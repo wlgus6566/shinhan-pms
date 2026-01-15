@@ -26,11 +26,15 @@ export default function LoginPage() {
   }, [user, loading, router]);
 
   if (loading || user) {
-    return <div className="min-h-screen bg-shinhan-blue flex items-center justify-center text-white">로딩 중...</div>;
+    return (
+      <div className="min-h-screen bg-shinhan-blue flex items-center justify-center text-white">
+        로딩 중...
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-shinhan-blue flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-blue-50 flex flex-col items-center justify-center p-4 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
         <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-white/10 rounded-full blur-3xl"></div>
