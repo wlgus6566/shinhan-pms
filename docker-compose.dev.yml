@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # PostgreSQL (개발용)
+  postgres:
+    image: postgres:16-alpine
+    container_name: pms-postgres-dev
+    restart: unless-stopped
+    ports:
+      - '5433:5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: pms_dev
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./apps/api/prisma:/docker-entrypoint-initdb.d:ro
+    networks:
+      - pms-network
+
+  # Adminer (DB 관리 UI)
+  adminer:
+    image: adminer:latest
+    container_name: pms-adminer-dev
+    restart: unless-stopped
+    ports:
+      - '8081:8080'
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+      ADMINER_DESIGN: dracula
+    networks:
+      - pms-network
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_dev_data:
+    driver: local
+
+networks:
+  pms-network:
+    driver: bridge

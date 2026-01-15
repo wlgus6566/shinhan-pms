@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사용자 관리 - PMS</title>
+    <style>
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --border-color: #404040;
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --danger-color: #ef4444;
+            --success-color: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 사이드바 */
+        .sidebar {
+            width: 240px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+        }
+
+        .sidebar h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .sidebar nav ul {
+            list-style: none;
+        }
+
+        .sidebar nav li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: block;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .sidebar nav a:hover,
+        .sidebar nav a.active {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        /* 메인 컨텐츠 */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* 필터 */
+        .filters {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .filters input,
+        .filters select {
+            padding: 10px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .filters input {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        /* 테이블 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 12px;
+            text-transform: uppercase;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-active {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success-color);
+        }
+
+        .badge-inactive {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger-color);
+        }
+
+        .badge-pm {
+            background: rgba(168, 85, 247, 0.2);
+            color: #a855f7;
+        }
+
+        .badge-pl {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--primary-color);
+        }
+
+        .badge-pa,
+        .badge-member {
+            background: rgba(107, 114, 128, 0.2);
+            color: #9ca3af;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        /* 페이지네이션 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 24px;
+        }
+
+        .pagination button {
+            padding: 8px 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .pagination button:hover {
+            background: var(--bg-primary);
+        }
+
+        .pagination button.active {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 사이드바 -->
+        <aside class="sidebar">
+            <h2>PMS</h2>
+            <nav>
+                <ul>
+                    <li><a href="../project-management/index.html">프로젝트</a></li>
+                    <li><a href="#">작업</a></li>
+                    <li><a href="#">이슈</a></li>
+                    <li><a href="#">일정</a></li>
+                    <li><a href="#">리소스</a></li>
+                    <li><a href="#">리포트</a></li>
+                    <li><hr style="border: none; border-top: 1px solid var(--border-color); margin: 10px 0;"></li>
+                    <li><a href="profile.html">프로필</a></li>
+                    <li><a href="users.html" class="active">사용자 관리</a></li>
+                    <li><a href="login.html">로그아웃</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- 메인 컨텐츠 -->
+        <main class="main-content">
+            <div class="header">
+                <h1>사용자 관리</h1>
+                <p>팀원 정보를 확인하고 관리할 수 있습니다 (PM/PL 전용)</p>
+            </div>
+
+            <!-- 검색 및 필터 -->
+            <div class="filters">
+                <input type="search" placeholder="이름 또는 이메일 검색">
+                <select>
+                    <option value="">전체 파트</option>
+                    <option value="PLANNING">기획</option>
+                    <option value="DESIGN">디자인</option>
+                    <option value="PUBLISHING">퍼블리싱</option>
+                    <option value="DEVELOPMENT">개발</option>
+                </select>
+                <select>
+                    <option value="">전체 등급</option>
+                    <option value="PM">PM</option>
+                    <option value="PL">PL</option>
+                    <option value="PA">PA</option>
+                    <option value="MEMBER">팀원</option>
+                </select>
+                <select>
+                    <option value="">전체 상태</option>
+                    <option value="true">활성</option>
+                    <option value="false">비활성</option>
+                </select>
+            </div>
+
+            <!-- 사용자 목록 테이블 -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>이름</th>
+                        <th>이메일</th>
+                        <th>파트</th>
+                        <th>등급</th>
+                        <th>상태</th>
+                        <th>가입일</th>
+                        <th>작업</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>홍길동</td>
+                        <td>hong.gildong@shinhancard.com</td>
+                        <td>개발</td>
+                        <td><span class="badge badge-pm">PM</span></td>
+                        <td><span class="badge badge-active">활성</span></td>
+                        <td>2024-01-15</td>
+                        <td>
+                            <a href="user-detail.html?id=1" class="btn btn-primary btn-sm">상세</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>김철수</td>
+                        <td>kim.chulsoo@shinhancard.com</td>
+                        <td>기획</td>
+                        <td><span class="badge badge-pl">PL</span></td>
+                        <td><span class="badge badge-active">활성</span></td>
+                        <td>2024-01-16</td>
+                        <td>
+                            <a href="user-detail.html?id=2" class="btn btn-primary btn-sm">상세</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>이영희</td>
+                        <td>lee.younghee@shinhancard.com</td>
+                        <td>디자인</td>
+                        <td><span class="badge badge-pa">PA</span></td>
+                        <td><span class="badge badge-active">활성</span></td>
+                        <td>2024-01-17</td>
+                        <td>
+                            <a href="user-detail.html?id=3" class="btn btn-primary btn-sm">상세</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>박민수</td>
+                        <td>park.minsoo@shinhancard.com</td>
+                        <td>퍼블리싱</td>
+                        <td><span class="badge badge-member">팀원</span></td>
+                        <td><span class="badge badge-active">활성</span></td>
+                        <td>2024-01-18</td>
+                        <td>
+                            <a href="user-detail.html?id=4" class="btn btn-primary btn-sm">상세</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>최지훈</td>
+                        <td>choi.jihoon@shinhancard.com</td>
+                        <td>개발</td>
+                        <td><span class="badge badge-member">팀원</span></td>
+                        <td><span class="badge badge-inactive">비활성</span></td>
+                        <td>2024-01-10</td>
+                        <td>
+                            <a href="user-detail.html?id=5" class="btn btn-primary btn-sm">상세</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- 페이지네이션 -->
+            <div class="pagination">
+                <button disabled>이전</button>
+                <button class="active">1</button>
+                <button>2</button>
+                <button>3</button>
+                <button>다음</button>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

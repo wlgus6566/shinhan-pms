@@ -37,3 +37,32 @@ model Project {
   
   @@map("projects")
 }
+
+// =============================================
+// 회원 관리
+// =============================================
+
+model User {
+  id           BigInt    @id @default(autoincrement())
+  email        String    @unique @db.VarChar(255)
+  passwordHash String    @map("password_hash") @db.VarChar(255)
+  name         String    @db.VarChar(50)
+  department   String    @db.VarChar(20)
+  role         String    @default("MEMBER") @db.VarChar(20)
+  lastLoginAt  DateTime? @map("last_login_at") @db.Timestamp(6)
+  isActive     Boolean   @default(true) @map("is_active")
+  createdBy    BigInt    @map("created_by")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedBy    BigInt?   @map("updated_by")
+  updatedAt    DateTime? @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  // 인덱스
+  @@index([email], map: "idx_users_email")
+  @@index([department], map: "idx_users_department")
+  @@index([role], map: "idx_users_role")
+  @@index([isActive], map: "idx_users_is_active")
+  @@index([department, isActive], map: "idx_users_department_active")
+  @@index([role, isActive], map: "idx_users_role_active")
+  
+  @@map("users")
+}

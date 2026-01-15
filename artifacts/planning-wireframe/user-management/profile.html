@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>프로필 - PMS</title>
+    <style>
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --border-color: #404040;
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --danger-color: #ef4444;
+            --success-color: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 사이드바 */
+        .sidebar {
+            width: 240px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+        }
+
+        .sidebar h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .sidebar nav ul {
+            list-style: none;
+        }
+
+        .sidebar nav li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: block;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .sidebar nav a:hover,
+        .sidebar nav a.active {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        /* 메인 컨텐츠 */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            max-width: 800px;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .success-message {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success-color);
+            color: var(--success-color);
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 14px;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group label .required {
+            color: var(--danger-color);
+            margin-left: 4px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .form-group input:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .form-group .hint {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 6px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-primary);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .info-row {
+            display: flex;
+            margin-bottom: 16px;
+        }
+
+        .info-row dt {
+            width: 120px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .info-row dd {
+            flex: 1;
+            font-size: 14px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 사이드바 -->
+        <aside class="sidebar">
+            <h2>PMS</h2>
+            <nav>
+                <ul>
+                    <li><a href="../project-management/index.html">프로젝트</a></li>
+                    <li><a href="#">작업</a></li>
+                    <li><a href="#">이슈</a></li>
+                    <li><a href="#">일정</a></li>
+                    <li><a href="#">리소스</a></li>
+                    <li><a href="#">리포트</a></li>
+                    <li><hr style="border: none; border-top: 1px solid var(--border-color); margin: 10px 0;"></li>
+                    <li><a href="profile.html" class="active">프로필</a></li>
+                    <li><a href="users.html">사용자 관리</a></li>
+                    <li><a href="login.html">로그아웃</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- 메인 컨텐츠 -->
+        <main class="main-content">
+            <div class="header">
+                <h1>프로필</h1>
+                <p>내 정보를 확인하고 수정할 수 있습니다</p>
+            </div>
+
+            <div class="success-message" id="successMessage">
+                프로필이 업데이트되었습니다
+            </div>
+
+            <!-- 기본 정보 -->
+            <div class="card">
+                <h2>기본 정보</h2>
+                <form onsubmit="handleUpdateProfile(event)">
+                    <div class="form-group">
+                        <label>이메일</label>
+                        <input 
+                            type="email" 
+                            value="hong.gildong@shinhancard.com" 
+                            disabled
+                        >
+                        <div class="hint">이메일은 변경할 수 없습니다</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            이름
+                            <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            name="name" 
+                            value="홍길동"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            파트
+                            <span class="required">*</span>
+                        </label>
+                        <select name="department" required>
+                            <option value="PLANNING">기획</option>
+                            <option value="DESIGN">디자인</option>
+                            <option value="PUBLISHING">퍼블리싱</option>
+                            <option value="DEVELOPMENT" selected>개발</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>등급</label>
+                        <input 
+                            type="text" 
+                            value="팀원" 
+                            disabled
+                        >
+                        <div class="hint">등급은 PM만 변경할 수 있습니다</div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="submit" class="btn btn-primary">저장</button>
+                        <a href="password.html" class="btn btn-secondary">비밀번호 변경</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 계정 정보 -->
+            <div class="card">
+                <h2>계정 정보</h2>
+                <dl>
+                    <div class="info-row">
+                        <dt>상태</dt>
+                        <dd><span class="badge">활성</span></dd>
+                    </div>
+                    <div class="info-row">
+                        <dt>가입일</dt>
+                        <dd>2024-01-15 10:30</dd>
+                    </div>
+                    <div class="info-row">
+                        <dt>마지막 수정</dt>
+                        <dd>2024-01-15 14:20</dd>
+                    </div>
+                </dl>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function handleUpdateProfile(event) {
+            event.preventDefault();
+            const successMessage = document.getElementById('successMessage');
+            
+            // 성공 메시지 표시
+            successMessage.classList.add('show');
+            
+            // 3초 후 메시지 숨김
+            setTimeout(() => {
+                successMessage.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

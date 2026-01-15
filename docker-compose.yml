@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 데이터베이스
+  postgres:
+    image: postgres:16-alpine
+    container_name: pms-postgres
+    restart: unless-stopped
+    ports:
+      - '5433:5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: pms_dev
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - pms-network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Adminer (데이터베이스 관리 UI - 선택사항)
+  adminer:
+    image: adminer:latest
+    container_name: pms-adminer
+    restart: unless-stopped
+    ports:
+      - '8081:8080'
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+    networks:
+      - pms-network
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  pms-network:
+    driver: bridge

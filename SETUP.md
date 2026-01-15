@@ -2,13 +2,57 @@
 
 ## 1. 사전 요구사항
 
+### 필수
+
 - Node.js >= 18
 - pnpm >= 8.15.5
-- PostgreSQL >= 14
+
+### 데이터베이스 (선택 중 하나)
+
+- **옵션 1 (권장)**: Docker & Docker Compose
+- **옵션 2**: PostgreSQL >= 14 (로컬 설치)
 
 ## 2. 데이터베이스 설정
 
-### PostgreSQL 설치 및 DB 생성
+### 옵션 1: Docker 사용 (권장)
+
+**장점**: 설정이 간단하고 환경 일관성 보장
+
+```bash
+# Docker Compose로 PostgreSQL 시작
+docker-compose up -d
+
+# 또는 개발 환경 전용 설정 사용
+docker-compose -f docker-compose.dev.yml up -d
+
+# 로그 확인
+docker-compose logs -f postgres
+
+# 상태 확인
+docker-compose ps
+```
+
+**서비스**:
+
+- PostgreSQL: `localhost:5433`
+- Adminer (DB 관리 UI): http://localhost:8081
+  - 시스템: PostgreSQL
+  - 서버: postgres
+  - 사용자: postgres
+  - 비밀번호: postgres
+  - 데이터베이스: pms_dev
+
+**컨테이너 중지 및 제거**:
+
+```bash
+# 컨테이너 중지
+docker-compose stop
+
+# 컨테이너 및 볼륨 제거 (데이터 삭제 주의!)
+docker-compose down -v
+```
+
+### 옵션 2: PostgreSQL 로컬 설치
 
 ```bash
 # macOS (Homebrew)
@@ -16,11 +60,11 @@ brew install postgresql@14
 brew services start postgresql@14
 
 # 데이터베이스 생성
-createdb shinhan_pms
+createdb pms_dev
 
 # 또는 psql로
 psql postgres
-CREATE DATABASE shinhan_pms;
+CREATE DATABASE pms_dev;
 \q
 ```
 
@@ -38,17 +82,40 @@ pnpm install
 ```bash
 # apps/api 디렉토리에서
 cd apps/api
-cp .env.example .env
 
-# .env 파일 편집하여 DATABASE_URL 설정
-# DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/shinhan_pms?schema=public"
+# .env 파일 생성
+cat > .env << 'EOF'
+# Database
+DATABASE_URL="postgresql://postgres:postgres@localhost:5433/pms_dev?schema=public"
+
+# JWT
+JWT_SECRET="your-secret-key-change-in-production"
+JWT_EXPIRES_IN="1h"
+JWT_REFRESH_SECRET="your-refresh-secret-key-change-in-production"
+JWT_REFRESH_EXPIRES_IN="7d"
+
+# Server
+PORT=3000
+NODE_ENV=development
+EOF
 ```
 
-### Prisma 설정
+**주의**: 운영 환경에서는 `JWT_SECRET`과 `JWT_REFRESH_SECRET`을 반드시 변경하세요.
+
+### Prisma 마이그레이션
 
 ```bash
 # apps/api 디렉토리에서
-pnpm prisma:generate
+cd apps/api
+
+# Prisma Client 생성
+pnpm prisma generate
+
+# 마이그레이션 실행
+pnpm prisma migrate dev
+
+# (선택) Prisma Studio로 데이터 확인
+pnpm prisma studio
 ```
 
 ### shadcn/ui 설정 (프론트엔드용)
@@ -76,6 +143,7 @@ npx shadcn@latest add button card input label form select badge alert dialog
 ```
 
 **필수 의존성 (이미 package.json에 포함됨):**
+
 - `tailwindcss` - CSS 프레임워크
 - `@hookform/resolvers` - React Hook Form + Zod 통합
 - `zod` - 스키마 validation
@@ -97,6 +165,7 @@ pnpm dev
 ```
 
 서버가 실행되면:
+
 - API: http://localhost:3000
 - Swagger 문서: http://localhost:3000/docs
 
@@ -164,21 +233,21 @@ pnpm --filter api prisma:studio
 @planner 프로젝트 관리 기능을 기획해주세요.
 
 # 와이어프레임 작성
-@wireframe artifacts/planning-user-story/project-management.md를 참고하여 
+@wireframe artifacts/planning-user-story/project-management.md를 참고하여
 HTML 와이어프레임을 작성해주세요.
 
 # DB 스키마 설계
-@modeler artifacts/planning-user-story/project-management.md와 
-artifacts/planning-wireframe/project-management/를 참고하여 
+@modeler artifacts/planning-user-story/project-management.md와
+artifacts/planning-wireframe/project-management/를 참고하여
 DB 스키마를 설계해주세요.
 
 # 백엔드 개발
-@developer artifacts/planning-user-story/project-management.md를 참고하여 
+@developer artifacts/planning-user-story/project-management.md를 참고하여
 NestJS API를 TDD로 개발해주세요.
 
 # 프론트엔드 개발 (shadcn/ui)
-@developer artifacts/planning-wireframe/project-management/를 참고하여 
-Next.js + shadcn/ui로 UI를 개발해주세요. 
+@developer artifacts/planning-wireframe/project-management/를 참고하여
+Next.js + shadcn/ui로 UI를 개발해주세요.
 react-hook-form과 zod를 사용하여 폼 validation을 구현하세요.
 ```
 
@@ -239,9 +308,67 @@ pnpm prisma:generate
 - PostgreSQL 서버 실행 여부 확인
 - 데이터베이스 존재 여부 확인
 
-## 11. 추가 리소스
+## 11. Docker 관련 명령어
+
+### 개발 환경
+
+```bash
+# PostgreSQL 시작
+docker-compose up -d
+
+# PostgreSQL + Adminer 시작
+docker-compose -f docker-compose.dev.yml up -d
+
+# 로그 확인
+docker-compose logs -f postgres
+
+# 컨테이너 중지
+docker-compose stop
+
+# 컨테이너 및 네트워크 제거
+docker-compose down
+
+# 컨테이너, 네트워크, 볼륨 모두 제거 (데이터 삭제!)
+docker-compose down -v
+```
+
+### Docker 내부 PostgreSQL 접속
+
+```bash
+# psql로 접속
+docker exec -it pms-postgres psql -U postgres -d pms_dev
+
+# 또는 bash 접속
+docker exec -it pms-postgres bash
+```
+
+### 데이터베이스 백업 및 복원
+
+```bash
+# 백업
+docker exec -t pms-postgres pg_dump -U postgres pms_dev > backup.sql
+
+# 복원
+docker exec -i pms-postgres psql -U postgres -d pms_dev < backup.sql
+```
+
+### API 서버 Docker 빌드 (선택)
+
+```bash
+# Dockerfile로 API 서버 이미지 빌드
+docker build -t pms-api -f apps/api/Dockerfile .
+
+# 빌드한 이미지 실행
+docker run -p 3000:3000 \
+  -e DATABASE_URL="postgresql://postgres:postgres@host.docker.internal:5433/pms_dev" \
+  pms-api
+```
+
+## 12. 추가 리소스
 
 - [NestJS 공식 문서](https://docs.nestjs.com)
 - [Next.js 공식 문서](https://nextjs.org/docs)
 - [Prisma 공식 문서](https://www.prisma.io/docs)
 - [Turborepo 공식 문서](https://turbo.build/repo/docs)
+- [Docker 공식 문서](https://docs.docker.com)
+- [shadcn/ui 공식 문서](https://ui.shadcn.com)

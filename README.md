@@ -1,14 +1,37 @@
-# Turborepo starter
+# 신한카드 PMS (Project Management System)
 
-This is a community-maintained example. If you experience a problem, please submit a pull request with a fix. GitHub Issues will be closed.
+신한카드 운영&고도화 업무 관리를 위한 프로젝트 관리 시스템
 
-## Using this example
+## 빠른 시작
 
-Run the following command:
+### 1. Docker로 PostgreSQL 실행 (권장)
 
 ```bash
-npx create-turbo@latest -e with-nestjs
+# PostgreSQL 시작
+docker-compose up -d
+
+# 데이터베이스 마이그레이션
+cd apps/api
+pnpm prisma migrate dev
 ```
+
+### 2. 개발 서버 실행
+
+```bash
+# 전체 서버 실행 (API + Web)
+pnpm dev
+
+# 또는 개별 실행
+pnpm --filter api dev    # API 서버
+pnpm --filter web dev    # 웹 앱
+```
+
+**서비스 접속**:
+
+- API: http://localhost:3000
+- Swagger: http://localhost:3000/docs
+- Web: http://localhost:3001
+- Adminer (DB 관리): http://localhost:8081
 
 ## What's inside?
 
@@ -40,52 +63,107 @@ This `Turborepo` has some additional tools already set for you:
 - [Prettier](https://prettier.io) for code formatting
 - [Jest](https://prettier.io) & [Playwright](https://playwright.dev/) for testing
 
-### Commands
+### 기술 스택
 
-This `Turborepo` already configured useful commands for all your apps and packages.
+**Frontend**:
 
-#### Build
+- Next.js (CSR)
+- shadcn/ui + Radix UI
+- React Hook Form + Zod
+- Tailwind CSS
+
+**Backend**:
+
+- NestJS (Fastify)
+- Prisma ORM
+- PostgreSQL
+- JWT Authentication
+- bcrypt
+
+**DevOps**:
+
+- Docker & Docker Compose
+- Turborepo
+- GitHub Actions
+
+### 주요 명령어
+
+#### 개발
 
 ```bash
-# Will build all the app & packages with the supported `build` script.
-pnpm run build
+# 전체 개발 서버 실행
+pnpm dev
 
-# ℹ️ If you plan to only build apps individually,
-# Please make sure you've built the packages first.
+# API 서버만 실행
+pnpm --filter api dev
+
+# 웹 앱만 실행
+pnpm --filter web dev
 ```
 
-#### Develop
+#### 빌드
 
 ```bash
-# Will run the development server for all the app & packages with the supported `dev` script.
-pnpm run dev
+# 전체 빌드
+pnpm build
+
+# 개별 빌드
+pnpm --filter api build
+pnpm --filter web build
 ```
 
-#### test
+#### 테스트
 
 ```bash
-# Will launch a test suites for all the app & packages with the supported `test` script.
-pnpm run test
+# 전체 테스트
+pnpm test
 
-# You can launch e2e testes with `test:e2e`
-pnpm run test:e2e
+# E2E 테스트
+pnpm test:e2e
 
-# See `@repo/jest-config` to customize the behavior.
+# API 테스트만
+pnpm --filter api test
 ```
 
-#### Lint
+#### 데이터베이스
 
 ```bash
-# Will lint all the app & packages with the supported `lint` script.
-# See `@repo/eslint-config` to customize the behavior.
-pnpm run lint
+# Prisma Client 생성
+pnpm --filter api prisma generate
+
+# 마이그레이션
+pnpm --filter api prisma migrate dev
+
+# Prisma Studio (GUI)
+pnpm --filter api prisma studio
 ```
 
-#### Format
+#### Docker
 
 ```bash
-# Will format all the supported `.ts,.js,json,.tsx,.jsx` files.
-# See `@repo/eslint-config/prettier-base.js` to customize the behavior.
+# PostgreSQL 시작
+docker-compose up -d
+
+# 로그 확인
+docker-compose logs -f
+
+# 중지
+docker-compose stop
+
+# 제거 (데이터 유지)
+docker-compose down
+
+# 제거 (데이터 삭제)
+docker-compose down -v
+```
+
+#### Lint & Format
+
+```bash
+# Lint
+pnpm lint
+
+# Format
 pnpm format
 ```
 
@@ -110,15 +188,43 @@ Next, you can link your Turborepo to your Remote Cache by running the following 
 npx turbo link
 ```
 
-## Useful Links
+## 문서
 
-This example take some inspiration the [with-nextjs](https://github.com/vercel/turborepo/tree/main/examples/with-nextjs) `Turbo` example and [01-cats-app](https://github.com/nestjs/nest/tree/master/sample/01-cats-app) `NestJs` sample.
+- [환경 설정 가이드](./SETUP.md) - 상세한 설정 방법
+- [AI 에이전트 가이드](./AI_AGENT_GUIDE.md) - AI 기반 개발 워크플로우
+- [PRD](./artifacts/prd.md) - 프로젝트 요구사항 문서
 
-Learn more about the power of Turborepo:
+## 주요 기능
 
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+- ✅ 회원 관리 (인증/권한)
+- ✅ 프로젝트 관리
+- ⏳ 업무 관리
+- ⏳ 일정 관리
+- ⏳ 현황 관리
+- ⏳ 보고서
+
+## 프로젝트 구조
+
+```
+shinhan-pms/
+├── apps/
+│   ├── api/              # NestJS 백엔드
+│   └── web/              # Next.js 프론트엔드
+├── packages/
+│   ├── api/              # 공유 타입 (DTO, Entity)
+│   ├── ui/               # 공유 UI 컴포넌트
+│   └── ...
+├── artifacts/            # AI 에이전트 산출물
+│   ├── planning-user-story/     # 기획서
+│   ├── planning-wireframe/      # 와이어프레임
+│   └── database-schema/         # DB 스키마
+└── .claude/agents/       # AI 에이전트 정의
+```
+
+## 참고 자료
+
+- [NestJS](https://docs.nestjs.com)
+- [Next.js](https://nextjs.org/docs)
+- [Prisma](https://www.prisma.io/docs)
+- [shadcn/ui](https://ui.shadcn.com)
+- [Turborepo](https://turbo.build/repo/docs)
