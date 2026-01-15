@@ -1,5 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConflictException, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import {
+  ConflictException,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -79,8 +83,12 @@ describe('AuthService', () => {
         email: signupDto.email,
       });
 
-      await expect(service.signup(signupDto)).rejects.toThrow(ConflictException);
-      await expect(service.signup(signupDto)).rejects.toThrow('이미 사용 중인 이메일입니다');
+      await expect(service.signup(signupDto)).rejects.toThrow(
+        ConflictException,
+      );
+      await expect(service.signup(signupDto)).rejects.toThrow(
+        '이미 사용 중인 이메일입니다',
+      );
     });
 
     it('should hash password before saving', async () => {
@@ -117,7 +125,9 @@ describe('AuthService', () => {
 
     it('should return access token and user info on successful login', async () => {
       mockPrismaService.user.findUnique.mockResolvedValue(mockUser);
-      jest.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(true));
+      jest
+        .spyOn(bcrypt, 'compare')
+        .mockImplementation(() => Promise.resolve(true));
       mockJwtService.sign.mockReturnValue('mock_token');
 
       const result = await service.login(loginDto);
@@ -131,16 +141,26 @@ describe('AuthService', () => {
     it('should throw UnauthorizedException if user not found', async () => {
       mockPrismaService.user.findUnique.mockResolvedValue(null);
 
-      await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
-      await expect(service.login(loginDto)).rejects.toThrow('이메일 또는 비밀번호가 일치하지 않습니다');
+      await expect(service.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
+      await expect(service.login(loginDto)).rejects.toThrow(
+        '이메일 또는 비밀번호가 일치하지 않습니다',
+      );
     });
 
     it('should throw UnauthorizedException if password is incorrect', async () => {
       mockPrismaService.user.findUnique.mockResolvedValue(mockUser);
-      jest.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(false));
+      jest
+        .spyOn(bcrypt, 'compare')
+        .mockImplementation(() => Promise.resolve(false));
 
-      await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
-      await expect(service.login(loginDto)).rejects.toThrow('이메일 또는 비밀번호가 일치하지 않습니다');
+      await expect(service.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
+      await expect(service.login(loginDto)).rejects.toThrow(
+        '이메일 또는 비밀번호가 일치하지 않습니다',
+      );
     });
 
     it('should throw UnauthorizedException if user is inactive', async () => {
@@ -149,8 +169,12 @@ describe('AuthService', () => {
         isActive: false,
       });
 
-      await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
-      await expect(service.login(loginDto)).rejects.toThrow('계정이 비활성화되었습니다');
+      await expect(service.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
+      await expect(service.login(loginDto)).rejects.toThrow(
+        '계정이 비활성화되었습니다',
+      );
     });
   });
 
@@ -168,7 +192,9 @@ describe('AuthService', () => {
 
     it('should change password successfully', async () => {
       mockPrismaService.user.findUnique.mockResolvedValue(mockUser);
-      jest.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(true));
+      jest
+        .spyOn(bcrypt, 'compare')
+        .mockImplementation(() => Promise.resolve(true));
       mockPrismaService.user.update.mockResolvedValue({
         ...mockUser,
         passwordHash: '$2b$10$hashedNewPassword',
@@ -179,15 +205,23 @@ describe('AuthService', () => {
       expect(mockPrismaService.user.update).toHaveBeenCalled();
       const updateCall = mockPrismaService.user.update.mock.calls[0][0];
       expect(updateCall.data.passwordHash).toBeDefined();
-      expect(updateCall.data.passwordHash).not.toBe(changePasswordDto.newPassword);
+      expect(updateCall.data.passwordHash).not.toBe(
+        changePasswordDto.newPassword,
+      );
     });
 
     it('should throw BadRequestException if current password is incorrect', async () => {
       mockPrismaService.user.findUnique.mockResolvedValue(mockUser);
-      jest.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(false));
+      jest
+        .spyOn(bcrypt, 'compare')
+        .mockImplementation(() => Promise.resolve(false));
 
-      await expect(service.changePassword(userId, changePasswordDto)).rejects.toThrow(BadRequestException);
-      await expect(service.changePassword(userId, changePasswordDto)).rejects.toThrow('현재 비밀번호가 일치하지 않습니다');
+      await expect(
+        service.changePassword(userId, changePasswordDto),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        service.changePassword(userId, changePasswordDto),
+      ).rejects.toThrow('현재 비밀번호가 일치하지 않습니다');
     });
   });
 });

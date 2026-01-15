@@ -8,7 +8,12 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
@@ -25,7 +30,11 @@ export class AuthController {
 
   @Post('signup')
   @ApiOperation({ summary: '회원가입' })
-  @ApiResponse({ status: 201, description: '회원가입 성공', type: UserResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: '회원가입 성공',
+    type: UserResponseDto,
+  })
   @ApiResponse({ status: 409, description: '이미 사용 중인 이메일' })
   async signup(@Body() signupDto: SignupDto): Promise<UserResponseDto> {
     return this.authService.signup(signupDto);
@@ -46,7 +55,9 @@ export class AuthController {
   @ApiOperation({ summary: '내 프로필 조회' })
   @ApiResponse({ status: 200, description: '조회 성공', type: UserResponseDto })
   @ApiResponse({ status: 401, description: '인증 필요' })
-  async getProfile(@CurrentUser() user: UserResponseDto): Promise<UserResponseDto> {
+  async getProfile(
+    @CurrentUser() user: UserResponseDto,
+  ): Promise<UserResponseDto> {
     return this.authService.getProfile(user.id);
   }
 

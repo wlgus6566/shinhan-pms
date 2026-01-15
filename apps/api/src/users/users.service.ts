@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
@@ -14,7 +18,12 @@ export class UsersService {
     isActive?: boolean;
     page?: number;
     limit?: number;
-  }): Promise<{ users: UserResponseDto[]; total: number; page: number; limit: number }> {
+  }): Promise<{
+    users: UserResponseDto[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
     const page = filters?.page || 1;
     const limit = filters?.limit || 20;
     const skip = (page - 1) * limit;

@@ -1,147 +1,78 @@
-import type { Link } from '@repo/api';
-import { Button } from '@repo/ui/button';
-import Image, { type ImageProps } from 'next/image';
+'use client';
 
-import styles from './page.module.css';
+import Link from 'next/link';
+import { LoginForm } from '@/components/auth/LoginForm';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import Image from 'next/image';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
-type Props = Omit<ImageProps, 'src'> & {
-  srcLight: string;
-  srcDark: string;
-};
+export default function LoginPage() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
 
-const ThemeImage = (props: Props) => {
-  const { srcLight, srcDark, ...rest } = props;
-
-  return (
-    <>
-      <Image {...rest} src={srcLight} className="imgLight" />
-      <Image {...rest} src={srcDark} className="imgDark" />
-    </>
-  );
-};
-
-async function getLinks(): Promise<Link[]> {
-  try {
-    const res = await fetch('http://localhost:3000/links', {
-      cache: 'no-store',
-    });
-
-    if (!res.ok) {
-      throw new Error('Failed to fetch links');
+  useEffect(() => {
+    if (!loading && user) {
+      router.push('/dashboard');
     }
+  }, [user, loading, router]);
 
-    return res.json();
-  } catch (error) {
-    console.error('Error fetching links:', error);
-    return [];
+  if (loading || user) {
+    return <div className="min-h-screen bg-shinhan-blue flex items-center justify-center text-white">로딩 중...</div>;
   }
-}
-
-export default async function Home() {
-  const links = await getLinks();
 
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <ThemeImage
-          className={styles.logo}
-          srcLight="turborepo-dark.svg"
-          srcDark="turborepo-light.svg"
-          alt="Turborepo logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>apps/web/app/page.tsx</code>
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="min-h-screen bg-shinhan-blue flex flex-col items-center justify-center p-4 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
+        <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-white/10 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-[10%] -right-[10%] w-[50%] h-[50%] bg-shinhan-gold/20 rounded-full blur-3xl"></div>
+      </div>
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new/clone?demo-description=Learn+to+implement+a+monorepo+with+a+two+Next.js+sites+that+has+installed+three+local+packages.&demo-image=%2F%2Fimages.ctfassets.net%2Fe5382hct74si%2F4K8ZISWAzJ8X1504ca0zmC%2F0b21a1c6246add355e55816278ef54bc%2FBasic.png&demo-title=Monorepo+with+Turborepo&demo-url=https%3A%2F%2Fexamples-basic-web.vercel.sh%2F&from=templates&project-name=Monorepo+with+Turborepo&repository-name=monorepo-turborepo&repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fturborepo%2Ftree%2Fmain%2Fexamples%2Fbasic&root-directory=apps%2Fdocs&skippable-integrations=1&teamSlug=vercel&utm_source=create-turbo"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+      <Card className="w-full max-w-md z-10 shadow-2xl border-none">
+        <CardHeader className="space-y-4 pt-10">
+          <div className="flex justify-center mb-2">
             <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+              src="/logo.png"
+              alt="logo"
+              width={176}
+              height={31.5}
+              className="w-auto h-auto"
             />
-            Deploy now
-          </a>
-          <a
-            href="https://turborepo.dev/docs?utm_source"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-
-        <Button appName="web" className={styles.secondary}>
-          Open alert
-        </Button>
-
-        {links.length > 0 ? (
-          <div className={styles.ctas}>
-            {links.map((link) => (
-              <a
-                key={link.id}
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                title={link.description}
-                className={styles.secondary}
-              >
-                {link.title}
-              </a>
-            ))}
           </div>
-        ) : (
-          <div style={{ color: '#666' }}>
-            No links available. Make sure the NestJS API is running on port
-            3000.
+          <div className="space-y-1 text-center">
+            <CardDescription className="text-slate-500">
+              신한카드 PMS 통합 관리 시스템
+            </CardDescription>
           </div>
-        )}
-      </main>
+        </CardHeader>
+        <CardContent className="px-8 pb-8">
+          <LoginForm />
+        </CardContent>
+        <CardFooter className="flex flex-col space-y-4 bg-slate-50 rounded-b-xl border-t px-8 py-6">
+          <div className="text-sm text-center text-slate-600">
+            계정이 없으신가요?{' '}
+            <Link
+              href="/auth/signup"
+              className="text-shinhan-blue font-semibold hover:underline"
+            >
+              회원가입
+            </Link>
+          </div>
+        </CardFooter>
+      </Card>
 
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com/templates?search=turborepo&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://turborepo.dev?utm_source=create-turbo"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to turborepo.dev →
-        </a>
-      </footer>
+      <p className="mt-8 text-white/60 text-xs z-10 font-light">
+        © 2024 Shinhan Card PMS. All rights reserved.
+      </p>
     </div>
   );
 }

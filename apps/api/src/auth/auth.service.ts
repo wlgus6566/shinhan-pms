@@ -48,14 +48,18 @@ export class AuthService {
     return new UserResponseDto(user);
   }
 
-  async login(loginDto: LoginDto): Promise<{ accessToken: string; user: UserResponseDto }> {
+  async login(
+    loginDto: LoginDto,
+  ): Promise<{ accessToken: string; user: UserResponseDto }> {
     // 사용자 조회
     const user = await this.prisma.user.findUnique({
       where: { email: loginDto.email },
     });
 
     if (!user) {
-      throw new UnauthorizedException('이메일 또는 비밀번호가 일치하지 않습니다');
+      throw new UnauthorizedException(
+        '이메일 또는 비밀번호가 일치하지 않습니다',
+      );
     }
 
     // 활성 상태 확인
@@ -64,9 +68,14 @@ export class AuthService {
     }
 
     // 비밀번호 확인
-    const isPasswordValid = await bcrypt.compare(loginDto.password, user.passwordHash);
+    const isPasswordValid = await bcrypt.compare(
+      loginDto.password,
+      user.passwordHash,
+    );
     if (!isPasswordValid) {
-      throw new UnauthorizedException('이메일 또는 비밀번호가 일치하지 않습니다');
+      throw new UnauthorizedException(
+        '이메일 또는 비밀번호가 일치하지 않습니다',
+      );
     }
 
     // 마지막 로그인 시간 업데이트
@@ -76,7 +85,11 @@ export class AuthService {
     });
 
     // JWT 토큰 생성
-    const payload = { sub: user.id.toString(), email: user.email, role: user.role };
+    const payload = {
+      sub: user.id.toString(),
+      email: user.email,
+      role: user.role,
+    };
     const accessToken = this.jwtService.sign(payload);
 
     return {
@@ -97,7 +110,10 @@ export class AuthService {
     return new UserResponseDto(user);
   }
 
-  async updateProfile(userId: bigint, updateProfileDto: UpdateProfileDto): Promise<UserResponseDto> {
+  async updateProfile(
+    userId: bigint,
+    updateProfileDto: UpdateProfileDto,
+  ): Promise<UserResponseDto> {
     const user = await this.prisma.user.update({
       where: { id: userId },
       data: {
@@ -110,7 +126,10 @@ export class AuthService {
     return new UserResponseDto(user);
   }
 
-  async changePassword(userId: bigint, changePasswordDto: ChangePasswordDto): Promise<void> {
+  async changePassword(
+    userId: bigint,
+    changePasswordDto: ChangePasswordDto,
+  ): Promise<void> {
     // 사용자 조회
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -131,7 +150,10 @@ export class AuthService {
     }
 
     // 새 비밀번호 해시
-    const newPasswordHash = await bcrypt.hash(changePasswordDto.newPassword, 10);
+    const newPasswordHash = await bcrypt.hash(
+      changePasswordDto.newPassword,
+      10,
+    );
 
     // 비밀번호 업데이트
     await this.prisma.user.update({
