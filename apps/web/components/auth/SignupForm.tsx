@@ -63,9 +63,11 @@ export function SignupForm() {
     setIsLoading(true);
     setError(null);
     try {
-      await signupApi(values);
+      // passwordConfirm을 제외하고 백엔드에 전송
+      const { passwordConfirm, ...signupData } = values;
+      await signupApi(signupData);
       alert('회원가입이 완료되었습니다. 로그인해주세요.');
-      router.push('/auth/login');
+      router.push('/');
     } catch (err: any) {
       setError(err.message || '회원가입 중 오류가 발생했습니다');
     } finally {

@@ -1,11 +1,22 @@
-import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { NestFactory, Reflector } from '@nestjs/core';
+import { ValidationPipe, ClassSerializerInterceptor } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // BigInt 직렬화 해결
+  (BigInt.prototype as any).toJSON = function () {
+    return this.toString();
+  };
+
+  // 전역 API 접두사 설정
+  app.setGlobalPrefix('api');
+
+  // 전역 Interceptor 설정 (Exclude 등 반영)
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
   // CORS 설정
   app.enableCors();
