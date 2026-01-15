@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>프로젝트 상세 - PMS</title>
+    <style>
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --border-color: #404040;
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --danger-color: #ef4444;
+            --danger-hover: #dc2626;
+            --success-color: #22c55e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 사이드바 */
+        .sidebar {
+            width: 240px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+        }
+
+        .sidebar h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        .sidebar nav ul {
+            list-style: none;
+        }
+
+        .sidebar nav li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: block;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .sidebar nav a:hover,
+        .sidebar nav a.active {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        /* 메인 컨텐츠 */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            max-width: 900px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            flex: 1;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* 버튼 */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: var(--danger-hover);
+        }
+
+        /* 카드 */
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .card h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        /* 정의 리스트 */
+        dl {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 15px;
+        }
+
+        dt {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        dd {
+            color: var(--text-primary);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge.active {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--primary-color);
+        }
+
+        .badge.completed {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success-color);
+        }
+
+        .empty-text {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        /* 확인 다이얼로그 */
+        .dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .dialog-overlay.show {
+            display: flex;
+        }
+
+        .dialog {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .dialog h3 {
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .dialog p {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .dialog-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            margin-top: 20px;
+            padding: 10px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 사이드바 -->
+        <aside class="sidebar">
+            <h2>PMS</h2>
+            <nav>
+                <ul>
+                    <li><a href="index.html" class="active">📊 프로젝트</a></li>
+                    <li><a href="#">✓ 작업</a></li>
+                    <li><a href="#">🐛 이슈</a></li>
+                    <li><a href="#">📅 일정</a></li>
+                    <li><a href="#">👥 리소스</a></li>
+                    <li><a href="#">📈 리포트</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- 메인 컨텐츠 -->
+        <main class="main-content">
+            <div class="header">
+                <h1>신한카드 PMS</h1>
+                <div class="header-actions">
+                    <a href="edit.html?id=1" class="btn btn-secondary">수정</a>
+                    <button class="btn btn-danger" onclick="showDeleteDialog()">삭제</button>
+                </div>
+            </div>
+
+            <!-- 프로젝트 정보 -->
+            <div class="card">
+                <h3>프로젝트 정보</h3>
+                <dl>
+                    <dt>프로젝트명</dt>
+                    <dd>신한카드 PMS</dd>
+
+                    <dt>설명</dt>
+                    <dd>프로젝트 관리 시스템 개발. AI 에이전트 기반 워크플로우를 적용한 신한카드 운영 및 고도화 업무 관리 시스템입니다.</dd>
+
+                    <dt>시작일</dt>
+                    <dd>2024-01-01</dd>
+
+                    <dt>종료일</dt>
+                    <dd>2024-12-31</dd>
+
+                    <dt>상태</dt>
+                    <dd><span class="badge active">진행중</span></dd>
+
+                    <dt>생성일시</dt>
+                    <dd>2024-01-01 09:00:00</dd>
+
+                    <dt>수정일시</dt>
+                    <dd>2024-01-15 14:30:00</dd>
+                </dl>
+            </div>
+
+            <!-- 추가 정보 (향후 확장용) -->
+            <div class="card">
+                <h3>관련 정보</h3>
+                <p class="empty-text">작업, 이슈 등 관련 정보는 향후 기능에서 제공됩니다.</p>
+            </div>
+
+            <!-- 목록으로 버튼 -->
+            <a href="index.html" class="back-link">
+                ← 목록으로
+            </a>
+        </main>
+    </div>
+
+    <!-- 삭제 확인 다이얼로그 -->
+    <div class="dialog-overlay" id="deleteDialog">
+        <div class="dialog">
+            <h3>프로젝트 삭제</h3>
+            <p>정말 삭제하시겠습니까?<br>삭제된 프로젝트는 복구할 수 없습니다.</p>
+            <div class="dialog-actions">
+                <button class="btn btn-secondary" onclick="hideDeleteDialog()">취소</button>
+                <button class="btn btn-danger" onclick="confirmDelete()">삭제</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showDeleteDialog() {
+            document.getElementById('deleteDialog').classList.add('show');
+        }
+
+        function hideDeleteDialog() {
+            document.getElementById('deleteDialog').classList.remove('show');
+        }
+
+        function confirmDelete() {
+            // 삭제 시뮬레이션
+            alert('프로젝트가 삭제되었습니다');
+            window.location.href = 'index.html';
+        }
+
+        // ESC 키로 다이얼로그 닫기
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hideDeleteDialog();
+            }
+        });
+
+        // 오버레이 클릭 시 다이얼로그 닫기
+        document.getElementById('deleteDialog').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideDeleteDialog();
+            }
+        });
+    </script>
+</body>
+</html>

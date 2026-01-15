@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>프로젝트 생성 - PMS</title>
+    <style>
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --border-color: #404040;
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --danger-color: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 사이드바 */
+        .sidebar {
+            width: 240px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+        }
+
+        .sidebar h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        .sidebar nav ul {
+            list-style: none;
+        }
+
+        .sidebar nav li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: block;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .sidebar nav a:hover,
+        .sidebar nav a.active {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        /* 메인 컨텐츠 */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            max-width: 800px;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+        }
+
+        /* 에러 메시지 */
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--danger-color);
+            color: var(--danger-color);
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* 폼 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group label .required {
+            color: var(--danger-color);
+            margin-left: 4px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-group .hint {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        /* 버튼 */
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 사이드바 -->
+        <aside class="sidebar">
+            <h2>PMS</h2>
+            <nav>
+                <ul>
+                    <li><a href="index.html" class="active">📊 프로젝트</a></li>
+                    <li><a href="#">✓ 작업</a></li>
+                    <li><a href="#">🐛 이슈</a></li>
+                    <li><a href="#">📅 일정</a></li>
+                    <li><a href="#">👥 리소스</a></li>
+                    <li><a href="#">📈 리포트</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- 메인 컨텐츠 -->
+        <main class="main-content">
+            <div class="header">
+                <h1>프로젝트 생성</h1>
+            </div>
+
+            <!-- 에러 메시지 영역 -->
+            <div class="error-message" id="errorMessage">
+                <!-- 에러 발생 시 메시지 표시 -->
+            </div>
+
+            <!-- 폼 -->
+            <form id="projectForm" onsubmit="handleSubmit(event)">
+                <div class="form-group">
+                    <label>
+                        프로젝트명
+                        <span class="required">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        name="projectName" 
+                        id="projectName"
+                        required 
+                        minlength="2"
+                        maxlength="100"
+                        placeholder="프로젝트명을 입력하세요 (2-100자)"
+                    >
+                    <div class="hint">2-100자 사이로 입력해주세요</div>
+                </div>
+
+                <div class="form-group">
+                    <label>설명</label>
+                    <textarea 
+                        name="description" 
+                        id="description"
+                        maxlength="1000"
+                        placeholder="프로젝트에 대한 설명을 입력하세요 (최대 1000자)"
+                    ></textarea>
+                    <div class="hint">최대 1000자</div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>시작일</label>
+                        <input 
+                            type="date" 
+                            name="startDate" 
+                            id="startDate"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label>종료일</label>
+                        <input 
+                            type="date" 
+                            name="endDate" 
+                            id="endDate"
+                        >
+                        <div class="hint">시작일 이후여야 합니다</div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        생성
+                    </button>
+                    <a href="index.html" class="btn btn-secondary">취소</a>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <script>
+        function handleSubmit(event) {
+            event.preventDefault();
+            
+            const errorMessage = document.getElementById('errorMessage');
+            const submitBtn = document.getElementById('submitBtn');
+            const projectName = document.getElementById('projectName').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            // 에러 메시지 초기화
+            errorMessage.classList.remove('show');
+            errorMessage.textContent = '';
+
+            // 유효성 검증
+            if (projectName.length < 2 || projectName.length > 100) {
+                showError('프로젝트명은 2-100자 사이여야 합니다');
+                return;
+            }
+
+            // 날짜 검증
+            if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
+                showError('종료일은 시작일 이후여야 합니다');
+                return;
+            }
+
+            // 중복 검증 시뮬레이션 (실제로는 API 호출)
+            const existingProjects = ['신한카드 PMS', '모바일 앱 리뉴얼'];
+            if (existingProjects.includes(projectName)) {
+                showError('이미 존재하는 프로젝트명입니다');
+                return;
+            }
+
+            // 저장 중 상태
+            submitBtn.disabled = true;
+            submitBtn.textContent = '저장 중...';
+
+            // 저장 시뮬레이션
+            setTimeout(() => {
+                alert('프로젝트가 생성되었습니다');
+                window.location.href = 'detail.html?id=new';
+            }, 1000);
+        }
+
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+            errorMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // 날짜 자동 검증
+        document.getElementById('endDate').addEventListener('change', function() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = this.value;
+
+            if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
+                showError('종료일은 시작일 이후여야 합니다');
+            }
+        });
+    </script>
+</body>
+</html>

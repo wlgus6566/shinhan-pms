@@ -1,0 +1,4 @@
+# 이 디렉토리는 Modeler 에이전트가 작성한 DB 스키마를 저장합니다.
+# 각 도메인별로 {domain}/ 디렉토리가 생성됩니다.
+# - {domain}.md: 테이블 명세서
+# - {domain}.sql: DDL/DML

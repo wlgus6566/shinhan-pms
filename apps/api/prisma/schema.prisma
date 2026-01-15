@@ -1,0 +1,39 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================
+// 프로젝트 관리
+// =============================================
+
+model Project {
+  id          BigInt    @id @default(autoincrement())
+  projectName String    @unique @map("project_name") @db.VarChar(100)
+  description String?   @db.Text
+  startDate   DateTime? @map("start_date") @db.Date
+  endDate     DateTime? @map("end_date") @db.Date
+  status      String    @default("ACTIVE") @db.VarChar(20)
+  isActive    Boolean   @default(true) @map("is_active")
+  createdBy   BigInt    @map("created_by")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedBy   BigInt?   @map("updated_by")
+  updatedAt   DateTime? @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  // 인덱스
+  @@index([projectName], map: "idx_projects_name")
+  @@index([status], map: "idx_projects_status")
+  @@index([startDate, endDate], map: "idx_projects_dates")
+  @@index([createdAt(sort: Desc)], map: "idx_projects_created_at")
+  @@index([isActive], map: "idx_projects_is_active")
+  @@index([isActive, status], map: "idx_projects_active_status")
+  
+  @@map("projects")
+}
