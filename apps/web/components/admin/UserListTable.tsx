@@ -149,7 +149,7 @@ export function UserListTable() {
                   </TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="sm" asChild>
-                      <Link href={`/admin/users/${user.id}`}>상세</Link>
+                      <Link href={`/dashboard/admin/users/${user.id}`}>상세</Link>
                     </Button>
                   </TableCell>
                 </TableRow>
