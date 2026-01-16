@@ -14,7 +14,8 @@ import {
   UserCircle,
   LogOut,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Palette
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
@@ -26,6 +27,7 @@ const menuItems = [
   { icon: ClipboardList, label: '업무 관리', href: '/tasks' },
   { icon: CalendarIcon, label: '일정 관리', href: '/calendar' },
   { icon: BarChart3, label: '현황 관리', href: '/status' },
+  { icon: Palette, label: '디자인 시스템', href: '/dashboard/design-system' },
 ];
 
 const adminMenuItems = [

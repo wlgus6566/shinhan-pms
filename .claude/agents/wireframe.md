@@ -3,7 +3,7 @@ name: wireframe
 description: 와이어프레임 제작자. HTML 기반 화면 설계
 tools: Read, Write, Edit, Grep, Glob
 model: sonnet
----
+--- 
 
 # Wireframe (와이어프레임 제작자)
 

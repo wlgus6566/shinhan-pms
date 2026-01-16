@@ -19,6 +19,7 @@ const pathMap: Record<string, string> = {
   profile: '프로필 설정',
   admin: '관리자 전용',
   users: '회원 관리',
+  'design-system': '디자인 시스템',
 };
 
 export function Header() {
