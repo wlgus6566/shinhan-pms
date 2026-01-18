@@ -29,7 +29,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-shinhan-lightgray">
+    <div className="min-h-screen min-w-[1024px] bg-shinhan-lightgray">
       {/* 고정 사이드바 */}
       <Sidebar />
 
@@ -39,9 +39,7 @@ export default function DashboardLayout({
         <Header />
 
         {/* 페이지 콘텐츠 */}
-        <main className="p-8">
-          {children}
-        </main>
+        <main className="p-8">{children}</main>
       </div>
     </div>
   );

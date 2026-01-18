@@ -32,7 +32,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <Button className="w-full bg-shinhan-blue hover:bg-shinhan-darkblue shadow-lg shadow-blue-200 rounded-xl" asChild>
-              <Link href="/projects">이동하기</Link>
+              <Link href="/dashboard/projects">이동하기</Link>
             </Button>
           </CardContent>
         </Card>

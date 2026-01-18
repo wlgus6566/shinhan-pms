@@ -1,12 +1,5 @@
 import { fetchApi } from './client';
 
-export async function signup(data: any) {
-  return fetchApi('/api/auth/signup', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  });
-}
-
 export async function login(data: any) {
   const result = await fetchApi('/api/auth/login', {
     method: 'POST',

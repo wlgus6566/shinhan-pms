@@ -23,7 +23,7 @@ import Image from 'next/image';
 
 const menuItems = [
   { icon: LayoutDashboard, label: '대시보드', href: '/dashboard' },
-  { icon: FolderKanban, label: '프로젝트 관리', href: '/projects' },
+  { icon: FolderKanban, label: '프로젝트 관리', href: '/dashboard/projects' },
   { icon: ClipboardList, label: '업무 관리', href: '/tasks' },
   { icon: CalendarIcon, label: '일정 관리', href: '/calendar' },
   { icon: BarChart3, label: '현황 관리', href: '/status' },

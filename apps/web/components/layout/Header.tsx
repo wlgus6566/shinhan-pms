@@ -20,6 +20,8 @@ const pathMap: Record<string, string> = {
   admin: '관리자 전용',
   users: '회원 관리',
   'design-system': '디자인 시스템',
+  new: '새 프로젝트',
+  edit: '수정',
 };
 
 export function Header() {

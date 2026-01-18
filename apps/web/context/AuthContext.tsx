@@ -4,7 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface User {
-  id: string;
+  id: number;
   email: string;
   name: string;
   department: string;
@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('user');
     setUser(null);
-    router.push('/auth/login');
+    router.push('/');
   };
 
   return (

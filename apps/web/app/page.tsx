@@ -1,14 +1,11 @@
 'use client';
 
-import Link from 'next/link';
 import { LoginForm } from '@/components/auth/LoginForm';
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
-  CardTitle,
 } from '@/components/ui/card';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
@@ -61,17 +58,6 @@ export default function LoginPage() {
         <CardContent className="px-8 pb-8">
           <LoginForm />
         </CardContent>
-        <CardFooter className="flex flex-col space-y-4 bg-slate-50 rounded-b-xl border-t px-8 py-6">
-          <div className="text-sm text-center text-slate-600">
-            계정이 없으신가요?{' '}
-            <Link
-              href="/auth/signup"
-              className="text-shinhan-blue font-semibold hover:underline"
-            >
-              회원가입
-            </Link>
-          </div>
-        </CardFooter>
       </Card>
 
       <p className="mt-8 text-white/60 text-xs z-10 font-light">
