@@ -97,7 +97,7 @@ export function UserEditForm({ userId }: { userId: string }) {
     setIsDeactivating(true);
     try {
       await deactivateUser(userId);
-      router.push('/dashboard/admin/users');
+      router.push('/users');
     } catch (err: any) {
       setError(err.message);
       setIsDeactivating(false);

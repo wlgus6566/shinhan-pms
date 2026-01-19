@@ -28,7 +28,7 @@ const menuItems = [
 ];
 
 const adminMenuItems = [
-  { icon: Users, label: '회원 관리', href: '/admin/users' },
+  { icon: Users, label: '멤버 관리', href: '/users' },
 ];
 
 export function Sidebar() {

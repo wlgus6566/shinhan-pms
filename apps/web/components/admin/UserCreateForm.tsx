@@ -92,7 +92,7 @@ export function UserCreateForm() {
       };
 
       await createUser(userData);
-      router.push('/dashboard/admin/users');
+      router.push('/users');
     } catch (err: any) {
       setError(err.message || '멤버 등록 중 오류가 발생했습니다');
     } finally {
