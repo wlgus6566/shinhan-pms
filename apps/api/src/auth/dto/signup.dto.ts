@@ -17,7 +17,7 @@ export enum Department {
 
 export class SignupDto {
   @ApiProperty({
-    example: 'hong.gildong@shinhancard.com',
+    example: 'hong.gildong@emotion.co.kr',
     description: '이메일',
   })
   @IsEmail({}, { message: '올바른 이메일 형식을 입력해주세요' })

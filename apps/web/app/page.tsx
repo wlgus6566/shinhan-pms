@@ -7,7 +7,6 @@ import {
   CardDescription,
   CardHeader,
 } from '@/components/ui/card';
-import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
@@ -24,45 +23,74 @@ export default function LoginPage() {
 
   if (loading || user) {
     return (
-      <div className="min-h-screen bg-shinhan-blue flex items-center justify-center text-white">
-        로딩 중...
+      <div className="min-h-screen bg-[#1e1f2e] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-slate-400 text-sm">로딩 중...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-blue-50 flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
-        <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-white/10 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-[10%] -right-[10%] w-[50%] h-[50%] bg-shinhan-gold/20 rounded-full blur-3xl"></div>
+    <div className="min-h-screen bg-[#1e1f2e] flex">
+      {/* Right Side - Login Form */}
+      <div className="flex-1 flex items-center justify-center p-8 bg-slate-50">
+        <div className="w-full max-w-md">
+          {/* Mobile Logo */}
+          <div className="lg:hidden flex items-center justify-center gap-3 mb-10">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25">
+              <span className="text-white font-bold text-lg">C</span>
+            </div>
+            <div>
+              <h1 className="text-slate-900 font-bold text-lg tracking-tight">
+                Emotion PMS
+              </h1>
+            </div>
+          </div>
+
+          <Card className="border-0 shadow-xl shadow-slate-200/50 bg-white">
+            <CardHeader className="space-y-3 pt-8 pb-2">
+              <h2 className="text-2xl font-bold text-slate-900 text-center">
+                로그인
+              </h2>
+              <CardDescription className="text-slate-500 text-center">
+                계정에 로그인하여 대시보드에 접속하세요
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="px-8 pb-8 pt-4">
+              <LoginForm />
+
+              {/* Divider */}
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-slate-200" />
+                </div>
+                <div className="relative flex justify-center text-xs">
+                  <span className="bg-white px-3 text-slate-400">또는</span>
+                </div>
+              </div>
+
+              {/* Demo Credentials */}
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                  테스트 계정
+                </p>
+                <div className="space-y-1 text-sm">
+                  <p className="text-slate-600">
+                    <span className="text-slate-400">이메일:</span>{' '}
+                    admin@emotion.co.kr
+                  </p>
+                  <p className="text-slate-600">
+                    <span className="text-slate-400">비밀번호:</span>{' '}
+                    password123
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-
-      <Card className="w-full max-w-md z-10 shadow-2xl border-none">
-        <CardHeader className="space-y-4 pt-10">
-          <div className="flex justify-center mb-2">
-            <Image
-              src="/logo.png"
-              alt="logo"
-              width={176}
-              height={31.5}
-              className="w-auto h-auto"
-            />
-          </div>
-          <div className="space-y-1 text-center">
-            <CardDescription className="text-slate-500">
-              신한카드 PMS 통합 관리 시스템
-            </CardDescription>
-          </div>
-        </CardHeader>
-        <CardContent className="px-8 pb-8">
-          <LoginForm />
-        </CardContent>
-      </Card>
-
-      <p className="mt-8 text-white/60 text-xs z-10 font-light">
-        © 2024 Shinhan Card PMS. All rights reserved.
-      </p>
     </div>
   );
 }

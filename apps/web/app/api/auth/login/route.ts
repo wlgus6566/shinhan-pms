@@ -4,8 +4,16 @@ import { mockMembers } from '@/lib/data/mockData';
 // Mock users with passwords for authentication
 const mockUsers = [
   {
+    id: 0,
+    email: 'admin@emotion.co.kr',
+    password: '2motion!',
+    name: '시스템 관리자',
+    department: 'DEVELOPMENT',
+    role: 'PM',
+  },
+  {
     id: 1,
-    email: 'kim@shinhan.com',
+    email: 'kim@emotion.co.kr',
     password: 'password123',
     name: '김철수',
     department: 'DEVELOPMENT',
@@ -13,7 +21,7 @@ const mockUsers = [
   },
   {
     id: 2,
-    email: 'lee@shinhan.com',
+    email: 'lee@emotion.co.kr',
     password: 'password123',
     name: '이영희',
     department: 'PLANNING',
@@ -21,7 +29,7 @@ const mockUsers = [
   },
   {
     id: 3,
-    email: 'park@shinhan.com',
+    email: 'park@emotion.co.kr',
     password: 'password123',
     name: '박민수',
     department: 'DESIGN',
@@ -29,7 +37,7 @@ const mockUsers = [
   },
   {
     id: 4,
-    email: 'jung@shinhan.com',
+    email: 'jung@emotion.co.kr',
     password: 'password123',
     name: '정수진',
     department: 'DEVELOPMENT',
@@ -37,7 +45,7 @@ const mockUsers = [
   },
   {
     id: 5,
-    email: 'choi@shinhan.com',
+    email: 'choi@emotion.co.kr',
     password: 'password123',
     name: '최동욱',
     department: 'OPERATION',
@@ -45,7 +53,7 @@ const mockUsers = [
   },
   {
     id: 6,
-    email: 'kang@shinhan.com',
+    email: 'kang@emotion.co.kr',
     password: 'password123',
     name: '강미영',
     department: 'PLANNING',
@@ -53,7 +61,7 @@ const mockUsers = [
   },
   {
     id: 7,
-    email: 'yoon@shinhan.com',
+    email: 'yoon@emotion.co.kr',
     password: 'password123',
     name: '윤서준',
     department: 'DESIGN',
@@ -61,7 +69,7 @@ const mockUsers = [
   },
   {
     id: 8,
-    email: 'lim@shinhan.com',
+    email: 'lim@emotion.co.kr',
     password: 'password123',
     name: '임지훈',
     department: 'DEVELOPMENT',
@@ -79,17 +87,17 @@ export async function POST(request: NextRequest) {
     if (!email || !password) {
       return NextResponse.json(
         { message: '이메일과 비밀번호를 입력해주세요' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Find user
-    const user = mockUsers.find(u => u.email === email);
-    
+    const user = mockUsers.find((u) => u.email === email);
+
     if (!user) {
       return NextResponse.json(
         { message: '이메일 또는 비밀번호가 올바르지 않습니다' },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -97,7 +105,7 @@ export async function POST(request: NextRequest) {
     if (user.password !== password) {
       return NextResponse.json(
         { message: '이메일 또는 비밀번호가 올바르지 않습니다' },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -114,7 +122,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     return NextResponse.json(
       { message: '로그인 중 오류가 발생했습니다' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -1,9 +1,9 @@
 {
-  "name": "my-turborepo",
+  "name": "emotion-pms",
   "version": "0.0.0",
   "private": true,
-  "description": "",
-  "author": "",
+  "description": "이모션 프로젝트 관리 시스템",
+  "author": "emotion",
   "license": "UNLICENSED",
   "scripts": {
     "dev": "turbo run dev",

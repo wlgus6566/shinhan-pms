@@ -25,7 +25,7 @@ export default function EditProjectPage() {
 
   useEffect(() => {
     if (user && !canEdit) {
-      router.push(`/dashboard/projects/${projectId}`);
+      router.push(`/projects/${projectId}`);
     }
   }, [user, canEdit, router, projectId]);
 
@@ -37,7 +37,7 @@ export default function EditProjectPage() {
     <div className="max-w-3xl">
       <div className="mb-6">
         <Button variant="ghost" size="sm" asChild>
-          <Link href={`/dashboard/projects/${projectId}`}>
+          <Link href={`/projects/${projectId}`}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             프로젝트 상세로
           </Link>

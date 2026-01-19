@@ -62,7 +62,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
           <div className="flex items-center gap-3">
             <div className="flex-1 bg-gray-200 rounded-full h-2">
               <div
-                className="bg-shinhan-blue h-2 rounded-full transition-all"
+                className="bg-emotion-primary h-2 rounded-full transition-all"
                 style={{ width: `${project.progress}%` }}
               />
             </div>

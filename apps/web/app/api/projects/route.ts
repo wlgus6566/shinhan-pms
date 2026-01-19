@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
       creator: {
         id: 1,
         name: '김철수',
-        email: 'kim@shinhan.com',
+        email: 'kim@emotion.co.kr',
       },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

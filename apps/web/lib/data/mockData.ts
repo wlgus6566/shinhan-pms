@@ -5,56 +5,56 @@ export const mockMembers: AvailableMember[] = [
   {
     id: 1,
     name: '김철수',
-    email: 'kim@shinhan.com',
+    email: 'kim@emotion.co.kr',
     department: 'DEVELOPMENT',
     role: 'USER',
   },
   {
     id: 2,
     name: '이영희',
-    email: 'lee@shinhan.com',
+    email: 'lee@emotion.co.kr',
     department: 'PLANNING',
     role: 'USER',
   },
   {
     id: 3,
     name: '박민수',
-    email: 'park@shinhan.com',
+    email: 'park@emotion.co.kr',
     department: 'DESIGN',
     role: 'USER',
   },
   {
     id: 4,
     name: '정수진',
-    email: 'jung@shinhan.com',
+    email: 'jung@emotion.co.kr',
     department: 'DEVELOPMENT',
     role: 'USER',
   },
   {
     id: 5,
     name: '최동욱',
-    email: 'choi@shinhan.com',
+    email: 'choi@emotion.co.kr',
     department: 'OPERATION',
     role: 'USER',
   },
   {
     id: 6,
     name: '강미영',
-    email: 'kang@shinhan.com',
+    email: 'kang@emotion.co.kr',
     department: 'PLANNING',
     role: 'USER',
   },
   {
     id: 7,
     name: '윤서준',
-    email: 'yoon@shinhan.com',
+    email: 'yoon@emotion.co.kr',
     department: 'DESIGN',
     role: 'USER',
   },
   {
     id: 8,
     name: '임지훈',
-    email: 'lim@shinhan.com',
+    email: 'lim@emotion.co.kr',
     department: 'DEVELOPMENT',
     role: 'USER',
   },
@@ -64,8 +64,8 @@ export const mockMembers: AvailableMember[] = [
 export const mockProjects: Project[] = [
   {
     id: 1,
-    name: '신한카드 모바일 앱 리뉴얼',
-    description: '사용자 경험 개선을 위한 모바일 앱 전면 리뉴얼 프로젝트',
+    name: '이모션 홈페이지 리뉴얼',
+    description: '브랜드 아이덴티티 강화를 위한 홈페이지 전면 리뉴얼',
     startDate: '2024-01-15T00:00:00Z',
     endDate: '2024-06-30T00:00:00Z',
     status: 'IN_PROGRESS',
@@ -74,7 +74,7 @@ export const mockProjects: Project[] = [
     creator: {
       id: 1,
       name: '김철수',
-      email: 'kim@shinhan.com',
+      email: 'kim@emotion.co.kr',
     },
     createdAt: '2024-01-10T00:00:00Z',
     updatedAt: '2024-03-20T00:00:00Z',
@@ -82,8 +82,8 @@ export const mockProjects: Project[] = [
   },
   {
     id: 2,
-    name: '고객센터 시스템 고도화',
-    description: 'AI 챗봇 도입 및 상담 프로세스 자동화',
+    name: 'PMS 시스템 개발',
+    description: '이모션 업무 관리를 위한 프로젝트 관리 시스템',
     startDate: '2024-02-01T00:00:00Z',
     endDate: '2024-07-31T00:00:00Z',
     status: 'IN_PROGRESS',
@@ -92,7 +92,7 @@ export const mockProjects: Project[] = [
     creator: {
       id: 2,
       name: '이영희',
-      email: 'lee@shinhan.com',
+      email: 'lee@emotion.co.kr',
     },
     createdAt: '2024-01-25T00:00:00Z',
     updatedAt: '2024-03-18T00:00:00Z',
@@ -100,8 +100,8 @@ export const mockProjects: Project[] = [
   },
   {
     id: 3,
-    name: '결제 시스템 보안 강화',
-    description: '최신 보안 프로토콜 적용 및 취약점 보완',
+    name: '쇼핑몰 플랫폼 구축',
+    description: 'B2C 전자상거래 플랫폼 개발 프로젝트',
     startDate: '2023-11-01T00:00:00Z',
     endDate: '2024-01-31T00:00:00Z',
     status: 'COMPLETED',
@@ -110,7 +110,7 @@ export const mockProjects: Project[] = [
     creator: {
       id: 1,
       name: '김철수',
-      email: 'kim@shinhan.com',
+      email: 'kim@emotion.co.kr',
     },
     createdAt: '2023-10-20T00:00:00Z',
     updatedAt: '2024-02-01T00:00:00Z',
@@ -118,8 +118,8 @@ export const mockProjects: Project[] = [
   },
   {
     id: 4,
-    name: '멤버십 포인트 플랫폼 구축',
-    description: '통합 멤버십 포인트 관리 시스템 개발',
+    name: '모바일 앱 개발',
+    description: 'iOS/Android 하이브리드 앱 개발',
     startDate: '2024-03-01T00:00:00Z',
     endDate: '2024-09-30T00:00:00Z',
     status: 'PENDING',
@@ -128,7 +128,7 @@ export const mockProjects: Project[] = [
     creator: {
       id: 3,
       name: '박민수',
-      email: 'park@shinhan.com',
+      email: 'park@emotion.co.kr',
     },
     createdAt: '2024-02-15T00:00:00Z',
     updatedAt: '2024-02-15T00:00:00Z',
@@ -136,7 +136,7 @@ export const mockProjects: Project[] = [
   },
   {
     id: 5,
-    name: '데이터 분석 대시보드 개발',
+    name: '데이터 분석 대시보드',
     description: '실시간 비즈니스 인사이트 제공 대시보드',
     startDate: '2024-01-20T00:00:00Z',
     endDate: '2024-05-31T00:00:00Z',
@@ -146,7 +146,7 @@ export const mockProjects: Project[] = [
     creator: {
       id: 2,
       name: '이영희',
-      email: 'lee@shinhan.com',
+      email: 'lee@emotion.co.kr',
     },
     createdAt: '2024-01-15T00:00:00Z',
     updatedAt: '2024-03-10T00:00:00Z',
@@ -164,7 +164,7 @@ export const mockProjects: Project[] = [
     creator: {
       id: 4,
       name: '정수진',
-      email: 'jung@shinhan.com',
+      email: 'jung@emotion.co.kr',
     },
     createdAt: '2024-02-10T00:00:00Z',
     updatedAt: '2024-03-22T00:00:00Z',
@@ -183,7 +183,7 @@ export const mockProjectMembers: ProjectMember[] = [
     member: {
       id: 1,
       name: '김철수',
-      email: 'kim@shinhan.com',
+      email: 'kim@emotion.co.kr',
       department: 'DEVELOPMENT',
       role: 'USER',
     },
@@ -198,7 +198,7 @@ export const mockProjectMembers: ProjectMember[] = [
     member: {
       id: 3,
       name: '박민수',
-      email: 'park@shinhan.com',
+      email: 'park@emotion.co.kr',
       department: 'DESIGN',
       role: 'USER',
     },
@@ -213,7 +213,7 @@ export const mockProjectMembers: ProjectMember[] = [
     member: {
       id: 4,
       name: '정수진',
-      email: 'jung@shinhan.com',
+      email: 'jung@emotion.co.kr',
       department: 'DEVELOPMENT',
       role: 'USER',
     },
@@ -229,7 +229,7 @@ export const mockProjectMembers: ProjectMember[] = [
     member: {
       id: 2,
       name: '이영희',
-      email: 'lee@shinhan.com',
+      email: 'lee@emotion.co.kr',
       department: 'PLANNING',
       role: 'USER',
     },
@@ -244,7 +244,7 @@ export const mockProjectMembers: ProjectMember[] = [
     member: {
       id: 5,
       name: '최동욱',
-      email: 'choi@shinhan.com',
+      email: 'choi@emotion.co.kr',
       department: 'OPERATION',
       role: 'USER',
     },
@@ -260,7 +260,7 @@ export const mockProjectMembers: ProjectMember[] = [
     member: {
       id: 1,
       name: '김철수',
-      email: 'kim@shinhan.com',
+      email: 'kim@emotion.co.kr',
       department: 'DEVELOPMENT',
       role: 'USER',
     },
@@ -275,7 +275,7 @@ export const mockProjectMembers: ProjectMember[] = [
     member: {
       id: 8,
       name: '임지훈',
-      email: 'lim@shinhan.com',
+      email: 'lim@emotion.co.kr',
       department: 'DEVELOPMENT',
       role: 'USER',
     },
@@ -291,7 +291,7 @@ export const mockProjectMembers: ProjectMember[] = [
     member: {
       id: 3,
       name: '박민수',
-      email: 'park@shinhan.com',
+      email: 'park@emotion.co.kr',
       department: 'DESIGN',
       role: 'USER',
     },
@@ -306,7 +306,7 @@ export const mockProjectMembers: ProjectMember[] = [
     member: {
       id: 6,
       name: '강미영',
-      email: 'kang@shinhan.com',
+      email: 'kang@emotion.co.kr',
       department: 'PLANNING',
       role: 'USER',
     },
@@ -322,7 +322,7 @@ export const mockProjectMembers: ProjectMember[] = [
     member: {
       id: 4,
       name: '정수진',
-      email: 'jung@shinhan.com',
+      email: 'jung@emotion.co.kr',
       department: 'DEVELOPMENT',
       role: 'USER',
     },
@@ -337,7 +337,7 @@ export const mockProjectMembers: ProjectMember[] = [
     member: {
       id: 7,
       name: '윤서준',
-      email: 'yoon@shinhan.com',
+      email: 'yoon@emotion.co.kr',
       department: 'DESIGN',
       role: 'USER',
     },

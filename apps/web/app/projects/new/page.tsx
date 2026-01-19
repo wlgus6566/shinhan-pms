@@ -16,7 +16,7 @@ export default function NewProjectPage() {
 
   useEffect(() => {
     if (user && !isPM) {
-      router.push('/dashboard/projects');
+      router.push('/projects');
     }
   }, [user, isPM, router]);
 
@@ -28,7 +28,7 @@ export default function NewProjectPage() {
     <div className="max-w-3xl">
       <div className="mb-6">
         <Button variant="ghost" size="sm" asChild>
-          <Link href="/dashboard/projects">
+          <Link href="/projects">
             <ArrowLeft className="h-4 w-4 mr-2" />
             프로젝트 목록으로
           </Link>

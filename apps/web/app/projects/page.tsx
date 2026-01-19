@@ -23,7 +23,7 @@ export default function ProjectsPage() {
         </div>
         {isPM && (
           <Button asChild>
-            <Link href="/dashboard/projects/new">
+            <Link href="/projects/new">
               <Plus className="h-4 w-4 mr-2" />새 프로젝트 등록
             </Link>
           </Button>

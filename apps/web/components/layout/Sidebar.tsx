@@ -11,23 +11,22 @@ import {
   Calendar as CalendarIcon,
   BarChart3,
   Users,
-  UserCircle,
   LogOut,
   ChevronLeft,
   ChevronRight,
-  Palette
+  Palette,
+  Settings,
+  HelpCircle,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { useState } from 'react';
-import Image from 'next/image';
 
 const menuItems = [
   { icon: LayoutDashboard, label: '대시보드', href: '/dashboard' },
-  { icon: FolderKanban, label: '프로젝트 관리', href: '/dashboard/projects' },
-  { icon: ClipboardList, label: '업무 관리', href: '/tasks' },
-  { icon: CalendarIcon, label: '일정 관리', href: '/calendar' },
-  { icon: BarChart3, label: '현황 관리', href: '/status' },
-  { icon: Palette, label: '디자인 시스템', href: '/dashboard/design-system' },
+  { icon: FolderKanban, label: '프로젝트', href: '/projects' },
+  { icon: ClipboardList, label: '업무', href: '/tasks' },
+  { icon: CalendarIcon, label: '일정', href: '/calendar' },
+  { icon: BarChart3, label: '현황', href: '/status' },
+  { icon: Palette, label: '디자인', href: '/dashboard/design-system' },
 ];
 
 const adminMenuItems = [
@@ -39,119 +38,193 @@ export function Sidebar() {
   const { user, logout } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const isActive = (href: string) => pathname === href || pathname?.startsWith(`${href}/`);
+  const isActive = (href: string) =>
+    pathname === href || pathname?.startsWith(`${href}/`);
 
   return (
     <aside
       className={cn(
-        'fixed left-0 top-0 h-full bg-white border-r border-slate-200 transition-all duration-300 z-50 flex flex-col',
-        isCollapsed ? 'w-[80px]' : 'w-[240px]'
+        'fixed left-0 top-0 h-full bg-[#1e1f2e] transition-all duration-300 z-50 flex flex-col',
+        isCollapsed ? 'w-[72px]' : 'w-[240px]',
       )}
     >
       {/* Logo Area */}
-      <div className="h-16 flex items-center px-6 border-b border-slate-100">
-        <Link href="/dashboard" className="flex items-center gap-3 overflow-hidden">
-          <div className="w-8 h-8 bg-shinhan-blue rounded-lg flex-shrink-0 flex items-center justify-center shadow-lg shadow-blue-200">
-            <span className="text-white font-bold text-lg italic">S</span>
+      <div
+        className={cn(
+          'h-16 flex items-center border-b border-white/5',
+          isCollapsed ? 'justify-center px-0' : 'px-5',
+        )}
+      >
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-3 overflow-hidden"
+        >
+          <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex-shrink-0 flex items-center justify-center shadow-lg shadow-blue-500/25">
+            <span className="text-white font-bold text-base">E</span>
           </div>
           {!isCollapsed && (
-            <span className="font-bold text-shinhan-blue tracking-tight whitespace-nowrap">
-              SHINHAN <span className="text-slate-400 font-light">PMS</span>
-            </span>
+            <div className="flex flex-col">
+              <span className="text-white font-bold text-sm tracking-tight">
+                Emotion PMS
+              </span>
+            </div>
           )}
         </Link>
       </div>
 
-      {/* Menu Area */}
-      <nav className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
-        {menuItems.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={cn(
-              'flex items-center gap-3 px-3 py-2 rounded-xl transition-all group',
-              isActive(item.href)
-                ? 'bg-blue-50 text-shinhan-blue font-semibold'
-                : 'text-slate-500 hover:bg-slate-50 hover:text-shinhan-blue'
-            )}
-          >
-            <item.icon className={cn('h-5 w-5', isActive(item.href) ? 'text-shinhan-blue' : 'text-slate-400 group-hover:text-shinhan-blue')} />
-            {!isCollapsed && <span>{item.label}</span>}
-          </Link>
-        ))}
-
-        {/* Admin Menu Section */}
-        {(user?.role === 'PM' || user?.role === 'PL') && (
-          <div className="pt-6">
-            {!isCollapsed && <p className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Admin</p>}
-            {adminMenuItems.map((item) => (
+      {/* Navigation */}
+      <nav className="flex-1 py-4 px-3 overflow-y-auto scrollbar-thin">
+        <div className="space-y-1">
+          {menuItems.map((item) => {
+            const active = isActive(item.href);
+            return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex items-center gap-3 px-3 py-2 rounded-xl transition-all group',
-                  isActive(item.href)
-                    ? 'bg-yellow-50 text-orange-600 font-semibold'
-                    : 'text-slate-500 hover:bg-slate-50 hover:text-orange-600'
+                  'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative',
+                  active
+                    ? 'bg-blue-500/15 text-blue-400'
+                    : 'text-slate-400 hover:bg-white/5 hover:text-white',
                 )}
               >
-                <item.icon className={cn('h-5 w-5', isActive(item.href) ? 'text-orange-500' : 'text-slate-400 group-hover:text-orange-500')} />
-                {!isCollapsed && <span>{item.label}</span>}
+                {active && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-blue-500 rounded-r-full" />
+                )}
+                <item.icon
+                  className={cn(
+                    'h-5 w-5 flex-shrink-0 transition-colors',
+                    active
+                      ? 'text-blue-400'
+                      : 'text-slate-500 group-hover:text-white',
+                  )}
+                />
+                {!isCollapsed && (
+                  <span
+                    className={cn(
+                      'text-sm font-medium truncate',
+                      active && 'font-semibold',
+                    )}
+                  >
+                    {item.label}
+                  </span>
+                )}
               </Link>
-            ))}
+            );
+          })}
+        </div>
+
+        {/* Admin Section */}
+        {(user?.role === 'PM' || user?.role === 'PL') && (
+          <div className="mt-6 pt-6 border-t border-white/5">
+            {!isCollapsed && (
+              <p className="px-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-3">
+                관리자
+              </p>
+            )}
+            {adminMenuItems.map((item) => {
+              const active = isActive(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative',
+                    active
+                      ? 'bg-amber-500/15 text-amber-400'
+                      : 'text-slate-400 hover:bg-white/5 hover:text-white',
+                  )}
+                >
+                  {active && (
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-amber-500 rounded-r-full" />
+                  )}
+                  <item.icon
+                    className={cn(
+                      'h-5 w-5 flex-shrink-0 transition-colors',
+                      active
+                        ? 'text-amber-400'
+                        : 'text-slate-500 group-hover:text-white',
+                    )}
+                  />
+                  {!isCollapsed && (
+                    <span
+                      className={cn(
+                        'text-sm font-medium truncate',
+                        active && 'font-semibold',
+                      )}
+                    >
+                      {item.label}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
           </div>
         )}
       </nav>
 
-      {/* Profile Area */}
-      <div className="p-4 border-t border-slate-100">
-        <div className={cn(
-          'bg-slate-50 rounded-2xl transition-all',
-          isCollapsed ? 'p-2' : 'p-3'
-        )}>
-          {user && (
-            <div className={cn('flex items-center gap-3', isCollapsed && 'justify-center')}>
-              <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-shinhan-blue font-bold text-xs flex-shrink-0">
-                {user.name.charAt(0)}
-              </div>
-              {!isCollapsed && (
-                <div className="flex-1 overflow-hidden">
-                  <p className="text-sm font-bold text-slate-900 truncate">{user.name}</p>
-                  <p className="text-[10px] text-slate-500 truncate">{user.department} / {user.role}</p>
-                </div>
-              )}
-            </div>
-          )}
-          {!isCollapsed && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full mt-2 text-slate-400 hover:text-destructive hover:bg-destructive/5 h-8"
-              onClick={logout}
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              로그아웃
-            </Button>
-          )}
-          {isCollapsed && (
-             <Button
-             variant="ghost"
-             size="sm"
-             className="w-full mt-2 text-slate-400 hover:text-destructive"
-             onClick={logout}
-           >
-             <LogOut className="h-4 w-4" />
-           </Button>
-          )}
+      {/* Stats Card - CRM Style */}
+      {!isCollapsed && (
+        <div className="mx-3 mb-4 p-4 bg-gradient-to-br from-blue-500/10 to-blue-600/5 rounded-2xl border border-blue-500/10">
+          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+            진행중 프로젝트
+          </p>
+          <p className="text-2xl font-bold text-white">12</p>
+          <div className="flex items-center gap-1 mt-1">
+            <span className="text-emerald-400 text-xs font-medium">+3</span>
+            <span className="text-slate-500 text-xs">이번 주</span>
+          </div>
         </div>
+      )}
+
+      {/* User Profile */}
+      <div
+        className={cn('border-t border-white/5', isCollapsed ? 'p-2' : 'p-3')}
+      >
+        {user && (
+          <div
+            className={cn(
+              'flex items-center gap-3 p-2 rounded-xl transition-colors',
+              !isCollapsed && 'hover:bg-white/5',
+            )}
+          >
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
+              {user.name.charAt(0)}
+            </div>
+            {!isCollapsed && (
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-white truncate">
+                  {user.name}
+                </p>
+                <p className="text-[11px] text-slate-500 truncate">
+                  {user.department}
+                </p>
+              </div>
+            )}
+            <button
+              onClick={logout}
+              className={cn(
+                'p-2 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors',
+                isCollapsed && 'w-full flex justify-center mt-2',
+              )}
+              title="로그아웃"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Collapse Toggle */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute -right-3 top-20 w-6 h-6 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-400 hover:text-shinhan-blue shadow-sm"
+        className="absolute -right-3 top-20 w-6 h-6 bg-[#1e1f2e] border border-white/10 rounded-full flex items-center justify-center text-slate-500 hover:text-white transition-colors shadow-lg"
       >
-        {isCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
+        {isCollapsed ? (
+          <ChevronRight className="h-3 w-3" />
+        ) : (
+          <ChevronLeft className="h-3 w-3" />
+        )}
       </button>
     </aside>
   );

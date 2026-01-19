@@ -87,9 +87,9 @@
 
 | 이름        | Tailwind Token    | HEX (신한 브랜드 적용)       |
 | :---------- | :---------------- | :--------------------------- |
-| Primary     | `bg-primary`      | #0046FF (Shinhan Blue)       |
-| Secondary   | `bg-secondary`    | #FFD200 (Shinhan Gold)       |
-| Background  | `bg-background`   | #F4F7FF (Shinhan Light Gray) |
+| Primary     | `bg-primary`      | #6366F1 (Emotion Primary)    |
+| Secondary   | `bg-secondary`    | #8B5CF6 (Emotion Secondary)  |
+| Background  | `bg-background`   | #F9FAFB (Emotion Light Gray) |
 | Border      | `border-input`    | #E5E5E5                      |
 | Text        | `text-foreground` | #333333                      |
 | Muted       | `text-muted`      | #888888                      |

@@ -49,7 +49,7 @@ describe('AuthService', () => {
 
   describe('signup', () => {
     const signupDto: SignupDto = {
-      email: 'test@shinhancard.com',
+      email: 'test@emotion.co.kr',
       password: 'Test1234!',
       name: '테스트',
       department: Department.DEVELOPMENT,
@@ -109,7 +109,7 @@ describe('AuthService', () => {
 
   describe('login', () => {
     const loginDto: LoginDto = {
-      email: 'test@shinhancard.com',
+      email: 'test@emotion.co.kr',
       password: 'Test1234!',
     };
 

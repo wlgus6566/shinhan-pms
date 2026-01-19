@@ -5,7 +5,7 @@ export class UserResponseDto {
   @ApiProperty({ example: 1 })
   id: bigint;
 
-  @ApiProperty({ example: 'hong.gildong@shinhancard.com' })
+  @ApiProperty({ example: 'hong.gildong@emotion.co.kr' })
   email: string;
 
   @ApiProperty({ example: '홍길동' })

@@ -10,11 +10,11 @@ const config: Config = {
   theme: {
   	extend: {
   		colors: {
-        shinhan: {
-          blue: '#0046FF',
-          darkblue: '#0035CC',
-          gold: '#FFD200',
-          lightgray: '#F4F7FF',
+        emotion: {
+          primary: '#6366F1',      // 인디고 (주색상)
+          secondary: '#8B5CF6',    // 보라 (보조색상)
+          accent: '#EC4899',       // 핑크 (강조색)
+          lightgray: '#F9FAFB',    // 연한 회색 배경
         },
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',

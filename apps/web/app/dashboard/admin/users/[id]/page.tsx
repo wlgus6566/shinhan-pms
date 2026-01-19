@@ -12,7 +12,7 @@ export default function UserEditPage() {
 
   return (
     <div className="max-w-2xl">
-      <Button variant="ghost" className="mb-6 -ml-2 text-slate-500 hover:text-shinhan-blue" onClick={() => router.back()}>
+      <Button variant="ghost" className="mb-6 -ml-2 text-slate-500 hover:text-emotion-primary" onClick={() => router.back()}>
         <ArrowLeft className="mr-2 h-4 w-4" />
         목록으로 돌아가기
       </Button>

@@ -4,81 +4,275 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { LayoutDashboard, Users, UserCircle, LogOut, FolderKanban, ClipboardList, BarChart3 } from 'lucide-react';
+import {
+  FolderKanban,
+  ClipboardList,
+  Users,
+  TrendingUp,
+  TrendingDown,
+  ArrowRight,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  AlertCircle
+} from 'lucide-react';
+
+// Stats Card Component
+function StatsCard({
+  label,
+  value,
+  trend,
+  trendValue,
+  icon: Icon,
+  color = 'blue'
+}: {
+  label: string;
+  value: string | number;
+  trend?: 'up' | 'down';
+  trendValue?: string;
+  icon: React.ElementType;
+  color?: 'blue' | 'emerald' | 'amber' | 'rose' | 'sky';
+}) {
+  const colorClasses = {
+    blue: 'from-blue-500 to-blue-600 shadow-blue-500/25',
+    emerald: 'from-emerald-500 to-emerald-600 shadow-emerald-500/25',
+    amber: 'from-amber-500 to-amber-600 shadow-amber-500/25',
+    rose: 'from-rose-500 to-rose-600 shadow-rose-500/25',
+    sky: 'from-sky-500 to-sky-600 shadow-sky-500/25',
+  };
+
+  return (
+    <div className="bg-white rounded-2xl border border-slate-100 p-5 hover:shadow-md transition-all duration-200">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{label}</p>
+          <p className="text-2xl font-bold text-slate-900 mt-1">{value}</p>
+          {trend && trendValue && (
+            <div className={`flex items-center gap-1 mt-2 text-xs font-medium ${
+              trend === 'up' ? 'text-emerald-600' : 'text-rose-600'
+            }`}>
+              {trend === 'up' ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+              <span>{trendValue}</span>
+              <span className="text-slate-400 ml-1">이번 주</span>
+            </div>
+          )}
+        </div>
+        <div className={`p-3 rounded-xl bg-gradient-to-br ${colorClasses[color]} shadow-lg`}>
+          <Icon className="h-5 w-5 text-white" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Quick Action Card
+function QuickActionCard({
+  title,
+  description,
+  href,
+  icon: Icon,
+  color = 'blue'
+}: {
+  title: string;
+  description: string;
+  href: string;
+  icon: React.ElementType;
+  color?: 'blue' | 'emerald' | 'amber' | 'rose';
+}) {
+  const colorClasses = {
+    blue: {
+      bg: 'bg-blue-50',
+      icon: 'text-blue-500',
+      hover: 'group-hover:bg-blue-100',
+    },
+    emerald: {
+      bg: 'bg-emerald-50',
+      icon: 'text-emerald-500',
+      hover: 'group-hover:bg-emerald-100',
+    },
+    amber: {
+      bg: 'bg-amber-50',
+      icon: 'text-amber-500',
+      hover: 'group-hover:bg-amber-100',
+    },
+    rose: {
+      bg: 'bg-rose-50',
+      icon: 'text-rose-500',
+      hover: 'group-hover:bg-rose-100',
+    },
+  };
+
+  return (
+    <Link href={href} className="group">
+      <Card className="border-slate-100 hover:border-slate-200 hover:shadow-lg transition-all duration-200">
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-4">
+            <div className={`p-3 rounded-xl ${colorClasses[color].bg} ${colorClasses[color].hover} transition-colors`}>
+              <Icon className={`h-6 w-6 ${colorClasses[color].icon}`} />
+            </div>
+            <div className="flex-1">
+              <CardTitle className="text-base font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
+                {title}
+              </CardTitle>
+              <CardDescription className="text-slate-500 text-sm mt-0.5">
+                {description}
+              </CardDescription>
+            </div>
+            <ArrowRight className="h-5 w-5 text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
+          </div>
+        </CardHeader>
+      </Card>
+    </Link>
+  );
+}
 
 export default function DashboardPage() {
   const { user } = useAuth();
 
   return (
-    <div className="space-y-8">
-      <section>
-        <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-2">업무 현황 대시보드</h2>
-        <p className="text-slate-500">신한카드 운영 및 고도화 업무를 체계적으로 관리합니다.</p>
+    <div className="space-y-8 animate-fade-in">
+      {/* Header */}
+      <section className="flex items-end justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+            안녕하세요, {user?.name}님
+          </h1>
+          <p className="text-slate-500 mt-1">
+            오늘의 업무 현황을 확인하세요.
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="text-sm text-slate-400">
+            {new Date().toLocaleDateString('ko-KR', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+              weekday: 'long'
+            })}
+          </p>
+        </div>
       </section>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="hover:shadow-xl transition-all border-none shadow-md overflow-hidden group rounded-2xl">
-          <div className="h-2 bg-shinhan-blue group-hover:h-3 transition-all"></div>
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center text-xl font-bold">
-              <div className="p-2 bg-blue-50 rounded-xl mr-3">
-                <FolderKanban className="h-6 w-6 text-shinhan-blue" />
-              </div>
-              프로젝트 관리
-            </CardTitle>
-            <CardDescription className="text-slate-500 mt-2">
-              진행 중인 프로젝트를 확인하고 새로운 업무를 등록합니다.
-            </CardDescription>
+      {/* Stats Grid */}
+      <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 stagger-children">
+        <StatsCard
+          label="진행중 프로젝트"
+          value="12"
+          trend="up"
+          trendValue="+3"
+          icon={FolderKanban}
+          color="blue"
+        />
+        <StatsCard
+          label="완료된 업무"
+          value="48"
+          trend="up"
+          trendValue="+12"
+          icon={CheckCircle2}
+          color="emerald"
+        />
+        <StatsCard
+          label="대기중 업무"
+          value="8"
+          trend="down"
+          trendValue="-2"
+          icon={Clock}
+          color="amber"
+        />
+        <StatsCard
+          label="긴급 이슈"
+          value="2"
+          icon={AlertCircle}
+          color="rose"
+        />
+      </section>
+
+      {/* Quick Actions */}
+      <section>
+        <h2 className="text-lg font-semibold text-slate-900 mb-4">바로가기</h2>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <QuickActionCard
+                title="프로젝트 관리"
+                description="진행 중인 프로젝트를 확인하고 관리합니다"
+                href="/projects"
+                icon={FolderKanban}
+                color="blue"
+              />
+          <QuickActionCard
+            title="업무 관리"
+            description="할당된 업무를 확인하고 진행 상태를 업데이트합니다"
+            href="/tasks"
+            icon={ClipboardList}
+            color="emerald"
+          />
+          {(user?.role === 'PM' || user?.role === 'PL') && (
+            <QuickActionCard
+              title="회원 관리"
+              description="팀원의 권한과 상태를 관리합니다"
+              href="/admin/users"
+              icon={Users}
+              color="amber"
+            />
+          )}
+        </div>
+      </section>
+
+      {/* Recent Activity - Placeholder */}
+      <section className="grid gap-6 lg:grid-cols-2">
+        <Card className="border-slate-100">
+          <CardHeader>
+            <CardTitle className="text-base font-semibold">최근 활동</CardTitle>
+            <CardDescription>팀의 최근 활동 내역입니다</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button className="w-full bg-shinhan-blue hover:bg-shinhan-darkblue shadow-lg shadow-blue-200 rounded-xl" asChild>
-              <Link href="/dashboard/projects">이동하기</Link>
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-xl transition-all border-none shadow-md overflow-hidden group rounded-2xl">
-          <div className="h-2 bg-emerald-500 group-hover:h-3 transition-all"></div>
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center text-xl font-bold">
-              <div className="p-2 bg-emerald-50 rounded-xl mr-3">
-                <ClipboardList className="h-6 w-6 text-emerald-500" />
-              </div>
-              업무 관리
-            </CardTitle>
-            <CardDescription className="text-slate-500 mt-2">
-              나에게 할당된 업무를 확인하고 진행 상태를 업데이트합니다.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button className="w-full bg-emerald-500 hover:bg-emerald-600 shadow-lg shadow-emerald-200 rounded-xl" asChild>
-              <Link href="/tasks">이동하기</Link>
-            </Button>
-          </CardContent>
-        </Card>
-
-        {(user?.role === 'PM' || user?.role === 'PL') && (
-          <Card className="hover:shadow-xl transition-all border-none shadow-md overflow-hidden group rounded-2xl">
-            <div className="h-2 bg-shinhan-gold group-hover:h-3 transition-all"></div>
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center text-xl font-bold">
-                <div className="p-2 bg-yellow-50 rounded-xl mr-3">
-                  <Users className="h-6 w-6 text-orange-500" />
+            <div className="space-y-4">
+              {[
+                { user: '김철수', action: '프로젝트 A 업무 완료', time: '10분 전', avatar: '김' },
+                { user: '이영희', action: '새 업무 생성', time: '30분 전', avatar: '이' },
+                { user: '박민수', action: '댓글 추가', time: '1시간 전', avatar: '박' },
+              ].map((activity, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xs font-semibold">
+                    {activity.avatar}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-slate-900 truncate">
+                      <span className="font-medium">{activity.user}</span>
+                      <span className="text-slate-500"> - {activity.action}</span>
+                    </p>
+                    <p className="text-xs text-slate-400">{activity.time}</p>
+                  </div>
                 </div>
-                사용자 관리
-              </CardTitle>
-              <CardDescription className="text-slate-500 mt-2">
-                팀원의 등급과 파트 권한을 설정하고 상태를 관리합니다.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button className="w-full border-shinhan-blue text-shinhan-blue hover:bg-blue-50 rounded-xl" variant="outline" asChild>
-                <Link href="/admin/users">관리하기</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-slate-100">
+          <CardHeader>
+            <CardTitle className="text-base font-semibold">이번 주 일정</CardTitle>
+            <CardDescription>다가오는 마일스톤과 일정입니다</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {[
+                { title: '프로젝트 A 킥오프', date: '월', color: 'bg-blue-500' },
+                { title: '주간 팀 미팅', date: '화', color: 'bg-emerald-500' },
+                { title: '클라이언트 리뷰', date: '목', color: 'bg-amber-500' },
+              ].map((event, i) => (
+                <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors">
+                  <div className={`w-1.5 h-8 rounded-full ${event.color}`} />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-slate-900">{event.title}</p>
+                    <p className="text-xs text-slate-400">{event.date}요일</p>
+                  </div>
+                  <Calendar className="h-4 w-4 text-slate-400" />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </section>
     </div>
   );
 }

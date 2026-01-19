@@ -25,7 +25,7 @@
 ### 3. 로그인 확인
 1. 로그아웃 후 다시 로그인해 보세요
 2. 테스트 계정:
-   - 이메일: `kim@shinhan.com`
+   - 이메일: `kim@emotion.co.kr`
    - 비밀번호: `password123`
 
 ### 4. LocalStorage 확인

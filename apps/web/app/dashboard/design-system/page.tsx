@@ -1,11 +1,31 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -19,7 +39,7 @@ import {
   AlertCircle,
   CheckCircle,
   Info,
-  XCircle
+  XCircle,
 } from 'lucide-react';
 
 export default function DesignSystemPage() {
@@ -28,10 +48,10 @@ export default function DesignSystemPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground mb-2">
-          신한 PMS 디자인 시스템
+          PMS 디자인 시스템
         </h1>
         <p className="text-sm text-muted-foreground">
-          shadcn/ui + Tailwind CSS 기반의 신한카드 PMS 컴포넌트 라이브러리
+          shadcn/ui + Tailwind CSS 기반의 PMS 컴포넌트 라이브러리
         </p>
       </div>
 
@@ -39,7 +59,7 @@ export default function DesignSystemPage() {
       <Card>
         <CardHeader>
           <CardTitle>색상 시스템</CardTitle>
-          <CardDescription>신한 브랜드 색상 및 시스템 색상</CardDescription>
+          <CardDescription>브랜드 색상 및 시스템 색상</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
@@ -48,24 +68,24 @@ export default function DesignSystemPage() {
               <h3 className="text-sm font-semibold mb-3">브랜드 색상</h3>
               <div className="grid grid-cols-4 gap-4">
                 <div className="space-y-2">
-                  <div className="w-full h-20 bg-shinhan-blue rounded-lg shadow-md" />
-                  <p className="text-xs font-medium">Shinhan Blue</p>
-                  <p className="text-xs text-muted-foreground">#0046FF</p>
+                  <div className="w-full h-20 bg-emotion-primary rounded-lg shadow-md" />
+                  <p className="text-xs font-medium">Emotion Primary</p>
+                  <p className="text-xs text-muted-foreground">#6366F1</p>
                 </div>
                 <div className="space-y-2">
-                  <div className="w-full h-20 bg-shinhan-darkblue rounded-lg shadow-md" />
-                  <p className="text-xs font-medium">Shinhan Dark Blue</p>
-                  <p className="text-xs text-muted-foreground">#0035CC</p>
+                  <div className="w-full h-20 bg-emotion-secondary rounded-lg shadow-md" />
+                  <p className="text-xs font-medium">Emotion Secondary</p>
+                  <p className="text-xs text-muted-foreground">#8B5CF6</p>
                 </div>
                 <div className="space-y-2">
-                  <div className="w-full h-20 bg-shinhan-gold rounded-lg shadow-md" />
-                  <p className="text-xs font-medium">Shinhan Gold</p>
-                  <p className="text-xs text-muted-foreground">#FFD200</p>
+                  <div className="w-full h-20 bg-emotion-accent rounded-lg shadow-md" />
+                  <p className="text-xs font-medium">Emotion Accent</p>
+                  <p className="text-xs text-muted-foreground">#EC4899</p>
                 </div>
                 <div className="space-y-2">
-                  <div className="w-full h-20 bg-shinhan-lightgray rounded-lg shadow-md" />
-                  <p className="text-xs font-medium">Shinhan Light Gray</p>
-                  <p className="text-xs text-muted-foreground">#F4F7FF</p>
+                  <div className="w-full h-20 bg-emotion-lightgray rounded-lg shadow-md" />
+                  <p className="text-xs font-medium">Emotion Light Gray</p>
+                  <p className="text-xs text-muted-foreground">#F9FAFB</p>
                 </div>
               </div>
             </div>
@@ -113,7 +133,9 @@ export default function DesignSystemPage() {
           </div>
           <div className="space-y-2">
             <h2 className="text-xl font-semibold">Section Title - 섹션 제목</h2>
-            <p className="text-xs text-muted-foreground">text-xl font-semibold</p>
+            <p className="text-xs text-muted-foreground">
+              text-xl font-semibold
+            </p>
           </div>
           <div className="space-y-2">
             <p className="text-base">Body - 기본 텍스트</p>
@@ -121,7 +143,9 @@ export default function DesignSystemPage() {
           </div>
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">Label - 필드 라벨</p>
-            <p className="text-xs text-muted-foreground">text-sm text-muted-foreground</p>
+            <p className="text-xs text-muted-foreground">
+              text-sm text-muted-foreground
+            </p>
           </div>
           <div className="space-y-2">
             <p className="text-xs text-muted">Caption - 날짜, 설명</p>
@@ -211,8 +235,14 @@ export default function DesignSystemPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="input-error">Input with Error</Label>
-              <Input id="input-error" placeholder="오류 상태" className="border-destructive" />
-              <p className="text-xs text-destructive">오류 메시지가 여기에 표시됩니다</p>
+              <Input
+                id="input-error"
+                placeholder="오류 상태"
+                className="border-destructive"
+              />
+              <p className="text-xs text-destructive">
+                오류 메시지가 여기에 표시됩니다
+              </p>
             </div>
           </div>
         </CardContent>
@@ -257,7 +287,9 @@ export default function DesignSystemPage() {
                 <p className="text-sm">액션 버튼이 필요한 카드</p>
               </CardContent>
               <CardFooter className="flex gap-2">
-                <Button size="sm" variant="outline">취소</Button>
+                <Button size="sm" variant="outline">
+                  취소
+                </Button>
                 <Button size="sm">확인</Button>
               </CardFooter>
             </Card>
@@ -277,8 +309,10 @@ export default function DesignSystemPage() {
             <Badge variant="secondary">Secondary</Badge>
             <Badge variant="destructive">Destructive</Badge>
             <Badge variant="outline">Outline</Badge>
-            <Badge className="bg-shinhan-blue">Shinhan Blue</Badge>
-            <Badge className="bg-shinhan-gold text-slate-900">Shinhan Gold</Badge>
+            <Badge className="bg-emotion-primary">Emotion Primary</Badge>
+            <Badge className="bg-emotion-accent text-slate-900">
+              Emotion Accent
+            </Badge>
           </div>
         </CardContent>
       </Card>
@@ -342,21 +376,29 @@ export default function DesignSystemPage() {
             </TableHeader>
             <TableBody>
               <TableRow>
-                <TableCell className="font-medium">신한 PMS 시스템 개발</TableCell>
+                <TableCell className="font-medium">
+                  신한 PMS 시스템 개발
+                </TableCell>
                 <TableCell>홍길동</TableCell>
-                <TableCell><Badge>진행중</Badge></TableCell>
+                <TableCell>
+                  <Badge>진행중</Badge>
+                </TableCell>
                 <TableCell className="text-right">75%</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell className="font-medium">카드 앱 리뉴얼</TableCell>
                 <TableCell>김철수</TableCell>
-                <TableCell><Badge variant="secondary">완료</Badge></TableCell>
+                <TableCell>
+                  <Badge variant="secondary">완료</Badge>
+                </TableCell>
                 <TableCell className="text-right">100%</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell className="font-medium">인프라 고도화</TableCell>
                 <TableCell>이영희</TableCell>
-                <TableCell><Badge variant="destructive">지연</Badge></TableCell>
+                <TableCell>
+                  <Badge variant="destructive">지연</Badge>
+                </TableCell>
                 <TableCell className="text-right">45%</TableCell>
               </TableRow>
             </TableBody>
@@ -373,27 +415,27 @@ export default function DesignSystemPage() {
         <CardContent>
           <div className="flex flex-wrap gap-6">
             <div className="flex flex-col items-center gap-2">
-              <LayoutDashboard className="h-8 w-8 text-shinhan-blue" />
+              <LayoutDashboard className="h-8 w-8 text-emotion-primary" />
               <span className="text-xs">Dashboard</span>
             </div>
             <div className="flex flex-col items-center gap-2">
-              <FolderKanban className="h-8 w-8 text-shinhan-blue" />
+              <FolderKanban className="h-8 w-8 text-emotion-primary" />
               <span className="text-xs">Projects</span>
             </div>
             <div className="flex flex-col items-center gap-2">
-              <ClipboardList className="h-8 w-8 text-shinhan-blue" />
+              <ClipboardList className="h-8 w-8 text-emotion-primary" />
               <span className="text-xs">Tasks</span>
             </div>
             <div className="flex flex-col items-center gap-2">
-              <Calendar className="h-8 w-8 text-shinhan-blue" />
+              <Calendar className="h-8 w-8 text-emotion-primary" />
               <span className="text-xs">Calendar</span>
             </div>
             <div className="flex flex-col items-center gap-2">
-              <BarChart3 className="h-8 w-8 text-shinhan-blue" />
+              <BarChart3 className="h-8 w-8 text-emotion-primary" />
               <span className="text-xs">Analytics</span>
             </div>
             <div className="flex flex-col items-center gap-2">
-              <Users className="h-8 w-8 text-shinhan-blue" />
+              <Users className="h-8 w-8 text-emotion-primary" />
               <span className="text-xs">Users</span>
             </div>
           </div>

@@ -31,7 +31,7 @@ export default function ProjectDetailPage() {
         .then(setProject)
         .catch((err) => {
           setError(err.message);
-          setTimeout(() => router.push('/dashboard/projects'), 2000);
+          setTimeout(() => router.push('/projects'), 2000);
         })
         .finally(() => setLoading(false));
     }
@@ -68,7 +68,7 @@ export default function ProjectDetailPage() {
     <div className="max-w-5xl">
       <div className="mb-6 flex items-center justify-between">
         <Button variant="ghost" size="sm" asChild>
-          <Link href="/dashboard/projects">
+          <Link href="/projects">
             <ArrowLeft className="h-4 w-4 mr-2" />
             프로젝트 목록으로
           </Link>
@@ -76,7 +76,7 @@ export default function ProjectDetailPage() {
 
         {canEdit && (
           <Button asChild>
-            <Link href={`/dashboard/projects/${projectId}/edit`}>
+            <Link href={`/projects/${projectId}/edit`}>
               <Edit className="h-4 w-4 mr-2" />
               수정
             </Link>

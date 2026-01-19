@@ -22,14 +22,14 @@ export default function DashboardLayout({
 
   if (loading || !user) {
     return (
-      <div className="flex h-screen items-center justify-center bg-shinhan-lightgray">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-shinhan-blue"></div>
+      <div className="flex h-screen items-center justify-center bg-emotion-lightgray">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emotion-primary"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen min-w-[1024px] bg-shinhan-lightgray">
+    <div className="min-h-screen min-w-[1024px] bg-emotion-lightgray">
       {/* 고정 사이드바 */}
       <Sidebar />
 

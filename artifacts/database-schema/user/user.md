@@ -114,7 +114,7 @@ INSERT INTO users (
     created_by, 
     created_at
 ) VALUES (
-    'admin@shinhancard.com',
+    'admin@emotion.co.kr',
     '$2b$10$YourBcryptHashHere', -- bcrypt hash of 'Admin1234!'
     '시스템 관리자',
     'DEVELOPMENT',

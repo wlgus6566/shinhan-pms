@@ -1,6 +1,6 @@
-# 신한카드 PMS (Project Management System)
+# 이모션 PMS (Project Management System)
 
-신한카드 운영&고도화 업무 관리를 위한 프로젝트 관리 시스템
+이모션의 프로젝트 및 업무 관리를 위한 통합 프로젝트 관리 시스템
 
 ## 빠른 시작
 
@@ -206,7 +206,7 @@ npx turbo link
 ## 프로젝트 구조
 
 ```
-shinhan-pms/
+emotion-pms/
 ├── apps/
 │   ├── api/              # NestJS 백엔드
 │   └── web/              # Next.js 프론트엔드

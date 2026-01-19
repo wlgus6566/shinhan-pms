@@ -91,7 +91,7 @@ export function ProjectForm({ projectId, mode }: ProjectFormProps) {
     try {
       if (mode === 'create') {
         await createProject(values);
-        router.push('/dashboard/projects');
+        router.push('/projects');
       } else if (projectId) {
         await updateProject(projectId, values);
         setSuccess(true);
@@ -110,7 +110,7 @@ export function ProjectForm({ projectId, mode }: ProjectFormProps) {
     setIsDeleting(true);
     try {
       await deleteProject(projectId);
-      router.push('/dashboard/projects');
+      router.push('/projects');
     } catch (err: any) {
       setError(err.message);
       setIsDeleting(false);

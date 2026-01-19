@@ -72,7 +72,7 @@ export function LoginForm() {
               <FormItem>
                 <FormLabel>이메일</FormLabel>
                 <FormControl>
-                  <Input placeholder="name@shinhancard.com" {...field} />
+                  <Input placeholder="name@emotion.co.kr" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
