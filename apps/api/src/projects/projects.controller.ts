@@ -9,6 +9,7 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  ParseIntPipe,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -21,6 +22,9 @@ import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { ProjectResponseDto } from './dto/project-response.dto';
+import { AddProjectMemberDto } from './dto/add-member.dto';
+import { UpdateProjectMemberRoleDto } from './dto/update-member-role.dto';
+import { ProjectMemberResponseDto } from './dto/project-member-response.dto';
 
 @ApiTags('Projects')
 @Controller('projects')
@@ -143,6 +147,110 @@ export class ProjectsController {
       status: project.status,
       createdAt: project.createdAt,
       updatedAt: project.updatedAt,
+    };
+  }
+
+  // =============================================
+  // 프로젝트 멤버 관리 API
+  // =============================================
+
+  @Get(':id/members')
+  @ApiOperation({ summary: '프로젝트 멤버 목록 조회' })
+  @ApiParam({ name: 'id', description: '프로젝트 ID' })
+  @ApiResponse({
+    status: 200,
+    description: '프로젝트 멤버 목록',
+    type: [ProjectMemberResponseDto],
+  })
+  @ApiResponse({ status: 404, description: '프로젝트를 찾을 수 없습니다' })
+  async getProjectMembers(@Param('id') id: string) {
+    const members = await this.projectsService.getProjectMembers(BigInt(id));
+    return members.map((member) => this.transformProjectMember(member));
+  }
+
+  @Post(':id/members')
+  @ApiOperation({ summary: '프로젝트 멤버 추가' })
+  @ApiParam({ name: 'id', description: '프로젝트 ID' })
+  @ApiResponse({
+    status: 201,
+    description: '멤버가 추가되었습니다',
+    type: ProjectMemberResponseDto,
+  })
+  @ApiResponse({ status: 404, description: '프로젝트 또는 사용자를 찾을 수 없습니다' })
+  @ApiResponse({ status: 409, description: '이미 프로젝트 멤버입니다' })
+  async addProjectMember(
+    @Param('id') id: string,
+    @Body() addMemberDto: AddProjectMemberDto,
+  ) {
+    const userId = 1n; // TODO: JWT에서 추출
+    const member = await this.projectsService.addProjectMember(
+      BigInt(id),
+      addMemberDto,
+      userId,
+    );
+    return this.transformProjectMember(member);
+  }
+
+  @Patch(':id/members/:memberId')
+  @ApiOperation({ summary: '프로젝트 멤버 역할 수정' })
+  @ApiParam({ name: 'id', description: '프로젝트 ID' })
+  @ApiParam({ name: 'memberId', description: '멤버 ID' })
+  @ApiResponse({
+    status: 200,
+    description: '역할이 수정되었습니다',
+    type: ProjectMemberResponseDto,
+  })
+  @ApiResponse({ status: 404, description: '프로젝트 멤버를 찾을 수 없습니다' })
+  async updateProjectMemberRole(
+    @Param('id') id: string,
+    @Param('memberId', ParseIntPipe) memberId: number,
+    @Body() updateRoleDto: UpdateProjectMemberRoleDto,
+  ) {
+    const userId = 1n; // TODO: JWT에서 추출
+    const member = await this.projectsService.updateProjectMemberRole(
+      BigInt(id),
+      BigInt(memberId),
+      updateRoleDto,
+      userId,
+    );
+    return this.transformProjectMember(member);
+  }
+
+  @Delete(':id/members/:memberId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: '프로젝트 멤버 제거' })
+  @ApiParam({ name: 'id', description: '프로젝트 ID' })
+  @ApiParam({ name: 'memberId', description: '멤버 ID' })
+  @ApiResponse({ status: 204, description: '멤버가 제거되었습니다' })
+  @ApiResponse({ status: 404, description: '프로젝트 멤버를 찾을 수 없습니다' })
+  async removeProjectMember(
+    @Param('id') id: string,
+    @Param('memberId', ParseIntPipe) memberId: number,
+  ) {
+    await this.projectsService.removeProjectMember(BigInt(id), BigInt(memberId));
+  }
+
+  /**
+   * Prisma ProjectMember 모델을 API Response DTO로 변환
+   */
+  private transformProjectMember(projectMember: any): ProjectMemberResponseDto {
+    return {
+      id: projectMember.id.toString(),
+      projectId: projectMember.projectId.toString(),
+      memberId: projectMember.memberId.toString(),
+      role: projectMember.role,
+      workArea: projectMember.workArea,
+      member: projectMember.member
+        ? {
+            id: projectMember.member.id.toString(),
+            name: projectMember.member.name,
+            email: projectMember.member.email,
+            department: projectMember.member.department,
+            role: projectMember.member.role,
+          }
+        : undefined,
+      createdAt: projectMember.createdAt,
+      updatedAt: projectMember.updatedAt,
     };
   }
 }

@@ -11,7 +11,7 @@ import {
 export enum Department {
   PLANNING = 'PLANNING',
   DESIGN = 'DESIGN',
-  PUBLISHING = 'PUBLISHING',
+  FRONTEND = 'FRONTEND',
   DEVELOPMENT = 'DEVELOPMENT',
 }
 

@@ -37,7 +37,7 @@ async function main() {
     },
   });
 
-  await prisma.user.upsert({
+  const lee = await prisma.user.upsert({
     where: { email: 'lee@emotion.co.kr' },
     update: { role: 'MEMBER', department: '개발본부1' },
     create: {
@@ -49,6 +49,34 @@ async function main() {
       createdBy: admin.id,
     },
   });
+
+  const park = await prisma.user.upsert({
+    where: { email: 'park@emotion.co.kr' },
+    update: { role: 'MEMBER', department: '기획본부1' },
+    create: {
+      email: 'park@emotion.co.kr',
+      passwordHash: userPasswordHash,
+      name: '박민수',
+      department: '기획본부1',
+      role: 'MEMBER',
+      createdBy: admin.id,
+    },
+  });
+
+  const choi = await prisma.user.upsert({
+    where: { email: 'choi@emotion.co.kr' },
+    update: { role: 'MEMBER', department: '디자인본부' },
+    create: {
+      email: 'choi@emotion.co.kr',
+      passwordHash: userPasswordHash,
+      name: '최수진',
+      department: '디자인본부',
+      role: 'MEMBER',
+      createdBy: admin.id,
+    },
+  });
+
+  console.log('✅ 테스트 계정 생성 완료');
 
   // 3. 초기 프로젝트 생성
   const project1 = await prisma.project.upsert({
@@ -78,6 +106,117 @@ async function main() {
   });
 
   console.log('✅ 초기 프로젝트 생성 완료:', project1.projectName, ',', project2.projectName);
+
+  // 4. 프로젝트 멤버 추가
+  const kim = await prisma.user.findUnique({ where: { email: 'kim@emotion.co.kr' } });
+
+  // 프로젝트 1 멤버 추가
+  await prisma.projectMember.upsert({
+    where: {
+      projectId_memberId: {
+        projectId: project1.id,
+        memberId: admin.id,
+      },
+    },
+    update: {},
+    create: {
+      projectId: project1.id,
+      memberId: admin.id,
+      role: 'PM',
+      workArea: 'PLANNING',
+      createdBy: admin.id,
+    },
+  });
+
+  if (kim) {
+    await prisma.projectMember.upsert({
+      where: {
+        projectId_memberId: {
+          projectId: project1.id,
+          memberId: kim.id,
+        },
+      },
+      update: {},
+      create: {
+        projectId: project1.id,
+        memberId: kim.id,
+        role: 'PL',
+        workArea: 'PLANNING',
+        createdBy: admin.id,
+      },
+    });
+  }
+
+  await prisma.projectMember.upsert({
+    where: {
+      projectId_memberId: {
+        projectId: project1.id,
+        memberId: lee.id,
+      },
+    },
+    update: {},
+    create: {
+      projectId: project1.id,
+      memberId: lee.id,
+      role: 'PA',
+      workArea: 'BACKEND',
+      createdBy: admin.id,
+    },
+  });
+
+  // 프로젝트 2 멤버 추가
+  await prisma.projectMember.upsert({
+    where: {
+      projectId_memberId: {
+        projectId: project2.id,
+        memberId: admin.id,
+      },
+    },
+    update: {},
+    create: {
+      projectId: project2.id,
+      memberId: admin.id,
+      role: 'PM',
+      workArea: 'PLANNING',
+      createdBy: admin.id,
+    },
+  });
+
+  await prisma.projectMember.upsert({
+    where: {
+      projectId_memberId: {
+        projectId: project2.id,
+        memberId: park.id,
+      },
+    },
+    update: {},
+    create: {
+      projectId: project2.id,
+      memberId: park.id,
+      role: 'PL',
+      workArea: 'PLANNING',
+      createdBy: admin.id,
+    },
+  });
+
+  await prisma.projectMember.upsert({
+    where: {
+      projectId_memberId: {
+        projectId: project2.id,
+        memberId: choi.id,
+      },
+    },
+    update: {},
+    create: {
+      projectId: project2.id,
+      memberId: choi.id,
+      role: 'PA',
+      workArea: 'DESIGN',
+      createdBy: admin.id,
+    },
+  });
+
+  console.log('✅ 프로젝트 멤버 추가 완료');
   console.log('✨ 시드 데이터 생성 완료!');
 }
 

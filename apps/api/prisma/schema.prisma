@@ -27,6 +27,9 @@ model Project {
   updatedBy   BigInt?   @map("updated_by")
   updatedAt   DateTime? @updatedAt @map("updated_at") @db.Timestamp(6)
 
+  // 관계 설정
+  members ProjectMember[]
+
   // 인덱스
   @@index([projectName], map: "idx_projects_name")
   @@index([status], map: "idx_projects_status")
@@ -34,7 +37,7 @@ model Project {
   @@index([createdAt(sort: Desc)], map: "idx_projects_created_at")
   @@index([isActive], map: "idx_projects_is_active")
   @@index([isActive, status], map: "idx_projects_active_status")
-  
+
   @@map("projects")
 }
 
@@ -57,6 +60,9 @@ model User {
   updatedBy    BigInt?   @map("updated_by")
   updatedAt    DateTime? @updatedAt @map("updated_at") @db.Timestamp(6)
 
+  // 관계 설정
+  projectMemberships ProjectMember[]
+
   // 인덱스
   @@index([email], map: "idx_users_email")
   @@index([department], map: "idx_users_department")
@@ -64,6 +70,35 @@ model User {
   @@index([isActive], map: "idx_users_is_active")
   @@index([department, isActive], map: "idx_users_department_active")
   @@index([role, isActive], map: "idx_users_role_active")
-  
+
   @@map("users")
+}
+
+// =============================================
+// 프로젝트 멤버 관리
+// =============================================
+
+model ProjectMember {
+  id        BigInt    @id @default(autoincrement())
+  projectId BigInt    @map("project_id")
+  memberId  BigInt    @map("member_id")
+  role      String    @default("PA") @db.VarChar(20)
+  workArea  String    @default("BACKEND") @map("work_area") @db.VarChar(20)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  createdBy BigInt    @map("created_by")
+  updatedAt DateTime? @updatedAt @map("updated_at") @db.Timestamp(6)
+  updatedBy BigInt?   @map("updated_by")
+
+  // 관계 설정
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  member  User    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  // 인덱스
+  @@unique([projectId, memberId], map: "unique_project_member")
+  @@index([projectId], map: "idx_project_members_project_id")
+  @@index([memberId], map: "idx_project_members_member_id")
+  @@index([role], map: "idx_project_members_role")
+  @@index([workArea], map: "idx_project_members_work_area")
+
+  @@map("project_members")
 }

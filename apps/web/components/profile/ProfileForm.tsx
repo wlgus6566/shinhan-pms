@@ -27,7 +27,7 @@ import { CheckCircle2, Loader2 } from 'lucide-react';
 
 const profileSchema = z.object({
   name: z.string().min(2, '이름은 최소 2자 이상이어야 합니다').max(50),
-  department: z.enum(['PLANNING', 'DESIGN', 'PUBLISHING', 'DEVELOPMENT']),
+  department: z.enum(['PLANNING', 'DESIGN', 'FRONTEND', 'DEVELOPMENT']),
 });
 
 type ProfileValues = z.infer<typeof profileSchema>;
@@ -120,7 +120,7 @@ export function ProfileForm() {
                 <SelectContent>
                   <SelectItem value="PLANNING">기획</SelectItem>
                   <SelectItem value="DESIGN">디자인</SelectItem>
-                  <SelectItem value="PUBLISHING">퍼블리싱</SelectItem>
+                  <SelectItem value="FRONTEND">프론트엔드</SelectItem>
                   <SelectItem value="DEVELOPMENT">개발</SelectItem>
                 </SelectContent>
               </Select>

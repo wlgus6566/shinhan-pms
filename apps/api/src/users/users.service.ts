@@ -61,6 +61,7 @@ export class UsersService {
     isActive?: boolean;
     page?: number;
     limit?: number;
+    excludeProject?: string;
   }): Promise<{
     users: UserResponseDto[];
     total: number;
@@ -90,6 +91,20 @@ export class UsersService {
 
     if (filters?.isActive !== undefined) {
       where.isActive = filters.isActive;
+    }
+
+    // 특정 프로젝트에 속하지 않은 사용자만 조회
+    if (filters?.excludeProject) {
+      const projectId = BigInt(filters.excludeProject);
+      const projectMembers = await this.prisma.projectMember.findMany({
+        where: { projectId },
+        select: { memberId: true },
+      });
+      const excludedMemberIds = projectMembers.map((pm) => pm.memberId);
+
+      if (excludedMemberIds.length > 0) {
+        where.id = { notIn: excludedMemberIds };
+      }
     }
 
     const [users, total] = await Promise.all([

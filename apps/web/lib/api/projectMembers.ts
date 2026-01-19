@@ -60,6 +60,14 @@ export async function removeProjectMember(
  * Get available members (not yet in the project)
  * Used for adding new members
  */
-export async function getAvailableMembers(projectId: string | number): Promise<AvailableMember[]> {
-  return fetcher<AvailableMember[]>(`/api/members?excludeProject=${projectId}`);
+export async function getAvailableMembers(
+  projectId: string | number,
+  search?: string
+): Promise<AvailableMember[]> {
+  const query = new URLSearchParams({ excludeProject: projectId.toString() });
+  if (search) {
+    query.append('search', search);
+  }
+  const response = await fetcher<{ users: AvailableMember[] }>(`/api/users?${query.toString()}`);
+  return response.users;
 }

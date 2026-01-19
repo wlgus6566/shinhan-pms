@@ -98,7 +98,7 @@ export default function ProjectDetailPage() {
       <Tabs defaultValue="info" className="space-y-4">
         <TabsList>
           <TabsTrigger value="info">기본 정보</TabsTrigger>
-          <TabsTrigger value="members">팀원 관리</TabsTrigger>
+          <TabsTrigger value="members">멤버 관리</TabsTrigger>
         </TabsList>
 
         <TabsContent value="info">

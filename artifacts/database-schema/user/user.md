@@ -49,7 +49,7 @@
 **제약조건**
 
 - `UNIQUE (email)` - 이메일 중복 불가
-- `CHECK (department IN ('PLANNING', 'DESIGN', 'PUBLISHING', 'DEVELOPMENT'))` - 파트 제한
+- `CHECK (department IN ('PLANNING', 'DESIGN', 'FRONTEND', 'DEVELOPMENT'))` - 파트 제한
 - `CHECK (role IN ('PM', 'PL', 'PA', 'MEMBER'))` - 등급 제한
 - `CHECK (LENGTH(name) >= 2 AND LENGTH(name) <= 50)` - 이름 길이 제한
 
@@ -82,14 +82,14 @@ users (1) --- (N) project_members (user_id)
 
 ## 4. 초기 데이터
 
-### 4.1 파트 코드 (Department)
+### 4.1 기획, 디자인, 프론트엔드 코드 (Department)
 
-| 코드        | 명칭     | 설명          |
-| ----------- | -------- | ------------- |
-| PLANNING    | 기획     | 기획 파트     |
-| DESIGN      | 디자인   | 디자인 파트   |
-| PUBLISHING  | 퍼블리싱 | 퍼블리싱 파트 |
-| DEVELOPMENT | 개발     | 개발 파트     |
+| 코드        | 명칭       | 설명            |
+| ----------- | ---------- | --------------- |
+| PLANNING    | 기획       | 기획 파트       |
+| DESIGN      | 디자인     | 디자인 파트     |
+| FRONTEND    | 프론트엔드 | 프론트엔드 파트 |
+| DEVELOPMENT | 개발       | 개발 파트       |
 
 ### 4.2 등급 코드 (Role)
 

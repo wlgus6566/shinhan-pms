@@ -78,6 +78,12 @@ export class UsersController {
     type: Number,
     description: '페이지당 개수',
   })
+  @ApiQuery({
+    name: 'excludeProject',
+    required: false,
+    type: String,
+    description: '특정 프로젝트에 속하지 않은 사용자만 조회',
+  })
   @ApiResponse({ status: 200, description: '조회 성공' })
   @ApiResponse({ status: 403, description: '권한 없음' })
   async findAll(
@@ -87,6 +93,7 @@ export class UsersController {
     @Query('isActive') isActive?: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
+    @Query('excludeProject') excludeProject?: string,
   ) {
     return this.usersService.findAll({
       search,
@@ -96,6 +103,7 @@ export class UsersController {
         isActive === 'true' ? true : isActive === 'false' ? false : undefined,
       page: page ? parseInt(page) : undefined,
       limit: limit ? parseInt(limit) : undefined,
+      excludeProject,
     });
   }
 

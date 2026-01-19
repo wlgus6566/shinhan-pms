@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { 
   getProjectMembers, 
-  removeProjectMember, 
-  updateProjectMemberRole 
+  removeProjectMember
 } from '@/lib/api/projectMembers';
 import {
   Table,
@@ -17,13 +16,6 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -41,13 +33,21 @@ import {
 } from '@/components/ui/tooltip';
 import { Loader2, UserPlus, Trash2 } from 'lucide-react';
 import { AddMemberDialog } from './AddMemberDialog';
-import type { ProjectMember, ProjectRole, Department, UserRole } from '@/types/project';
+import type { ProjectMember, ProjectRole, Department, UserRole, WorkArea } from '@/types/project';
 
 const departmentLabels: Record<Department, string> = {
   PLANNING: '기획',
   DESIGN: '디자인',
+  FRONTEND: '프론트엔드',
   DEVELOPMENT: '개발',
   OPERATION: '운영',
+};
+
+const workAreaLabels: Record<WorkArea, string> = {
+  PLANNING: '기획',
+  DESIGN: '디자인',
+  FRONTEND: '프론트엔드',
+  BACKEND: '백엔드',
 };
 
 const userRoleLabels: Record<UserRole, string> = {
@@ -92,17 +92,6 @@ export function ProjectMembersTable({ projectId, creatorId }: ProjectMembersTabl
     fetchMembers();
   }, [projectId]);
 
-  const handleRoleChange = async (memberId: number, newRole: ProjectRole) => {
-    try {
-      await updateProjectMemberRole(projectId, memberId, { role: newRole });
-      setMembers(members.map(m => 
-        m.memberId === memberId ? { ...m, role: newRole } : m
-      ));
-    } catch (error: any) {
-      alert(error.message);
-    }
-  };
-
   const handleRemove = async () => {
     if (!memberToRemove) return;
     
@@ -132,17 +121,17 @@ export function ProjectMembersTable({ projectId, creatorId }: ProjectMembersTabl
     if (member.memberId === creatorId) return '프로젝트 생성자는 제거할 수 없습니다';
     if (member.memberId === user?.id) return '본인은 제거할 수 없습니다';
     if (!canManage) return '권한이 없습니다';
-    return '팀원 제거';
+    return '멤버 제거';
   };
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">팀원 목록</h3>
+        <h3 className="text-lg font-semibold">멤버 목록</h3>
         {canManage && (
           <Button onClick={() => setAddDialogOpen(true)} size="sm">
             <UserPlus className="h-4 w-4 mr-2" />
-            팀원 추가
+            멤버 추가
           </Button>
         )}
       </div>
@@ -153,8 +142,8 @@ export function ProjectMembersTable({ projectId, creatorId }: ProjectMembersTabl
             <TableRow>
               <TableHead>이름</TableHead>
               <TableHead>이메일</TableHead>
-              <TableHead>파트</TableHead>
-              <TableHead>등급</TableHead>
+              <TableHead>본부</TableHead>
+              <TableHead>담당 분야</TableHead>
               <TableHead>프로젝트 역할</TableHead>
               {canManage && <TableHead className="text-right">작업</TableHead>}
             </TableRow>
@@ -169,7 +158,7 @@ export function ProjectMembersTable({ projectId, creatorId }: ProjectMembersTabl
             ) : members.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={canManage ? 6 : 5} className="h-24 text-center">
-                  팀원이 없습니다
+                  멤버가 없습니다
                 </TableCell>
               </TableRow>
             ) : (
@@ -177,28 +166,24 @@ export function ProjectMembersTable({ projectId, creatorId }: ProjectMembersTabl
                 <TableRow key={member.id}>
                   <TableCell className="font-medium">{member.member?.name}</TableCell>
                   <TableCell>{member.member?.email}</TableCell>
-                  <TableCell>{member.member?.department ? departmentLabels[member.member.department] : '-'}</TableCell>
-                  <TableCell>{member.member?.role ? userRoleLabels[member.member.role] : '-'}</TableCell>
                   <TableCell>
-                    {canManage ? (
-                      <Select 
-                        value={member.role} 
-                        onValueChange={(value) => handleRoleChange(member.memberId, value as ProjectRole)}
-                      >
-                        <SelectTrigger className="w-[100px]">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="PM">PM</SelectItem>
-                          <SelectItem value="PL">PL</SelectItem>
-                          <SelectItem value="PA">PA</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <Badge variant={projectRoleVariants[member.role]}>
-                        {member.role}
+                    <span className="text-sm text-slate-700">
+                      {member.member?.department || '-'}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    {member.workArea ? (
+                      <Badge variant="secondary">
+                        {workAreaLabels[member.workArea] || member.workArea}
                       </Badge>
+                    ) : (
+                      <span className="text-sm text-slate-500">-</span>
                     )}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={projectRoleVariants[member.role]}>
+                      {member.role}
+                    </Badge>
                   </TableCell>
                   {canManage && (
                     <TableCell className="text-right">
@@ -240,7 +225,7 @@ export function ProjectMembersTable({ projectId, creatorId }: ProjectMembersTabl
       <Dialog open={!!memberToRemove} onOpenChange={(open) => !open && setMemberToRemove(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>팀원 제거</DialogTitle>
+            <DialogTitle>멤버 제거</DialogTitle>
             <DialogDescription>
               정말 {memberToRemove?.member?.name}님을 프로젝트에서 제거하시겠습니까?
             </DialogDescription>

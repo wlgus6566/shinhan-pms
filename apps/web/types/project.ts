@@ -10,6 +10,9 @@ export type UserRole = 'ADMIN' | 'USER';
 // Department enum
 export type Department = 'PLANNING' | 'DESIGN' | 'DEVELOPMENT' | 'OPERATION';
 
+// Work area enum (프로젝트 내 담당 분야)
+export type WorkArea = 'PLANNING' | 'DESIGN' | 'FRONTEND' | 'BACKEND';
+
 // Project interface
 export interface Project {
   id: number;
@@ -36,6 +39,7 @@ export interface ProjectMember {
   projectId: number;
   memberId: number;
   role: ProjectRole;
+  workArea: WorkArea;
   member?: {
     id: number;
     name: string;
@@ -74,10 +78,12 @@ export interface GetProjectsParams {
 export interface AddProjectMemberRequest {
   memberId: number;
   role: ProjectRole;
+  workArea: WorkArea;
 }
 
 export interface UpdateProjectMemberRoleRequest {
   role: ProjectRole;
+  workArea?: WorkArea;
 }
 
 // Available member (not yet in project)

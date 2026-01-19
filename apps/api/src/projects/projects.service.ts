@@ -2,10 +2,13 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
+import { AddProjectMemberDto } from './dto/add-member.dto';
+import { UpdateProjectMemberRoleDto } from './dto/update-member-role.dto';
 
 @Injectable()
 export class ProjectsService {
@@ -141,6 +144,155 @@ export class ProjectsService {
     return await this.prisma.project.update({
       where: { id },
       data: { isActive: false },
+    });
+  }
+
+  // =============================================
+  // 프로젝트 멤버 관리
+  // =============================================
+
+  /**
+   * 프로젝트 멤버 목록 조회
+   */
+  async getProjectMembers(projectId: bigint) {
+    // 프로젝트 존재 확인
+    await this.findOne(projectId);
+
+    return await this.prisma.projectMember.findMany({
+      where: { projectId },
+      include: {
+        member: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            department: true,
+            role: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+  }
+
+  /**
+   * 프로젝트에 멤버 추가
+   */
+  async addProjectMember(
+    projectId: bigint,
+    addMemberDto: AddProjectMemberDto,
+    userId: bigint,
+  ) {
+    // 프로젝트 존재 확인
+    await this.findOne(projectId);
+
+    // 멤버 존재 확인
+    const member = await this.prisma.user.findUnique({
+      where: { id: BigInt(addMemberDto.memberId), isActive: true },
+    });
+
+    if (!member) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다');
+    }
+
+    // 이미 프로젝트 멤버인지 확인
+    const existingMember = await this.prisma.projectMember.findFirst({
+      where: {
+        projectId,
+        memberId: BigInt(addMemberDto.memberId),
+      },
+    });
+
+    if (existingMember) {
+      throw new ConflictException('이미 프로젝트 멤버입니다');
+    }
+
+    // 멤버 추가
+    return await this.prisma.projectMember.create({
+      data: {
+        projectId,
+        memberId: BigInt(addMemberDto.memberId),
+        role: addMemberDto.role,
+        workArea: addMemberDto.workArea,
+        createdBy: userId,
+      },
+      include: {
+        member: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            department: true,
+            role: true,
+          },
+        },
+      },
+    });
+  }
+
+  /**
+   * 프로젝트 멤버 역할 수정
+   */
+  async updateProjectMemberRole(
+    projectId: bigint,
+    memberId: bigint,
+    updateRoleDto: UpdateProjectMemberRoleDto,
+    userId: bigint,
+  ) {
+    // 프로젝트 존재 확인
+    await this.findOne(projectId);
+
+    // 프로젝트 멤버 존재 확인
+    const projectMember = await this.prisma.projectMember.findFirst({
+      where: { projectId, memberId },
+    });
+
+    if (!projectMember) {
+      throw new NotFoundException('프로젝트 멤버를 찾을 수 없습니다');
+    }
+
+    // 역할 수정
+    return await this.prisma.projectMember.update({
+      where: { id: projectMember.id },
+      data: {
+        role: updateRoleDto.role,
+        ...(updateRoleDto.workArea && { workArea: updateRoleDto.workArea }),
+        updatedBy: userId,
+        updatedAt: new Date(),
+      },
+      include: {
+        member: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            department: true,
+            role: true,
+          },
+        },
+      },
+    });
+  }
+
+  /**
+   * 프로젝트에서 멤버 제거
+   */
+  async removeProjectMember(projectId: bigint, memberId: bigint) {
+    // 프로젝트 존재 확인
+    await this.findOne(projectId);
+
+    // 프로젝트 멤버 존재 확인
+    const projectMember = await this.prisma.projectMember.findFirst({
+      where: { projectId, memberId },
+    });
+
+    if (!projectMember) {
+      throw new NotFoundException('프로젝트 멤버를 찾을 수 없습니다');
+    }
+
+    // 멤버 제거
+    await this.prisma.projectMember.delete({
+      where: { id: projectMember.id },
     });
   }
 }
