@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -41,7 +41,8 @@ export function LoginForm() {
     },
   });
 
-  async function onSubmit(values: LoginValues) {
+  // Use useCallback for stable callback reference
+  const onSubmit = useCallback(async (values: LoginValues) => {
     setIsLoading(true);
     setError(null);
     try {
@@ -53,7 +54,7 @@ export function LoginForm() {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [login, router]);
 
   return (
     <div className="grid gap-6">

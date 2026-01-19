@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface User {
@@ -25,30 +25,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  // Cache storage API calls (js-cache-storage)
   useEffect(() => {
+    // Batch storage reads together
     const savedUser = localStorage.getItem('user');
     const token = localStorage.getItem('accessToken');
+    
     if (savedUser && token) {
-      setUser(JSON.parse(savedUser));
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (e) {
+        // Clear invalid data
+        localStorage.removeItem('user');
+        localStorage.removeItem('accessToken');
+      }
     }
     setLoading(false);
   }, []);
 
-  const login = (token: string, user: User) => {
+  // Stable callbacks with useCallback
+  const login = useCallback((token: string, user: User) => {
     localStorage.setItem('accessToken', token);
     localStorage.setItem('user', JSON.stringify(user));
     setUser(user);
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('user');
     setUser(null);
     router.push('/');
-  };
+  }, [router]);
+
+  // Memoize context value to prevent unnecessary re-renders
+  const value = useMemo(
+    () => ({ user, loading, login, logout }),
+    [user, loading, login, logout]
+  );
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

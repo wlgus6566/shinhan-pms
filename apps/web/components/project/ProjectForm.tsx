@@ -1,11 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { getProject, createProject, updateProject, deleteProject } from '@/lib/api/projects';
+import dynamic from 'next/dynamic';
+import {
+  getProject,
+  createProject,
+  updateProject,
+  deleteProject,
+} from '@/lib/api/projects';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { FormInput, FormTextarea, FormSelect } from '@/components/form';
@@ -22,17 +28,36 @@ import {
 import { CheckCircle2, Loader2 } from 'lucide-react';
 import type { ProjectStatus } from '@/types/project';
 
-const projectSchema = z.object({
-  name: z.string().min(2, '프로젝트명은 최소 2자 이상이어야 합니다').max(100, '프로젝트명은 최대 100자까지 입력할 수 있습니다'),
-  description: z.string().max(500, '설명은 최대 500자까지 입력할 수 있습니다').optional(),
-  startDate: z.string().min(1, '시작일을 선택하세요'),
-  endDate: z.string().min(1, '종료일을 선택하세요'),
-  status: z.enum(['PENDING', 'IN_PROGRESS', 'COMPLETED', 'ON_HOLD'] as const),
-  progress: z.coerce.number().min(0, '진행률은 0 이상이어야 합니다').max(100, '진행률은 100 이하여야 합니다'),
-}).refine((data) => new Date(data.endDate) >= new Date(data.startDate), {
-  message: '종료일은 시작일 이후여야 합니다',
-  path: ['endDate'],
-});
+// Hoist static data outside component
+const statusOptions = [
+  { value: 'PENDING', label: '대기' },
+  { value: 'IN_PROGRESS', label: '진행중' },
+  { value: 'COMPLETED', label: '완료' },
+  { value: 'ON_HOLD', label: '보류' },
+] as const;
+
+const projectSchema = z
+  .object({
+    name: z
+      .string()
+      .min(2, '프로젝트명은 최소 2자 이상이어야 합니다')
+      .max(100, '프로젝트명은 최대 100자까지 입력할 수 있습니다'),
+    description: z
+      .string()
+      .max(500, '설명은 최대 500자까지 입력할 수 있습니다')
+      .optional(),
+    startDate: z.string().min(1, '시작일을 선택하세요'),
+    endDate: z.string().min(1, '종료일을 선택하세요'),
+    status: z.enum(['PENDING', 'IN_PROGRESS', 'COMPLETED', 'ON_HOLD'] as const),
+    progress: z.coerce
+      .number()
+      .min(0, '진행률은 0 이상이어야 합니다')
+      .max(100, '진행률은 100 이하여야 합니다'),
+  })
+  .refine((data) => new Date(data.endDate) >= new Date(data.startDate), {
+    message: '종료일은 시작일 이후여야 합니다',
+    path: ['endDate'],
+  });
 
 type ProjectFormValues = z.infer<typeof projectSchema>;
 
@@ -61,6 +86,7 @@ export function ProjectForm({ projectId, mode }: ProjectFormProps) {
     },
   });
 
+  // Narrow dependencies: remove form from deps (rerender-dependencies)
   useEffect(() => {
     if (mode === 'edit' && projectId) {
       getProject(projectId)
@@ -68,7 +94,7 @@ export function ProjectForm({ projectId, mode }: ProjectFormProps) {
           // Convert ISO date strings to YYYY-MM-DD format
           const startDate = project.startDate.split('T')[0];
           const endDate = project.endDate.split('T')[0];
-          
+
           form.reset({
             name: project.name,
             description: project.description || '',
@@ -81,32 +107,36 @@ export function ProjectForm({ projectId, mode }: ProjectFormProps) {
         .catch((err) => setError(err.message))
         .finally(() => setIsLoading(false));
     }
-  }, [projectId, mode, form]);
+  }, [projectId, mode]); // Removed form from deps
 
-  async function onSubmit(values: ProjectFormValues) {
-    setIsSaving(true);
-    setSuccess(false);
-    setError(null);
-    
-    try {
-      if (mode === 'create') {
-        await createProject(values);
-        router.push('/projects');
-      } else if (projectId) {
-        await updateProject(projectId, values);
-        setSuccess(true);
-        setTimeout(() => setSuccess(false), 3000);
+  // Use useCallback for stable callback refs
+  const onSubmit = useCallback(
+    async (values: ProjectFormValues) => {
+      setIsSaving(true);
+      setSuccess(false);
+      setError(null);
+
+      try {
+        if (mode === 'create') {
+          await createProject(values);
+          router.push('/projects');
+        } else if (projectId) {
+          await updateProject(projectId, values);
+          setSuccess(true);
+          setTimeout(() => setSuccess(false), 3000);
+        }
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setIsSaving(false);
       }
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setIsSaving(false);
-    }
-  }
+    },
+    [mode, projectId, router],
+  );
 
-  async function onDelete() {
+  const onDelete = useCallback(async () => {
     if (!projectId) return;
-    
+
     setIsDeleting(true);
     try {
       await deleteProject(projectId);
@@ -115,7 +145,7 @@ export function ProjectForm({ projectId, mode }: ProjectFormProps) {
       setError(err.message);
       setIsDeleting(false);
     }
-  }
+  }, [projectId, router]);
 
   if (isLoading) {
     return (
@@ -125,20 +155,15 @@ export function ProjectForm({ projectId, mode }: ProjectFormProps) {
     );
   }
 
-  const statusOptions = [
-    { value: 'PENDING', label: '대기' },
-    { value: 'IN_PROGRESS', label: '진행중' },
-    { value: 'COMPLETED', label: '완료' },
-    { value: 'ON_HOLD', label: '보류' },
-  ];
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         {success && (
           <Alert className="bg-green-50 text-green-700 border-green-200">
             <CheckCircle2 className="h-4 w-4" />
-            <AlertDescription>프로젝트 정보가 업데이트되었습니다</AlertDescription>
+            <AlertDescription>
+              프로젝트 정보가 업데이트되었습니다
+            </AlertDescription>
           </Alert>
         )}
         {error && (
@@ -206,19 +231,31 @@ export function ProjectForm({ projectId, mode }: ProjectFormProps) {
           {mode === 'edit' && (
             <Dialog>
               <DialogTrigger asChild>
-                <Button type="button" variant="destructive">삭제</Button>
+                <Button type="button" variant="destructive">
+                  삭제
+                </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>프로젝트 삭제</DialogTitle>
                   <DialogDescription>
-                    정말 이 프로젝트를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+                    정말 이 프로젝트를 삭제하시겠습니까? 이 작업은 되돌릴 수
+                    없습니다.
                   </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
-                  <Button type="button" variant="outline" onClick={() => {}}>취소</Button>
-                  <Button type="button" variant="destructive" onClick={onDelete} disabled={isDeleting}>
-                    {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  <Button type="button" variant="outline" onClick={() => {}}>
+                    취소
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={onDelete}
+                    disabled={isDeleting}
+                  >
+                    {isDeleting && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
                     확인
                   </Button>
                 </DialogFooter>

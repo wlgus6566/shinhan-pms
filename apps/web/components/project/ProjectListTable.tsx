@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import Link from 'next/link';
 import { getProjects } from '@/lib/api/projects';
 import {
@@ -21,24 +21,47 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, Search, MoreHorizontal, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  Loader2,
+  Search,
+  MoreHorizontal,
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
 import type { Project, ProjectStatus } from '@/types/project';
 
+// Hoist static data outside component (rendering-hoist-jsx)
 const statusLabels: Record<ProjectStatus, string> = {
   PENDING: '대기',
   IN_PROGRESS: '진행중',
   COMPLETED: '완료',
   ON_HOLD: '보류',
-};
+} as const;
 
 const statusVariants: Record<
   ProjectStatus,
-  'default' | 'secondary' | 'outline' | 'destructive' | 'success' | 'warning' | 'info'
+  'default' | 'secondary' | 'outline' | 'destructive'
 > = {
   PENDING: 'secondary',
   IN_PROGRESS: 'default',
-  COMPLETED: 'success',
-  ON_HOLD: 'warning',
+  COMPLETED: 'outline',
+  ON_HOLD: 'destructive',
+} as const;
+
+// Format date helper (cache function results)
+const formatDateCache = new Map<string, string>();
+const formatDate = (dateString: string): string => {
+  if (formatDateCache.has(dateString)) {
+    return formatDateCache.get(dateString)!;
+  }
+  const result = new Date(dateString).toLocaleDateString('ko-KR', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+  formatDateCache.set(dateString, result);
+  return result;
 };
 
 export function ProjectListTable() {
@@ -76,21 +99,28 @@ export function ProjectListTable() {
     return () => clearTimeout(timer);
   }, [search, status]);
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
+  // Pagination (useMemo to avoid recalculation on every render)
+  const { totalPages, paginatedProjects } = useMemo(() => {
+    const total = Math.ceil(projects.length / itemsPerPage);
+    const paginated = projects.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage,
+    );
+    return { totalPages: total, paginatedProjects: paginated };
+  }, [projects, currentPage, itemsPerPage]);
 
-  // Pagination
-  const totalPages = Math.ceil(projects.length / itemsPerPage);
-  const paginatedProjects = projects.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  // Stable callbacks for pagination (rerender-functional-setstate)
+  const handlePrevPage = useCallback(() => {
+    setCurrentPage((p) => Math.max(1, p - 1));
+  }, []);
+
+  const handleNextPage = useCallback(() => {
+    setCurrentPage((p) => Math.min(totalPages, p + 1));
+  }, [totalPages]);
+
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -120,7 +150,11 @@ export function ProjectListTable() {
           </Select>
         </div>
         <p className="text-sm text-slate-500">
-          총 <span className="font-semibold text-slate-900">{projects.length}</span>개 프로젝트
+          총{' '}
+          <span className="font-semibold text-slate-900">
+            {projects.length}
+          </span>
+          개 프로젝트
         </p>
       </div>
 
@@ -156,7 +190,9 @@ export function ProjectListTable() {
                 <TableCell colSpan={7} className="h-32">
                   <div className="flex flex-col items-center justify-center gap-3">
                     <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
-                    <p className="text-sm text-slate-500">프로젝트를 불러오는 중...</p>
+                    <p className="text-sm text-slate-500">
+                      프로젝트를 불러오는 중...
+                    </p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -182,7 +218,9 @@ export function ProjectListTable() {
               <TableRow>
                 <TableCell colSpan={7} className="h-32">
                   <div className="flex flex-col items-center justify-center gap-2">
-                    <p className="text-sm text-slate-500">프로젝트가 없습니다</p>
+                    <p className="text-sm text-slate-500">
+                      프로젝트가 없습니다
+                    </p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -212,7 +250,9 @@ export function ProjectListTable() {
                       <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xs font-semibold">
                         {project.creator?.name?.charAt(0) || '?'}
                       </div>
-                      <span className="text-sm text-slate-700">{project.creator?.name || '-'}</span>
+                      <span className="text-sm text-slate-700">
+                        {project.creator?.name || '-'}
+                      </span>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -235,9 +275,13 @@ export function ProjectListTable() {
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">
-                      <span className="text-slate-600">{formatDate(project.startDate)}</span>
+                      <span className="text-slate-600">
+                        {formatDate(project.startDate)}
+                      </span>
                       <span className="text-slate-400 mx-1">~</span>
-                      <span className="text-slate-600">{formatDate(project.endDate)}</span>
+                      <span className="text-slate-600">
+                        {formatDate(project.endDate)}
+                      </span>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -266,7 +310,7 @@ export function ProjectListTable() {
                 variant="outline"
                 size="sm"
                 className="h-8"
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                onClick={handlePrevPage}
                 disabled={currentPage === 1}
               >
                 <ChevronLeft className="h-4 w-4 mr-1" />
@@ -287,7 +331,7 @@ export function ProjectListTable() {
                   return (
                     <button
                       key={pageNum}
-                      onClick={() => setCurrentPage(pageNum)}
+                      onClick={() => handlePageChange(pageNum)}
                       className={`pagination-item ${currentPage === pageNum ? 'active' : ''}`}
                     >
                       {pageNum}
@@ -299,7 +343,7 @@ export function ProjectListTable() {
                 variant="outline"
                 size="sm"
                 className="h-8"
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                onClick={handleNextPage}
                 disabled={currentPage === totalPages}
               >
                 다음

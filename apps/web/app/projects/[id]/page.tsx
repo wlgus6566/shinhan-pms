@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { getProject } from '@/lib/api/projects';
@@ -23,7 +23,11 @@ export default function ProjectDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const canEdit = user?.role === 'PM' || user?.role === 'PL';
+  // Derive state with useMemo (rerender-derived-state)
+  const canEdit = useMemo(
+    () => user?.role === 'PM' || user?.role === 'PL',
+    [user?.role]
+  );
 
   useEffect(() => {
     if (projectId) {

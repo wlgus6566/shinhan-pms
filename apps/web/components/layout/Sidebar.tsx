@@ -15,10 +15,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Palette,
-  Settings,
-  HelpCircle,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 
 const menuItems = [
   { icon: LayoutDashboard, label: '대시보드', href: '/dashboard' },
@@ -38,8 +36,16 @@ export function Sidebar() {
   const { user, logout } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const isActive = (href: string) =>
-    pathname === href || pathname?.startsWith(`${href}/`);
+  // Memoize isActive check to avoid recreating on every render
+  const isActive = useCallback(
+    (href: string) => pathname === href || pathname?.startsWith(`${href}/`),
+    [pathname]
+  );
+
+  // Stable toggle handler
+  const toggleCollapsed = useCallback(() => {
+    setIsCollapsed(prev => !prev);
+  }, []);
 
   return (
     <aside
@@ -217,8 +223,9 @@ export function Sidebar() {
 
       {/* Collapse Toggle */}
       <button
-        onClick={() => setIsCollapsed(!isCollapsed)}
+        onClick={toggleCollapsed}
         className="absolute -right-3 top-20 w-6 h-6 bg-[#1e1f2e] border border-white/10 rounded-full flex items-center justify-center text-slate-500 hover:text-white transition-colors shadow-lg"
+        aria-label={isCollapsed ? '사이드바 펼치기' : '사이드바 접기'}
       >
         {isCollapsed ? (
           <ChevronRight className="h-3 w-3" />
