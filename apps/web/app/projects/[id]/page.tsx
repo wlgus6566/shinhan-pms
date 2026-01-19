@@ -25,8 +25,8 @@ export default function ProjectDetailPage() {
 
   // Derive state with useMemo (rerender-derived-state)
   const canEdit = useMemo(
-    () => user?.role === 'PM' || user?.role === 'PL',
-    [user?.role]
+    () => user?.role === 'SUPER_ADMIN' || user?.role === 'PM',
+    [user?.role],
   );
 
   useEffect(() => {

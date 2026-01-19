@@ -121,7 +121,7 @@ export function Sidebar() {
         </div>
 
         {/* Admin Section */}
-        {(user?.role === 'PM' || user?.role === 'PL') && (
+        {(user?.role === 'SUPER_ADMIN' || user?.role === 'PM') && (
           <div className="mt-6 pt-6 border-t border-white/5">
             {!isCollapsed && (
               <p className="px-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-3">

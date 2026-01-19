@@ -35,10 +35,12 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { CheckCircle2, Loader2 } from 'lucide-react';
+import { FormInput, FormSelect } from '@/components/form';
+import { DEPARTMENT_OPTIONS, ROLE_OPTIONS } from '@/lib/constants/roles';
 
 const userUpdateSchema = z.object({
-  department: z.enum(['PLANNING', 'DESIGN', 'PUBLISHING', 'DEVELOPMENT']),
-  role: z.enum(['PM', 'PL', 'PA', 'MEMBER']),
+  department: z.string().min(1, '본부를 입력하세요'),
+  role: z.enum(['SUPER_ADMIN', 'PM', 'MEMBER']),
   isActive: z.boolean(),
 });
 
@@ -56,7 +58,7 @@ export function UserEditForm({ userId }: { userId: string }) {
   const form = useForm<UserUpdateValues>({
     resolver: zodResolver(userUpdateSchema),
     defaultValues: {
-      department: 'DEVELOPMENT',
+      department: '',
       role: 'MEMBER',
       isActive: true,
     },
@@ -133,52 +135,21 @@ export function UserEditForm({ userId }: { userId: string }) {
             </Alert>
           )}
           
-          <FormField
+          <FormSelect
             control={form.control}
             name="department"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>파트</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="파트를 선택하세요" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="PLANNING">기획</SelectItem>
-                    <SelectItem value="DESIGN">디자인</SelectItem>
-                    <SelectItem value="PUBLISHING">퍼블리싱</SelectItem>
-                    <SelectItem value="DEVELOPMENT">개발</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="본부 *"
+            placeholder="본부를 선택하세요"
+            options={DEPARTMENT_OPTIONS}
           />
 
-          <FormField
+          <FormSelect
             control={form.control}
             name="role"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>등급</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="등급을 선택하세요" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="PM">PM</SelectItem>
-                    <SelectItem value="PL">PL</SelectItem>
-                    <SelectItem value="PA">PA</SelectItem>
-                    <SelectItem value="MEMBER">팀원</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="권한 *"
+            placeholder="권한을 선택하세요"
+            options={ROLE_OPTIONS}
+            description="슈퍼 관리자는 전체 권한, 프로젝트 관리자는 프로젝트 관리 권한, 일반은 업무일지 작성 권한을 가집니다"
           />
 
           <FormField

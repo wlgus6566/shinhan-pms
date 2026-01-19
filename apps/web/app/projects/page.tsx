@@ -8,7 +8,8 @@ import { Plus } from 'lucide-react';
 
 export default function ProjectsPage() {
   const { user } = useAuth();
-  const isPM = user?.role === 'PM';
+  const canCreateProject =
+    user?.role === 'SUPER_ADMIN' || user?.role === 'PM';
 
   return (
     <div className="max-w-7xl">
@@ -21,7 +22,7 @@ export default function ProjectsPage() {
             프로젝트를 관리하고 팀원을 배정할 수 있습니다
           </p>
         </div>
-        {isPM && (
+        {canCreateProject && (
           <Button asChild>
             <Link href="/projects/new">
               <Plus className="h-4 w-4 mr-2" />새 프로젝트 등록

@@ -6,32 +6,32 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 시드 데이터 생성 시작...');
 
-  // 1. 관리자 계정 생성
+  // 1. 슈퍼 관리자 계정 생성
   const adminPasswordHash = await bcrypt.hash('2motion!', 10);
   const admin = await prisma.user.upsert({
     where: { email: 'admin@emotion.co.kr' },
-    update: {},
+    update: { role: 'SUPER_ADMIN', department: '경영전략본부' },
     create: {
       email: 'admin@emotion.co.kr',
       passwordHash: adminPasswordHash,
       name: '시스템 관리자',
-      department: '운영팀',
-      role: 'PM',
+      department: '경영전략본부',
+      role: 'SUPER_ADMIN',
       createdBy: BigInt(1),
     },
   });
-  console.log('✅ 관리자 계정 생성 완료:', admin.email);
+  console.log('✅ 슈퍼 관리자 계정 생성 완료:', admin.email);
 
   // 2. 다른 테스트 계정 생성
   const userPasswordHash = await bcrypt.hash('password123', 10);
   await prisma.user.upsert({
     where: { email: 'kim@emotion.co.kr' },
-    update: {},
+    update: { role: 'PM', department: '기획본부1' },
     create: {
       email: 'kim@emotion.co.kr',
       passwordHash: userPasswordHash,
-      name: '김철수 PM',
-      department: '기획부',
+      name: '김철수',
+      department: '기획본부1',
       role: 'PM',
       createdBy: admin.id,
     },
@@ -39,13 +39,13 @@ async function main() {
 
   await prisma.user.upsert({
     where: { email: 'lee@emotion.co.kr' },
-    update: {},
+    update: { role: 'MEMBER', department: '개발본부1' },
     create: {
       email: 'lee@emotion.co.kr',
       passwordHash: userPasswordHash,
-      name: '이영희 PL',
-      department: '개발부',
-      role: 'PL',
+      name: '이영희',
+      department: '개발본부1',
+      role: 'MEMBER',
       createdBy: admin.id,
     },
   });

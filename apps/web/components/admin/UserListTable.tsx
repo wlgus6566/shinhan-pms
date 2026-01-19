@@ -24,17 +24,9 @@ import {
 import { Loader2, Search } from 'lucide-react';
 
 const roleLabels: Record<string, string> = {
-  PM: 'PM',
-  PL: 'PL',
-  PA: 'PA',
-  MEMBER: '팀원',
-};
-
-const departmentLabels: Record<string, string> = {
-  PLANNING: '기획',
-  DESIGN: '디자인',
-  PUBLISHING: '퍼블리싱',
-  DEVELOPMENT: '개발',
+  SUPER_ADMIN: '슈퍼 관리자',
+  PM: '프로젝트 관리자',
+  MEMBER: '일반',
 };
 
 export function UserListTable() {
@@ -80,28 +72,15 @@ export function UserListTable() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <Select value={department} onValueChange={setDepartment}>
-          <SelectTrigger className="w-[150px]">
-            <SelectValue placeholder="파트 필터" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">전체 파트</SelectItem>
-            <SelectItem value="PLANNING">기획</SelectItem>
-            <SelectItem value="DESIGN">디자인</SelectItem>
-            <SelectItem value="PUBLISHING">퍼블리싱</SelectItem>
-            <SelectItem value="DEVELOPMENT">개발</SelectItem>
-          </SelectContent>
-        </Select>
         <Select value={role} onValueChange={setRole}>
-          <SelectTrigger className="w-[150px]">
-            <SelectValue placeholder="등급 필터" />
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="권한 필터" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="ALL">전체 등급</SelectItem>
-            <SelectItem value="PM">PM</SelectItem>
-            <SelectItem value="PL">PL</SelectItem>
-            <SelectItem value="PA">PA</SelectItem>
-            <SelectItem value="MEMBER">팀원</SelectItem>
+            <SelectItem value="ALL">전체 권한</SelectItem>
+            <SelectItem value="SUPER_ADMIN">슈퍼 관리자</SelectItem>
+            <SelectItem value="PM">프로젝트 관리자</SelectItem>
+            <SelectItem value="MEMBER">일반</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -112,8 +91,8 @@ export function UserListTable() {
             <TableRow>
               <TableHead>이름</TableHead>
               <TableHead>이메일</TableHead>
-              <TableHead>파트</TableHead>
-              <TableHead>등급</TableHead>
+              <TableHead>본부</TableHead>
+              <TableHead>권한</TableHead>
               <TableHead>상태</TableHead>
               <TableHead className="text-right">작업</TableHead>
             </TableRow>
@@ -136,9 +115,17 @@ export function UserListTable() {
                 <TableRow key={user.id}>
                   <TableCell className="font-medium">{user.name}</TableCell>
                   <TableCell>{user.email}</TableCell>
-                  <TableCell>{departmentLabels[user.department] || user.department}</TableCell>
+                  <TableCell>{user.department}</TableCell>
                   <TableCell>
-                    <Badge variant={user.role === 'PM' ? 'default' : 'secondary'}>
+                    <Badge
+                      variant={
+                        user.role === 'SUPER_ADMIN'
+                          ? 'default'
+                          : user.role === 'PM'
+                            ? 'secondary'
+                            : 'outline'
+                      }
+                    >
                       {roleLabels[user.role] || user.role}
                     </Badge>
                   </TableCell>

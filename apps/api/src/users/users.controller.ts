@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Post,
   Patch,
   Delete,
   Param,
@@ -32,6 +33,22 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 @ApiBearerAuth()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Post()
+  @Roles('SUPER_ADMIN', 'PM')
+  @ApiOperation({ summary: '사용자 생성 (슈퍼관리자/PM 전용)' })
+  @ApiResponse({
+    status: 201,
+    description: '사용자가 생성되었습니다',
+    type: UserResponseDto,
+  })
+  @ApiResponse({ status: 409, description: '이미 사용 중인 이메일' })
+  async create(
+    @Body() createUserDto: any,
+    @CurrentUser() currentUser: UserResponseDto,
+  ): Promise<UserResponseDto> {
+    return this.usersService.create(createUserDto, currentUser.id);
+  }
 
   @Get()
   @Roles('PM', 'PL')

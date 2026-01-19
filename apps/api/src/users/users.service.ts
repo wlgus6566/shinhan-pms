@@ -2,14 +2,57 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 
+interface CreateUserDto {
+  email: string;
+  password: string;
+  name: string;
+  profileImage?: string;
+  department: string;
+  role: string;
+}
+
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
+
+  async create(
+    createUserDto: CreateUserDto,
+    createdBy: bigint,
+  ): Promise<UserResponseDto> {
+    // 이메일 중복 체크
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: createUserDto.email },
+    });
+
+    if (existingUser) {
+      throw new ConflictException('이미 사용 중인 이메일입니다');
+    }
+
+    // 비밀번호 해시
+    const passwordHash = await bcrypt.hash(createUserDto.password, 10);
+
+    // 사용자 생성
+    const user = await this.prisma.user.create({
+      data: {
+        email: createUserDto.email,
+        passwordHash,
+        name: createUserDto.name,
+        profileImage: createUserDto.profileImage,
+        department: createUserDto.department,
+        role: createUserDto.role,
+        createdBy,
+      },
+    });
+
+    return new UserResponseDto(user);
+  }
 
   async findAll(filters?: {
     search?: string;
