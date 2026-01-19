@@ -1,11 +1,14 @@
 'use client';
 
 import { AuthProvider } from '@/context/AuthContext';
+import { SWRProvider } from '@/lib/swr-provider';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <AuthProvider>
-      {children}
-    </AuthProvider>
+    <SWRProvider>
+      <AuthProvider>
+        {children}
+      </AuthProvider>
+    </SWRProvider>
   );
 }

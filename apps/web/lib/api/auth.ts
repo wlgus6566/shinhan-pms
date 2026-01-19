@@ -1,39 +1,59 @@
-import { fetchApi } from './client';
+import { fetcher, tokenManager } from './fetcher';
 
-export async function login(data: any) {
-  const result = await fetchApi('/api/auth/login', {
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  accessToken: string;
+  user: {
+    id: string | number;
+    email: string;
+    name: string;
+    role: string;
+    department: string;
+  };
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export async function login(data: LoginRequest): Promise<LoginResponse> {
+  const result = await fetcher<LoginResponse>('/api/auth/login', {
     method: 'POST',
-    body: JSON.stringify(data),
+    body: data,
   });
   
   if (result.accessToken) {
-    localStorage.setItem('accessToken', result.accessToken);
+    tokenManager.setAccessToken(result.accessToken);
     localStorage.setItem('user', JSON.stringify(result.user));
   }
   
   return result;
 }
 
-export async function logout() {
-  localStorage.removeItem('accessToken');
-  localStorage.removeItem('user');
+export async function logout(): Promise<void> {
+  tokenManager.clearTokens();
   // Optional: call logout API if exists
 }
 
 export async function getMe() {
-  return fetchApi('/api/auth/me');
+  return fetcher('/api/auth/me');
 }
 
 export async function updateMe(data: any) {
-  return fetchApi('/api/auth/me', {
+  return fetcher('/api/auth/me', {
     method: 'PATCH',
-    body: JSON.stringify(data),
+    body: data,
   });
 }
 
-export async function changePassword(data: any) {
-  return fetchApi('/api/auth/me/password', {
+export async function changePassword(data: ChangePasswordRequest) {
+  return fetcher('/api/auth/me/password', {
     method: 'PATCH',
-    body: JSON.stringify(data),
+    body: data,
   });
 }

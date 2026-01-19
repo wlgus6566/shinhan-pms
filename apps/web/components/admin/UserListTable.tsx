@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
-import { getUsers } from '@/lib/api/users';
+import { useUsers } from '@/lib/hooks/useUsers';
 import {
   Table,
   TableBody,
@@ -21,7 +21,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, Search } from 'lucide-react';
+import {
+  TablePagination,
+  TableLoading,
+  TableError,
+  TableEmpty,
+} from '@/components/common/table';
+import { Search, MoreHorizontal, ArrowUpDown } from 'lucide-react';
 
 const roleLabels: Record<string, string> = {
   SUPER_ADMIN: '슈퍼 관리자',
@@ -29,103 +35,137 @@ const roleLabels: Record<string, string> = {
   MEMBER: '일반',
 };
 
+const roleVariants: Record<string, 'default' | 'secondary' | 'outline'> = {
+  SUPER_ADMIN: 'default',
+  PM: 'secondary',
+  MEMBER: 'outline',
+};
+
 export function UserListTable() {
-  const [users, setUsers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [department, setDepartment] = useState('ALL');
   const [role, setRole] = useState('ALL');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
-  const fetchUsers = async () => {
-    setLoading(true);
-    try {
-      const params: any = {};
-      if (search) params.search = search;
-      if (department !== 'ALL') params.department = department;
-      if (role !== 'ALL') params.role = role;
-      
-      const result = await getUsers(params);
-      setUsers(result.users);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // SWR로 데이터 패칭
+  const params = useMemo(() => {
+    const p: any = {};
+    if (search) p.search = search;
+    if (role !== 'ALL') p.role = role;
+    return p;
+  }, [search, role]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchUsers();
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [search, department, role]);
+  const { users, isLoading, error } = useUsers(params);
+  const userList = users || [];
+
+  // Pagination
+  const { totalPages, paginatedUsers } = useMemo(() => {
+    const total = Math.ceil(userList.length / itemsPerPage);
+    const paginated = userList.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage,
+    );
+    return { totalPages: total, paginatedUsers: paginated };
+  }, [userList, currentPage, itemsPerPage]);
+
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap gap-4 items-center">
-        <div className="relative flex-1 min-width-[200px]">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="이름 또는 이메일 검색"
-            className="pl-8"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+    <div className="space-y-6">
+      {/* Filters */}
+      <div className="flex flex-wrap gap-4 items-center justify-between">
+        <div className="flex gap-3 items-center">
+          <div className="relative">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Input
+              placeholder="이름 또는 이메일 검색..."
+              className="pl-10 w-[280px]"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <Select value={role} onValueChange={setRole}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="권한 필터" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">전체 권한</SelectItem>
+              <SelectItem value="SUPER_ADMIN">슈퍼 관리자</SelectItem>
+              <SelectItem value="PM">프로젝트 관리자</SelectItem>
+              <SelectItem value="MEMBER">일반</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        <Select value={role} onValueChange={setRole}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="권한 필터" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">전체 권한</SelectItem>
-            <SelectItem value="SUPER_ADMIN">슈퍼 관리자</SelectItem>
-            <SelectItem value="PM">프로젝트 관리자</SelectItem>
-            <SelectItem value="MEMBER">일반</SelectItem>
-          </SelectContent>
-        </Select>
+        <p className="text-sm text-slate-500">
+          총{' '}
+          <span className="font-semibold text-slate-900">{userList.length}</span>명
+          멤버
+        </p>
       </div>
 
-      <div className="rounded-md border">
+      {/* Table */}
+      <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>이름</TableHead>
+            <TableRow className="hover:bg-transparent border-b border-slate-100">
+              <TableHead className="w-[40px]">
+                <input type="checkbox" className="checkbox-crm" />
+              </TableHead>
+              <TableHead>
+                <div className="flex items-center gap-1 cursor-pointer hover:text-slate-700">
+                  이름
+                  <ArrowUpDown className="h-3 w-3" />
+                </div>
+              </TableHead>
               <TableHead>이메일</TableHead>
               <TableHead>본부</TableHead>
               <TableHead>권한</TableHead>
               <TableHead>상태</TableHead>
-              <TableHead className="text-right">작업</TableHead>
+              <TableHead className="w-[60px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
-                  <Loader2 className="h-6 w-6 animate-spin mx-auto" />
-                </TableCell>
-              </TableRow>
-            ) : users.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
-                  사용자가 없습니다
-                </TableCell>
-              </TableRow>
+            {isLoading ? (
+              <TableLoading colSpan={7} message="멤버를 불러오는 중..." />
+            ) : error ? (
+              <TableError
+                colSpan={7}
+                message={error.message || '멤버 목록을 불러오는데 실패했습니다'}
+                onRetry={() => {
+                  setSearch('');
+                  setRole('ALL');
+                }}
+              />
+            ) : paginatedUsers.length === 0 ? (
+              <TableEmpty colSpan={7} message="멤버가 없습니다" />
             ) : (
-              users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.name}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.department}</TableCell>
+              paginatedUsers.map((user) => (
+                <TableRow key={user.id} className="group">
                   <TableCell>
-                    <Badge
-                      variant={
-                        user.role === 'SUPER_ADMIN'
-                          ? 'default'
-                          : user.role === 'PM'
-                            ? 'secondary'
-                            : 'outline'
-                      }
+                    <input type="checkbox" className="checkbox-crm" />
+                  </TableCell>
+                  <TableCell>
+                    <Link
+                      href={`/users/${user.id}`}
+                      className="flex items-center gap-3 group/link"
                     >
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xs font-semibold">
+                        {user.name?.charAt(0) || '?'}
+                      </div>
+                      <span className="font-semibold text-slate-900 group-hover/link:text-blue-600 transition-colors">
+                        {user.name}
+                      </span>
+                    </Link>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-sm text-slate-600">{user.email}</span>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-sm text-slate-700">
+                      {user.department}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={roleVariants[user.role]}>
                       {roleLabels[user.role] || user.role}
                     </Badge>
                   </TableCell>
@@ -134,9 +174,16 @@ export function UserListTable() {
                       {user.isActive ? '활성' : '비활성'}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" asChild>
-                      <Link href={`/users/${user.id}`}>상세</Link>
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                      asChild
+                    >
+                      <Link href={`/users/${user.id}`}>
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Link>
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -144,6 +191,15 @@ export function UserListTable() {
             )}
           </TableBody>
         </Table>
+
+        {/* Pagination */}
+        {!isLoading && userList.length > 0 && (
+          <TablePagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        )}
       </div>
     </div>
   );

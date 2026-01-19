@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback, memo } from 'react';
+import { useState, useMemo, useCallback, memo } from 'react';
 import Link from 'next/link';
-import { getProjects } from '@/lib/api/projects';
+import { useProjects } from '@/lib/hooks/useProjects';
 import {
   Table,
   TableBody,
@@ -22,13 +22,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
-  Loader2,
-  Search,
-  MoreHorizontal,
-  ArrowUpDown,
-  ChevronLeft,
-  ChevronRight,
-} from 'lucide-react';
+  TablePagination,
+  TableLoading,
+  TableError,
+  TableEmpty,
+} from '@/components/common/table';
+import { Search, MoreHorizontal, ArrowUpDown } from 'lucide-react';
 import type { Project, ProjectStatus } from '@/types/project';
 
 // Hoist static data outside component (rendering-hoist-jsx)
@@ -65,62 +64,32 @@ const formatDate = (dateString: string): string => {
 };
 
 export function ProjectListTable() {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<string>('ALL');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  useEffect(() => {
-    const fetchProjects = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const params: any = {};
-        if (search) params.search = search;
-        if (status !== 'ALL') params.status = status as ProjectStatus;
-
-        const result = await getProjects(params);
-        setProjects(result);
-      } catch (error: any) {
-        setError(error.message || '프로젝트 목록을 불러오는데 실패했습니다');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const timer = setTimeout(() => {
-      fetchProjects();
-    }, 300);
-
-    return () => clearTimeout(timer);
+  // SWR로 데이터 패칭
+  const params = useMemo(() => {
+    const p: any = {};
+    if (search) p.search = search;
+    if (status !== 'ALL') p.status = status as ProjectStatus;
+    return p;
   }, [search, status]);
+
+  const { projects, isLoading, error } = useProjects(params);
+  const projectList = projects || [];
 
   // Pagination (useMemo to avoid recalculation on every render)
   const { totalPages, paginatedProjects } = useMemo(() => {
-    const total = Math.ceil(projects.length / itemsPerPage);
-    const paginated = projects.slice(
+    const total = Math.ceil(projectList.length / itemsPerPage);
+    const paginated = projectList.slice(
       (currentPage - 1) * itemsPerPage,
       currentPage * itemsPerPage,
     );
     return { totalPages: total, paginatedProjects: paginated };
-  }, [projects, currentPage, itemsPerPage]);
+  }, [projectList, currentPage, itemsPerPage]);
 
-  // Stable callbacks for pagination (rerender-functional-setstate)
-  const handlePrevPage = useCallback(() => {
-    setCurrentPage((p) => Math.max(1, p - 1));
-  }, []);
-
-  const handleNextPage = useCallback(() => {
-    setCurrentPage((p) => Math.min(totalPages, p + 1));
-  }, [totalPages]);
-
-  const handlePageChange = useCallback((page: number) => {
-    setCurrentPage(page);
-  }, []);
 
   return (
     <div className="space-y-6">
@@ -152,7 +121,7 @@ export function ProjectListTable() {
         <p className="text-sm text-slate-500">
           총{' '}
           <span className="font-semibold text-slate-900">
-            {projects.length}
+            {projectList.length}
           </span>
           개 프로젝트
         </p>
@@ -185,45 +154,19 @@ export function ProjectListTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={7} className="h-32">
-                  <div className="flex flex-col items-center justify-center gap-3">
-                    <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
-                    <p className="text-sm text-slate-500">
-                      프로젝트를 불러오는 중...
-                    </p>
-                  </div>
-                </TableCell>
-              </TableRow>
+            {isLoading ? (
+              <TableLoading colSpan={7} message="프로젝트를 불러오는 중..." />
             ) : error ? (
-              <TableRow>
-                <TableCell colSpan={7} className="h-32">
-                  <div className="flex flex-col items-center justify-center gap-3">
-                    <p className="text-sm text-rose-600">{error}</p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setSearch('');
-                        setStatus('ALL');
-                      }}
-                    >
-                      다시 시도
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
+              <TableError
+                colSpan={7}
+                message={error.message || '프로젝트 목록을 불러오는데 실패했습니다'}
+                onRetry={() => {
+                  setSearch('');
+                  setStatus('ALL');
+                }}
+              />
             ) : paginatedProjects.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="h-32">
-                  <div className="flex flex-col items-center justify-center gap-2">
-                    <p className="text-sm text-slate-500">
-                      프로젝트가 없습니다
-                    </p>
-                  </div>
-                </TableCell>
-              </TableRow>
+              <TableEmpty colSpan={7} message="프로젝트가 없습니다" />
             ) : (
               paginatedProjects.map((project) => (
                 <TableRow key={project.id} className="group">
@@ -303,67 +246,12 @@ export function ProjectListTable() {
         </Table>
 
         {/* Pagination */}
-        {!loading && projects.length > 0 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-slate-100">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8"
-                onClick={handlePrevPage}
-                disabled={currentPage === 1}
-              >
-                <ChevronLeft className="h-4 w-4 mr-1" />
-                이전
-              </Button>
-              <div className="flex items-center gap-1">
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let pageNum;
-                  if (totalPages <= 5) {
-                    pageNum = i + 1;
-                  } else if (currentPage <= 3) {
-                    pageNum = i + 1;
-                  } else if (currentPage >= totalPages - 2) {
-                    pageNum = totalPages - 4 + i;
-                  } else {
-                    pageNum = currentPage - 2 + i;
-                  }
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => handlePageChange(pageNum)}
-                      className={`pagination-item ${currentPage === pageNum ? 'active' : ''}`}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8"
-                onClick={handleNextPage}
-                disabled={currentPage === totalPages}
-              >
-                다음
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </Button>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-slate-500">
-              <span>페이지당</span>
-              <Select defaultValue="10">
-                <SelectTrigger className="h-8 w-[70px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="20">20</SelectItem>
-                  <SelectItem value="50">50</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+        {!isLoading && projectList.length > 0 && (
+          <TablePagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
         )}
       </div>
     </div>

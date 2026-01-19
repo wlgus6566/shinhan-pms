@@ -51,8 +51,8 @@ export class UsersController {
   }
 
   @Get()
-  @Roles('PM', 'PL')
-  @ApiOperation({ summary: '사용자 목록 조회 (PM/PL 전용)' })
+  @Roles('SUPER_ADMIN', 'PM')
+  @ApiOperation({ summary: '사용자 목록 조회 (슈퍼관리자/PM 전용)' })
   @ApiQuery({
     name: 'search',
     required: false,
@@ -100,8 +100,8 @@ export class UsersController {
   }
 
   @Get(':id')
-  @Roles('PM', 'PL')
-  @ApiOperation({ summary: '사용자 상세 조회 (PM/PL 전용)' })
+  @Roles('SUPER_ADMIN', 'PM')
+  @ApiOperation({ summary: '사용자 상세 조회 (슈퍼관리자/PM 전용)' })
   @ApiResponse({ status: 200, description: '조회 성공', type: UserResponseDto })
   @ApiResponse({ status: 403, description: '권한 없음' })
   @ApiResponse({ status: 404, description: '사용자 없음' })
@@ -112,8 +112,8 @@ export class UsersController {
   }
 
   @Patch(':id')
-  @Roles('PM')
-  @ApiOperation({ summary: '사용자 정보 수정 (PM 전용)' })
+  @Roles('SUPER_ADMIN')
+  @ApiOperation({ summary: '사용자 정보 수정 (슈퍼관리자 전용)' })
   @ApiResponse({ status: 200, description: '수정 성공', type: UserResponseDto })
   @ApiResponse({ status: 400, description: '잘못된 요청' })
   @ApiResponse({ status: 403, description: '권한 없음' })
@@ -127,9 +127,9 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @Roles('PM')
+  @Roles('SUPER_ADMIN')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: '사용자 비활성화 (PM 전용)' })
+  @ApiOperation({ summary: '사용자 비활성화 (슈퍼관리자 전용)' })
   @ApiResponse({ status: 204, description: '비활성화 성공' })
   @ApiResponse({ status: 400, description: '본인 계정 비활성화 불가' })
   @ApiResponse({ status: 403, description: '권한 없음' })

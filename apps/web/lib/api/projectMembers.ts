@@ -1,4 +1,4 @@
-import { fetchApi } from './client';
+import { fetcher } from './fetcher';
 import type {
   ProjectMember,
   AvailableMember,
@@ -10,7 +10,7 @@ import type {
  * Get all members of a project
  */
 export async function getProjectMembers(projectId: string | number): Promise<ProjectMember[]> {
-  return fetchApi(`/api/projects/${projectId}/members`);
+  return fetcher<ProjectMember[]>(`/api/projects/${projectId}/members`);
 }
 
 /**
@@ -21,9 +21,9 @@ export async function addProjectMember(
   projectId: string | number,
   data: AddProjectMemberRequest
 ): Promise<ProjectMember> {
-  return fetchApi(`/api/projects/${projectId}/members`, {
+  return fetcher<ProjectMember>(`/api/projects/${projectId}/members`, {
     method: 'POST',
-    body: JSON.stringify(data),
+    body: data,
   });
 }
 
@@ -36,9 +36,9 @@ export async function updateProjectMemberRole(
   memberId: string | number,
   data: UpdateProjectMemberRoleRequest
 ): Promise<ProjectMember> {
-  return fetchApi(`/api/projects/${projectId}/members/${memberId}`, {
+  return fetcher<ProjectMember>(`/api/projects/${projectId}/members/${memberId}`, {
     method: 'PATCH',
-    body: JSON.stringify(data),
+    body: data,
   });
 }
 
@@ -51,7 +51,7 @@ export async function removeProjectMember(
   projectId: string | number,
   memberId: string | number
 ): Promise<void> {
-  return fetchApi(`/api/projects/${projectId}/members/${memberId}`, {
+  return fetcher<void>(`/api/projects/${projectId}/members/${memberId}`, {
     method: 'DELETE',
   });
 }
@@ -61,5 +61,5 @@ export async function removeProjectMember(
  * Used for adding new members
  */
 export async function getAvailableMembers(projectId: string | number): Promise<AvailableMember[]> {
-  return fetchApi(`/api/members?excludeProject=${projectId}`);
+  return fetcher<AvailableMember[]>(`/api/members?excludeProject=${projectId}`);
 }

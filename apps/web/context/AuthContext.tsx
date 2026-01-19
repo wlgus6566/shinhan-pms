@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { tokenManager } from '@/lib/api/fetcher';
 
 interface User {
   id: number;
@@ -29,15 +30,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Batch storage reads together
     const savedUser = localStorage.getItem('user');
-    const token = localStorage.getItem('accessToken');
+    const token = tokenManager.getAccessToken();
     
     if (savedUser && token) {
       try {
         setUser(JSON.parse(savedUser));
       } catch (e) {
         // Clear invalid data
-        localStorage.removeItem('user');
-        localStorage.removeItem('accessToken');
+        tokenManager.clearTokens();
       }
     }
     setLoading(false);
@@ -45,14 +45,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Stable callbacks with useCallback
   const login = useCallback((token: string, user: User) => {
-    localStorage.setItem('accessToken', token);
+    tokenManager.setAccessToken(token);
     localStorage.setItem('user', JSON.stringify(user));
     setUser(user);
   }, []);
 
   const logout = useCallback(() => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('user');
+    tokenManager.clearTokens();
     setUser(null);
     router.push('/');
   }, [router]);
