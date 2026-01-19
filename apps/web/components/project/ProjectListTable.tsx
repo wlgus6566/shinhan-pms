@@ -39,6 +39,11 @@ const statusLabels: Record<string, string> = {
   ON_HOLD: '보류',
 } as const;
 
+const typeLabels: Record<string, string> = {
+  BUILD: '구축',
+  OPERATION: '운영',
+} as const;
+
 const statusVariants: Record<
   string,
   'default' | 'secondary' | 'outline' | 'destructive'
@@ -143,9 +148,10 @@ export function ProjectListTable() {
                   <ArrowUpDown className="h-3 w-3" />
                 </div>
               </TableHead>
-              <TableHead>담당자</TableHead>
-              <TableHead>상태</TableHead>
-              <TableHead>진행률</TableHead>
+              <TableHead>클라이언트</TableHead>
+              <TableHead className="text-center">타입</TableHead>
+              <TableHead>PM</TableHead>
+              <TableHead className="text-center">상태</TableHead>
               <TableHead>
                 <div className="flex items-center gap-1 cursor-pointer hover:text-slate-700">
                   기간
@@ -157,10 +163,10 @@ export function ProjectListTable() {
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <TableLoading colSpan={7} message="프로젝트를 불러오는 중..." />
+              <TableLoading colSpan={8} message="프로젝트를 불러오는 중..." />
             ) : error ? (
               <TableError
-                colSpan={7}
+                colSpan={8}
                 message={error.message || '프로젝트 목록을 불러오는데 실패했습니다'}
                 onRetry={() => {
                   setSearch('');
@@ -168,7 +174,7 @@ export function ProjectListTable() {
                 }}
               />
             ) : paginatedProjects.length === 0 ? (
-              <TableEmpty colSpan={7} message="프로젝트가 없습니다" />
+              <TableEmpty colSpan={8} message="프로젝트가 없습니다" />
             ) : (
               paginatedProjects.map((project) => (
                 <TableRow key={project.id} className="group">
@@ -178,21 +184,24 @@ export function ProjectListTable() {
                   <TableCell>
                     <Link
                       href={`/projects/${project.id}`}
-                      className="flex flex-col group/link"
+                      className="font-semibold text-slate-900 hover:text-blue-600 transition-colors"
                     >
-                      <span className="font-semibold text-slate-900 group-hover/link:text-blue-600 transition-colors">
-                        {project.name}
-                      </span>
-                      {project.description && (
-                        <span className="text-xs text-slate-400 truncate max-w-[200px]">
-                          {project.description}
-                        </span>
-                      )}
+                      {project.name}
                     </Link>
                   </TableCell>
                   <TableCell>
+                    <span className="text-sm text-slate-600">
+                      {project.client || '-'}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <Badge variant="outline" className="font-normal">
+                      {typeLabels[project.projectType] || project.projectType}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xs font-semibold">
+                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-[10px] font-semibold">
                         {project.creator?.name?.charAt(0) || '?'}
                       </div>
                       <span className="text-sm text-slate-700">
@@ -200,26 +209,13 @@ export function ProjectListTable() {
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-center">
                     <Badge variant={statusVariants[project.status] || 'outline'}>
                       {statusLabels[project.status] || project.status}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-3 min-w-[120px]">
-                      <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full transition-all duration-500"
-                          style={{ width: `${project.progress}%` }}
-                        />
-                      </div>
-                      <span className="text-xs font-medium text-slate-500 w-10">
-                        {project.progress}%
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm">
+                    <div className="text-sm whitespace-nowrap">
                       <span className="text-slate-600">
                         {formatDate(project.startDate)}
                       </span>

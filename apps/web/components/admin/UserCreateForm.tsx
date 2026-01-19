@@ -12,7 +12,7 @@ import { FormInput, FormSelect } from '@/components/form';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CheckCircle2, Loader2, Upload, User } from 'lucide-react';
-import { DEPARTMENT_OPTIONS, ROLE_OPTIONS } from '@/lib/constants/roles';
+import { DEPARTMENT_OPTIONS, ROLE_OPTIONS, POSITION_OPTIONS } from '@/lib/constants/roles';
 
 const userCreateSchema = z
   .object({
@@ -30,6 +30,7 @@ const userCreateSchema = z
       ),
     confirmPassword: z.string(),
     department: z.string().min(1, '본부를 선택하세요'),
+    position: z.enum(['DIVISION_HEAD', 'GENERAL_MANAGER', 'PRINCIPAL_LEADER', 'SENIOR_LEADER', 'LEADER', 'TEAM_MEMBER']),
     role: z.enum(['SUPER_ADMIN', 'PM', 'MEMBER']),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -55,6 +56,7 @@ export function UserCreateForm() {
       password: '',
       confirmPassword: '',
       department: '',
+      position: 'TEAM_MEMBER',
       role: 'MEMBER',
     },
   });
@@ -183,6 +185,15 @@ export function UserCreateForm() {
           label="본부 *"
           placeholder="본부를 선택하세요"
           options={DEPARTMENT_OPTIONS}
+        />
+
+        {/* 직책 */}
+        <FormSelect
+          control={form.control}
+          name="position"
+          label="직책 *"
+          placeholder="직책을 선택하세요"
+          options={POSITION_OPTIONS}
         />
 
         {/* 관리자 유형 */}

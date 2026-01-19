@@ -9,6 +9,15 @@ export enum Role {
   MEMBER = 'MEMBER',
 }
 
+export enum Position {
+  DIVISION_HEAD = 'DIVISION_HEAD',
+  GENERAL_MANAGER = 'GENERAL_MANAGER',
+  PRINCIPAL_LEADER = 'PRINCIPAL_LEADER',
+  SENIOR_LEADER = 'SENIOR_LEADER',
+  LEADER = 'LEADER',
+  TEAM_MEMBER = 'TEAM_MEMBER',
+}
+
 export class UpdateUserDto {
   @ApiProperty({
     example: 'DEVELOPMENT',
@@ -19,6 +28,16 @@ export class UpdateUserDto {
   @IsOptional()
   @IsEnum(Department, { message: '올바른 파트를 선택해주세요' })
   department?: Department;
+
+  @ApiProperty({
+    example: 'TEAM_MEMBER',
+    description: '직책',
+    enum: Position,
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(Position, { message: '올바른 직책을 선택해주세요' })
+  position?: Position;
 
   @ApiProperty({
     example: 'PM',

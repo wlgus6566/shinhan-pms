@@ -49,3 +49,29 @@ export const ROLE_OPTIONS = Object.entries(ROLES).map(([key, value]) => ({
   value,
   label: ROLE_LABELS[value],
 }));
+
+// 직책
+export const POSITIONS = {
+  DIVISION_HEAD: 'DIVISION_HEAD', // 부문장
+  GENERAL_MANAGER: 'GENERAL_MANAGER', // 본부장
+  PRINCIPAL_LEADER: 'PRINCIPAL_LEADER', // 책임리더
+  SENIOR_LEADER: 'SENIOR_LEADER', // 선임리더
+  LEADER: 'LEADER', // 리더
+  TEAM_MEMBER: 'TEAM_MEMBER', // 팀원
+} as const;
+
+export type Position = (typeof POSITIONS)[keyof typeof POSITIONS];
+
+export const POSITION_LABELS: Record<string, string> = {
+  DIVISION_HEAD: '부문장',
+  GENERAL_MANAGER: '본부장',
+  PRINCIPAL_LEADER: '책임리더',
+  SENIOR_LEADER: '선임리더',
+  LEADER: '리더',
+  TEAM_MEMBER: '팀원',
+};
+
+export const POSITION_OPTIONS = Object.entries(POSITIONS).map(([key, value]) => ({
+  value,
+  label: POSITION_LABELS[value],
+}));

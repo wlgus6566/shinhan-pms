@@ -5,7 +5,13 @@ export class ProjectResponseDto {
   id: string;
 
   @ApiProperty({ description: '프로젝트명', example: '신한카드 PMS' })
-  projectName: string;
+  name: string;
+
+  @ApiProperty({ description: '클라이언트', example: '신한카드', required: false })
+  client?: string;
+
+  @ApiProperty({ description: '프로젝트 타입', enum: ['OPERATION', 'BUILD'] })
+  projectType: string;
 
   @ApiProperty({
     description: '프로젝트 설명',

@@ -29,11 +29,9 @@ import { CheckCircle2, Loader2 } from 'lucide-react';
 import type { ProjectStatus } from '@/types/project';
 
 // Hoist static data outside component
-const statusOptions = [
-  { value: 'PENDING', label: '대기' },
-  { value: 'IN_PROGRESS', label: '진행중' },
-  { value: 'COMPLETED', label: '완료' },
-  { value: 'ON_HOLD', label: '보류' },
+const projectTypeOptions = [
+  { value: 'OPERATION', label: '운영' },
+  { value: 'BUILD', label: '구축' },
 ] as const;
 
 const projectSchema = z
@@ -42,17 +40,13 @@ const projectSchema = z
       .string()
       .min(2, '프로젝트명은 최소 2자 이상이어야 합니다')
       .max(100, '프로젝트명은 최대 100자까지 입력할 수 있습니다'),
-    description: z
+    client: z
       .string()
-      .max(500, '설명은 최대 500자까지 입력할 수 있습니다')
+      .max(100, '클라이언트는 최대 100자까지 입력할 수 있습니다')
       .optional(),
+    projectType: z.enum(['OPERATION', 'BUILD'] as const),
     startDate: z.string().min(1, '시작일을 선택하세요'),
     endDate: z.string().min(1, '종료일을 선택하세요'),
-    status: z.enum(['PENDING', 'IN_PROGRESS', 'COMPLETED', 'ON_HOLD'] as const),
-    progress: z.coerce
-      .number()
-      .min(0, '진행률은 0 이상이어야 합니다')
-      .max(100, '진행률은 100 이하여야 합니다'),
   })
   .refine((data) => new Date(data.endDate) >= new Date(data.startDate), {
     message: '종료일은 시작일 이후여야 합니다',
@@ -78,11 +72,10 @@ export function ProjectForm({ projectId, mode }: ProjectFormProps) {
     resolver: zodResolver(projectSchema),
     defaultValues: {
       name: '',
-      description: '',
+      client: '',
+      projectType: 'BUILD',
       startDate: '',
       endDate: '',
-      status: 'PENDING',
-      progress: 0,
     },
   });
 
@@ -92,16 +85,15 @@ export function ProjectForm({ projectId, mode }: ProjectFormProps) {
       getProject(projectId)
         .then((project) => {
           // Convert ISO date strings to YYYY-MM-DD format
-          const startDate = project.startDate.split('T')[0];
-          const endDate = project.endDate.split('T')[0];
+          const startDate = project.startDate ? project.startDate.split('T')[0] : '';
+          const endDate = project.endDate ? project.endDate.split('T')[0] : '';
 
           form.reset({
             name: project.name,
-            description: project.description || '',
+            client: project.client || '',
+            projectType: (project.projectType as 'OPERATION' | 'BUILD') || 'BUILD',
             startDate,
             endDate,
-            status: project.status,
-            progress: project.progress,
           });
         })
         .catch((err) => setError(err.message))
@@ -179,14 +171,22 @@ export function ProjectForm({ projectId, mode }: ProjectFormProps) {
           placeholder="프로젝트명을 입력하세요"
         />
 
-        <FormTextarea
-          control={form.control}
-          name="description"
-          label="설명"
-          placeholder="프로젝트 설명을 입력하세요"
-          rows={4}
-          description="최대 500자까지 입력할 수 있습니다"
-        />
+        <div className="grid grid-cols-2 gap-4">
+          <FormInput
+            control={form.control}
+            name="client"
+            label="클라이언트"
+            placeholder="클라이언트명을 입력하세요"
+          />
+
+          <FormSelect
+            control={form.control}
+            name="projectType"
+            label="타입 *"
+            placeholder="프로젝트 타입을 선택하세요"
+            options={projectTypeOptions}
+          />
+        </div>
 
         <div className="grid grid-cols-2 gap-4">
           <FormInput
@@ -201,24 +201,6 @@ export function ProjectForm({ projectId, mode }: ProjectFormProps) {
             name="endDate"
             label="종료일 *"
             type="date"
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <FormSelect
-            control={form.control}
-            name="status"
-            label="상태 *"
-            placeholder="상태를 선택하세요"
-            options={statusOptions}
-          />
-
-          <FormInput
-            control={form.control}
-            name="progress"
-            label="진행률 (%) *"
-            type="number"
-            placeholder="0-100"
           />
         </div>
 

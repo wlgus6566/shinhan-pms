@@ -136,7 +136,9 @@ export class ProjectsController {
   private transformProject(project: any): ProjectResponseDto {
     return {
       id: project.id.toString(),
-      projectName: project.projectName,
+      name: project.projectName, // Map projectName to name for frontend
+      client: project.client,
+      projectType: project.projectType,
       description: project.description,
       startDate: project.startDate
         ? project.startDate.toISOString().split('T')[0]
@@ -240,12 +242,14 @@ export class ProjectsController {
       memberId: projectMember.memberId.toString(),
       role: projectMember.role,
       workArea: projectMember.workArea,
+      notes: projectMember.notes,
       member: projectMember.member
         ? {
             id: projectMember.member.id.toString(),
             name: projectMember.member.name,
             email: projectMember.member.email,
             department: projectMember.member.department,
+            position: projectMember.member.position,
             role: projectMember.member.role,
           }
         : undefined,

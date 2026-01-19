@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsDateString, Length, MaxLength } from 'class-validator';
+import { IsString, IsOptional, IsDateString, IsIn, Length, MaxLength } from 'class-validator';
 
 export class CreateProjectDto {
   @ApiProperty({
@@ -11,6 +11,26 @@ export class CreateProjectDto {
   @IsString()
   @Length(2, 100, { message: '프로젝트명은 2-100자 사이여야 합니다' })
   projectName: string;
+
+  @ApiProperty({
+    description: '클라이언트',
+    example: '신한카드',
+    required: false,
+    maxLength: 100,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100, { message: '클라이언트는 최대 100자까지 입력 가능합니다' })
+  client?: string;
+
+  @ApiProperty({
+    description: '프로젝트 타입',
+    enum: ['OPERATION', 'BUILD'],
+    example: 'BUILD',
+  })
+  @IsString()
+  @IsIn(['OPERATION', 'BUILD'], { message: '프로젝트 타입은 운영 또는 구축이어야 합니다' })
+  projectType: 'OPERATION' | 'BUILD';
 
   @ApiProperty({
     description: '프로젝트 설명',

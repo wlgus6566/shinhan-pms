@@ -21,7 +21,7 @@ export default function EditProjectPage() {
   const { user } = useAuth();
   const projectId = params.id as string;
 
-  const canEdit = user?.role === 'PM' || user?.role === 'PL';
+  const canEdit = user?.role === 'SUPER_ADMIN' || user?.role === 'PM' || user?.role === 'PL';
 
   useEffect(() => {
     if (user && !canEdit) {

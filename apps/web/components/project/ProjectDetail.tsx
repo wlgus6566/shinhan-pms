@@ -10,11 +10,16 @@ interface ProjectDetailProps {
 
 // Hoist static data outside component (rendering-hoist-jsx)
 const statusMap: Record<string, { label: string; className: string }> = {
-  PENDING: { label: '대기', className: 'bg-gray-100 text-gray-700' },
-  ACTIVE: { label: '진행중', className: 'bg-blue-100 text-blue-700' },
-  IN_PROGRESS: { label: '진행중', className: 'bg-blue-100 text-blue-700' },
-  COMPLETED: { label: '완료', className: 'bg-green-100 text-green-700' },
-  ON_HOLD: { label: '보류', className: 'bg-orange-100 text-orange-700' },
+  PENDING: { label: '대기', className: 'bg-gray-100 text-gray-700 hover:bg-gray-100' },
+  ACTIVE: { label: '진행중', className: 'bg-blue-100 text-blue-700 hover:bg-blue-100' },
+  IN_PROGRESS: { label: '진행중', className: 'bg-blue-100 text-blue-700 hover:bg-blue-100' },
+  COMPLETED: { label: '완료', className: 'bg-green-100 text-green-700 hover:bg-green-100' },
+  ON_HOLD: { label: '보류', className: 'bg-orange-100 text-orange-700 hover:bg-orange-100' },
+} as const;
+
+const typeLabels: Record<string, string> = {
+  BUILD: '구축',
+  OPERATION: '운영',
 } as const;
 
 const fallbackStatus = { label: '알 수 없음', className: 'bg-slate-100 text-slate-700' };
@@ -59,23 +64,37 @@ export const ProjectDetail = memo(function ProjectDetail({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h3 className="text-sm font-medium text-muted-foreground mb-2">
-          프로젝트명
-        </h3>
-        <p className="text-lg font-semibold">{project.name}</p>
-      </div>
-
-      {project.description && (
+      <div className="grid grid-cols-2 gap-6">
         <div>
           <h3 className="text-sm font-medium text-muted-foreground mb-2">
-            설명
+            프로젝트명
           </h3>
-          <p className="text-sm text-slate-700 whitespace-pre-wrap">
-            {project.description}
-          </p>
+          <p className="text-lg font-semibold">{project.name}</p>
         </div>
-      )}
+        <div>
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">
+            클라이언트
+          </h3>
+          <p className="text-lg font-semibold">{project.client || '-'}</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-6">
+        <div>
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">
+            타입
+          </h3>
+          <Badge variant="outline" className="font-normal">
+            {typeLabels[project.projectType] || project.projectType}
+          </Badge>
+        </div>
+        <div>
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">
+            상태
+          </h3>
+          <Badge className={status.className}>{status.label}</Badge>
+        </div>
+      </div>
 
       <div className="grid grid-cols-2 gap-6">
         <div>
@@ -93,36 +112,10 @@ export const ProjectDetail = memo(function ProjectDetail({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
-        <div>
-          <h3 className="text-sm font-medium text-muted-foreground mb-2">
-            상태
-          </h3>
-          <Badge className={status.className}>{status.label}</Badge>
-        </div>
-
-        <div>
-          <h3 className="text-sm font-medium text-muted-foreground mb-2">
-            진행률
-          </h3>
-          <div className="flex items-center gap-3">
-            <div className="flex-1 bg-gray-200 rounded-full h-2">
-              <div
-                className="bg-emotion-primary h-2 rounded-full transition-all"
-                style={{ width: `${project.progress}%` }}
-              />
-            </div>
-            <span className="text-sm font-semibold text-slate-700">
-              {project.progress}%
-            </span>
-          </div>
-        </div>
-      </div>
-
       {project.creator && (
         <div>
           <h3 className="text-sm font-medium text-muted-foreground mb-2">
-            등록자
+            등록자 (PM)
           </h3>
           <p className="text-sm">
             {project.creator.name} ({project.creator.email})

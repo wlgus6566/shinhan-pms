@@ -14,6 +14,9 @@ export class UserResponseDto {
   @ApiProperty({ example: 'DEVELOPMENT' })
   department: string;
 
+  @ApiProperty({ example: 'TEAM_MEMBER' })
+  position: string;
+
   @ApiProperty({ example: 'MEMBER' })
   role: string;
 

@@ -49,35 +49,3 @@ export function useProject(id: string | number | null) {
     mutate,
   };
 }
-
-/**
- * 프로젝트 생성
- */
-export async function createProject(data: CreateProjectRequest): Promise<Project> {
-  return fetcher<Project>('/api/projects', {
-    method: 'POST',
-    body: data,
-  });
-}
-
-/**
- * 프로젝트 수정
- */
-export async function updateProject(
-  id: string | number,
-  data: UpdateProjectRequest
-): Promise<Project> {
-  return fetcher<Project>(`/api/projects/${id}`, {
-    method: 'PATCH',
-    body: data,
-  });
-}
-
-/**
- * 프로젝트 삭제
- */
-export async function deleteProject(id: string | number): Promise<void> {
-  return fetcher<void>(`/api/projects/${id}`, {
-    method: 'DELETE',
-  });
-}

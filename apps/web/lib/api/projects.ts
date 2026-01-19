@@ -37,9 +37,13 @@ export async function getProject(id: string | number): Promise<Project> {
  * Creator is automatically assigned as PM
  */
 export async function createProject(data: CreateProjectRequest): Promise<Project> {
+  const { name, ...rest } = data;
   return fetcher<Project>('/api/projects', {
     method: 'POST',
-    body: data,
+    body: {
+      ...rest,
+      projectName: name,
+    },
   });
 }
 
@@ -51,9 +55,13 @@ export async function updateProject(
   id: string | number,
   data: UpdateProjectRequest
 ): Promise<Project> {
+  const { name, ...rest } = data;
   return fetcher<Project>(`/api/projects/${id}`, {
     method: 'PATCH',
-    body: data,
+    body: {
+      ...rest,
+      ...(name && { projectName: name }),
+    },
   });
 }
 

@@ -12,15 +12,15 @@ import Link from 'next/link';
 export default function NewProjectPage() {
   const router = useRouter();
   const { user } = useAuth();
-  const isPM = user?.role === 'PM';
+  const canCreate = user?.role === 'SUPER_ADMIN' || user?.role === 'PM';
 
   useEffect(() => {
-    if (user && !isPM) {
+    if (user && !canCreate) {
       router.push('/projects');
     }
-  }, [user, isPM, router]);
+  }, [user, canCreate, router]);
 
-  if (!isPM) {
+  if (!canCreate) {
     return null;
   }
 

@@ -15,6 +15,7 @@ interface CreateUserDto {
   name: string;
   profileImage?: string;
   department: string;
+  position: string;
   role: string;
 }
 
@@ -46,6 +47,7 @@ export class UsersService {
         name: createUserDto.name,
         profileImage: createUserDto.profileImage,
         department: createUserDto.department,
+        position: createUserDto.position,
         role: createUserDto.role,
         createdBy,
       },

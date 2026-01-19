@@ -1,5 +1,6 @@
-import { IsNotEmpty, IsNumber, IsString, IsIn } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, IsIn, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 export class AddProjectMemberDto {
   @ApiProperty({
@@ -22,11 +23,21 @@ export class AddProjectMemberDto {
 
   @ApiProperty({
     description: '담당 분야',
-    enum: ['PLANNING', 'DESIGN', 'FRONTEND', 'BACKEND'],
+    enum: ['PROJECT_MANAGEMENT', 'PLANNING', 'DESIGN', 'FRONTEND', 'BACKEND'],
     example: 'BACKEND',
   })
   @IsNotEmpty()
   @IsString()
-  @IsIn(['PLANNING', 'DESIGN', 'FRONTEND', 'BACKEND'])
-  workArea: 'PLANNING' | 'DESIGN' | 'FRONTEND' | 'BACKEND';
+  @IsIn(['PROJECT_MANAGEMENT', 'PLANNING', 'DESIGN', 'FRONTEND', 'BACKEND'])
+  workArea: 'PROJECT_MANAGEMENT' | 'PLANNING' | 'DESIGN' | 'FRONTEND' | 'BACKEND';
+
+  @ApiProperty({
+    description: '비고',
+    required: false,
+    example: '프로젝트 핵심 인원',
+  })
+  @IsOptional()
+  @IsString()
+  @Transform(({ value }) => (value === '' ? undefined : value))
+  notes?: string;
 }

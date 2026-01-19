@@ -34,6 +34,7 @@ import {
 import { Loader2, UserPlus, Trash2 } from 'lucide-react';
 import { AddMemberDialog } from './AddMemberDialog';
 import type { ProjectMember, ProjectRole, Department, UserRole, WorkArea } from '@/types/project';
+import { POSITION_LABELS } from '@/lib/constants/roles';
 
 const departmentLabels: Record<Department, string> = {
   PLANNING: '기획',
@@ -44,6 +45,7 @@ const departmentLabels: Record<Department, string> = {
 };
 
 const workAreaLabels: Record<WorkArea, string> = {
+  PROJECT_MANAGEMENT: '프로젝트 관리',
   PLANNING: '기획',
   DESIGN: '디자인',
   FRONTEND: '프론트엔드',
@@ -74,7 +76,10 @@ export function ProjectMembersTable({ projectId, creatorId }: ProjectMembersTabl
   const [memberToRemove, setMemberToRemove] = useState<ProjectMember | null>(null);
   const [isRemoving, setIsRemoving] = useState(false);
 
-  const canManage = user?.role === 'PM' || members.find(m => m.memberId === user?.id && (m.role === 'PM' || m.role === 'PL'));
+  const canManage = 
+    user?.role === 'SUPER_ADMIN' || 
+    user?.role === 'PM' || 
+    members.find(m => m.memberId === user?.id && (m.role === 'PM' || m.role === 'PL'));
 
   const fetchMembers = async () => {
     setLoading(true);
@@ -141,23 +146,24 @@ export function ProjectMembersTable({ projectId, creatorId }: ProjectMembersTabl
           <TableHeader>
             <TableRow>
               <TableHead>이름</TableHead>
-              <TableHead>이메일</TableHead>
+              <TableHead>직책</TableHead>
               <TableHead>본부</TableHead>
               <TableHead>담당 분야</TableHead>
-              <TableHead>프로젝트 역할</TableHead>
+              <TableHead>역할</TableHead>
+              <TableHead>비고</TableHead>
               {canManage && <TableHead className="text-right">작업</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={canManage ? 6 : 5} className="h-24 text-center">
+                <TableCell colSpan={canManage ? 7 : 6} className="h-24 text-center">
                   <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                 </TableCell>
               </TableRow>
             ) : members.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={canManage ? 6 : 5} className="h-24 text-center">
+                <TableCell colSpan={canManage ? 7 : 6} className="h-24 text-center">
                   멤버가 없습니다
                 </TableCell>
               </TableRow>
@@ -165,7 +171,11 @@ export function ProjectMembersTable({ projectId, creatorId }: ProjectMembersTabl
               members.map((member) => (
                 <TableRow key={member.id}>
                   <TableCell className="font-medium">{member.member?.name}</TableCell>
-                  <TableCell>{member.member?.email}</TableCell>
+                  <TableCell>
+                    <span className="text-sm text-slate-700">
+                      {member.member?.position ? POSITION_LABELS[member.member.position] || member.member.position : '-'}
+                    </span>
+                  </TableCell>
                   <TableCell>
                     <span className="text-sm text-slate-700">
                       {member.member?.department || '-'}
@@ -184,6 +194,11 @@ export function ProjectMembersTable({ projectId, creatorId }: ProjectMembersTabl
                     <Badge variant={projectRoleVariants[member.role]}>
                       {member.role}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-sm text-slate-600">
+                      {member.notes || '-'}
+                    </span>
                   </TableCell>
                   {canManage && (
                     <TableCell className="text-right">

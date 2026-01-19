@@ -15,9 +15,12 @@ export class ProjectMemberResponseDto {
 
   @ApiProperty({
     description: '담당 분야',
-    enum: ['PLANNING', 'DESIGN', 'FRONTEND', 'BACKEND'],
+    enum: ['PROJECT_MANAGEMENT', 'PLANNING', 'DESIGN', 'FRONTEND', 'BACKEND'],
   })
   workArea: string;
+
+  @ApiProperty({ description: '비고', required: false })
+  notes?: string;
 
   @ApiProperty({ description: '멤버 정보', required: false })
   member?: {
@@ -25,6 +28,7 @@ export class ProjectMemberResponseDto {
     name: string;
     email: string;
     department: string;
+    position?: string;
     role: string;
   };
 

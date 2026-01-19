@@ -31,6 +31,7 @@ import {
 import { Loader2, Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import FormSelect from '@/components/form/FormSelect';
 import type { AvailableMember } from '@/types/project';
 import { DEPARTMENTS } from '@/lib/constants/roles';
@@ -38,7 +39,8 @@ import { DEPARTMENTS } from '@/lib/constants/roles';
 const addMemberSchema = z.object({
   memberId: z.coerce.number().min(1, '멤버를 선택하세요'),
   role: z.enum(['PM', 'PL', 'PA'] as const),
-  workArea: z.enum(['PLANNING', 'DESIGN', 'FRONTEND', 'BACKEND'] as const),
+  workArea: z.enum(['PROJECT_MANAGEMENT', 'PLANNING', 'DESIGN', 'FRONTEND', 'BACKEND'] as const),
+  notes: z.string().optional(),
 });
 
 type AddMemberFormValues = z.infer<typeof addMemberSchema>;
@@ -60,6 +62,7 @@ const departmentMap: Record<string, string> = {
 
 // 담당 분야 옵션
 const workAreaOptions = [
+  { value: 'PROJECT_MANAGEMENT', label: '프로젝트 관리 (Project Management)' },
   { value: 'PLANNING', label: '기획 (Planning)' },
   { value: 'DESIGN', label: '디자인 (Design)' },
   { value: 'FRONTEND', label: '프론트엔드 (Frontend)' },
@@ -85,7 +88,8 @@ export function AddMemberDialog({ projectId, open, onOpenChange, onSuccess }: Ad
     defaultValues: {
       memberId: 0,
       role: 'PA',
-      workArea: 'BACKEND',
+      workArea: 'PLANNING',
+      notes: '',
     },
   });
 
@@ -108,7 +112,12 @@ export function AddMemberDialog({ projectId, open, onOpenChange, onSuccess }: Ad
     setError(null);
 
     try {
-      await addProjectMember(projectId, values);
+      // 빈 문자열 notes를 undefined로 변환
+      const payload = {
+        ...values,
+        notes: values.notes?.trim() || undefined,
+      };
+      await addProjectMember(projectId, payload);
       form.reset();
       onOpenChange(false);
       onSuccess();
@@ -251,6 +260,25 @@ export function AddMemberDialog({ projectId, open, onOpenChange, onSuccess }: Ad
                 label="프로젝트 역할 *"
                 placeholder="프로젝트 역할을 선택하세요"
                 options={projectRoleOptions}
+              />
+
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>비고</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="비고 사항을 입력하세요 (선택)"
+                        className="resize-none"
+                        rows={3}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
 
               <DialogFooter>

@@ -17,6 +17,8 @@ datasource db {
 model Project {
   id          BigInt    @id @default(autoincrement())
   projectName String    @unique @map("project_name") @db.VarChar(100)
+  client      String?   @db.VarChar(100)
+  projectType String    @default("BUILD") @map("project_type") @db.VarChar(20)
   description String?   @db.Text
   startDate   DateTime? @map("start_date") @db.Date
   endDate     DateTime? @map("end_date") @db.Date
@@ -32,6 +34,8 @@ model Project {
 
   // 인덱스
   @@index([projectName], map: "idx_projects_name")
+  @@index([client], map: "idx_projects_client")
+  @@index([projectType], map: "idx_projects_type")
   @@index([status], map: "idx_projects_status")
   @@index([startDate, endDate], map: "idx_projects_dates")
   @@index([createdAt(sort: Desc)], map: "idx_projects_created_at")
@@ -52,6 +56,7 @@ model User {
   name         String    @db.VarChar(50)
   profileImage String?   @map("profile_image") @db.Text
   department   String    @db.VarChar(50)
+  position     String    @default("TEAM_MEMBER") @db.VarChar(30)
   role         String    @default("MEMBER") @db.VarChar(20)
   lastLoginAt  DateTime? @map("last_login_at") @db.Timestamp(6)
   isActive     Boolean   @default(true) @map("is_active")
@@ -66,6 +71,7 @@ model User {
   // 인덱스
   @@index([email], map: "idx_users_email")
   @@index([department], map: "idx_users_department")
+  @@index([position], map: "idx_users_position")
   @@index([role], map: "idx_users_role")
   @@index([isActive], map: "idx_users_is_active")
   @@index([department, isActive], map: "idx_users_department_active")
@@ -83,7 +89,8 @@ model ProjectMember {
   projectId BigInt    @map("project_id")
   memberId  BigInt    @map("member_id")
   role      String    @default("PA") @db.VarChar(20)
-  workArea  String    @default("BACKEND") @map("work_area") @db.VarChar(20)
+  workArea  String    @default("PLANNING") @map("work_area") @db.VarChar(30)
+  notes     String?   @db.Text
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
   createdBy BigInt    @map("created_by")
   updatedAt DateTime? @updatedAt @map("updated_at") @db.Timestamp(6)
@@ -99,6 +106,7 @@ model ProjectMember {
   @@index([memberId], map: "idx_project_members_member_id")
   @@index([role], map: "idx_project_members_role")
   @@index([workArea], map: "idx_project_members_work_area")
+  @@index([projectId, workArea, role], map: "idx_project_work_area_role")
 
   @@map("project_members")
 }

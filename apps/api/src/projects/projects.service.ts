@@ -37,7 +37,8 @@ export class ProjectsService {
     return await this.prisma.project.create({
       data: {
         projectName: createProjectDto.projectName,
-        description: createProjectDto.description,
+        client: createProjectDto.client,
+        projectType: createProjectDto.projectType,
         startDate: createProjectDto.startDate
           ? new Date(createProjectDto.startDate)
           : null,
@@ -114,6 +115,12 @@ export class ProjectsService {
         ...(updateProjectDto.projectName && {
           projectName: updateProjectDto.projectName,
         }),
+        ...(updateProjectDto.client !== undefined && {
+          client: updateProjectDto.client,
+        }),
+        ...(updateProjectDto.projectType && {
+          projectType: updateProjectDto.projectType,
+        }),
         ...(updateProjectDto.description !== undefined && {
           description: updateProjectDto.description,
         }),
@@ -158,7 +165,7 @@ export class ProjectsService {
     // 프로젝트 존재 확인
     await this.findOne(projectId);
 
-    return await this.prisma.projectMember.findMany({
+    const members = await this.prisma.projectMember.findMany({
       where: { projectId },
       include: {
         member: {
@@ -167,11 +174,40 @@ export class ProjectsService {
             name: true,
             email: true,
             department: true,
+            position: true,
             role: true,
           },
         },
       },
-      orderBy: { createdAt: 'asc' },
+    });
+
+    // 정렬 로직
+    const workAreaOrder = {
+      PROJECT_MANAGEMENT: 0,
+      PLANNING: 1,
+      DESIGN: 2,
+      FRONTEND: 3,
+      BACKEND: 4,
+    };
+
+    const roleOrder = {
+      PM: 0,
+      PL: 1,
+      PA: 2,
+    };
+
+    return members.sort((a, b) => {
+      // 1. PM이 가장 먼저
+      if (a.role === 'PM' && b.role !== 'PM') return -1;
+      if (a.role !== 'PM' && b.role === 'PM') return 1;
+
+      // 2. 담당 분야 순서 (프로젝트 관리 > 기획 > 디자인 > 프론트엔드 > 백엔드)
+      const workAreaDiff =
+        (workAreaOrder[a.workArea] ?? 999) - (workAreaOrder[b.workArea] ?? 999);
+      if (workAreaDiff !== 0) return workAreaDiff;
+
+      // 3. 각 담당 분야 내에서 PL > PA
+      return (roleOrder[a.role] ?? 999) - (roleOrder[b.role] ?? 999);
     });
   }
 
@@ -214,6 +250,7 @@ export class ProjectsService {
         memberId: BigInt(addMemberDto.memberId),
         role: addMemberDto.role,
         workArea: addMemberDto.workArea,
+        notes: addMemberDto.notes,
         createdBy: userId,
       },
       include: {
@@ -223,6 +260,7 @@ export class ProjectsService {
             name: true,
             email: true,
             department: true,
+            position: true,
             role: true,
           },
         },
@@ -257,6 +295,7 @@ export class ProjectsService {
       data: {
         role: updateRoleDto.role,
         ...(updateRoleDto.workArea && { workArea: updateRoleDto.workArea }),
+        ...(updateRoleDto.notes !== undefined && { notes: updateRoleDto.notes }),
         updatedBy: userId,
         updatedAt: new Date(),
       },
