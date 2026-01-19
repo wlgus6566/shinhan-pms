@@ -59,7 +59,7 @@ async function main() {
       description: '전사적 자원 관리 시스템 고도화 프로젝트',
       startDate: new Date('2024-01-01'),
       endDate: new Date('2024-12-31'),
-      status: 'IN_PROGRESS',
+      status: 'ACTIVE',
       createdBy: admin.id,
     },
   });
@@ -72,7 +72,7 @@ async function main() {
       description: '사용자 경험 개선을 위한 모바일 앱 UI/UX 개편',
       startDate: new Date('2024-03-01'),
       endDate: new Date('2024-06-30'),
-      status: 'PENDING',
+      status: 'ACTIVE',
       createdBy: admin.id,
     },
   });

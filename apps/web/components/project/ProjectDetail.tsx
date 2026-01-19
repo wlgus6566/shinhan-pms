@@ -9,12 +9,15 @@ interface ProjectDetailProps {
 }
 
 // Hoist static data outside component (rendering-hoist-jsx)
-const statusMap = {
+const statusMap: Record<string, { label: string; className: string }> = {
   PENDING: { label: '대기', className: 'bg-gray-100 text-gray-700' },
+  ACTIVE: { label: '진행중', className: 'bg-blue-100 text-blue-700' },
   IN_PROGRESS: { label: '진행중', className: 'bg-blue-100 text-blue-700' },
   COMPLETED: { label: '완료', className: 'bg-green-100 text-green-700' },
   ON_HOLD: { label: '보류', className: 'bg-orange-100 text-orange-700' },
 } as const;
+
+const fallbackStatus = { label: '알 수 없음', className: 'bg-slate-100 text-slate-700' };
 
 // Cache formatted dates (js-cache-function-results)
 const dateFormatCache = new Map<string, string>();
@@ -34,7 +37,7 @@ const formatDate = (dateString: string): string => {
 export const ProjectDetail = memo(function ProjectDetail({
   project,
 }: ProjectDetailProps) {
-  const status = statusMap[project.status];
+  const status = statusMap[project.status] || fallbackStatus;
 
   // Memoize formatted dates
   const formattedStartDate = useMemo(

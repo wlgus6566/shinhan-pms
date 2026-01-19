@@ -31,18 +31,20 @@ import { Search, MoreHorizontal, ArrowUpDown } from 'lucide-react';
 import type { Project, ProjectStatus } from '@/types/project';
 
 // Hoist static data outside component (rendering-hoist-jsx)
-const statusLabels: Record<ProjectStatus, string> = {
+const statusLabels: Record<string, string> = {
   PENDING: '대기',
+  ACTIVE: '진행중',
   IN_PROGRESS: '진행중',
   COMPLETED: '완료',
   ON_HOLD: '보류',
 } as const;
 
 const statusVariants: Record<
-  ProjectStatus,
+  string,
   'default' | 'secondary' | 'outline' | 'destructive'
 > = {
   PENDING: 'secondary',
+  ACTIVE: 'default',
   IN_PROGRESS: 'default',
   COMPLETED: 'outline',
   ON_HOLD: 'destructive',
@@ -199,8 +201,8 @@ export function ProjectListTable() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={statusVariants[project.status]}>
-                      {statusLabels[project.status]}
+                    <Badge variant={statusVariants[project.status] || 'outline'}>
+                      {statusLabels[project.status] || project.status}
                     </Badge>
                   </TableCell>
                   <TableCell>

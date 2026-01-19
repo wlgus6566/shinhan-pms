@@ -1,5 +1,5 @@
 // Project status enum
-export type ProjectStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'ON_HOLD';
+export type ProjectStatus = 'PENDING' | 'ACTIVE' | 'IN_PROGRESS' | 'COMPLETED' | 'ON_HOLD';
 
 // Project role enum
 export type ProjectRole = 'PM' | 'PL' | 'PA';
