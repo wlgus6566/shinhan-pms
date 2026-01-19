@@ -4,20 +4,23 @@ import { mockProjects } from '@/lib/data/mockData';
 // GET /api/projects/:id - Get a single project
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> },
 ) {
   const params = await context.params;
   const projectId = parseInt(params.id);
-  
-  console.log('🔍 프로젝트 상세 조회:', { projectId, totalProjects: mockProjects.length });
-  
-  const project = mockProjects.find(p => p.id === projectId && !p.isDeleted);
+
+  console.log('🔍 프로젝트 상세 조회:', {
+    projectId,
+    totalProjects: mockProjects.length,
+  });
+
+  const project = mockProjects.find((p) => p.id === projectId && !p.isDeleted);
 
   if (!project) {
     console.log('❌ 프로젝트를 찾을 수 없음:', projectId);
     return NextResponse.json(
       { message: '프로젝트를 찾을 수 없습니다' },
-      { status: 404 }
+      { status: 404 },
     );
   }
 
@@ -28,17 +31,19 @@ export async function GET(
 // PATCH /api/projects/:id - Update a project
 export async function PATCH(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> },
 ) {
   try {
     const params = await context.params;
     const projectId = parseInt(params.id);
-    const projectIndex = mockProjects.findIndex(p => p.id === projectId && !p.isDeleted);
+    const projectIndex = mockProjects.findIndex(
+      (p) => p.id === projectId && !p.isDeleted,
+    );
 
     if (projectIndex === -1) {
       return NextResponse.json(
         { message: '프로젝트를 찾을 수 없습니다' },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -48,12 +53,12 @@ export async function PATCH(
     // Check unique name if name is being changed
     if (name && name !== mockProjects[projectIndex].name) {
       const existingProject = mockProjects.find(
-        p => p.name === name && !p.isDeleted && p.id !== projectId
+        (p) => p.name === name && !p.isDeleted && p.id !== projectId,
       );
       if (existingProject) {
         return NextResponse.json(
           { message: '이미 존재하는 프로젝트명입니다' },
-          { status: 409 }
+          { status: 409 },
         );
       }
     }
@@ -64,7 +69,7 @@ export async function PATCH(
     if (new Date(newEndDate) < new Date(newStartDate)) {
       return NextResponse.json(
         { message: '종료일은 시작일 이후여야 합니다' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -84,7 +89,7 @@ export async function PATCH(
   } catch (error) {
     return NextResponse.json(
       { message: '프로젝트 수정 중 오류가 발생했습니다' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -92,16 +97,18 @@ export async function PATCH(
 // DELETE /api/projects/:id - Soft delete a project
 export async function DELETE(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> },
 ) {
   const params = await context.params;
   const projectId = parseInt(params.id);
-  const projectIndex = mockProjects.findIndex(p => p.id === projectId && !p.isDeleted);
+  const projectIndex = mockProjects.findIndex(
+    (p) => p.id === projectId && !p.isDeleted,
+  );
 
   if (projectIndex === -1) {
     return NextResponse.json(
       { message: '프로젝트를 찾을 수 없습니다' },
-      { status: 404 }
+      { status: 404 },
     );
   }
 
