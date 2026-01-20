@@ -60,12 +60,12 @@ export function TaskTable({ tasks, onTaskClick }: TaskTableProps) {
               >
                 <TableCell className="font-medium">{task.taskName}</TableCell>
                 <TableCell>
-                  <Badge variant="outline" className={DIFFICULTY_COLORS[task.difficulty]}>
+                  <Badge className={DIFFICULTY_COLORS[task.difficulty]}>
                     {DIFFICULTY_LABELS[task.difficulty]}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="outline" className={STATUS_COLORS[task.status]}>
+                  <Badge className={STATUS_COLORS[task.status]}>
                     {STATUS_LABELS[task.status]}
                   </Badge>
                 </TableCell>

@@ -35,7 +35,8 @@ export default function TaskManagementPage() {
   // Check if current user is PM of this project
   const isPM = useMemo(() => {
     if (!user || !members || members.length === 0) return false;
-    return members.some(m => m.memberId === user.id && m.role === 'PM');
+    // Convert both to string for comparison to handle type mismatches
+    return members.some(m => String(m.memberId) === String(user.id) && m.role === 'PM');
   }, [user, members]);
 
   useEffect(() => {

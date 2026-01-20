@@ -24,10 +24,10 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
         <div className="flex items-start justify-between gap-2">
           <h3 className="font-semibold text-base line-clamp-2">{task.taskName}</h3>
           <div className="flex gap-2 flex-shrink-0">
-            <Badge variant="outline" className={DIFFICULTY_COLORS[task.difficulty]}>
+            <Badge className={DIFFICULTY_COLORS[task.difficulty]}>
               {DIFFICULTY_LABELS[task.difficulty]}
             </Badge>
-            <Badge variant="outline" className={STATUS_COLORS[task.status]}>
+            <Badge className={STATUS_COLORS[task.status]}>
               {STATUS_LABELS[task.status]}
             </Badge>
           </div>

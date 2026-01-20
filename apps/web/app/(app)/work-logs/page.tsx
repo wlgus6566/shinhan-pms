@@ -141,17 +141,28 @@ export default function WorkLogsPage() {
           </p>
         </div>
       ) : (
-        <div className="flex flex-row flex-wrap gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* 왼쪽: 내 업무 목록 */}
-          <div className="w-1/3">
+          <div className="lg:col-span-1">
             <MyTaskList
               tasks={myTasks}
               selectedTaskId={selectedTaskId}
               onTaskSelect={setSelectedTaskId}
             />
           </div>
+          
+          {/* 가운데: 달력 */}
+          <div className="lg:col-span-1">
+            <WorkLogCalendar
+              workLogs={workLogs}
+              selectedDate={selectedDate}
+              onDateSelect={handleDateSelect}
+              onMonthChange={handleMonthChange}
+            />
+          </div>
+
           {/* 오른쪽: 선택된 날짜의 일지 */}
-          <div className="w-1/3">
+          <div className="lg:col-span-1">
             <WorkLogList
               workLogs={workLogs}
               currentUserId={user?.id.toString()}
@@ -161,17 +172,6 @@ export default function WorkLogsPage() {
               onCreate={handleCreateClick}
             />
           </div>
-          {/* 가운데: 달력 */}
-          <div className="w-full">
-            <WorkLogCalendar
-              workLogs={workLogs}
-              selectedDate={selectedDate}
-              onDateSelect={handleDateSelect}
-              onMonthChange={handleMonthChange}
-            />
-          </div>
-
-         
         </div>
       )}
 

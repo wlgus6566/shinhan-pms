@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback, memo } from 'react';
 import useSWR from 'swr';
-import { getTasks } from '@/lib/api/tasks';
+import { getTasks, deleteTask } from '@/lib/api/tasks';
 import { getProjectMembers } from '@/lib/api/projectMembers';
 import { TaskTable } from './TaskTable';
 import { TaskFilters, type SortBy, type SortOrder } from './TaskFilters';
 import { TaskDetailSheet } from './TaskDetailSheet';
 import { AddTaskDialog } from './AddTaskDialog';
+import { EditTaskDialog } from './EditTaskDialog';
 import { Button } from '@/components/ui/button';
 import { Plus, Loader2 } from 'lucide-react';
 import type { Task, TaskStatus, TaskDifficulty } from '@/types/task';
@@ -18,8 +19,37 @@ interface TaskListProps {
   isPM: boolean;
 }
 
+// Hoist static objects outside component to prevent recreating on every render
+const DIFFICULTY_ORDER = { HIGH: 3, MEDIUM: 2, LOW: 1 } as const;
+const STATUS_ORDER = {
+  WAITING: 1,
+  IN_PROGRESS: 2,
+  WORK_COMPLETED: 3,
+  OPEN_WAITING: 4,
+  OPEN_RESPONDING: 5,
+  COMPLETED: 6,
+} as const;
+
+// Extract loading state as separate component to avoid re-renders
+const LoadingState = memo(() => (
+  <div className="flex justify-center items-center py-12">
+    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+  </div>
+));
+LoadingState.displayName = 'LoadingState';
+
+// Extract error state as separate component
+const ErrorState = memo(() => (
+  <div className="text-center py-12">
+    <p className="text-destructive">업무 목록을 불러오는데 실패했습니다</p>
+  </div>
+));
+ErrorState.displayName = 'ErrorState';
+
 export function TaskList({ projectId, isPM }: TaskListProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
 
@@ -44,19 +74,25 @@ export function TaskList({ projectId, isPM }: TaskListProps) {
   const loading = tasksLoading || membersLoading;
   const error = tasksError || membersError;
 
+  // Convert arrays to Sets for O(1) lookups (js-set-map-lookups)
+  const statusFilterSet = useMemo(() => new Set(statusFilter), [statusFilter]);
+  const difficultyFilterSet = useMemo(() => new Set(difficultyFilter), [difficultyFilter]);
+
   // Filtering logic
   const filteredTasks = useMemo(() => {
     if (!tasks) return [];
 
+    // Cache lowercase search query to avoid recalculating in loop
+    const lowerSearchQuery = searchQuery ? searchQuery.toLowerCase() : '';
+
     return tasks.filter((task) => {
-      // Search query filter
-      if (searchQuery && !task.taskName.toLowerCase().includes(searchQuery.toLowerCase())) {
+      // Search query filter - early exit for better performance
+      if (lowerSearchQuery && !task.taskName.toLowerCase().includes(lowerSearchQuery)) {
         return false;
       }
 
       // Assignee filter
       if (assigneeFilter !== 'all') {
-        const filterIdNum = parseInt(assigneeFilter);
         const isAssignee =
           task.planningAssignee?.id === assigneeFilter ||
           task.designAssignee?.id === assigneeFilter ||
@@ -65,21 +101,21 @@ export function TaskList({ projectId, isPM }: TaskListProps) {
         if (!isAssignee) return false;
       }
 
-      // Status filter
-      if (statusFilter.length > 0 && !statusFilter.includes(task.status)) {
+      // Status filter - use Set for O(1) lookup
+      if (statusFilterSet.size > 0 && !statusFilterSet.has(task.status)) {
         return false;
       }
 
-      // Difficulty filter
-      if (difficultyFilter.length > 0 && !difficultyFilter.includes(task.difficulty)) {
+      // Difficulty filter - use Set for O(1) lookup
+      if (difficultyFilterSet.size > 0 && !difficultyFilterSet.has(task.difficulty)) {
         return false;
       }
 
       return true;
     });
-  }, [tasks, searchQuery, assigneeFilter, statusFilter, difficultyFilter]);
+  }, [tasks, searchQuery, assigneeFilter, statusFilterSet, difficultyFilterSet]);
 
-  // Sorting logic
+  // Sorting logic - use hoisted constants
   const sortedTasks = useMemo(() => {
     const sorted = [...filteredTasks];
 
@@ -88,8 +124,7 @@ export function TaskList({ projectId, isPM }: TaskListProps) {
 
       switch (sortBy) {
         case 'difficulty':
-          const difficultyOrder = { HIGH: 3, MEDIUM: 2, LOW: 1 };
-          comparison = difficultyOrder[b.difficulty] - difficultyOrder[a.difficulty];
+          comparison = DIFFICULTY_ORDER[b.difficulty] - DIFFICULTY_ORDER[a.difficulty];
           break;
         case 'endDate':
           const aDate = a.endDate ? new Date(a.endDate).getTime() : Infinity;
@@ -97,15 +132,7 @@ export function TaskList({ projectId, isPM }: TaskListProps) {
           comparison = aDate - bDate;
           break;
         case 'status':
-          const statusOrder = {
-            WAITING: 1,
-            IN_PROGRESS: 2,
-            WORK_COMPLETED: 3,
-            OPEN_WAITING: 4,
-            OPEN_RESPONDING: 5,
-            COMPLETED: 6,
-          };
-          comparison = statusOrder[a.status] - statusOrder[b.status];
+          comparison = STATUS_ORDER[a.status] - STATUS_ORDER[b.status];
           break;
         case 'createdAt':
           comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
@@ -118,37 +145,46 @@ export function TaskList({ projectId, isPM }: TaskListProps) {
     return sorted;
   }, [filteredTasks, sortBy, sortOrder]);
 
-  const resetFilters = () => {
+  // Use useCallback for stable function references (rerender-functional-setstate)
+  const resetFilters = useCallback(() => {
     setSearchQuery('');
     setAssigneeFilter('all');
     setStatusFilter([]);
     setDifficultyFilter([]);
-  };
+  }, []);
+
+  const handleSuccess = useCallback(() => {
+    mutateTasks();
+  }, [mutateTasks]);
+
+  const handleTaskClick = useCallback((task: Task) => {
+    setSelectedTask(task);
+    setSheetOpen(true);
+  }, []);
+
+  const handleEdit = useCallback((task: Task) => {
+    setEditingTask(task);
+    setEditDialogOpen(true);
+    setSheetOpen(false); // Close detail sheet
+  }, []);
+
+  const handleDelete = useCallback(async (taskId: string) => {
+    try {
+      await deleteTask(taskId);
+      mutateTasks(); // Refresh task list
+      setSheetOpen(false);
+    } catch (err: any) {
+      console.error('Error deleting task:', err);
+    }
+  }, [mutateTasks]);
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
+    return <LoadingState />;
   }
 
   if (error) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-destructive">업무 목록을 불러오는데 실패했습니다</p>
-      </div>
-    );
+    return <ErrorState />;
   }
-
-  const handleSuccess = () => {
-    mutateTasks();
-  };
-
-  const handleTaskClick = (task: Task) => {
-    setSelectedTask(task);
-    setSheetOpen(true);
-  };
 
   return (
     <div className="space-y-4">
@@ -196,7 +232,20 @@ export function TaskList({ projectId, isPM }: TaskListProps) {
         task={selectedTask}
         open={sheetOpen}
         onOpenChange={setSheetOpen}
+        isPM={isPM}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
       />
+
+      {isPM && editingTask && projectMembers && (
+        <EditTaskDialog
+          task={editingTask}
+          projectMembers={projectMembers}
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          onSuccess={handleSuccess}
+        />
+      )}
     </div>
   );
 }
