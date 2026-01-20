@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { getProject } from '@/lib/api/projects';
+import { getProjectMembers } from '@/lib/api/projectMembers';
 import { ProjectDetail } from '@/components/project/ProjectDetail';
 import { ProjectMembersTable } from '@/components/project/ProjectMembersTable';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Edit, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import type { Project } from '@/types/project';
+import type { Project, ProjectMember } from '@/types/project';
 
 export default function ProjectDetailPage() {
   const params = useParams();
@@ -20,6 +21,7 @@ export default function ProjectDetailPage() {
   const projectId = params.id as string;
 
   const [project, setProject] = useState<Project | null>(null);
+  const [members, setMembers] = useState<ProjectMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,8 +33,14 @@ export default function ProjectDetailPage() {
 
   useEffect(() => {
     if (projectId) {
-      getProject(projectId)
-        .then(setProject)
+      Promise.all([
+        getProject(projectId),
+        getProjectMembers(projectId),
+      ])
+        .then(([projectData, membersData]) => {
+          setProject(projectData);
+          setMembers(membersData);
+        })
         .catch((err) => {
           setError(err.message);
           setTimeout(() => router.push('/projects'), 2000);

@@ -31,6 +31,7 @@ model Project {
 
   // 관계 설정
   members ProjectMember[]
+  tasks   Task[]
 
   // 인덱스
   @@index([projectName], map: "idx_projects_name")
@@ -66,7 +67,13 @@ model User {
   updatedAt    DateTime? @updatedAt @map("updated_at") @db.Timestamp(6)
 
   // 관계 설정
-  projectMemberships ProjectMember[]
+  projectMemberships  ProjectMember[]
+  tasksAsPlanning     Task[]          @relation("TaskPlanningAssignee")
+  tasksAsDesign       Task[]          @relation("TaskDesignAssignee")
+  tasksAsFrontend     Task[]          @relation("TaskFrontendAssignee")
+  tasksAsBackend      Task[]          @relation("TaskBackendAssignee")
+  createdTasks        Task[]          @relation("TaskCreator")
+  workLogs            WorkLog[]       @relation("WorkLogAuthor")
 
   // 인덱스
   @@index([email], map: "idx_users_email")
@@ -109,4 +116,81 @@ model ProjectMember {
   @@index([projectId, workArea, role], map: "idx_project_work_area_role")
 
   @@map("project_members")
+}
+
+// =============================================
+// 업무 관리
+// =============================================
+
+model Task {
+  id                   BigInt    @id @default(autoincrement())
+  projectId            BigInt    @map("project_id")
+  taskName             String    @map("task_name") @db.VarChar(100)
+  description          String?   @db.Text
+  difficulty           String    @db.VarChar(10) // HIGH, MEDIUM, LOW
+  clientName           String?   @map("client_name") @db.VarChar(100)
+
+  // 파트별 담당자
+  planningAssigneeId   BigInt?   @map("planning_assignee_id")
+  designAssigneeId     BigInt?   @map("design_assignee_id")
+  frontendAssigneeId   BigInt?   @map("frontend_assignee_id")
+  backendAssigneeId    BigInt?   @map("backend_assignee_id")
+
+  startDate            DateTime? @map("start_date") @db.Date
+  endDate              DateTime? @map("end_date") @db.Date
+  notes                String?   @db.Text
+
+  status               String    @default("TODO") @db.VarChar(20)
+  isActive             Boolean   @default(true) @map("is_active")
+  createdBy            BigInt    @map("created_by")
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedBy            BigInt?   @map("updated_by")
+  updatedAt            DateTime? @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  // 관계
+  project              Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  planningAssignee     User?     @relation("TaskPlanningAssignee", fields: [planningAssigneeId], references: [id], onDelete: SetNull)
+  designAssignee       User?     @relation("TaskDesignAssignee", fields: [designAssigneeId], references: [id], onDelete: SetNull)
+  frontendAssignee     User?     @relation("TaskFrontendAssignee", fields: [frontendAssigneeId], references: [id], onDelete: SetNull)
+  backendAssignee      User?     @relation("TaskBackendAssignee", fields: [backendAssigneeId], references: [id], onDelete: SetNull)
+  creator              User      @relation("TaskCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  workLogs             WorkLog[]
+
+  // 인덱스
+  @@index([projectId], map: "idx_tasks_project_id")
+  @@index([difficulty], map: "idx_tasks_difficulty")
+  @@index([status], map: "idx_tasks_status")
+  @@index([isActive], map: "idx_tasks_is_active")
+
+  @@map("tasks")
+}
+
+// =============================================
+// 업무일지 관리
+// =============================================
+
+model WorkLog {
+  id        BigInt    @id @default(autoincrement())
+  taskId    BigInt    @map("task_id")
+  userId    BigInt    @map("user_id")
+  workDate  DateTime  @map("work_date") @db.Date
+  content   String    @db.Text
+  workHours Decimal?  @map("work_hours") @db.Decimal(4, 1)
+  progress  Int?      @db.SmallInt
+  issues    String?   @db.Text
+  isActive  Boolean   @default(true) @map("is_active")
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt DateTime? @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  // 관계 설정
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation("WorkLogAuthor", fields: [userId], references: [id], onDelete: Cascade)
+
+  // 인덱스 및 제약조건
+  @@unique([taskId, userId, workDate], map: "unique_task_user_date")
+  @@index([taskId, workDate], map: "idx_work_logs_task_date")
+  @@index([userId, workDate], map: "idx_work_logs_user_date")
+  @@index([isActive], map: "idx_work_logs_is_active")
+
+  @@map("work_logs")
 }

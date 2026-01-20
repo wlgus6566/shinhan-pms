@@ -65,6 +65,34 @@ export class ProjectsService {
     });
   }
 
+  /**
+   * 내가 속한 프로젝트 목록 조회
+   */
+  async findMyProjects(userId: bigint) {
+    const projectMembers = await this.prisma.projectMember.findMany({
+      where: {
+        memberId: userId,
+        project: {
+          isActive: true,
+        },
+      },
+      include: {
+        project: true,
+      },
+      orderBy: {
+        project: {
+          projectName: 'asc',
+        },
+      },
+    });
+
+    return projectMembers.map((pm) => ({
+      ...pm.project,
+      myRole: pm.role,
+      myWorkArea: pm.workArea,
+    }));
+  }
+
   async findOne(id: bigint) {
     const project = await this.prisma.project.findUnique({
       where: { id, isActive: true },

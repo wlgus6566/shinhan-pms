@@ -10,6 +10,7 @@ import {
   HttpCode,
   HttpStatus,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -17,6 +18,7 @@ import {
   ApiResponse,
   ApiQuery,
   ApiParam,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
@@ -25,6 +27,8 @@ import { ProjectResponseDto } from './dto/project-response.dto';
 import { AddProjectMemberDto } from './dto/add-member.dto';
 import { UpdateProjectMemberRoleDto } from './dto/update-member-role.dto';
 import { ProjectMemberResponseDto } from './dto/project-member-response.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @ApiTags('Projects')
 @Controller('projects')
@@ -74,6 +78,20 @@ export class ProjectsController {
   ) {
     const projects = await this.projectsService.findAll({ search, status });
     return projects.map((project) => this.transformProject(project));
+  }
+
+  @Get('my')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '내가 속한 프로젝트 목록 조회' })
+  @ApiResponse({
+    status: 200,
+    description: '내가 멤버로 속한 프로젝트 목록',
+    type: [ProjectResponseDto],
+  })
+  async findMyProjects(@CurrentUser() user: any) {
+    const projects = await this.projectsService.findMyProjects(BigInt(user.id));
+    return projects.map((project) => this.transformMyProject(project));
   }
 
   @Get(':id')
@@ -147,6 +165,30 @@ export class ProjectsController {
         ? project.endDate.toISOString().split('T')[0]
         : undefined,
       status: project.status,
+      createdAt: project.createdAt,
+      updatedAt: project.updatedAt,
+    };
+  }
+
+  /**
+   * 내 프로젝트 목록용 변환 (역할 정보 포함)
+   */
+  private transformMyProject(project: any): any {
+    return {
+      id: project.id.toString(),
+      name: project.projectName,
+      client: project.client,
+      projectType: project.projectType,
+      description: project.description,
+      startDate: project.startDate
+        ? project.startDate.toISOString().split('T')[0]
+        : undefined,
+      endDate: project.endDate
+        ? project.endDate.toISOString().split('T')[0]
+        : undefined,
+      status: project.status,
+      myRole: project.myRole,
+      myWorkArea: project.myWorkArea,
       createdAt: project.createdAt,
       updatedAt: project.updatedAt,
     };

@@ -74,3 +74,15 @@ export async function deleteProject(id: string | number): Promise<void> {
     method: 'DELETE',
   });
 }
+
+/**
+ * 내가 속한 프로젝트 목록 조회
+ */
+export interface MyProject extends Project {
+  myRole: string;
+  myWorkArea: string;
+}
+
+export async function getMyProjects(): Promise<MyProject[]> {
+  return fetcher<MyProject[]>('/api/projects/my');
+}

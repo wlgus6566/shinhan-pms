@@ -1,11 +1,9 @@
 import useSWR from 'swr';
-import { fetcher } from '@/lib/api/fetcher';
 import type {
   Project,
   GetProjectsParams,
-  CreateProjectRequest,
-  UpdateProjectRequest,
 } from '@/types/project';
+import type { MyProject } from '@/lib/api/projects';
 
 /**
  * 프로젝트 목록 조회 hook
@@ -44,6 +42,20 @@ export function useProject(id: string | number | null) {
 
   return {
     project: data,
+    isLoading,
+    error,
+    mutate,
+  };
+}
+
+/**
+ * 내가 속한 프로젝트 목록 조회 hook
+ */
+export function useMyProjects() {
+  const { data, error, isLoading, mutate } = useSWR<MyProject[]>('/api/projects/my');
+
+  return {
+    projects: data,
     isLoading,
     error,
     mutate,

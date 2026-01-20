@@ -36,14 +36,6 @@ import { AddMemberDialog } from './AddMemberDialog';
 import type { ProjectMember, ProjectRole, Department, UserRole, WorkArea } from '@/types/project';
 import { POSITION_LABELS } from '@/lib/constants/roles';
 
-const departmentLabels: Record<Department, string> = {
-  PLANNING: '기획',
-  DESIGN: '디자인',
-  FRONTEND: '프론트엔드',
-  DEVELOPMENT: '개발',
-  OPERATION: '운영',
-};
-
 const workAreaLabels: Record<WorkArea, string> = {
   PROJECT_MANAGEMENT: '프로젝트 관리',
   PLANNING: '기획',
@@ -76,10 +68,7 @@ export function ProjectMembersTable({ projectId, creatorId }: ProjectMembersTabl
   const [memberToRemove, setMemberToRemove] = useState<ProjectMember | null>(null);
   const [isRemoving, setIsRemoving] = useState(false);
 
-  const canManage = 
-    user?.role === 'SUPER_ADMIN' || 
-    user?.role === 'PM' || 
-    members.find(m => m.memberId === user?.id && (m.role === 'PM' || m.role === 'PL'));
+  const canManage = user?.role === 'PM' || members.find(m => m.memberId === user?.id && (m.role === 'PM' || m.role === 'PL'));
 
   const fetchMembers = async () => {
     setLoading(true);
