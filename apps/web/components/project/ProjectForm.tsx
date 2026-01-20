@@ -32,7 +32,7 @@ import type { ProjectStatus } from '@/types/project';
 const projectTypeOptions = [
   { value: 'OPERATION', label: '운영' },
   { value: 'BUILD', label: '구축' },
-] as const;
+];
 
 const projectSchema = z
   .object({

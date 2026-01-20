@@ -2,40 +2,15 @@
 
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import type { Task } from '@/types/task';
+import { STATUS_LABELS, STATUS_COLORS, DIFFICULTY_LABELS, DIFFICULTY_COLORS, type Task } from '@/types/task';
 import { Calendar, User } from 'lucide-react';
 
 interface TaskCardProps {
   task: Task;
+  onClick?: () => void;
 }
 
-const difficultyLabels: Record<string, string> = {
-  HIGH: '상',
-  MEDIUM: '중',
-  LOW: '하',
-};
-
-const difficultyColors: Record<string, string> = {
-  HIGH: 'bg-red-500/10 text-red-700 border-red-200',
-  MEDIUM: 'bg-yellow-500/10 text-yellow-700 border-yellow-200',
-  LOW: 'bg-green-500/10 text-green-700 border-green-200',
-};
-
-const statusLabels: Record<string, string> = {
-  TODO: '할 일',
-  IN_PROGRESS: '진행 중',
-  DONE: '완료',
-  HOLD: '보류',
-};
-
-const statusColors: Record<string, string> = {
-  TODO: 'bg-gray-500/10 text-gray-700 border-gray-200',
-  IN_PROGRESS: 'bg-blue-500/10 text-blue-700 border-blue-200',
-  DONE: 'bg-green-500/10 text-green-700 border-green-200',
-  HOLD: 'bg-orange-500/10 text-orange-700 border-orange-200',
-};
-
-export function TaskCard({ task }: TaskCardProps) {
+export function TaskCard({ task, onClick }: TaskCardProps) {
   const assignees = [
     { label: '기획', assignee: task.planningAssignee },
     { label: '디자인', assignee: task.designAssignee },
@@ -44,16 +19,16 @@ export function TaskCard({ task }: TaskCardProps) {
   ].filter(a => a.assignee);
 
   return (
-    <Card className="hover:shadow-md transition-shadow cursor-pointer">
+    <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={onClick}>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <h3 className="font-semibold text-base line-clamp-2">{task.taskName}</h3>
           <div className="flex gap-2 flex-shrink-0">
-            <Badge variant="outline" className={difficultyColors[task.difficulty]}>
-              {difficultyLabels[task.difficulty]}
+            <Badge variant="outline" className={DIFFICULTY_COLORS[task.difficulty]}>
+              {DIFFICULTY_LABELS[task.difficulty]}
             </Badge>
-            <Badge variant="outline" className={statusColors[task.status]}>
-              {statusLabels[task.status]}
+            <Badge variant="outline" className={STATUS_COLORS[task.status]}>
+              {STATUS_LABELS[task.status]}
             </Badge>
           </div>
         </div>

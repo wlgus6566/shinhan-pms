@@ -112,15 +112,16 @@ export const fetcher = async <T = any>(
   const upperMethod = method.toUpperCase();
 
   try {
+    // interceptor에서 이미 response.data를 반환하므로 그대로 반환
     if (upperMethod === 'GET' || upperMethod === 'DELETE') {
       return await apiClient[upperMethod.toLowerCase() as 'get' | 'delete']<T>(
         url,
         config
-      );
+      ) as any as T;
     } else {
       return await apiClient[
         upperMethod.toLowerCase() as 'post' | 'put' | 'patch'
-      ]<T>(url, body, config);
+      ]<T>(url, body, config) as any as T;
     }
   } catch (error) {
     throw error;

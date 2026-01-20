@@ -87,7 +87,7 @@ export function WorkLogCalendar({
       if (!grouped[log.workDate]) {
         grouped[log.workDate] = [];
       }
-      grouped[log.workDate].push(log);
+      grouped[log.workDate]!.push(log);
     });
     return Object.entries(grouped).sort(([a], [b]) => b.localeCompare(a));
   }, [workLogs]);

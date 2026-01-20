@@ -154,7 +154,7 @@ export default function WorkLogsPage() {
           <div className="w-1/3">
             <WorkLogList
               workLogs={workLogs}
-              currentUserId={user?.id}
+              currentUserId={user?.id.toString()}
               selectedDate={selectedDate}
               onEdit={handleEditClick}
               onDelete={handleDeleteFromCard}

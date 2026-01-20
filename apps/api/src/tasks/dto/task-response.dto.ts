@@ -13,7 +13,7 @@ export class TaskResponseDto {
   @ApiProperty({ description: '설명', required: false })
   description?: string;
 
-  @ApiProperty({ description: '난이도', enum: ['HIGH', 'MEDIUM', 'LOW'] })
+  @ApiProperty({ description: '중요도', enum: ['HIGH', 'MEDIUM', 'LOW'] })
   difficulty: string;
 
   @ApiProperty({ description: '클라이언트명', required: false })

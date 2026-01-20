@@ -7,13 +7,13 @@ export const ROLES = {
 
 export type Role = (typeof ROLES)[keyof typeof ROLES];
 
-export const ROLE_LABELS: Record<string, string> = {
+export const ROLE_LABELS: Record<Role, string> = {
   SUPER_ADMIN: '슈퍼 관리자',
   PM: '프로젝트 관리자',
   MEMBER: '일반',
 };
 
-export const ROLE_DESCRIPTIONS: Record<string, string> = {
+export const ROLE_DESCRIPTIONS: Record<Role, string> = {
   SUPER_ADMIN: '전체 권한 (멤버 등록, 프로젝트 등록)',
   PM: '프로젝트 등록/수정/삭제, 프로젝트 멤버 관리',
   MEMBER: '업무일지 작성',
@@ -47,7 +47,7 @@ export const DEPARTMENT_OPTIONS = Object.entries(DEPARTMENTS).map(
 
 export const ROLE_OPTIONS = Object.entries(ROLES).map(([key, value]) => ({
   value,
-  label: ROLE_LABELS[value],
+  label: ROLE_LABELS[value as Role],
 }));
 
 // 직책
@@ -62,7 +62,7 @@ export const POSITIONS = {
 
 export type Position = (typeof POSITIONS)[keyof typeof POSITIONS];
 
-export const POSITION_LABELS: Record<string, string> = {
+export const POSITION_LABELS: Record<Position, string> = {
   DIVISION_HEAD: '부문장',
   GENERAL_MANAGER: '본부장',
   PRINCIPAL_LEADER: '책임리더',
@@ -73,5 +73,5 @@ export const POSITION_LABELS: Record<string, string> = {
 
 export const POSITION_OPTIONS = Object.entries(POSITIONS).map(([key, value]) => ({
   value,
-  label: POSITION_LABELS[value],
+  label: POSITION_LABELS[value as Position],
 }));

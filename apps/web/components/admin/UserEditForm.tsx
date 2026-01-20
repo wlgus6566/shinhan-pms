@@ -70,7 +70,7 @@ export function UserEditForm({ userId }: { userId: string }) {
         setUserData(user);
         form.reset({
           department: user.department,
-          role: user.role,
+          role: user.role as 'SUPER_ADMIN' | 'PM' | 'MEMBER',
           isActive: user.isActive,
         });
       })

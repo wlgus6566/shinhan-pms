@@ -6,7 +6,7 @@ import type { ProjectStatus } from '@/types/project';
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const search = searchParams.get('search');
-  const status = searchParams.get('status') as ProjectStatus | null;
+  const status = searchParams.get('status');
 
   let filteredProjects = mockProjects.filter(p => !p.isDeleted);
 
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, description, startDate, endDate, status, progress } = body;
+    const { name, client, projectType, description, startDate, endDate, status } = body;
 
     // Validation
     if (!name || !startDate || !endDate) {
@@ -62,11 +62,12 @@ export async function POST(request: NextRequest) {
     const newProject = {
       id: getNextProjectId(),
       name,
+      client: client || null,
+      projectType: projectType || 'BUILD',
       description: description || null,
       startDate,
       endDate,
       status: status || 'PENDING',
-      progress: progress || 0,
       creatorId: 1, // Mock creator ID
       creator: {
         id: 1,

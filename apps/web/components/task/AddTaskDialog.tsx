@@ -26,7 +26,7 @@ const addTaskSchema = z.object({
   taskName: z.string().min(2, '작업명은 2자 이상이어야 합니다').max(100, '작업명은 100자 이하여야 합니다'),
   description: z.string().max(1000, '작업내용은 1000자 이하여야 합니다').optional(),
   difficulty: z.enum(['HIGH', 'MEDIUM', 'LOW'] as const, {
-    required_error: '난이도를 선택하세요',
+    required_error: '중요도를 선택하세요',
   }),
   clientName: z.string().max(100, '담당 RM은 100자 이하여야 합니다').optional(),
   planningAssigneeId: z.string().optional(),
@@ -93,10 +93,12 @@ export function AddTaskDialog({ projectId, projectMembers, open, onOpenChange, o
 
   const getMemberOptions = (members: ProjectMember[]) => [
     { value: NONE_VALUE, label: '선택 안 함' },
-    ...members.map(m => ({
-      value: m.member.id.toString(),
-      label: `${m.member.name} (${m.member.email})`,
-    })),
+    ...members
+      .filter(m => m.member)
+      .map(m => ({
+        value: m.member!.id.toString(),
+        label: `${m.member!.name} (${m.member!.email})`,
+      })),
   ];
 
   const onSubmit = async (data: AddTaskFormValues) => {
@@ -194,8 +196,8 @@ export function AddTaskDialog({ projectId, projectMembers, open, onOpenChange, o
             <FormSelect
               control={form.control}
               name="difficulty"
-              label="난이도 *"
-              placeholder="난이도 선택"
+              label="중요도 *"
+              placeholder="중요도 선택"
               options={difficultyOptions}
             />
 

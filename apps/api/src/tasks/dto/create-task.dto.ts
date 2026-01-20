@@ -14,9 +14,9 @@ export class CreateTaskDto {
   @MaxLength(1000, { message: '작업내용은 최대 1000자까지 입력 가능합니다' })
   description?: string;
 
-  @ApiProperty({ description: '난이도', enum: ['HIGH', 'MEDIUM', 'LOW'] })
+  @ApiProperty({ description: '중요도', enum: ['HIGH', 'MEDIUM', 'LOW'] })
   @IsString()
-  @IsIn(['HIGH', 'MEDIUM', 'LOW'], { message: '난이도는 HIGH, MEDIUM, LOW 중 하나여야 합니다' })
+  @IsIn(['HIGH', 'MEDIUM', 'LOW'], { message: '중요도는 HIGH, MEDIUM, LOW 중 하나여야 합니다' })
   difficulty: 'HIGH' | 'MEDIUM' | 'LOW';
 
   @ApiProperty({ description: '담당 RM (고객사 이름)', required: false })

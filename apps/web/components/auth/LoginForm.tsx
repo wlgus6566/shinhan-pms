@@ -47,7 +47,11 @@ export function LoginForm() {
     setError(null);
     try {
       const result = await loginApi(values);
-      login(result.accessToken, result.user);
+      const user = {
+        ...result.user,
+        id: typeof result.user.id === 'string' ? parseInt(result.user.id) : result.user.id,
+      };
+      login(result.accessToken, user);
       router.push('/dashboard');
     } catch (err: any) {
       setError(err.message || '로그인 중 오류가 발생했습니다');

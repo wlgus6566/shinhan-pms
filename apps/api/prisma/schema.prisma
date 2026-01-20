@@ -140,7 +140,7 @@ model Task {
   endDate              DateTime? @map("end_date") @db.Date
   notes                String?   @db.Text
 
-  status               String    @default("TODO") @db.VarChar(20)
+  status               String    @default("WAITING") @db.VarChar(20)
   isActive             Boolean   @default(true) @map("is_active")
   createdBy            BigInt    @map("created_by")
   createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamp(6)

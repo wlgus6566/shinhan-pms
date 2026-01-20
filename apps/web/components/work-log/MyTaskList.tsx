@@ -11,8 +11,14 @@ interface MyTaskListProps {
 }
 
 const statusConfig: Record<string, { label: string; icon: React.ElementType; color: string }> = {
-  TODO: { label: '예정', icon: Clock, color: 'text-slate-500' },
-  IN_PROGRESS: { label: '진행중', icon: AlertTriangle, color: 'text-blue-500' },
+  WAITING: { label: '작업 대기', icon: Clock, color: 'text-slate-500' },
+  IN_PROGRESS: { label: '작업 중', icon: AlertTriangle, color: 'text-blue-500' },
+  WORK_COMPLETED: { label: '작업 완료', icon: CheckCircle2, color: 'text-green-500' },
+  OPEN_WAITING: { label: '오픈 대기', icon: Clock, color: 'text-yellow-500' },
+  OPEN_RESPONDING: { label: '오픈 대응', icon: AlertTriangle, color: 'text-orange-500' },
+  COMPLETED: { label: '완료', icon: CheckCircle2, color: 'text-emerald-500' },
+  // Legacy statuses for backward compatibility
+  TODO: { label: '작업 대기', icon: Clock, color: 'text-slate-500' },
   DONE: { label: '완료', icon: CheckCircle2, color: 'text-emerald-500' },
   HOLD: { label: '보류', icon: Clock, color: 'text-amber-500' },
 };
@@ -38,8 +44,8 @@ export function MyTaskList({ tasks, selectedTaskId, onTaskSelect }: MyTaskListPr
 
       <div className="max-h-[400px] overflow-y-auto">
         {tasks.map((task) => {
-          const status = statusConfig[task.status] || statusConfig.TODO;
-          const StatusIcon = status.icon;
+          const status = statusConfig[task.status] ?? statusConfig['WAITING'];
+          const StatusIcon = status!.icon;
 
           return (
             <button
@@ -51,7 +57,7 @@ export function MyTaskList({ tasks, selectedTaskId, onTaskSelect }: MyTaskListPr
               )}
             >
               <div className="flex items-start gap-3">
-                <StatusIcon className={cn('h-5 w-5 flex-shrink-0 mt-0.5', status.color)} />
+                <StatusIcon className={cn('h-5 w-5 flex-shrink-0 mt-0.5', status!.color)} />
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-slate-800 truncate">{task.taskName}</p>
                   {task.project && (
@@ -69,7 +75,7 @@ export function MyTaskList({ tasks, selectedTaskId, onTaskSelect }: MyTaskListPr
                         task.status === 'HOLD' && 'bg-amber-100 text-amber-600'
                       )}
                     >
-                      {status.label}
+                      {status!.label}
                     </span>
                     {task.difficulty && (
                       <span

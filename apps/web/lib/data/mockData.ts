@@ -65,11 +65,12 @@ export const mockProjects: Project[] = [
   {
     id: 1,
     name: '이모션 홈페이지 리뉴얼',
+    client: '이모션',
+    projectType: 'BUILD',
     description: '브랜드 아이덴티티 강화를 위한 홈페이지 전면 리뉴얼',
     startDate: '2024-01-15T00:00:00Z',
     endDate: '2024-06-30T00:00:00Z',
     status: 'IN_PROGRESS',
-    progress: 65,
     creatorId: 1,
     creator: {
       id: 1,
@@ -83,11 +84,12 @@ export const mockProjects: Project[] = [
   {
     id: 2,
     name: 'PMS 시스템 개발',
+    client: '이모션',
+    projectType: 'BUILD',
     description: '이모션 업무 관리를 위한 프로젝트 관리 시스템',
     startDate: '2024-02-01T00:00:00Z',
     endDate: '2024-07-31T00:00:00Z',
     status: 'IN_PROGRESS',
-    progress: 45,
     creatorId: 2,
     creator: {
       id: 2,
@@ -101,11 +103,12 @@ export const mockProjects: Project[] = [
   {
     id: 3,
     name: '쇼핑몰 플랫폼 구축',
+    client: 'ABC 쇼핑몰',
+    projectType: 'BUILD',
     description: 'B2C 전자상거래 플랫폼 개발 프로젝트',
     startDate: '2023-11-01T00:00:00Z',
     endDate: '2024-01-31T00:00:00Z',
     status: 'COMPLETED',
-    progress: 100,
     creatorId: 1,
     creator: {
       id: 1,
@@ -119,11 +122,12 @@ export const mockProjects: Project[] = [
   {
     id: 4,
     name: '모바일 앱 개발',
+    client: 'XYZ 기업',
+    projectType: 'BUILD',
     description: 'iOS/Android 하이브리드 앱 개발',
     startDate: '2024-03-01T00:00:00Z',
     endDate: '2024-09-30T00:00:00Z',
     status: 'PENDING',
-    progress: 10,
     creatorId: 3,
     creator: {
       id: 3,
@@ -137,11 +141,12 @@ export const mockProjects: Project[] = [
   {
     id: 5,
     name: '데이터 분석 대시보드',
+    client: '데이터 연구소',
+    projectType: 'OPERATION',
     description: '실시간 비즈니스 인사이트 제공 대시보드',
     startDate: '2024-01-20T00:00:00Z',
     endDate: '2024-05-31T00:00:00Z',
     status: 'ON_HOLD',
-    progress: 30,
     creatorId: 2,
     creator: {
       id: 2,
@@ -155,11 +160,12 @@ export const mockProjects: Project[] = [
   {
     id: 6,
     name: '디지털 마케팅 플랫폼',
+    client: '마케팅 에이전시',
+    projectType: 'OPERATION',
     description: '맞춤형 마케팅 캠페인 관리 시스템',
     startDate: '2024-02-15T00:00:00Z',
     endDate: '2024-08-15T00:00:00Z',
     status: 'IN_PROGRESS',
-    progress: 55,
     creatorId: 4,
     creator: {
       id: 4,
@@ -180,6 +186,7 @@ export const mockProjectMembers: ProjectMember[] = [
     projectId: 1,
     memberId: 1,
     role: 'PM',
+    workArea: 'PROJECT_MANAGEMENT',
     member: {
       id: 1,
       name: '김철수',
@@ -195,6 +202,7 @@ export const mockProjectMembers: ProjectMember[] = [
     projectId: 1,
     memberId: 3,
     role: 'PL',
+    workArea: 'DESIGN',
     member: {
       id: 3,
       name: '박민수',
@@ -210,6 +218,7 @@ export const mockProjectMembers: ProjectMember[] = [
     projectId: 1,
     memberId: 4,
     role: 'PA',
+    workArea: 'BACKEND',
     member: {
       id: 4,
       name: '정수진',
@@ -226,6 +235,7 @@ export const mockProjectMembers: ProjectMember[] = [
     projectId: 2,
     memberId: 2,
     role: 'PM',
+    workArea: 'PROJECT_MANAGEMENT',
     member: {
       id: 2,
       name: '이영희',
@@ -241,6 +251,7 @@ export const mockProjectMembers: ProjectMember[] = [
     projectId: 2,
     memberId: 5,
     role: 'PL',
+    workArea: 'FRONTEND',
     member: {
       id: 5,
       name: '최동욱',
@@ -257,6 +268,7 @@ export const mockProjectMembers: ProjectMember[] = [
     projectId: 3,
     memberId: 1,
     role: 'PM',
+    workArea: 'PROJECT_MANAGEMENT',
     member: {
       id: 1,
       name: '김철수',
@@ -272,6 +284,7 @@ export const mockProjectMembers: ProjectMember[] = [
     projectId: 3,
     memberId: 8,
     role: 'PA',
+    workArea: 'FRONTEND',
     member: {
       id: 8,
       name: '임지훈',
@@ -288,6 +301,7 @@ export const mockProjectMembers: ProjectMember[] = [
     projectId: 4,
     memberId: 3,
     role: 'PM',
+    workArea: 'PROJECT_MANAGEMENT',
     member: {
       id: 3,
       name: '박민수',
@@ -303,6 +317,7 @@ export const mockProjectMembers: ProjectMember[] = [
     projectId: 4,
     memberId: 6,
     role: 'PL',
+    workArea: 'PLANNING',
     member: {
       id: 6,
       name: '강미영',
@@ -319,6 +334,7 @@ export const mockProjectMembers: ProjectMember[] = [
     projectId: 6,
     memberId: 4,
     role: 'PM',
+    workArea: 'PROJECT_MANAGEMENT',
     member: {
       id: 4,
       name: '정수진',
@@ -334,6 +350,7 @@ export const mockProjectMembers: ProjectMember[] = [
     projectId: 6,
     memberId: 7,
     role: 'PA',
+    workArea: 'DESIGN',
     member: {
       id: 7,
       name: '윤서준',

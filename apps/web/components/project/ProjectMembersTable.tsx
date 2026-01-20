@@ -34,7 +34,7 @@ import {
 import { Loader2, UserPlus, Trash2 } from 'lucide-react';
 import { AddMemberDialog } from './AddMemberDialog';
 import type { ProjectMember, ProjectRole, Department, UserRole, WorkArea } from '@/types/project';
-import { POSITION_LABELS } from '@/lib/constants/roles';
+import { POSITION_LABELS, type Position } from '@/lib/constants/roles';
 
 const workAreaLabels: Record<WorkArea, string> = {
   PROJECT_MANAGEMENT: '프로젝트 관리',
@@ -162,7 +162,7 @@ export function ProjectMembersTable({ projectId, creatorId }: ProjectMembersTabl
                   <TableCell className="font-medium">{member.member?.name}</TableCell>
                   <TableCell>
                     <span className="text-sm text-slate-700">
-                      {member.member?.position ? POSITION_LABELS[member.member.position] || member.member.position : '-'}
+                      {member.member?.position ? POSITION_LABELS[member.member.position as Position] || member.member.position : '-'}
                     </span>
                   </TableCell>
                   <TableCell>

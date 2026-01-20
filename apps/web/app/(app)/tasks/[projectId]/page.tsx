@@ -13,7 +13,9 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Loader2, FolderKanban, Calendar } from 'lucide-react';
 import type { Project, ProjectMember } from '@/types/project';
 
-const statusLabels: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+type ProjectStatus = 'ACTIVE' | 'COMPLETED' | 'SUSPENDED';
+
+const statusLabels: Record<ProjectStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   ACTIVE: { label: '진행중', variant: 'default' },
   COMPLETED: { label: '완료', variant: 'secondary' },
   SUSPENDED: { label: '중단', variant: 'destructive' },
@@ -32,7 +34,7 @@ export default function TaskManagementPage() {
 
   // Check if current user is PM of this project
   const isPM = useMemo(() => {
-    if (!user) return false;
+    if (!user || !members || members.length === 0) return false;
     return members.some(m => m.memberId === user.id && m.role === 'PM');
   }, [user, members]);
 
@@ -84,7 +86,7 @@ export default function TaskManagementPage() {
     );
   }
 
-  const statusConfig = statusLabels[project.status] || statusLabels.ACTIVE;
+  const statusConfig = statusLabels[project.status as ProjectStatus] ?? statusLabels.ACTIVE;
 
   return (
     <div className="space-y-6">
