@@ -14,9 +14,9 @@ export default function ProfilePage() {
       </div>
 
       <Tabs defaultValue="account" className="space-y-6">
-        <TabsList className="bg-slate-100 p-1 rounded-xl">
-          <TabsTrigger value="account" className="rounded-lg px-6 py-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">기본 정보</TabsTrigger>
-          <TabsTrigger value="password" className="rounded-lg px-6 py-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">비밀번호 변경</TabsTrigger>
+        <TabsList>
+          <TabsTrigger value="account">기본 정보</TabsTrigger>
+          <TabsTrigger value="password">비밀번호 변경</TabsTrigger>
         </TabsList>
         <TabsContent value="account">
           <Card className="rounded-2xl border-none shadow-md overflow-hidden">

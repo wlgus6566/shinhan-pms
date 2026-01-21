@@ -26,6 +26,7 @@ interface TaskFiltersProps {
   setSortOrder: (sortOrder: SortOrder) => void;
   projectMembers: ProjectMember[];
   resetFilters: () => void;
+  statusCounts?: Record<TaskStatus, number>;
 }
 
 export function TaskFilters({
@@ -43,6 +44,7 @@ export function TaskFilters({
   setSortOrder,
   projectMembers,
   resetFilters,
+  statusCounts,
 }: TaskFiltersProps) {
   const toggleStatus = (status: TaskStatus) => {
     if (statusFilter.includes(status)) {
@@ -130,15 +132,22 @@ export function TaskFilters({
         <div className="flex-1">
           <div className="text-sm font-medium mb-2">상태</div>
           <div className="flex flex-wrap gap-2">
-            {(Object.keys(STATUS_LABELS) as TaskStatus[]).map((status) => (
-              <Badge
-                key={status}
-                className={cn(STATUS_COLORS[status], 'cursor-pointer', statusFilter.includes(status) ? 'bg-primary text-primary-foreground' : '')}
-                onClick={() => toggleStatus(status)}
-              >
-                {STATUS_LABELS[status]}
-              </Badge>
-            ))}
+            {(Object.keys(STATUS_LABELS) as TaskStatus[]).map((status) => {
+              const count = statusCounts?.[status] ?? 0;
+              return (
+                <Badge
+                  key={status}
+                  className={cn(
+                    STATUS_COLORS[status],
+                    'cursor-pointer',
+                    statusFilter.includes(status) ? 'bg-primary text-primary-foreground' : ''
+                  )}
+                  onClick={() => toggleStatus(status)}
+                >
+                  {STATUS_LABELS[status]} ({count})
+                </Badge>
+              );
+            })}
           </div>
         </div>
 

@@ -74,6 +74,26 @@ export function TaskList({ projectId, isPM }: TaskListProps) {
   const loading = tasksLoading || membersLoading;
   const error = tasksError || membersError;
 
+  // Calculate status counts based on all tasks
+  const statusCounts = useMemo(() => {
+    if (!tasks) return {} as Record<TaskStatus, number>;
+
+    const counts = {
+      WAITING: 0,
+      IN_PROGRESS: 0,
+      WORK_COMPLETED: 0,
+      OPEN_WAITING: 0,
+      OPEN_RESPONDING: 0,
+      OPEN_COMPLETED: 0,
+    } as Record<TaskStatus, number>;
+
+    tasks.forEach((task) => {
+      counts[task.status]++;
+    });
+
+    return counts;
+  }, [tasks]);
+
   // Convert arrays to Sets for O(1) lookups (js-set-map-lookups)
   const statusFilterSet = useMemo(() => new Set(statusFilter), [statusFilter]);
   const difficultyFilterSet = useMemo(() => new Set(difficultyFilter), [difficultyFilter]);
@@ -213,6 +233,7 @@ export function TaskList({ projectId, isPM }: TaskListProps) {
         setSortOrder={setSortOrder}
         projectMembers={projectMembers || []}
         resetFilters={resetFilters}
+        statusCounts={statusCounts}
       />
 
       {/* Table */}
