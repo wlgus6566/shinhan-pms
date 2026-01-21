@@ -3,7 +3,10 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import {
+  CreateTaskFormSchema,
+  type CreateTaskFormInput,
+} from '@repo/schema';
 import { createTask } from '@/lib/api/tasks';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,32 +24,6 @@ import FormSelect from '@/components/form/FormSelect';
 import { Loader2 } from 'lucide-react';
 import type { ProjectMember } from '@/types/project';
 import type { CreateTaskRequest } from '@/types/task';
-
-const addTaskSchema = z.object({
-  taskName: z.string().min(2, '작업명은 2자 이상이어야 합니다').max(100, '작업명은 100자 이하여야 합니다'),
-  description: z.string().max(1000, '작업내용은 1000자 이하여야 합니다').optional(),
-  difficulty: z.enum(['HIGH', 'MEDIUM', 'LOW'] as const, {
-    required_error: '중요도를 선택하세요',
-  }),
-  clientName: z.string().max(100, '담당 RM은 100자 이하여야 합니다').optional(),
-  planningAssigneeId: z.string().optional(),
-  designAssigneeId: z.string().optional(),
-  frontendAssigneeId: z.string().optional(),
-  backendAssigneeId: z.string().optional(),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-  notes: z.string().optional(),
-}).refine((data) => {
-  if (data.startDate && data.endDate) {
-    return new Date(data.endDate) >= new Date(data.startDate);
-  }
-  return true;
-}, {
-  message: '종료일은 시작일보다 이후여야 합니다',
-  path: ['endDate'],
-});
-
-type AddTaskFormValues = z.infer<typeof addTaskSchema>;
 
 interface AddTaskDialogProps {
   projectId: string;
@@ -68,8 +45,8 @@ export function AddTaskDialog({ projectId, projectMembers, open, onOpenChange, o
 
   const NONE_VALUE = '_NONE_';
 
-  const form = useForm<AddTaskFormValues>({
-    resolver: zodResolver(addTaskSchema),
+  const form = useForm<CreateTaskFormInput>({
+    resolver: zodResolver(CreateTaskFormSchema),
     defaultValues: {
       taskName: '',
       description: '',
@@ -101,7 +78,7 @@ export function AddTaskDialog({ projectId, projectMembers, open, onOpenChange, o
       })),
   ];
 
-  const onSubmit = async (data: AddTaskFormValues) => {
+  const onSubmit = async (data: CreateTaskFormInput) => {
     try {
       setSubmitting(true);
       setError(null);

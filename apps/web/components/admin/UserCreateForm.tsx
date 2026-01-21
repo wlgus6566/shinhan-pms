@@ -4,7 +4,10 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import {
+  UserCreateFormSchema,
+  type UserCreateFormInput,
+} from '@repo/schema';
 import { createUser } from '@/lib/api/users';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
@@ -14,32 +17,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CheckCircle2, Loader2, Upload, User } from 'lucide-react';
 import { DEPARTMENT_OPTIONS, ROLE_OPTIONS, POSITION_OPTIONS } from '@/lib/constants/roles';
 
-const userCreateSchema = z
-  .object({
-    name: z
-      .string()
-      .min(2, '이름은 최소 2자 이상이어야 합니다')
-      .max(50, '이름은 최대 50자까지 입력할 수 있습니다'),
-    email: z.string().email('올바른 이메일 형식이 아닙니다'),
-    password: z
-      .string()
-      .min(8, '비밀번호는 최소 8자 이상이어야 합니다')
-      .regex(
-        /^(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
-        '비밀번호는 영문 소문자, 숫자, 특수문자를 포함해야 합니다',
-      ),
-    confirmPassword: z.string(),
-    department: z.string().min(1, '본부를 선택하세요'),
-    position: z.enum(['DIVISION_HEAD', 'GENERAL_MANAGER', 'PRINCIPAL_LEADER', 'SENIOR_LEADER', 'LEADER', 'TEAM_MEMBER']),
-    role: z.enum(['SUPER_ADMIN', 'PM', 'MEMBER']),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: '비밀번호가 일치하지 않습니다',
-    path: ['confirmPassword'],
-  });
-
-type UserCreateValues = z.infer<typeof userCreateSchema>;
-
 export function UserCreateForm() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -48,8 +25,8 @@ export function UserCreateForm() {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
 
-  const form = useForm<UserCreateValues>({
-    resolver: zodResolver(userCreateSchema),
+  const form = useForm<UserCreateFormInput>({
+    resolver: zodResolver(UserCreateFormSchema),
     defaultValues: {
       name: '',
       email: '',
@@ -78,7 +55,7 @@ export function UserCreateForm() {
     }
   };
 
-  async function onSubmit(values: UserCreateValues) {
+  async function onSubmit(values: UserCreateFormInput) {
     setIsSaving(true);
     setError(null);
 
@@ -89,6 +66,7 @@ export function UserCreateForm() {
         email: values.email,
         password: values.password,
         department: values.department,
+        position: values.position,
         role: values.role,
         profileImage: profileImage || undefined,
       };

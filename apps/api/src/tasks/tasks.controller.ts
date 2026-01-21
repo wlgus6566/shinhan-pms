@@ -16,14 +16,14 @@ import {
   ApiResponse,
   ApiParam,
   ApiBearerAuth,
-  ApiBody,
 } from '@nestjs/swagger';
 import { TasksService } from './tasks.service';
-import { CreateTaskDto } from './dto/create-task.dto';
-import { UpdateTaskDto } from './dto/update-task.dto';
+import { CreateTaskDto, CreateTaskSchema } from './dto/create-task.dto';
+import { UpdateTaskDto, UpdateTaskSchema } from './dto/update-task.dto';
 import { TaskResponseDto } from './dto/task-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 
 @ApiTags('Tasks')
 @Controller()
@@ -35,7 +35,6 @@ export class TasksController {
   @Post('projects/:projectId/tasks')
   @ApiOperation({ summary: '업무 생성' })
   @ApiParam({ name: 'projectId', description: '프로젝트 ID' })
-  @ApiBody({ type: CreateTaskDto })
   @ApiResponse({
     status: 201,
     description: '업무가 생성되었습니다',
@@ -46,7 +45,8 @@ export class TasksController {
   @ApiResponse({ status: 404, description: '프로젝트를 찾을 수 없습니다' })
   async create(
     @Param('projectId') projectId: string,
-    @Body() createTaskDto: CreateTaskDto,
+    @Body(new ZodValidationPipe(CreateTaskSchema))
+    createTaskDto: CreateTaskDto,
     @CurrentUser() user: any,
   ) {
     const task = await this.tasksService.create(
@@ -87,7 +87,6 @@ export class TasksController {
   @Patch('tasks/:id')
   @ApiOperation({ summary: '업무 수정' })
   @ApiParam({ name: 'id', description: '업무 ID' })
-  @ApiBody({ type: UpdateTaskDto })
   @ApiResponse({
     status: 200,
     description: '업무가 수정되었습니다',
@@ -98,7 +97,8 @@ export class TasksController {
   @ApiResponse({ status: 404, description: '업무를 찾을 수 없습니다' })
   async update(
     @Param('id') id: string,
-    @Body() updateTaskDto: UpdateTaskDto,
+    @Body(new ZodValidationPipe(UpdateTaskSchema))
+    updateTaskDto: UpdateTaskDto,
     @CurrentUser() user: any,
   ) {
     const task = await this.tasksService.update(

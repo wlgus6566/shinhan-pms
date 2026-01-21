@@ -3,7 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import {
+  UpdateProfileFormSchema,
+  type UpdateProfileFormInput,
+} from '@repo/schema';
 import { getMe, updateMe } from '@/lib/api/auth';
 import { Button } from '@/components/ui/button';
 import {
@@ -25,21 +28,14 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle2, Loader2 } from 'lucide-react';
 
-const profileSchema = z.object({
-  name: z.string().min(2, '이름은 최소 2자 이상이어야 합니다').max(50),
-  department: z.enum(['PLANNING', 'DESIGN', 'FRONTEND', 'DEVELOPMENT']),
-});
-
-type ProfileValues = z.infer<typeof profileSchema>;
-
 export function ProfileForm() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const form = useForm<ProfileValues>({
-    resolver: zodResolver(profileSchema),
+  const form = useForm<UpdateProfileFormInput>({
+    resolver: zodResolver(UpdateProfileFormSchema),
     defaultValues: {
       name: '',
       department: 'DEVELOPMENT',
@@ -58,7 +54,7 @@ export function ProfileForm() {
       .finally(() => setIsLoading(false));
   }, [form]);
 
-  async function onSubmit(values: ProfileValues) {
+  async function onSubmit(values: UpdateProfileFormInput) {
     setIsSaving(true);
     setSuccess(false);
     setError(null);

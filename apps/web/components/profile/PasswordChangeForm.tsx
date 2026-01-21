@@ -3,7 +3,10 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import {
+  ChangePasswordFormSchema,
+  type ChangePasswordFormInput,
+} from '@repo/schema';
 import { changePassword } from '@/lib/api/auth';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,25 +21,13 @@ import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle2, Loader2 } from 'lucide-react';
 
-const passwordSchema = z.object({
-  currentPassword: z.string().min(1, '현재 비밀번호를 입력해주세요'),
-  newPassword: z.string().min(8, '비밀번호는 최소 8자 이상이어야 합니다')
-    .regex(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]/, '영문, 숫자, 특수문자를 포함해야 합니다'),
-  confirmPassword: z.string(),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: '새 비밀번호가 일치하지 않습니다',
-  path: ['confirmPassword'],
-});
-
-type PasswordValues = z.infer<typeof passwordSchema>;
-
 export function PasswordChangeForm() {
   const [isSaving, setIsSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const form = useForm<PasswordValues>({
-    resolver: zodResolver(passwordSchema),
+  const form = useForm<ChangePasswordFormInput>({
+    resolver: zodResolver(ChangePasswordFormSchema),
     defaultValues: {
       currentPassword: '',
       newPassword: '',
@@ -44,7 +35,7 @@ export function PasswordChangeForm() {
     },
   });
 
-  async function onSubmit(values: PasswordValues) {
+  async function onSubmit(values: ChangePasswordFormInput) {
     setIsSaving(true);
     setSuccess(false);
     setError(null);

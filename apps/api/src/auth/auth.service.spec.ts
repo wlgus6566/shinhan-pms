@@ -7,7 +7,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { SignupDto, Department } from './dto/signup.dto';
+import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import * as bcrypt from 'bcrypt';
@@ -52,7 +52,7 @@ describe('AuthService', () => {
       email: 'test@emotion.co.kr',
       password: 'Test1234!',
       name: '테스트',
-      department: Department.DEVELOPMENT,
+      department: 'DEVELOPMENT',
     };
 
     it('should create a new user successfully', async () => {

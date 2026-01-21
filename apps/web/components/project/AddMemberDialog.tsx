@@ -3,7 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import {
+  AddProjectMemberSchema,
+  type AddProjectMemberInput,
+} from '@repo/schema';
 import { getAvailableMembers, addProjectMember } from '@/lib/api/projectMembers';
 import { Button } from '@/components/ui/button';
 import {
@@ -35,15 +38,6 @@ import { Textarea } from '@/components/ui/textarea';
 import FormSelect from '@/components/form/FormSelect';
 import type { AvailableMember } from '@/types/project';
 import { DEPARTMENTS } from '@/lib/constants/roles';
-
-const addMemberSchema = z.object({
-  memberId: z.coerce.number().min(1, '멤버를 선택하세요'),
-  role: z.enum(['PM', 'PL', 'PA'] as const),
-  workArea: z.enum(['PROJECT_MANAGEMENT', 'PLANNING', 'DESIGN', 'FRONTEND', 'BACKEND'] as const),
-  notes: z.string().optional(),
-});
-
-type AddMemberFormValues = z.infer<typeof addMemberSchema>;
 
 interface AddMemberDialogProps {
   projectId: string;
@@ -83,8 +77,8 @@ export function AddMemberDialog({ projectId, open, onOpenChange, onSuccess }: Ad
   const [error, setError] = useState<string | null>(null);
   const [comboboxOpen, setComboboxOpen] = useState(false);
 
-  const form = useForm<AddMemberFormValues>({
-    resolver: zodResolver(addMemberSchema),
+  const form = useForm<AddProjectMemberInput>({
+    resolver: zodResolver(AddProjectMemberSchema),
     defaultValues: {
       memberId: 0,
       role: 'PA',
@@ -107,7 +101,7 @@ export function AddMemberDialog({ projectId, open, onOpenChange, onSuccess }: Ad
     }
   }, [open, projectId, form]);
 
-  async function onSubmit(values: AddMemberFormValues) {
+  async function onSubmit(values: AddProjectMemberInput) {
     setSubmitting(true);
     setError(null);
 

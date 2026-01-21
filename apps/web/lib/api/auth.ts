@@ -1,9 +1,9 @@
+import type {
+  ChangePasswordInput,
+  LoginInput,
+  UpdateProfileInput,
+} from '@repo/schema';
 import { fetcher, tokenManager } from './fetcher';
-
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
 
 export interface LoginResponse {
   accessToken: string;
@@ -16,12 +16,7 @@ export interface LoginResponse {
   };
 }
 
-export interface ChangePasswordRequest {
-  currentPassword: string;
-  newPassword: string;
-}
-
-export async function login(data: LoginRequest): Promise<LoginResponse> {
+export async function login(data: LoginInput): Promise<LoginResponse> {
   const result = await fetcher<LoginResponse>('/api/auth/login', {
     method: 'POST',
     body: data,
@@ -44,14 +39,14 @@ export async function getMe() {
   return fetcher('/api/auth/me');
 }
 
-export async function updateMe(data: any) {
+export async function updateMe(data: UpdateProfileInput) {
   return fetcher('/api/auth/me', {
     method: 'PATCH',
     body: data,
   });
 }
 
-export async function changePassword(data: ChangePasswordRequest) {
+export async function changePassword(data: ChangePasswordInput) {
   return fetcher('/api/auth/me/password', {
     method: 'PATCH',
     body: data,

@@ -4,7 +4,10 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import {
+  UserUpdateFormSchema,
+  type UserUpdateFormInput,
+} from '@repo/schema';
 import { getUser, updateUser, deactivateUser } from '@/lib/api/users';
 import { Button } from '@/components/ui/button';
 import {
@@ -38,14 +41,6 @@ import { CheckCircle2, Loader2 } from 'lucide-react';
 import { FormInput, FormSelect } from '@/components/form';
 import { DEPARTMENT_OPTIONS, ROLE_OPTIONS } from '@/lib/constants/roles';
 
-const userUpdateSchema = z.object({
-  department: z.string().min(1, '본부를 입력하세요'),
-  role: z.enum(['SUPER_ADMIN', 'PM', 'MEMBER']),
-  isActive: z.boolean(),
-});
-
-type UserUpdateValues = z.infer<typeof userUpdateSchema>;
-
 export function UserEditForm({ userId }: { userId: string }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
@@ -55,8 +50,8 @@ export function UserEditForm({ userId }: { userId: string }) {
   const [error, setError] = useState<string | null>(null);
   const [userData, setUserData] = useState<any>(null);
 
-  const form = useForm<UserUpdateValues>({
-    resolver: zodResolver(userUpdateSchema),
+  const form = useForm<UserUpdateFormInput>({
+    resolver: zodResolver(UserUpdateFormSchema),
     defaultValues: {
       department: '',
       role: 'MEMBER',
@@ -78,7 +73,7 @@ export function UserEditForm({ userId }: { userId: string }) {
       .finally(() => setIsLoading(false));
   }, [userId, form]);
 
-  async function onSubmit(values: UserUpdateValues) {
+  async function onSubmit(values: UserUpdateFormInput) {
     setIsSaving(true);
     setSuccess(false);
     setError(null);

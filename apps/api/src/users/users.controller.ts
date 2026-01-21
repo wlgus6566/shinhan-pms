@@ -20,12 +20,17 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { UsersService } from './users.service';
-import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  CreateUserDto,
+  UserCreateSchema,
+} from './dto/create-user.dto';
+import { UpdateUserDto, UserUpdateSchema } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 
 @ApiTags('사용자 관리')
 @Controller('users')
@@ -44,7 +49,7 @@ export class UsersController {
   })
   @ApiResponse({ status: 409, description: '이미 사용 중인 이메일' })
   async create(
-    @Body() createUserDto: any,
+    @Body(new ZodValidationPipe(UserCreateSchema)) createUserDto: CreateUserDto,
     @CurrentUser() currentUser: UserResponseDto,
   ): Promise<UserResponseDto> {
     return this.usersService.create(createUserDto, currentUser.id);
@@ -128,7 +133,7 @@ export class UsersController {
   @ApiResponse({ status: 404, description: '사용자 없음' })
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateUserDto: UpdateUserDto,
+    @Body(new ZodValidationPipe(UserUpdateSchema)) updateUserDto: UpdateUserDto,
     @CurrentUser() currentUser: UserResponseDto,
   ): Promise<UserResponseDto> {
     return this.usersService.update(BigInt(id), updateUserDto, currentUser.id);

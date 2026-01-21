@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import { LoginSchema, type LoginInput } from '@repo/schema';
 import { login as loginApi } from '@/lib/api/auth';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -20,21 +20,14 @@ import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, Loader2 } from 'lucide-react';
 
-const loginSchema = z.object({
-  email: z.string().email('올바른 이메일 형식을 입력해주세요'),
-  password: z.string().min(1, '비밀번호를 입력해주세요'),
-});
-
-type LoginValues = z.infer<typeof loginSchema>;
-
 export function LoginForm() {
   const router = useRouter();
   const { login } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const form = useForm<LoginValues>({
-    resolver: zodResolver(loginSchema),
+  const form = useForm<LoginInput>({
+    resolver: zodResolver(LoginSchema),
     defaultValues: {
       email: '',
       password: '',
@@ -42,7 +35,7 @@ export function LoginForm() {
   });
 
   // Use useCallback for stable callback reference
-  const onSubmit = useCallback(async (values: LoginValues) => {
+  const onSubmit = useCallback(async (values: LoginInput) => {
     setIsLoading(true);
     setError(null);
     try {

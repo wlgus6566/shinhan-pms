@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import { ProjectFormSchema, type ProjectFormInput } from '@repo/schema';
 import dynamic from 'next/dynamic';
 import {
   getProject,
@@ -34,27 +34,6 @@ const projectTypeOptions = [
   { value: 'BUILD', label: '구축' },
 ];
 
-const projectSchema = z
-  .object({
-    name: z
-      .string()
-      .min(2, '프로젝트명은 최소 2자 이상이어야 합니다')
-      .max(100, '프로젝트명은 최대 100자까지 입력할 수 있습니다'),
-    client: z
-      .string()
-      .max(100, '클라이언트는 최대 100자까지 입력할 수 있습니다')
-      .optional(),
-    projectType: z.enum(['OPERATION', 'BUILD'] as const),
-    startDate: z.string().min(1, '시작일을 선택하세요'),
-    endDate: z.string().min(1, '종료일을 선택하세요'),
-  })
-  .refine((data) => new Date(data.endDate) >= new Date(data.startDate), {
-    message: '종료일은 시작일 이후여야 합니다',
-    path: ['endDate'],
-  });
-
-type ProjectFormValues = z.infer<typeof projectSchema>;
-
 interface ProjectFormProps {
   projectId?: string;
   mode: 'create' | 'edit';
@@ -68,8 +47,8 @@ export function ProjectForm({ projectId, mode }: ProjectFormProps) {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const form = useForm<ProjectFormValues>({
-    resolver: zodResolver(projectSchema),
+  const form = useForm<ProjectFormInput>({
+    resolver: zodResolver(ProjectFormSchema),
     defaultValues: {
       name: '',
       client: '',
@@ -103,7 +82,7 @@ export function ProjectForm({ projectId, mode }: ProjectFormProps) {
 
   // Use useCallback for stable callback refs
   const onSubmit = useCallback(
-    async (values: ProjectFormValues) => {
+    async (values: ProjectFormInput) => {
       setIsSaving(true);
       setSuccess(false);
       setError(null);

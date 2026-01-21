@@ -6,18 +6,9 @@ import {
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
+import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
-
-interface CreateUserDto {
-  email: string;
-  password: string;
-  name: string;
-  profileImage?: string;
-  department: string;
-  position: string;
-  role: string;
-}
 
 @Injectable()
 export class UsersService {

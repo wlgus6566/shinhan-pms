@@ -15,13 +15,17 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { SignupDto } from './dto/signup.dto';
-import { LoginDto } from './dto/login.dto';
-import { ChangePasswordDto } from './dto/change-password.dto';
-import { UpdateProfileDto } from './dto/update-profile.dto';
+import { SignupDto, SignupSchema } from './dto/signup.dto';
+import { LoginDto, LoginSchema } from './dto/login.dto';
+import {
+  ChangePasswordDto,
+  ChangePasswordSchema,
+} from './dto/change-password.dto';
+import { UpdateProfileDto, UpdateProfileSchema } from './dto/update-profile.dto';
 import { UserResponseDto } from '../users/dto/user-response.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
+import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 
 @ApiTags('인증')
 @Controller('auth')
@@ -36,7 +40,9 @@ export class AuthController {
     type: UserResponseDto,
   })
   @ApiResponse({ status: 409, description: '이미 사용 중인 이메일' })
-  async signup(@Body() signupDto: SignupDto): Promise<UserResponseDto> {
+  async signup(
+    @Body(new ZodValidationPipe(SignupSchema)) signupDto: SignupDto,
+  ): Promise<UserResponseDto> {
     return this.authService.signup(signupDto);
   }
 
@@ -45,7 +51,7 @@ export class AuthController {
   @ApiOperation({ summary: '로그인' })
   @ApiResponse({ status: 200, description: '로그인 성공' })
   @ApiResponse({ status: 401, description: '인증 실패' })
-  async login(@Body() loginDto: LoginDto) {
+  async login(@Body(new ZodValidationPipe(LoginSchema)) loginDto: LoginDto) {
     return this.authService.login(loginDto);
   }
 
@@ -69,7 +75,8 @@ export class AuthController {
   @ApiResponse({ status: 401, description: '인증 필요' })
   async updateProfile(
     @CurrentUser() user: UserResponseDto,
-    @Body() updateProfileDto: UpdateProfileDto,
+    @Body(new ZodValidationPipe(UpdateProfileSchema))
+    updateProfileDto: UpdateProfileDto,
   ): Promise<UserResponseDto> {
     return this.authService.updateProfile(user.id, updateProfileDto);
   }
@@ -84,7 +91,8 @@ export class AuthController {
   @ApiResponse({ status: 401, description: '인증 필요' })
   async changePassword(
     @CurrentUser() user: UserResponseDto,
-    @Body() changePasswordDto: ChangePasswordDto,
+    @Body(new ZodValidationPipe(ChangePasswordSchema))
+    changePasswordDto: ChangePasswordDto,
   ): Promise<void> {
     return this.authService.changePassword(user.id, changePasswordDto);
   }

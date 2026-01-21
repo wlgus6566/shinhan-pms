@@ -21,14 +21,18 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { ProjectsService } from './projects.service';
-import { CreateProjectDto } from './dto/create-project.dto';
-import { UpdateProjectDto } from './dto/update-project.dto';
+import { CreateProjectDto, CreateProjectSchema } from './dto/create-project.dto';
+import { UpdateProjectDto, UpdateProjectSchema } from './dto/update-project.dto';
 import { ProjectResponseDto } from './dto/project-response.dto';
-import { AddProjectMemberDto } from './dto/add-member.dto';
-import { UpdateProjectMemberRoleDto } from './dto/update-member-role.dto';
+import { AddProjectMemberDto, AddProjectMemberSchema } from './dto/add-member.dto';
+import {
+  UpdateProjectMemberRoleDto,
+  UpdateProjectMemberRoleSchema,
+} from './dto/update-member-role.dto';
 import { ProjectMemberResponseDto } from './dto/project-member-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 
 @ApiTags('Projects')
 @Controller('projects')
@@ -46,7 +50,10 @@ export class ProjectsController {
     status: 400,
     description: '잘못된 요청 (중복된 프로젝트명, 날짜 오류 등)',
   })
-  async create(@Body() createProjectDto: CreateProjectDto) {
+  async create(
+    @Body(new ZodValidationPipe(CreateProjectSchema))
+    createProjectDto: CreateProjectDto,
+  ) {
     // TODO: 실제로는 JWT에서 userId 추출
     const userId = 1n;
     const project = await this.projectsService.create(createProjectDto, userId);
@@ -123,7 +130,8 @@ export class ProjectsController {
   })
   async update(
     @Param('id') id: string,
-    @Body() updateProjectDto: UpdateProjectDto,
+    @Body(new ZodValidationPipe(UpdateProjectSchema))
+    updateProjectDto: UpdateProjectDto,
   ) {
     const userId = 1n;
     const project = await this.projectsService.update(
@@ -224,7 +232,8 @@ export class ProjectsController {
   @ApiResponse({ status: 409, description: '이미 프로젝트 멤버입니다' })
   async addProjectMember(
     @Param('id') id: string,
-    @Body() addMemberDto: AddProjectMemberDto,
+    @Body(new ZodValidationPipe(AddProjectMemberSchema))
+    addMemberDto: AddProjectMemberDto,
   ) {
     const userId = 1n; // TODO: JWT에서 추출
     const member = await this.projectsService.addProjectMember(
@@ -248,7 +257,8 @@ export class ProjectsController {
   async updateProjectMemberRole(
     @Param('id') id: string,
     @Param('memberId', ParseIntPipe) memberId: number,
-    @Body() updateRoleDto: UpdateProjectMemberRoleDto,
+    @Body(new ZodValidationPipe(UpdateProjectMemberRoleSchema))
+    updateRoleDto: UpdateProjectMemberRoleDto,
   ) {
     const userId = 1n; // TODO: JWT에서 추출
     const member = await this.projectsService.updateProjectMemberRole(

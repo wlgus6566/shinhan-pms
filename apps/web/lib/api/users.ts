@@ -1,13 +1,5 @@
+import type { UserCreateInput, UserUpdateInput } from '@repo/schema';
 import { fetcher } from './fetcher';
-
-export interface CreateUserRequest {
-  email: string;
-  password: string;
-  name: string;
-  profileImage?: string;
-  department: string;
-  role: string;
-}
 
 export interface User {
   id: string | number;
@@ -43,14 +35,17 @@ export async function getUser(id: string | number): Promise<User> {
   return fetcher<User>(`/api/users/${id}`);
 }
 
-export async function createUser(data: CreateUserRequest): Promise<User> {
+export async function createUser(data: UserCreateInput): Promise<User> {
   return fetcher<User>('/api/users', {
     method: 'POST',
     body: data,
   });
 }
 
-export async function updateUser(id: string | number, data: any): Promise<User> {
+export async function updateUser(
+  id: string | number,
+  data: UserUpdateInput,
+): Promise<User> {
   return fetcher<User>(`/api/users/${id}`, {
     method: 'PATCH',
     body: data,
