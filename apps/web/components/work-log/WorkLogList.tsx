@@ -43,12 +43,12 @@ export function WorkLogList({
             {logsForSelectedDate.length}건의 업무일지
           </p>
         </div>
-        {onCreate && (
+        {/* {onCreate && (
           <Button onClick={onCreate} size="sm">
             <Plus className="h-4 w-4 mr-1" />
             일지 작성
           </Button>
-        )}
+        )} */}
       </div>
 
       {/* 일지 목록 */}
@@ -80,6 +80,16 @@ export function WorkLogList({
           </div>
         )}
       </div>
+        {/* Floating Action Button */}
+        {onCreate && (
+        <Button
+        onClick={onCreate}
+        className="fixed bottom-8 right-8 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow z-50"
+        size="icon"
+      >
+        <Plus className="h-6 w-6" />
+      </Button>
+      )}
     </div>
   );
 }

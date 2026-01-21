@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { format, startOfMonth, endOfMonth, parseISO } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,7 +14,6 @@ import {
 } from '@/components/ui/dialog';
 import { Calendar as CalendarIcon, MapPin, Users, Plus, Trash2, Pencil } from 'lucide-react';
 import { ScheduleCalendar } from './ScheduleCalendar';
-import { ScheduleFilters } from './ScheduleFilters';
 import { ScheduleForm } from './ScheduleForm';
 import type { Schedule, ScheduleType, CreateScheduleRequest } from '@/types/schedule';
 import { SCHEDULE_TYPE_LABELS, SCHEDULE_TYPE_COLORS, PARTICIPANT_STATUS_LABELS, PARTICIPANT_STATUS_COLORS } from '@/types/schedule';
@@ -142,19 +140,6 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
 
   return (
     <div className="space-y-6 relative">
-      {/* Header */}
-      <div>
-        <h2 className="text-2xl font-bold text-slate-800">프로젝트 일정</h2>
-        <p className="text-sm text-slate-500 mt-1">팀 일정을 관리하고 공유하세요</p>
-      </div>
-
-      {/* Filters */}
-      <ScheduleFilters
-        selectedTypes={selectedTypes}
-        setSelectedTypes={setSelectedTypes}
-        resetFilters={resetFilters}
-      />
-
       {/* 캘린더 */}
       {loading ? (
         <div className="text-center py-12">

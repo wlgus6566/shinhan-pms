@@ -26,7 +26,7 @@ const menuItems = [
   { icon: FolderKanban, label: '프로젝트', href: '/projects' },
   // "업무" 메뉴는 확장 드롭다운으로 별도 처리
   { icon: FileText, label: '업무일지', href: '/work-logs' },
-  { icon: CalendarIcon, label: '일정', href: '/calendar' },
+  { icon: CalendarIcon, label: '일정', href: '/schedule' },
   { icon: BarChart3, label: '현황', href: '/status' },
   { icon: Palette, label: '디자인', href: '/dashboard/design-system' },
 ];
