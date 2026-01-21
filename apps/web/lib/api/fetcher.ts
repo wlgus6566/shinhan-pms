@@ -52,7 +52,6 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response.data,
   async (error: AxiosError<any>) => {
-    const originalRequest = error.config;
 
     // 401 Unauthorized 처리
     if (error.response?.status === 401) {

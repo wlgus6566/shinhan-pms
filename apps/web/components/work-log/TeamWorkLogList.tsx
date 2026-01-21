@@ -22,6 +22,7 @@ import { User, Clock, AlertCircle, TrendingUp } from 'lucide-react';
 import { WorkLogCalendar } from './WorkLogCalendar';
 import type { WorkLog } from '@/types/work-log';
 import type { ProjectMember } from '@/types/project';
+import { getProjectWorkLogs } from '@/lib/api/workLogs';
 
 interface TeamWorkLogListProps {
   projectId: string;
@@ -43,14 +44,7 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
         const startDate = format(startOfMonth(currentMonth), 'yyyy-MM-dd');
         const endDate = format(endOfMonth(currentMonth), 'yyyy-MM-dd');
 
-        const params = new URLSearchParams({
-          projectId,
-          startDate,
-          endDate,
-        });
-
-        const response = await fetch(`/api/work-logs?${params}`);
-        const data = await response.json();
+        const data = await getProjectWorkLogs(projectId, startDate, endDate);
         setWorkLogs(data);
       } catch (error) {
         console.error('Failed to fetch work logs:', error);
@@ -63,7 +57,6 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
   }, [projectId, currentMonth]);
 
   const memberMap = new Map(members.map(m => [m.memberId.toString(), m.member]));
-  const workAreaMap = new Map(members.map(m => [m.memberId.toString(), m.workArea]));
 
   // 담당 분야별 필터링된 업무일지
   const filteredWorkLogs = useMemo(() => {

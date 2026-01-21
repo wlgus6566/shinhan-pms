@@ -139,23 +139,17 @@ export function ProjectListTable() {
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent border-b border-slate-100">
-              <TableHead className="w-[40px]">
-                <input type="checkbox" className="checkbox-crm" />
-              </TableHead>
               <TableHead>
                 <div className="flex items-center gap-1 cursor-pointer hover:text-slate-700">
                   프로젝트명
-                  <ArrowUpDown className="h-3 w-3" />
                 </div>
               </TableHead>
               <TableHead>클라이언트</TableHead>
               <TableHead className="text-center">타입</TableHead>
-              <TableHead>PM</TableHead>
               <TableHead className="text-center">상태</TableHead>
               <TableHead>
                 <div className="flex items-center gap-1 cursor-pointer hover:text-slate-700">
                   기간
-                  <ArrowUpDown className="h-3 w-3" />
                 </div>
               </TableHead>
               <TableHead className="w-[60px]"></TableHead>
@@ -179,9 +173,6 @@ export function ProjectListTable() {
               paginatedProjects.map((project) => (
                 <TableRow key={project.id} className="group">
                   <TableCell>
-                    <input type="checkbox" className="checkbox-crm" />
-                  </TableCell>
-                  <TableCell>
                     <Link
                       href={`/projects/${project.id}`}
                       className="font-semibold text-slate-900 hover:text-blue-600 transition-colors"
@@ -198,16 +189,6 @@ export function ProjectListTable() {
                     <Badge variant="outline" className="font-normal">
                       {typeLabels[project.projectType] || project.projectType}
                     </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-[10px] font-semibold">
-                        {project.creator?.name?.charAt(0) || '?'}
-                      </div>
-                      <span className="text-sm text-slate-700">
-                        {project.creator?.name || '-'}
-                      </span>
-                    </div>
                   </TableCell>
                   <TableCell className="text-center">
                     <Badge variant={statusVariants[project.status] || 'outline'}>
