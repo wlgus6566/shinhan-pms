@@ -107,9 +107,6 @@ export function UserListTable() {
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent border-b border-slate-100">
-              <TableHead className="w-[40px]">
-                <input type="checkbox" className="checkbox-crm" />
-              </TableHead>
               <TableHead>
                 <div className="flex items-center gap-1 cursor-pointer hover:text-slate-700">
                   이름
@@ -140,9 +137,6 @@ export function UserListTable() {
             ) : (
               paginatedUsers.map((user) => (
                 <TableRow key={user.id} className="group">
-                  <TableCell>
-                    <input type="checkbox" className="checkbox-crm" />
-                  </TableCell>
                   <TableCell>
                     <Link
                       href={`/users/${user.id}`}
