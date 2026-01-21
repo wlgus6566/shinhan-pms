@@ -11,18 +11,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { User, Clock, AlertCircle, TrendingUp } from 'lucide-react';
+import { User, Clock, AlertCircle } from 'lucide-react';
 import { WorkLogCalendar } from './WorkLogCalendar';
+import { TeamWorkLogFilters } from './TeamWorkLogFilters';
 import type { WorkLog } from '@/types/work-log';
 import type { ProjectMember } from '@/types/project';
+import type { TaskStatus, TaskDifficulty } from '@/types/task';
+import { STATUS_LABELS, STATUS_COLORS, DIFFICULTY_LABELS, DIFFICULTY_COLORS } from '@/types/task';
 import { getProjectWorkLogs } from '@/lib/api/workLogs';
+import { cn } from '@/lib/utils';
 
 interface TeamWorkLogListProps {
   projectId: string;
@@ -36,6 +33,11 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [dialogOpen, setDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Filter state
+  const [statusFilter, setStatusFilter] = useState<TaskStatus[]>([]);
+  const [difficultyFilter, setDifficultyFilter] = useState<TaskDifficulty[]>([]);
+  const [assigneeFilter, setAssigneeFilter] = useState<string>('all');
 
   useEffect(() => {
     const fetchWorkLogs = async () => {
@@ -58,29 +60,74 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
 
   const memberMap = new Map(members.map(m => [m.memberId.toString(), m.member]));
 
-  // 담당 분야별 필터링된 업무일지
-  const filteredWorkLogs = useMemo(() => {
-    if (selectedWorkArea === 'all') {
-      return workLogs;
-    }
-    // 선택한 분야의 멤버 ID들 추출
-    const memberIdsInWorkArea = members
-      .filter(m => m.workArea === selectedWorkArea)
-      .map(m => m.memberId.toString());
+  // Cascading filter helper: Filter assignees by work area
+  const filteredAssignees = useMemo(() => {
+    if (selectedWorkArea === 'all') return members;
+    return members.filter(m => m.workArea === selectedWorkArea);
+  }, [members, selectedWorkArea]);
 
-    return workLogs.filter(log => memberIdsInWorkArea.includes(log.userId));
-  }, [workLogs, selectedWorkArea, members]);
+  // Reset function
+  const resetFilters = () => {
+    setSelectedWorkArea('all');
+    setAssigneeFilter('all');
+    setStatusFilter([]);
+    setDifficultyFilter([]);
+  };
+
+  // Comprehensive filtering and sorting
+  const filteredAndSortedWorkLogs = useMemo(() => {
+    let result = [...workLogs];
+
+    // 1. Filter by work area
+    if (selectedWorkArea !== 'all') {
+      const memberIds = members
+        .filter(m => m.workArea === selectedWorkArea)
+        .map(m => m.memberId.toString());
+      result = result.filter(log => memberIds.includes(log.userId));
+    }
+
+    // 2. Filter by assignee
+    if (assigneeFilter !== 'all') {
+      result = result.filter(log => log.userId === assigneeFilter);
+    }
+
+    // 3. Filter by status
+    if (statusFilter.length > 0) {
+      result = result.filter(log =>
+        log.task?.status && statusFilter.includes(log.task.status)
+      );
+    }
+
+    // 4. Filter by difficulty
+    if (difficultyFilter.length > 0) {
+      result = result.filter(log =>
+        log.task?.difficulty && difficultyFilter.includes(log.task.difficulty)
+      );
+    }
+
+    // 5. Sort by work date (descending - newest first)
+    result.sort((a, b) => b.workDate.localeCompare(a.workDate));
+
+    return result;
+  }, [
+    workLogs,
+    selectedWorkArea,
+    assigneeFilter,
+    statusFilter,
+    difficultyFilter,
+    members,
+  ]);
 
   // 선택한 날짜의 업무일지들
   const selectedDateLogs = useMemo(() => {
     const dateStr = format(selectedDate, 'yyyy-MM-dd');
-    return filteredWorkLogs.filter(log => log.workDate === dateStr);
-  }, [selectedDate, filteredWorkLogs]);
+    return filteredAndSortedWorkLogs.filter(log => log.workDate === dateStr);
+  }, [selectedDate, filteredAndSortedWorkLogs]);
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
     const dateStr = format(date, 'yyyy-MM-dd');
-    const logsForDate = filteredWorkLogs.filter(log => log.workDate === dateStr);
+    const logsForDate = filteredAndSortedWorkLogs.filter(log => log.workDate === dateStr);
 
     if (logsForDate.length > 0) {
       setDialogOpen(true);
@@ -91,16 +138,6 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
     setCurrentMonth(startOfMonth(date));
   };
 
-  const workAreaLabels: Record<string, string> = {
-    all: '전체',
-    PLANNING: '기획',
-    DESIGN: '디자인',
-    FRONTEND: '프론트엔드',
-    BACKEND: '백엔드',
-    OPERATION: '운영',
-    PROJECT_MANAGEMENT: 'PM',
-  };
-
   // 프로젝트에 있는 담당 분야 목록 추출
   const availableWorkAreas = useMemo(() => {
     const areas = new Set(members.map(m => m.workArea));
@@ -109,25 +146,20 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
 
   return (
     <div className="space-y-6">
-      {/* 담당 분야 필터 */}
-      <div className="flex justify-between items-end">
-        <div className="flex-1 max-w-xs">
-          <label className="text-sm font-medium mb-2 block">담당 분야 선택</label>
-          <Select value={selectedWorkArea} onValueChange={setSelectedWorkArea}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">전체</SelectItem>
-              {availableWorkAreas.map(area => (
-                <SelectItem key={area} value={area}>
-                  {workAreaLabels[area] || area}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+      {/* Filters */}
+      <TeamWorkLogFilters
+        selectedWorkArea={selectedWorkArea}
+        setSelectedWorkArea={setSelectedWorkArea}
+        availableWorkAreas={availableWorkAreas}
+        assigneeFilter={assigneeFilter}
+        setAssigneeFilter={setAssigneeFilter}
+        filteredAssignees={filteredAssignees}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        difficultyFilter={difficultyFilter}
+        setDifficultyFilter={setDifficultyFilter}
+        resetFilters={resetFilters}
+      />
 
       {/* 캘린더 */}
       {loading ? (
@@ -136,7 +168,7 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
         </div>
       ) : (
         <WorkLogCalendar
-          workLogs={filteredWorkLogs}
+          workLogs={filteredAndSortedWorkLogs}
           selectedDate={selectedDate}
           onDateSelect={handleDateSelect}
           onMonthChange={handleMonthChange}
@@ -177,6 +209,20 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
                           <p className="text-sm font-semibold text-slate-800">
                             {log.task?.taskName || '작업명 없음'}
                           </p>
+                        </div>
+
+                        {/* Status and Difficulty Badges */}
+                        <div className="flex items-center gap-2">
+                          {log.task?.status && (
+                            <Badge className={cn('text-xs', STATUS_COLORS[log.task.status])}>
+                              {STATUS_LABELS[log.task.status]}
+                            </Badge>
+                          )}
+                          {log.task?.difficulty && (
+                            <Badge className={cn('text-xs', DIFFICULTY_COLORS[log.task.difficulty])}>
+                              {DIFFICULTY_LABELS[log.task.difficulty]}
+                            </Badge>
+                          )}
                         </div>
                       </div>
 

@@ -60,7 +60,7 @@ export class WorkLogsService {
         issues: createWorkLogDto.issues,
       },
       include: {
-        task: { select: { id: true, taskName: true, projectId: true } },
+        task: { select: { id: true, taskName: true, projectId: true, status: true, difficulty: true } },
         user: { select: { id: true, name: true, email: true } },
       },
     });
@@ -84,7 +84,7 @@ export class WorkLogsService {
     return await this.prisma.workLog.findMany({
       where,
       include: {
-        task: { select: { id: true, taskName: true, projectId: true } },
+        task: { select: { id: true, taskName: true, projectId: true, status: true, difficulty: true } },
         user: { select: { id: true, name: true, email: true } },
       },
       orderBy: { workDate: 'desc' },
@@ -109,7 +109,7 @@ export class WorkLogsService {
     return await this.prisma.workLog.findMany({
       where,
       include: {
-        task: { select: { id: true, taskName: true, projectId: true } },
+        task: { select: { id: true, taskName: true, projectId: true, status: true, difficulty: true } },
         user: { select: { id: true, name: true, email: true } },
       },
       orderBy: { workDate: 'desc' },
@@ -137,7 +137,7 @@ export class WorkLogsService {
     return await this.prisma.workLog.findMany({
       where,
       include: {
-        task: { select: { id: true, taskName: true, projectId: true } },
+        task: { select: { id: true, taskName: true, projectId: true, status: true, difficulty: true } },
         user: { select: { id: true, name: true, email: true } },
       },
       orderBy: { workDate: 'desc' },
@@ -151,7 +151,7 @@ export class WorkLogsService {
     const workLog = await this.prisma.workLog.findUnique({
       where: { id },
       include: {
-        task: { select: { id: true, taskName: true, projectId: true } },
+        task: { select: { id: true, taskName: true, projectId: true, status: true, difficulty: true } },
         user: { select: { id: true, name: true, email: true } },
       },
     });
@@ -204,7 +204,7 @@ export class WorkLogsService {
         issues: updateWorkLogDto.issues,
       },
       include: {
-        task: { select: { id: true, taskName: true, projectId: true } },
+        task: { select: { id: true, taskName: true, projectId: true, status: true, difficulty: true } },
         user: { select: { id: true, name: true, email: true } },
       },
     });

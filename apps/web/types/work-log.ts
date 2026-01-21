@@ -1,3 +1,5 @@
+import type { TaskStatus, TaskDifficulty } from './task';
+
 export interface WorkLogUser {
   id: string;
   name: string;
@@ -8,6 +10,8 @@ export interface WorkLogTask {
   id: string;
   taskName: string;
   projectId: string;
+  status: TaskStatus;
+  difficulty: TaskDifficulty;
 }
 
 export interface WorkLog {
@@ -53,5 +57,6 @@ export interface MyTask {
   project?: {
     id: string;
     projectName: string;
+    
   };
 }

@@ -203,6 +203,8 @@ export class WorkLogsController {
             id: workLog.task.id.toString(),
             taskName: workLog.task.taskName,
             projectId: workLog.task.projectId.toString(),
+            status: workLog.task.status,
+            difficulty: workLog.task.difficulty,
           }
         : undefined,
       user: workLog.user

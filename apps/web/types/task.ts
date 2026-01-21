@@ -17,14 +17,16 @@ export const STATUS_LABELS: Record<TaskStatus, string> = {
   OPEN_COMPLETED: '오픈 완료',
 };
 
-// 상태별 색상 (Badge 클래스)
 export const STATUS_COLORS: Record<TaskStatus, string> = {
+  // 내부 작업 흐름
   WAITING: 'bg-gray-100 text-gray-700 border-gray-300',
   IN_PROGRESS: 'bg-blue-100 text-blue-700 border-blue-300',
   WORK_COMPLETED: 'bg-green-100 text-green-700 border-green-300',
-  OPEN_WAITING: 'bg-amber-50 text-amber-700 border-amber-300',
-  OPEN_RESPONDING: 'bg-orange-100 text-orange-700 border-orange-300',
-  OPEN_COMPLETED: 'bg-emotion-secondary text-white border-purple-300',
+
+  // 오픈 이슈 흐름
+  OPEN_WAITING: 'bg-amber-100 text-amber-800 border-amber-300',
+  OPEN_RESPONDING: 'bg-orange-100 text-orange-800 border-orange-300',
+  OPEN_COMPLETED: 'bg-green-50 text-green-700 border-green-300',
 };
 
 // 중요도 라벨 매핑
