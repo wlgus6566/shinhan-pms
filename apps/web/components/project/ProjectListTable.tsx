@@ -36,7 +36,6 @@ const statusLabels: Record<string, string> = {
   ACTIVE: '진행중',
   IN_PROGRESS: '진행중',
   COMPLETED: '완료',
-  ON_HOLD: '보류',
 } as const;
 
 const typeLabels: Record<string, string> = {
@@ -121,7 +120,6 @@ export function ProjectListTable() {
               <SelectItem value="PENDING">대기</SelectItem>
               <SelectItem value="IN_PROGRESS">진행중</SelectItem>
               <SelectItem value="COMPLETED">완료</SelectItem>
-              <SelectItem value="ON_HOLD">보류</SelectItem>
             </SelectContent>
           </Select>
         </div>

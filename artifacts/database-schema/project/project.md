@@ -191,7 +191,6 @@
 | PENDING     | 대기   | 시작 전 대기 상태 | Gray   | 1        |
 | IN_PROGRESS | 진행중 | 현재 진행 중      | Blue   | 2        |
 | COMPLETED   | 완료   | 완료된 프로젝트   | Green  | 3        |
-| ON_HOLD     | 보류   | 일시 중단 상태    | Orange | 4        |
 
 ### 5.2 프로젝트 역할 (ProjectRole)
 

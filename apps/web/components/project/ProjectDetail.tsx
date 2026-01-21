@@ -14,7 +14,6 @@ const statusMap: Record<string, { label: string; className: string }> = {
   ACTIVE: { label: '진행중', className: 'bg-blue-100 text-blue-700 hover:bg-blue-100' },
   IN_PROGRESS: { label: '진행중', className: 'bg-blue-100 text-blue-700 hover:bg-blue-100' },
   COMPLETED: { label: '완료', className: 'bg-green-100 text-green-700 hover:bg-green-100' },
-  ON_HOLD: { label: '보류', className: 'bg-orange-100 text-orange-700 hover:bg-orange-100' },
 } as const;
 
 const typeLabels: Record<string, string> = {

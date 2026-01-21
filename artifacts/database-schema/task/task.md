@@ -125,12 +125,6 @@ CREATE INDEX idx_tasks_is_active ON tasks(is_active);
 - `MEDIUM`: 중 - 일반적인 작업
 - `LOW`: 하 - 간단하거나 빠르게 처리 가능한 작업
 
-### status (상태)
-- `TODO`: 할 일 - 아직 시작하지 않은 업무
-- `IN_PROGRESS`: 진행 중 - 현재 작업 중인 업무
-- `DONE`: 완료 - 완료된 업무
-- `HOLD`: 보류 - 일시적으로 중단된 업무
-
 ## 권한 관리
 
 ### 업무 생성

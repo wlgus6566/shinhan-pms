@@ -29,11 +29,16 @@ import { UpdateProjectMemberRoleDto } from './dto/update-member-role.dto';
 import { ProjectMemberResponseDto } from './dto/project-member-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { SchedulesService } from '../schedules/schedules.service';
+import { CreateScheduleDto } from '../schedules/dto/create-schedule.dto';
 
 @ApiTags('Projects')
 @Controller('projects')
 export class ProjectsController {
-  constructor(private readonly projectsService: ProjectsService) {}
+  constructor(
+    private readonly projectsService: ProjectsService,
+    private readonly schedulesService: SchedulesService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: '프로젝트 생성' })
@@ -297,6 +302,77 @@ export class ProjectsController {
         : undefined,
       createdAt: projectMember.createdAt,
       updatedAt: projectMember.updatedAt,
+    };
+  }
+
+  // =============================================
+  // 프로젝트 일정 관리 API
+  // =============================================
+
+  @Get(':id/schedules')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '프로젝트 일정 목록 조회' })
+  @ApiParam({ name: 'id', description: '프로젝트 ID' })
+  @ApiQuery({ name: 'startDate', required: false, description: '시작일 (ISO 8601)' })
+  @ApiQuery({ name: 'endDate', required: false, description: '종료일 (ISO 8601)' })
+  @ApiResponse({ status: 200, description: '프로젝트 일정 목록' })
+  async getProjectSchedules(
+    @Param('id') id: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    const schedules = await this.schedulesService.findByProject(
+      BigInt(id),
+      startDate,
+      endDate,
+    );
+    return schedules.map((schedule) => this.transformSchedule(schedule));
+  }
+
+  @Post(':id/schedules')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '프로젝트 일정 생성' })
+  @ApiParam({ name: 'id', description: '프로젝트 ID' })
+  @ApiResponse({ status: 201, description: '일정이 생성되었습니다' })
+  async createProjectSchedule(
+    @Param('id') id: string,
+    @Body() createScheduleDto: CreateScheduleDto,
+    @CurrentUser() user: any,
+  ) {
+    const dtoWithProject = { ...createScheduleDto, projectId: id };
+    const schedule = await this.schedulesService.create(
+      BigInt(user.id),
+      dtoWithProject,
+    );
+    return this.transformSchedule(schedule);
+  }
+
+  /**
+   * Schedule 변환 헬퍼
+   */
+  private transformSchedule(schedule: any): any {
+    return {
+      id: schedule.id.toString(),
+      projectId: schedule.projectId?.toString(),
+      title: schedule.title,
+      description: schedule.description,
+      scheduleType: schedule.scheduleType,
+      startDate: schedule.startDate.toISOString(),
+      endDate: schedule.endDate.toISOString(),
+      location: schedule.location,
+      isAllDay: schedule.isAllDay,
+      color: schedule.color,
+      participants: schedule.participants?.map((p: any) => ({
+        id: p.user.id.toString(),
+        name: p.user.name,
+        email: p.user.email,
+        status: p.status,
+      })) || [],
+      createdBy: schedule.createdBy.toString(),
+      createdAt: schedule.createdAt.toISOString(),
+      updatedAt: schedule.updatedAt?.toISOString(),
     };
   }
 }

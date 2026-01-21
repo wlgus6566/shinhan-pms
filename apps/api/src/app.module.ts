@@ -10,9 +10,10 @@ import { AppService } from './app.service';
 import { AppController } from './app.controller';
 import { TasksModule } from './tasks/tasks.module';
 import { WorkLogsModule } from './work-logs/work-logs.module';
+import { SchedulesModule } from './schedules/schedules.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, UsersModule, ProjectsModule, LinksModule, TasksModule, WorkLogsModule],
+  imports: [PrismaModule, AuthModule, UsersModule, ProjectsModule, LinksModule, TasksModule, WorkLogsModule, SchedulesModule],
   controllers: [AppController],
   providers: [AppService],
 })

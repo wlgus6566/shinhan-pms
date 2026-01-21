@@ -32,6 +32,7 @@ model Project {
   // 관계 설정
   members ProjectMember[]
   tasks   Task[]
+  schedules Schedule[]
 
   // 인덱스
   @@index([projectName], map: "idx_projects_name")
@@ -74,6 +75,8 @@ model User {
   tasksAsBackend      Task[]          @relation("TaskBackendAssignee")
   createdTasks        Task[]          @relation("TaskCreator")
   workLogs            WorkLog[]       @relation("WorkLogAuthor")
+  createdSchedules    Schedule[]      @relation("ScheduleCreator")
+  scheduleParticipations ScheduleParticipant[]
 
   // 인덱스
   @@index([email], map: "idx_users_email")
@@ -193,4 +196,59 @@ model WorkLog {
   @@index([isActive], map: "idx_work_logs_is_active")
 
   @@map("work_logs")
+}
+
+// =============================================
+// 일정 관리
+// =============================================
+
+model Schedule {
+  id          BigInt    @id @default(autoincrement())
+  projectId   BigInt?   @map("project_id")
+  title       String    @db.VarChar(100)
+  description String?   @db.Text
+  scheduleType String   @map("schedule_type") @db.VarChar(20) // MEETING, VACATION, EVENT, OTHER
+  startDate   DateTime  @map("start_date") @db.Timestamp(6)
+  endDate     DateTime  @map("end_date") @db.Timestamp(6)
+  location    String?   @db.VarChar(200)
+  isAllDay    Boolean   @default(false) @map("is_all_day")
+  color       String?   @db.VarChar(20)
+  isActive    Boolean   @default(true) @map("is_active")
+  createdBy   BigInt    @map("created_by")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedBy   BigInt?   @map("updated_by")
+  updatedAt   DateTime? @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  // 관계
+  project      Project?            @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  creator      User                @relation("ScheduleCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  participants ScheduleParticipant[]
+
+  // 인덱스
+  @@index([projectId], map: "idx_schedules_project_id")
+  @@index([scheduleType], map: "idx_schedules_type")
+  @@index([startDate, endDate], map: "idx_schedules_dates")
+  @@index([isActive], map: "idx_schedules_is_active")
+  @@index([createdBy], map: "idx_schedules_created_by")
+
+  @@map("schedules")
+}
+
+model ScheduleParticipant {
+  id         BigInt    @id @default(autoincrement())
+  scheduleId BigInt    @map("schedule_id")
+  userId     BigInt    @map("user_id")
+  status     String    @default("PENDING") @db.VarChar(20) // PENDING, ACCEPTED, DECLINED
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+
+  // 관계
+  schedule Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 제약조건 및 인덱스
+  @@unique([scheduleId, userId], map: "unique_schedule_user")
+  @@index([scheduleId], map: "idx_schedule_participants_schedule_id")
+  @@index([userId], map: "idx_schedule_participants_user_id")
+
+  @@map("schedule_participants")
 }
