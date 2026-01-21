@@ -119,7 +119,7 @@ export default function WorkLogsPage() {
       {/* 페이지 헤더 */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">내 업무일지</h1>
+          <h1 className="text-2xl font-bold text-slate-800">업무일지</h1>
           <p className="text-slate-500 mt-1">
             담당 업무의 일지를 작성하고 관리하세요
           </p>
@@ -141,35 +141,30 @@ export default function WorkLogsPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* 왼쪽: 내 업무 목록 */}
-          <div className="lg:col-span-1">
+        <div className="flex gap-6">
+          <div className="flex flex-col gap-6 w-[30%]">
             <MyTaskList
               tasks={myTasks}
               selectedTaskId={selectedTaskId}
               onTaskSelect={setSelectedTaskId}
             />
-          </div>
-          
-          {/* 가운데: 달력 */}
-          <div className="lg:col-span-1">
-            <WorkLogCalendar
-              workLogs={workLogs}
-              selectedDate={selectedDate}
-              onDateSelect={handleDateSelect}
-              onMonthChange={handleMonthChange}
-            />
-          </div>
-
-          {/* 오른쪽: 선택된 날짜의 일지 */}
-          <div className="lg:col-span-1">
-            <WorkLogList
+             <WorkLogList
               workLogs={workLogs}
               currentUserId={user?.id.toString()}
               selectedDate={selectedDate}
               onEdit={handleEditClick}
               onDelete={handleDeleteFromCard}
               onCreate={handleCreateClick}
+            />
+          </div>
+          
+          {/* 가운데: 달력 */}
+          <div className="flex-1">
+            <WorkLogCalendar
+              workLogs={workLogs}
+              selectedDate={selectedDate}
+              onDateSelect={handleDateSelect}
+              onMonthChange={handleMonthChange}
             />
           </div>
         </div>

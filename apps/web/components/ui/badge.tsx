@@ -24,9 +24,6 @@ const badgeVariants = cva(
           "border-sky-100 bg-sky-50 text-sky-700",
       },
     },
-    defaultVariants: {
-      variant: "default",
-    },
   }
 )
 
@@ -36,7 +33,7 @@ export interface BadgeProps
 
 function Badge({ className, variant, ...props }: BadgeProps) {
   return (
-    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+    <span className={cn(badgeVariants({ variant }), className)} {...props} />
   )
 }
 

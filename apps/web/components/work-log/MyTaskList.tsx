@@ -16,7 +16,7 @@ const statusConfig: Record<string, { label: string; icon: React.ElementType; col
   WORK_COMPLETED: { label: '작업 완료', icon: CheckCircle2, color: 'text-green-500' },
   OPEN_WAITING: { label: '오픈 대기', icon: Clock, color: 'text-yellow-500' },
   OPEN_RESPONDING: { label: '오픈 대응', icon: AlertTriangle, color: 'text-orange-500' },
-  COMPLETED: { label: '완료', icon: CheckCircle2, color: 'text-emerald-500' },
+  OPEN_COMPLETED: { label: '오픈 완료', icon: CheckCircle2, color: 'text-purple-500' },
   // Legacy statuses for backward compatibility
   TODO: { label: '작업 대기', icon: Clock, color: 'text-slate-500' },
   DONE: { label: '완료', icon: CheckCircle2, color: 'text-emerald-500' },

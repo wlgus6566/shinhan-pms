@@ -5,7 +5,7 @@ export type TaskStatus =
   | 'WORK_COMPLETED'    // 작업 완료
   | 'OPEN_WAITING'      // 오픈 대기
   | 'OPEN_RESPONDING'   // 오픈 대응
-  | 'COMPLETED';        // 완료
+  | 'OPEN_COMPLETED';        // 오픈 완료
 
 // 한글 라벨 매핑
 export const STATUS_LABELS: Record<TaskStatus, string> = {
@@ -14,7 +14,7 @@ export const STATUS_LABELS: Record<TaskStatus, string> = {
   WORK_COMPLETED: '작업 완료',
   OPEN_WAITING: '오픈 대기',
   OPEN_RESPONDING: '오픈 대응',
-  COMPLETED: '완료',
+  OPEN_COMPLETED: '오픈 완료',
 };
 
 // 상태별 색상 (Badge 클래스)
@@ -24,7 +24,7 @@ export const STATUS_COLORS: Record<TaskStatus, string> = {
   WORK_COMPLETED: 'bg-green-100 text-green-700 border-green-300',
   OPEN_WAITING: 'bg-yellow-100 text-yellow-700 border-yellow-300',
   OPEN_RESPONDING: 'bg-orange-100 text-orange-700 border-orange-300',
-  COMPLETED: 'bg-emerald-100 text-emerald-700 border-emerald-300',
+  OPEN_COMPLETED: 'bg-emotion-secondary text-white border-purple-300',
 };
 
 // 중요도 라벨 매핑
@@ -36,8 +36,8 @@ export const DIFFICULTY_LABELS: Record<TaskDifficulty, string> = {
 
 // 중요도별 색상
 export const DIFFICULTY_COLORS: Record<TaskDifficulty, string> = {
-  HIGH: 'bg-red-100 text-red-700 border-red-300',
-  MEDIUM: 'bg-yellow-100 text-yellow-700 border-yellow-300',
+  HIGH: 'bg-rose-50 text-rose-700 border-rose-300',
+  MEDIUM: 'bg-amber-50 text-amber-700 border-amber-300',
   LOW: 'bg-green-100 text-green-700 border-green-300',
 };
 

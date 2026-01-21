@@ -41,7 +41,7 @@ export function TaskTable({ tasks, onTaskClick }: TaskTableProps) {
             <TableHead className="w-[120px]">진행상태</TableHead>
             <TableHead className="min-w-[200px]">담당자</TableHead>
             <TableHead className="w-[200px]">기간</TableHead>
-            <TableHead className="w-[120px] hidden md:table-cell">담당RM</TableHead>
+            <TableHead className="w-[120px] hidden md:table-cell">담당PM</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

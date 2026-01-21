@@ -71,7 +71,7 @@ const statusOptions = [
   { value: 'WORK_COMPLETED', label: '작업 완료' },
   { value: 'OPEN_WAITING', label: '오픈 대기' },
   { value: 'OPEN_RESPONDING', label: '오픈 대응' },
-  { value: 'COMPLETED', label: '완료' },
+  { value: 'OPEN_COMPLETED', label: '오픈 완료' },
 ];
 
 export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuccess }: EditTaskDialogProps) {

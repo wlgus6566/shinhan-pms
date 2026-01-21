@@ -2,11 +2,12 @@
 
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowUpDown, X, Search } from 'lucide-react';
-import { STATUS_LABELS, DIFFICULTY_LABELS, type TaskStatus, type TaskDifficulty } from '@/types/task';
+import { STATUS_LABELS, STATUS_COLORS, DIFFICULTY_LABELS, DIFFICULTY_COLORS, type TaskStatus, type TaskDifficulty } from '@/types/task';
 import type { ProjectMember } from '@/types/project';
-
+import { cn } from '@/lib/utils';
 export type SortBy = 'difficulty' | 'endDate' | 'status' | 'createdAt';
 export type SortOrder = 'asc' | 'desc';
 
@@ -130,15 +131,13 @@ export function TaskFilters({
           <div className="text-sm font-medium mb-2">상태</div>
           <div className="flex flex-wrap gap-2">
             {(Object.keys(STATUS_LABELS) as TaskStatus[]).map((status) => (
-              <Button
+              <Badge
                 key={status}
-                variant={statusFilter.includes(status) ? 'default' : 'outline'}
-                size="sm"
+                className={cn(STATUS_COLORS[status], 'cursor-pointer', statusFilter.includes(status) ? 'bg-primary text-primary-foreground' : '')}
                 onClick={() => toggleStatus(status)}
-                className="text-xs"
               >
                 {STATUS_LABELS[status]}
-              </Button>
+              </Badge>
             ))}
           </div>
         </div>
@@ -148,15 +147,13 @@ export function TaskFilters({
           <div className="text-sm font-medium mb-2">중요도</div>
           <div className="flex flex-wrap gap-2">
             {(Object.keys(DIFFICULTY_LABELS) as TaskDifficulty[]).map((difficulty) => (
-              <Button
+              <Badge
                 key={difficulty}
-                variant={difficultyFilter.includes(difficulty) ? 'default' : 'outline'}
-                size="sm"
+                className={cn(DIFFICULTY_COLORS[difficulty], 'cursor-pointer', difficultyFilter.includes(difficulty) ? 'bg-primary text-primary-foreground' : '')}
                 onClick={() => toggleDifficulty(difficulty)}
-                className="text-xs"
               >
                 {DIFFICULTY_LABELS[difficulty]}
-              </Button>
+              </Badge>
             ))}
           </div>
         </div>
