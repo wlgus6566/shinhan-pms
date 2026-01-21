@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { format, startOfMonth, endOfMonth, subDays } from 'date-fns';
 import { FileText, Loader2 } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/context/AuthContext';
 import { useMyWorkLogs, useMyTasks } from '@/lib/hooks/useWorkLogs';
 import {
@@ -26,6 +27,7 @@ export default function WorkLogsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
   const [editingWorkLog, setEditingWorkLog] = useState<WorkLog | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('all');
 
   // 날짜 범위 계산
   const dateRange = useMemo(() => {
@@ -46,6 +48,44 @@ export default function WorkLogsPage() {
 
   const { tasks: myTasks = [], isLoading: tasksLoading } = useMyTasks();
 
+  // 고유 프로젝트 목록 추출 (가나다순 정렬)
+  const uniqueProjects = useMemo(() => {
+    const projectMap = new Map<string, { id: string; projectName: string }>();
+
+    myTasks.forEach(task => {
+      if (task.project && task.project.id) {
+        projectMap.set(task.project.id, {
+          id: task.project.id,
+          projectName: task.project.projectName
+        });
+      }
+    });
+
+    return Array.from(projectMap.values()).sort((a, b) =>
+      a.projectName.localeCompare(b.projectName, 'ko')
+    );
+  }, [myTasks]);
+
+  // 프로젝트별 필터링된 업무 목록
+  const filteredTasks = useMemo(() => {
+    if (selectedProjectId === 'all') return myTasks;
+    return myTasks.filter(task => task.projectId === selectedProjectId);
+  }, [myTasks, selectedProjectId]);
+
+  // 프로젝트별 필터링된 일지 목록
+  const filteredWorkLogs = useMemo(() => {
+    if (selectedProjectId === 'all') return workLogs;
+
+    // 선택된 프로젝트에 속한 taskId 추출
+    const projectTaskIds = new Set(
+      myTasks
+        .filter(task => task.projectId === selectedProjectId)
+        .map(task => task.id)
+    );
+
+    return workLogs.filter(log => projectTaskIds.has(log.taskId));
+  }, [workLogs, myTasks, selectedProjectId]);
+
   // 어제 일지 (복사 기능용)
   const previousLog = useMemo(() => {
     if (!selectedTaskId) return null;
@@ -54,6 +94,13 @@ export default function WorkLogsPage() {
       (log) => log.taskId === selectedTaskId && log.workDate === yesterday
     ) || null;
   }, [workLogs, selectedTaskId, selectedDate]);
+
+  // 프로젝트 전환 시 선택된 업무가 필터 범위에 없으면 리셋
+  useEffect(() => {
+    if (selectedTaskId && !filteredTasks.some(task => task.id === selectedTaskId)) {
+      setSelectedTaskId(undefined);
+    }
+  }, [selectedTaskId, filteredTasks]);
 
   // 날짜 선택 핸들러
   const handleDateSelect = useCallback((date: Date) => {
@@ -126,6 +173,28 @@ export default function WorkLogsPage() {
         </div>
       </div>
 
+      {/* 프로젝트 필터 탭 */}
+      {!isLoading && myTasks.length > 0 && uniqueProjects.length > 0 && (
+        <Tabs
+          value={selectedProjectId}
+          onValueChange={setSelectedProjectId}
+        >
+          <TabsList>
+            <TabsTrigger value="all">전체</TabsTrigger>
+            {uniqueProjects.map(project => (
+              <TabsTrigger
+                key={project.id}
+                value={project.id}
+                className="max-w-[200px] truncate"
+                title={project.projectName}
+              >
+                {project.projectName}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+      )}
+
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
@@ -144,12 +213,12 @@ export default function WorkLogsPage() {
         <div className="flex gap-6">
           <div className="flex flex-col gap-6 w-[30%]">
             <MyTaskList
-              tasks={myTasks}
+              tasks={filteredTasks}
               selectedTaskId={selectedTaskId}
               onTaskSelect={setSelectedTaskId}
             />
              <WorkLogList
-              workLogs={workLogs}
+              workLogs={filteredWorkLogs}
               currentUserId={user?.id.toString()}
               selectedDate={selectedDate}
               onEdit={handleEditClick}
@@ -161,7 +230,7 @@ export default function WorkLogsPage() {
           {/* 가운데: 달력 */}
           <div className="flex-1">
             <WorkLogCalendar
-              workLogs={workLogs}
+              workLogs={filteredWorkLogs}
               selectedDate={selectedDate}
               onDateSelect={handleDateSelect}
               onMonthChange={handleMonthChange}

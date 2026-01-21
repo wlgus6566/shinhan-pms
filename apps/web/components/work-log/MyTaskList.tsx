@@ -61,11 +61,6 @@ export function MyTaskList({ tasks, selectedTaskId, onTaskSelect }: MyTaskListPr
                 <StatusIcon className={cn('h-5 w-5 flex-shrink-0 mt-0.5', status!.color)} />
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-slate-800 truncate">{task.taskName}</p>
-                  {task.project && (
-                    <p className="text-sm text-slate-500 truncate mt-0.5">
-                      {task.project.projectName}
-                    </p>
-                  )}
                   <div className="flex items-center gap-2 mt-2">
                     <span
                       className={cn(
