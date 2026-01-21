@@ -54,10 +54,10 @@ export function WorkLogList({
       {/* 일지 목록 */}
       <div className="p-4">
         {logsForSelectedDate.length === 0 ? (
-          <div className="py-12 text-center">
+          <div className="py-4 text-center">
             <FileText className="h-12 w-12 text-slate-300 mx-auto mb-3" />
             <p className="text-slate-500 mb-4">
-              이 날짜에 작성된 업무일지가 없습니다
+            오늘 작성된 업무일지가 없습니다
             </p>
             {onCreate && (
               <Button variant="outline" onClick={onCreate}>

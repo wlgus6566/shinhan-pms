@@ -99,15 +99,6 @@ export function WorkLogCard({ workLog, isOwner, onEdit, onDelete }: WorkLogCardP
           </div>
         </div>
       )}
-
-      {/* 작성자 */}
-      {workLog.user && (
-        <div className="mt-3 pt-3 border-t border-slate-100">
-          <p className="text-xs text-slate-400">
-            작성자: {workLog.user.name}
-          </p>
-        </div>
-      )}
     </div>
   );
 }

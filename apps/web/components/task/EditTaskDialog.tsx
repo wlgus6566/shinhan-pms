@@ -28,7 +28,7 @@ const editTaskSchema = z.object({
   difficulty: z.enum(['HIGH', 'MEDIUM', 'LOW'] as const, {
     required_error: '중요도를 선택하세요',
   }),
-  status: z.enum(['WAITING', 'IN_PROGRESS', 'WORK_COMPLETED', 'OPEN_WAITING', 'OPEN_RESPONDING', 'COMPLETED'] as const, {
+  status: z.enum(['WAITING', 'IN_PROGRESS', 'WORK_COMPLETED', 'OPEN_WAITING', 'OPEN_RESPONDING', 'OPEN_COMPLETED'] as const, {
     required_error: '상태를 선택하세요',
   }),
   clientName: z.string().max(100, '담당 RM은 100자 이하여야 합니다').optional(),

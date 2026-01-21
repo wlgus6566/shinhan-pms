@@ -1,8 +1,9 @@
 'use client';
 
 import { FolderKanban, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import type { MyTask } from '@/types/work-log';
+import { DIFFICULTY_COLORS, DIFFICULTY_LABELS, STATUS_LABELS, STATUS_COLORS, type TaskStatus, type TaskDifficulty } from '@/types/task';
+import { cn } from '@/lib/utils';
 
 interface MyTaskListProps {
   tasks: MyTask[];
@@ -38,7 +39,7 @@ export function MyTaskList({ tasks, selectedTaskId, onTaskSelect }: MyTaskListPr
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
       <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
-        <h3 className="font-bold text-slate-800">내 업무 목록</h3>
+        <h3 className="font-bold text-slate-800">진행 중인 업무</h3>
         <p className="text-sm text-slate-500 mt-0.5">{tasks.length}개의 업무</p>
       </div>
 
@@ -52,7 +53,7 @@ export function MyTaskList({ tasks, selectedTaskId, onTaskSelect }: MyTaskListPr
               key={task.id}
               onClick={() => onTaskSelect?.(task.id)}
               className={cn(
-                'w-full px-6 py-4 text-left border-b border-slate-100 last:border-b-0 transition-colors hover:bg-slate-50',
+                'w-full px-6 py-2 text-left border-b border-slate-100 last:border-b-0 transition-colors hover:bg-slate-50',
                 selectedTaskId === task.id && 'bg-blue-50 hover:bg-blue-50'
               )}
             >
@@ -68,27 +69,18 @@ export function MyTaskList({ tasks, selectedTaskId, onTaskSelect }: MyTaskListPr
                   <div className="flex items-center gap-2 mt-2">
                     <span
                       className={cn(
-                        'px-2 py-0.5 text-xs font-medium rounded-full',
-                        task.status === 'TODO' && 'bg-slate-100 text-slate-600',
-                        task.status === 'IN_PROGRESS' && 'bg-blue-100 text-blue-600',
-                        task.status === 'DONE' && 'bg-emerald-100 text-emerald-600',
-                        task.status === 'HOLD' && 'bg-amber-100 text-amber-600'
-                      )}
-                    >
-                      {status!.label}
+                        'px-2 py-0.5 text-xs font-medium rounded-full', STATUS_COLORS[task.status as TaskStatus])
+                    }>
+                      {STATUS_LABELS[task.status as TaskStatus]}
                     </span>
                     {task.difficulty && (
                       <span
                         className={cn(
                           'px-2 py-0.5 text-xs font-medium rounded-full',
-                          task.difficulty === 'HIGH' && 'bg-rose-100 text-rose-600',
-                          task.difficulty === 'MEDIUM' && 'bg-amber-100 text-amber-600',
-                          task.difficulty === 'LOW' && 'bg-emerald-100 text-emerald-600'
+                          DIFFICULTY_COLORS[task.difficulty as TaskDifficulty]
                         )}
                       >
-                        {task.difficulty === 'HIGH' && '높음'}
-                        {task.difficulty === 'MEDIUM' && '보통'}
-                        {task.difficulty === 'LOW' && '낮음'}
+                        {DIFFICULTY_LABELS[task.difficulty as TaskDifficulty]}
                       </span>
                     )}
                   </div>

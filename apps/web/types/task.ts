@@ -22,7 +22,7 @@ export const STATUS_COLORS: Record<TaskStatus, string> = {
   WAITING: 'bg-gray-100 text-gray-700 border-gray-300',
   IN_PROGRESS: 'bg-blue-100 text-blue-700 border-blue-300',
   WORK_COMPLETED: 'bg-green-100 text-green-700 border-green-300',
-  OPEN_WAITING: 'bg-yellow-100 text-yellow-700 border-yellow-300',
+  OPEN_WAITING: 'bg-amber-50 text-amber-700 border-amber-300',
   OPEN_RESPONDING: 'bg-orange-100 text-orange-700 border-orange-300',
   OPEN_COMPLETED: 'bg-emotion-secondary text-white border-purple-300',
 };

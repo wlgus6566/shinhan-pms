@@ -7,6 +7,7 @@ import { getProject } from '@/lib/api/projects';
 import { getProjectMembers } from '@/lib/api/projectMembers';
 import { ProjectDetail } from '@/components/project/ProjectDetail';
 import { ProjectMembersTable } from '@/components/project/ProjectMembersTable';
+import { TeamWorkLogList } from '@/components/work-log/TeamWorkLogList';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -107,6 +108,7 @@ export default function ProjectDetailPage() {
         <TabsList>
           <TabsTrigger value="info">기본 정보</TabsTrigger>
           <TabsTrigger value="members">멤버 관리</TabsTrigger>
+          <TabsTrigger value="team-logs">팀 업무일지</TabsTrigger>
         </TabsList>
 
         <TabsContent value="info">
@@ -126,6 +128,10 @@ export default function ProjectDetailPage() {
               />
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="team-logs">
+          <TeamWorkLogList projectId={projectId} members={members} />
         </TabsContent>
       </Tabs>
     </div>
