@@ -286,20 +286,29 @@ export function ScheduleForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>일정 유형 *</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value} disabled={viewMode}>
+              {viewMode ? (
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="일정 유형 선택" />
-                  </SelectTrigger>
+                  <Input
+                    value={SCHEDULE_TYPE_LABELS[field.value]}
+                    disabled
+                  />
                 </FormControl>
-                <SelectContent>
-                  {Object.entries(SCHEDULE_TYPE_LABELS).map(([value, label]) => (
-                    <SelectItem key={value} value={value}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              ) : (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="일정 유형 선택" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {Object.entries(SCHEDULE_TYPE_LABELS).map(([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
               <FormMessage />
             </FormItem>
           )}
@@ -313,20 +322,29 @@ export function ScheduleForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>팀 범위 *</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value} disabled={viewMode}>
+                {viewMode ? (
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="팀 범위 선택" />
-                    </SelectTrigger>
+                    <Input
+                      value={field.value ? TEAM_SCOPE_LABELS[field.value] : ''}
+                      disabled
+                    />
                   </FormControl>
-                  <SelectContent>
-                    {availableTeamScopes.map(scope => (
-                      <SelectItem key={scope} value={scope}>
-                        {TEAM_SCOPE_LABELS[scope]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                ) : (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="팀 범위 선택" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {availableTeamScopes.map(scope => (
+                        <SelectItem key={scope} value={scope}>
+                          {TEAM_SCOPE_LABELS[scope]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
                 <FormMessage />
               </FormItem>
             )}
@@ -359,21 +377,27 @@ export function ScheduleForm({
                   <FormItem>
                     <FormLabel>유형 *</FormLabel>
                     <FormControl>
-                      <RadioGroup
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        className="flex gap-4"
-                        disabled={viewMode}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="AM" id="am" disabled={viewMode} />
-                          <Label htmlFor="am" className="cursor-pointer">오전</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="PM" id="pm" disabled={viewMode} />
-                          <Label htmlFor="pm" className="cursor-pointer">오후</Label>
-                        </div>
-                      </RadioGroup>
+                      {viewMode ? (
+                        <Input
+                          value={field.value === 'AM' ? '오전' : field.value === 'PM' ? '오후' : ''}
+                          disabled
+                        />
+                      ) : (
+                        <RadioGroup
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          className="flex gap-4"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="AM" id="am" />
+                            <Label htmlFor="am" className="cursor-pointer">오전</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="PM" id="pm" />
+                            <Label htmlFor="pm" className="cursor-pointer">오후</Label>
+                          </div>
+                        </RadioGroup>
+                      )}
                     </FormControl>
                     <FormMessage />
                   </FormItem>

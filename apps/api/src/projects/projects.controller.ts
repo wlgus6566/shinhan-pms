@@ -368,6 +368,9 @@ export class ProjectsController {
       location: schedule.location,
       isAllDay: schedule.isAllDay,
       color: schedule.color,
+      teamScope: schedule.teamScope,
+      halfDayType: schedule.halfDayType,
+      usageDate: schedule.usageDate?.toISOString().split('T')[0],
       participants: schedule.participants?.map((p: any) => ({
         id: p.user.id.toString(),
         name: p.user.name,

@@ -15,6 +15,9 @@ export class ScheduleParticipantDto {
     enum: ['PENDING', 'ACCEPTED', 'DECLINED']
   })
   status: string;
+
+  @ApiPropertyOptional({ description: 'Work area' })
+  workArea?: string;
 }
 
 export class ScheduleResponseDto {
@@ -62,4 +65,19 @@ export class ScheduleResponseDto {
 
   @ApiPropertyOptional({ description: 'Updated timestamp' })
   updatedAt?: string;
+
+  @ApiPropertyOptional({
+    description: 'Team scope for meetings/scrums',
+    enum: ['ALL', 'PLANNING', 'DESIGN', 'FRONTEND', 'BACKEND']
+  })
+  teamScope?: string;
+
+  @ApiPropertyOptional({
+    description: 'Half day type (AM/PM) for half-day vacations',
+    enum: ['AM', 'PM']
+  })
+  halfDayType?: string;
+
+  @ApiPropertyOptional({ description: 'Usage date for vacation/half-day' })
+  usageDate?: string;
 }

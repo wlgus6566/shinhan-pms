@@ -49,6 +49,8 @@ export class SchedulesService {
         throw new ForbiddenException('프로젝트 멤버만 일정을 생성할 수 있습니다');
       }
     }
+    console.log('[DEBUG] scheduleData:', scheduleData);
+    
 
     // 일정 생성
     const schedule = await this.prisma.schedule.create({
@@ -62,6 +64,9 @@ export class SchedulesService {
         location: scheduleData.location,
         isAllDay: scheduleData.isAllDay ?? false,
         color: scheduleData.color,
+        teamScope: scheduleData.teamScope,
+        halfDayType: scheduleData.halfDayType,
+        usageDate: scheduleData.usageDate ? new Date(scheduleData.usageDate) : null,
         createdBy: userId,
       },
       include: {
@@ -290,6 +295,9 @@ export class SchedulesService {
     if (scheduleData.location !== undefined) updateData.location = scheduleData.location;
     if (scheduleData.isAllDay !== undefined) updateData.isAllDay = scheduleData.isAllDay;
     if (scheduleData.color !== undefined) updateData.color = scheduleData.color;
+    if (scheduleData.teamScope !== undefined) updateData.teamScope = scheduleData.teamScope;
+    if (scheduleData.halfDayType !== undefined) updateData.halfDayType = scheduleData.halfDayType;
+    if (scheduleData.usageDate !== undefined) updateData.usageDate = scheduleData.usageDate ? new Date(scheduleData.usageDate) : null;
 
     return await this.prisma.schedule.update({
       where: { id },

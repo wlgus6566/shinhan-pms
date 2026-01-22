@@ -100,6 +100,7 @@ export class SchedulesController {
       startDate,
       endDate,
     );
+
     return schedules.map((schedule) => this.transformSchedule(schedule));
   }
 
@@ -209,7 +210,16 @@ export class SchedulesController {
   }
 
   private transformSchedule(schedule: any): any {
-    return {
+    // 🔍 디버깅: Prisma 결과 확인
+    console.log('🔍 [transformSchedule] Schedule raw data:', {
+      id: schedule.id,
+      title: schedule.title,
+      teamScope: schedule.teamScope,
+      hasTeamScope: 'teamScope' in schedule,
+      allKeys: Object.keys(schedule),
+    });
+
+    const result = {
       id: schedule.id.toString(),
       projectId: schedule.projectId?.toString(),
       title: schedule.title,
@@ -220,6 +230,9 @@ export class SchedulesController {
       location: schedule.location,
       isAllDay: schedule.isAllDay,
       color: schedule.color,
+      teamScope: schedule.teamScope,
+      halfDayType: schedule.halfDayType,
+      usageDate: schedule.usageDate?.toISOString().split('T')[0],
       participants: schedule.participants?.map((p: any) => ({
         id: p.user.id.toString(),
         name: p.user.name,
@@ -230,5 +243,13 @@ export class SchedulesController {
       createdAt: schedule.createdAt.toISOString(),
       updatedAt: schedule.updatedAt?.toISOString(),
     };
+
+    console.log('🔍 [transformSchedule] Transformed result:', {
+      id: result.id,
+      teamScope: result.teamScope,
+      hasTeamScope: 'teamScope' in result,
+    });
+
+    return result;
   }
 }

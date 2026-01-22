@@ -59,4 +59,32 @@ export class CreateScheduleDto {
   @IsArray()
   @IsString({ each: true })
   participantIds?: string[];
+
+  @ApiPropertyOptional({
+    description: 'Team scope for meetings/scrums',
+    enum: ['ALL', 'PLANNING', 'DESIGN', 'FRONTEND', 'BACKEND'],
+    example: 'ALL'
+  })
+  @IsOptional()
+  @IsString()
+  @IsIn(['ALL', 'PLANNING', 'DESIGN', 'FRONTEND', 'BACKEND'])
+  teamScope?: string;
+
+  @ApiPropertyOptional({
+    description: 'Half day type (AM/PM) for half-day vacations',
+    enum: ['AM', 'PM'],
+    example: 'AM'
+  })
+  @IsOptional()
+  @IsString()
+  @IsIn(['AM', 'PM'])
+  halfDayType?: string;
+
+  @ApiPropertyOptional({
+    description: 'Usage date for vacation/half-day',
+    example: '2026-01-25'
+  })
+  @IsOptional()
+  @IsDateString()
+  usageDate?: string;
 }

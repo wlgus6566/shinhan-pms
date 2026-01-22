@@ -13,7 +13,6 @@ import {
   isToday,
   addMonths,
   subMonths,
-  isWithinInterval,
   parseISO,
 } from 'date-fns';
 import { ko } from 'date-fns/locale';
@@ -21,7 +20,7 @@ import { ChevronLeft, ChevronRight, Calendar, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { Schedule } from '@/types/schedule';
-import { SCHEDULE_TYPE_LABELS, SCHEDULE_TYPE_CALENDAR_COLORS } from '@/types/schedule';
+import { SCHEDULE_TYPE_LABELS, SCHEDULE_TYPE_CALENDAR_COLORS, TEAM_SCOPE_FILTER_COLORS } from '@/types/schedule';
 
 interface ScheduleCalendarProps {
   schedules: Schedule[];
@@ -228,7 +227,7 @@ export function ScheduleCalendar({
                             }}
                             className="w-full inline-block px-1.5 py-0.5 text-[10px] font-medium rounded truncate text-left"
                             style={{
-                              backgroundColor: schedule.color || SCHEDULE_TYPE_CALENDAR_COLORS[schedule.scheduleType],
+                              backgroundColor: schedule.color || (schedule.teamScope ? TEAM_SCOPE_FILTER_COLORS[schedule.teamScope] : SCHEDULE_TYPE_CALENDAR_COLORS[schedule.scheduleType]),
                               color: 'white',
                             }}
                             title={schedule.title}
@@ -279,7 +278,7 @@ export function ScheduleCalendar({
                         <div
                           className="w-2 h-2 rounded-full"
                           style={{
-                            backgroundColor: schedule.color || SCHEDULE_TYPE_CALENDAR_COLORS[schedule.scheduleType],
+                            backgroundColor: schedule.color || (schedule.teamScope ? TEAM_SCOPE_FILTER_COLORS[schedule.teamScope] : SCHEDULE_TYPE_CALENDAR_COLORS[schedule.scheduleType]),
                           }}
                         />
                         <div className="flex-1 min-w-0">

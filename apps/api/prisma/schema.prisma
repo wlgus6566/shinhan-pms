@@ -207,12 +207,15 @@ model Schedule {
   projectId   BigInt?   @map("project_id")
   title       String    @db.VarChar(100)
   description String?   @db.Text
-  scheduleType String   @map("schedule_type") @db.VarChar(20) // MEETING, VACATION, EVENT, OTHER
+  scheduleType String   @map("schedule_type") @db.VarChar(20) // MEETING, SCRUM, VACATION, HALF_DAY, OTHER
   startDate   DateTime  @map("start_date") @db.Timestamp(6)
   endDate     DateTime  @map("end_date") @db.Timestamp(6)
   location    String?   @db.VarChar(200)
   isAllDay    Boolean   @default(false) @map("is_all_day")
   color       String?   @db.VarChar(20)
+  teamScope   String?   @map("team_scope") @db.VarChar(20) // ALL, PLANNING, DESIGN, FRONTEND, BACKEND (for MEETING/SCRUM)
+  halfDayType String?   @map("half_day_type") @db.VarChar(2) // AM, PM (for HALF_DAY)
+  usageDate   DateTime? @map("usage_date") @db.Date // for VACATION/HALF_DAY
   isActive    Boolean   @default(true) @map("is_active")
   createdBy   BigInt    @map("created_by")
   createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
@@ -230,6 +233,8 @@ model Schedule {
   @@index([startDate, endDate], map: "idx_schedules_dates")
   @@index([isActive], map: "idx_schedules_is_active")
   @@index([createdBy], map: "idx_schedules_created_by")
+  @@index([teamScope], map: "idx_schedules_team_scope")
+  @@index([usageDate], map: "idx_schedules_usage_date")
 
   @@map("schedules")
 }
