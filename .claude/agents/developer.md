@@ -35,9 +35,9 @@ NestJS 백엔드 API와 Next.js 프론트엔드 UI를 TDD 방식으로 개발하
 
 ### 디자인 가이드 준수
 
-- **Primary**: 신한 블루 (`#0046FF`) / **Secondary**: 신한 골드 (`#FFD200`).
-- **Radius**: `rounded-2xl` (1rem) / **Shadow**: `shadow-md`.
-- 모든 컴포넌트는 `artifacts/pms-ui-ux-design-guide.md`를 따름.
+- **Primary**: 인디고 (`#6366F1`) / **Secondary**: 보라 (`#8B5CF6`) / **Accent**: 핑크 (`#EC4899`).
+- **Radius**: `rounded-lg` (8px), `rounded-xl` (12px) / **Shadow**: `shadow-sm`, `shadow-md`, `shadow-lg`.
+- 모든 컴포넌트는 `BRANDING.md`를 따름.
 
 ### CSR(Client-Side Rendering) 개발 원칙
 
@@ -105,4 +105,4 @@ npx shadcn@latest add [component-name] -y
 - [ ] **백엔드**: Swagger (`/docs`)에 API가 정상 노출되는가?
 - [ ] **프론트엔드**: 모든 페이지에 `'use client'`가 포함되었는가?
 - [ ] **프론트엔드**: 로딩(`Loader2`) 및 에러 처리가 구현되었는가?
-- [ ] **디자인**: 버튼, 카드 등이 신한 브랜드 가이드를 따르는가?
+- [ ] **디자인**: 버튼, 카드 등이 이모션 브랜드 가이드를 따르는가?

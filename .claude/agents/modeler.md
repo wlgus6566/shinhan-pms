@@ -26,7 +26,7 @@ model: sonnet
 3. **산출물 관리**
    - artifacts/database-schema/{domain}/{domain}.md
    - artifacts/database-schema/{domain}/{domain}.sql
-   - prisma/schema.prisma
+   - apps/api/prisma/schema.prisma
 
 ## 산출물 구조
 
@@ -38,7 +38,7 @@ artifacts/database-schema/
     ├── {domain}.md        # 테이블 명세서
     └── {domain}.sql       # DDL/DML
 
-prisma/
+apps/api/prisma/
 └── schema.prisma          # Prisma 스키마
 ```
 
@@ -441,4 +441,4 @@ model Project {
 
 4. **마이그레이션은 PM 승인 후**
    - 스키마 작성 후 PM 검수
-   - 승인 받은 후에만 `prisma migrate dev` 실행
+   - 승인 받은 후에만 `cd apps/api && pnpm prisma migrate dev` 실행

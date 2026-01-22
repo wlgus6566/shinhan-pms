@@ -50,7 +50,7 @@ artifacts/planning-wireframe/
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>[화면명] - PMS</title>
+    <title>[화면명] - 이모션 PMS</title>
     <style>
         /* 다크모드 기본 스타일 */
         :root {
@@ -59,8 +59,10 @@ artifacts/planning-wireframe/
             --text-primary: #e0e0e0;
             --text-secondary: #a0a0a0;
             --border-color: #404040;
-            --primary-color: #3b82f6;
-            --primary-hover: #2563eb;
+            --primary-color: #6366F1;     /* 이모션 인디고 */
+            --primary-hover: #4F46E5;
+            --secondary-color: #8B5CF6;   /* 이모션 보라 */
+            --accent-color: #EC4899;      /* 이모션 핑크 */
             --danger-color: #ef4444;
             --danger-hover: #dc2626;
         }
@@ -254,7 +256,7 @@ artifacts/planning-wireframe/
     <div class="container">
         <!-- 사이드바 (각 HTML 파일에 직접 임베드) -->
         <aside class="sidebar">
-            <h2>PMS</h2>
+            <h2>이모션 PMS</h2>
             <nav>
                 <ul>
                     <li><a href="../project-management/index.html">프로젝트</a></li>
@@ -287,7 +289,7 @@ artifacts/planning-wireframe/
 ```html
 <!-- ✅ 좋은 예: 직접 임베드 -->
 <aside class="sidebar">
-    <h2>PMS</h2>
+    <h2>이모션 PMS</h2>
     <nav>
         <ul>
             <li><a href="index.html" class="active">프로젝트</a></li>
