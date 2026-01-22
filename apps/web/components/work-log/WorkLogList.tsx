@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { FileText, Plus } from 'lucide-react';
+import { AlertCircle, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { WorkLogCard } from './WorkLogCard';
 import type { WorkLog } from '@/types/work-log';
@@ -55,9 +55,9 @@ export function WorkLogList({
       <div className="p-4">
         {logsForSelectedDate.length === 0 ? (
           <div className="py-4 text-center">
-            <FileText className="h-12 w-12 text-slate-300 mx-auto mb-3" />
-            <p className="text-slate-500 mb-4">
-            오늘 작성된 업무일지가 없습니다
+            <AlertCircle className="w-5 h-5 text-red-500 mx-auto mb-3" />
+            <p className="text-red-500 mb-4 text-center">
+            오늘 작성된 업무일지가 없어요.
             </p>
             {onCreate && (
               <Button variant="outline" onClick={onCreate}>

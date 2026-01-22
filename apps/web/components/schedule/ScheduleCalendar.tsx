@@ -189,7 +189,7 @@ export function ScheduleCalendar({
                   key={format(day, 'yyyy-MM-dd')}
                   onClick={() => onDateSelect(day)}
                   className={cn(
-                    'relative h-24 p-2 border-b border-r border-slate-100 transition-all hover:bg-slate-50',
+                    'relative h-24 py-2 px-1 border-b border-r border-slate-100 transition-all hover:bg-slate-50',
                     !isCurrentMonth && 'bg-slate-50/50',
                     isSelected && 'bg-blue-50 hover:bg-blue-50',
                     index % 7 === 6 && 'border-r-0'
@@ -218,13 +218,13 @@ export function ScheduleCalendar({
                     {schedulesForDay.length > 0 && isCurrentMonth && (
                       <div className="mt-1 space-y-0.5 overflow-hidden flex-1">
                         {schedulesForDay.slice(0, 2).map((schedule) => (
-                          <button
+                          <span
                             key={schedule.id}
                             onClick={(e) => {
                               e.stopPropagation();
                               onScheduleClick?.(schedule);
                             }}
-                            className="w-full px-1.5 py-0.5 text-[10px] font-medium rounded truncate text-left"
+                            className="w-full inline-block px-1.5 py-0.5 text-[10px] font-medium rounded truncate text-left"
                             style={{
                               backgroundColor: schedule.color || SCHEDULE_TYPE_CALENDAR_COLORS[schedule.scheduleType],
                               color: 'white',
@@ -233,7 +233,7 @@ export function ScheduleCalendar({
                           >
                             {schedule.isAllDay ? '⏰ ' : ''}
                             {schedule.title}
-                          </button>
+                          </span>
                         ))}
                         {schedulesForDay.length > 2 && (
                           <div className="px-1.5 text-[10px] text-slate-500">

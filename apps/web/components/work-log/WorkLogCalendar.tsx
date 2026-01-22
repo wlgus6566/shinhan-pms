@@ -191,7 +191,7 @@ export function WorkLogCalendar({
                   key={dateStr}
                   onClick={() => onDateSelect(day)}
                   className={cn(
-                    'relative h-24 p-2 border-b border-r border-slate-100 transition-all hover:bg-slate-50',
+                    'relative h-24 py-2 px-1 border-b border-r border-slate-100 transition-all hover:bg-slate-50',
                     !isCurrentMonth && 'bg-slate-50/50',
                     isSelected && 'bg-blue-50 hover:bg-blue-50',
                     index % 7 === 6 && 'border-r-0'
