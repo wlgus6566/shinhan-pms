@@ -25,8 +25,8 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import type { Schedule, ScheduleType, CreateScheduleRequest, TeamScope, HalfDayType } from '@/types/schedule';
-import { SCHEDULE_TYPE_LABELS, TEAM_SCOPE_LABELS, HALF_DAY_TYPE_LABELS } from '@/types/schedule';
+import type { Schedule, CreateScheduleRequest, TeamScope } from '@/types/schedule';
+import { SCHEDULE_TYPE_LABELS, TEAM_SCOPE_LABELS } from '@/types/schedule';
 import type { ProjectMember, WorkArea } from '@/types/project';
 import { getProjectMembers } from '@/lib/api/projectMembers';
 
@@ -108,6 +108,9 @@ interface ScheduleFormProps {
   onSubmit: (data: CreateScheduleRequest) => void;
   onCancel: () => void;
   isLoading?: boolean;
+  viewMode?: boolean;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
 export function ScheduleForm({
@@ -116,6 +119,9 @@ export function ScheduleForm({
   onSubmit,
   onCancel,
   isLoading = false,
+  viewMode = false,
+  onEdit,
+  onDelete,
 }: ScheduleFormProps) {
   const isEditing = !!schedule;
   const [projectMembers, setProjectMembers] = useState<ProjectMember[]>([]);
@@ -138,6 +144,17 @@ export function ScheduleForm({
     fetchMembers();
   }, [projectId]);
 
+  // UTC 시간을 로컬 시간으로 변환하여 datetime-local input에 표시
+  const formatDateTimeLocal = (isoString: string) => {
+    const date = new Date(isoString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
   const form = useForm<ScheduleFormValues>({
     resolver: zodResolver(scheduleFormSchema),
     defaultValues: schedule
@@ -145,8 +162,8 @@ export function ScheduleForm({
           title: schedule.title,
           description: schedule.description || '',
           scheduleType: schedule.scheduleType,
-          startDate: schedule.startDate ? schedule.startDate.slice(0, 16) : '', // Format for datetime-local
-          endDate: schedule.endDate ? schedule.endDate.slice(0, 16) : '',
+          startDate: schedule.startDate ? formatDateTimeLocal(schedule.startDate) : '',
+          endDate: schedule.endDate ? formatDateTimeLocal(schedule.endDate) : '',
           location: schedule.location || '',
           isAllDay: schedule.isAllDay,
           color: schedule.color || '',
@@ -197,7 +214,6 @@ export function ScheduleForm({
     onSubmit(submitData);
   };
 
-  const isAllDay = form.watch('isAllDay');
   const scheduleType = form.watch('scheduleType');
   const teamScope = form.watch('teamScope');
   const showParticipants = scheduleType === 'MEETING' || scheduleType === 'SCRUM';
@@ -257,7 +273,7 @@ export function ScheduleForm({
             <FormItem>
               <FormLabel>제목 *</FormLabel>
               <FormControl>
-                <Input placeholder="일정 제목을 입력하세요" {...field} />
+                <Input placeholder="일정 제목을 입력하세요" {...field} disabled={viewMode} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -270,7 +286,7 @@ export function ScheduleForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>일정 유형 *</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select onValueChange={field.onChange} value={field.value} disabled={viewMode}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="일정 유형 선택" />
@@ -297,7 +313,7 @@ export function ScheduleForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>팀 범위 *</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select onValueChange={field.onChange} value={field.value} disabled={viewMode}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="팀 범위 선택" />
@@ -327,7 +343,7 @@ export function ScheduleForm({
                 <FormItem>
                   <FormLabel>사용일 *</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} />
+                    <Input type="date" {...field} disabled={viewMode} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -347,13 +363,14 @@ export function ScheduleForm({
                         value={field.value}
                         onValueChange={field.onChange}
                         className="flex gap-4"
+                        disabled={viewMode}
                       >
                         <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="AM" id="am" />
+                          <RadioGroupItem value="AM" id="am" disabled={viewMode} />
                           <Label htmlFor="am" className="cursor-pointer">오전</Label>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="PM" id="pm" />
+                          <RadioGroupItem value="PM" id="pm" disabled={viewMode} />
                           <Label htmlFor="pm" className="cursor-pointer">오후</Label>
                         </div>
                       </RadioGroup>
@@ -378,6 +395,7 @@ export function ScheduleForm({
                       type="datetime-local"
                       step="1800"
                       {...field}
+                      disabled={viewMode}
                     />
                   </FormControl>
                   <FormMessage />
@@ -396,6 +414,7 @@ export function ScheduleForm({
                       type="datetime-local"
                       step="1800"
                       {...field}
+                      disabled={viewMode}
                     />
                   </FormControl>
                   <FormMessage />
@@ -414,7 +433,7 @@ export function ScheduleForm({
                 장소{(scheduleType === 'MEETING' || scheduleType === 'SCRUM') && ' *'}
               </FormLabel>
               <FormControl>
-                <Input placeholder="장소를 입력하세요 (예: 회의실 A)" {...field} />
+                <Input placeholder="장소를 입력하세요 (예: 회의실 A)" {...field} disabled={viewMode} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -474,6 +493,7 @@ export function ScheduleForm({
                                         field.onChange(currentValue.filter((id) => id !== memberId));
                                       }
                                     }}
+                                    disabled={viewMode}
                                   />
                                   <label className="text-sm cursor-pointer">
                                     {member.member?.name || '알 수 없음'} ({member.role})
@@ -505,6 +525,7 @@ export function ScheduleForm({
                   className="resize-none"
                   rows={4}
                   {...field}
+                  disabled={viewMode}
                 />
               </FormControl>
               <FormMessage />
@@ -512,19 +533,48 @@ export function ScheduleForm({
           )}
         />
 
-        <div className="flex justify-end gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-            disabled={isLoading}
-          >
-            취소
-          </Button>
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? '저장 중...' : isEditing ? '수정' : '생성'}
-          </Button>
-        </div>
+        {viewMode ? (
+          <div className="flex justify-end gap-2">
+            {onDelete && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onDelete}
+              >
+                삭제
+              </Button>
+            )}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+            >
+              닫기
+            </Button>
+            {onEdit && (
+              <Button
+                type="button"
+                onClick={onEdit}
+              >
+                수정
+              </Button>
+            )}
+          </div>
+        ) : (
+          <div className="flex justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+              disabled={isLoading}
+            >
+              취소
+            </Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? '저장 중...' : isEditing ? '수정' : '생성'}
+            </Button>
+          </div>
+        )}
       </form>
     </Form>
   );

@@ -1,27 +1,23 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { format, startOfMonth, endOfMonth, parseISO } from 'date-fns';
-import { ko } from 'date-fns/locale';
-import { Badge } from '@/components/ui/badge';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from '@/components/ui/dialog';
-import { Calendar as CalendarIcon, MapPin, Users, Plus, Trash2, Pencil } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { ScheduleCalendar } from './ScheduleCalendar';
 import { ScheduleForm } from './ScheduleForm';
 import { SelectedDateScheduleList } from './SelectedDateScheduleList';
-import type { Schedule, ScheduleType, CreateScheduleRequest, TeamScope } from '@/types/schedule';
-import { SCHEDULE_TYPE_LABELS, SCHEDULE_TYPE_COLORS, PARTICIPANT_STATUS_LABELS, PARTICIPANT_STATUS_COLORS, TEAM_SCOPE_LABELS, TEAM_SCOPE_FILTER_COLORS } from '@/types/schedule';
+import type { Schedule, CreateScheduleRequest, TeamScope } from '@/types/schedule';
+import { TEAM_SCOPE_LABELS, TEAM_SCOPE_FILTER_COLORS } from '@/types/schedule';
 import type { ProjectMember } from '@/types/project';
 import { getProjectSchedules, createProjectSchedule, updateSchedule, deleteSchedule } from '@/lib/api/schedules';
 import { getProjectMembers } from '@/lib/api/projectMembers';
-import { cn } from '@/lib/utils';
 
 interface ProjectScheduleListProps {
   projectId: string;
@@ -40,7 +36,6 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
   const [projectMembers, setProjectMembers] = useState<ProjectMember[]>([]);
 
   // Filter state
-  const [selectedTypes, setSelectedTypes] = useState<ScheduleType[]>([]);
   const [selectedTeams, setSelectedTeams] = useState<TeamScope[]>([]);
 
   // Fetch project members for dynamic team filtering
@@ -98,23 +93,18 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
   const filteredSchedules = useMemo(() => {
     let result = [...schedules];
 
-    // 1. Filter by schedule type
-    if (selectedTypes.length > 0) {
-      result = result.filter(schedule => selectedTypes.includes(schedule.scheduleType));
-    }
-
-    // 2. Filter by team scope
+    // 1. Filter by team scope
     if (selectedTeams.length > 0) {
       result = result.filter(schedule =>
         schedule.teamScope && selectedTeams.includes(schedule.teamScope)
       );
     }
 
-    // 3. Sort by start date (ascending - earliest first)
+    // 2. Sort by start date (ascending - earliest first)
     result.sort((a, b) => a.startDate.localeCompare(b.startDate));
 
     return result;
-  }, [schedules, selectedTypes, selectedTeams]);
+  }, [schedules, selectedTeams]);
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
@@ -248,102 +238,21 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
 
       {/* 일정 상세 모달 */}
       <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>일정 상세</DialogTitle>
+          </DialogHeader>
+
           {selectedSchedule && (
-            <>
-              <DialogHeader>
-                <div className="flex items-start justify-between gap-4">
-                  <DialogTitle className="text-xl">{selectedSchedule.title}</DialogTitle>
-                  <Badge className={cn('text-xs', SCHEDULE_TYPE_COLORS[selectedSchedule.scheduleType])}>
-                    {SCHEDULE_TYPE_LABELS[selectedSchedule.scheduleType]}
-                  </Badge>
-                </div>
-              </DialogHeader>
-
-              <div className="space-y-4 mt-4">
-                {/* 날짜 및 시간 */}
-                <div className="flex items-start gap-3">
-                  <CalendarIcon className="h-5 w-5 text-slate-400 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-slate-700">
-                      {format(parseISO(selectedSchedule.startDate), 'yyyy년 M월 d일 (EEE)', { locale: ko })}
-                      {' '}
-                      {selectedSchedule.isAllDay ? (
-                        <span className="text-slate-500">하루 종일</span>
-                      ) : (
-                        <>
-                          {format(parseISO(selectedSchedule.startDate), 'HH:mm')}
-                          {' ~ '}
-                          {format(parseISO(selectedSchedule.endDate), 'HH:mm')}
-                        </>
-                      )}
-                    </p>
-                  </div>
-                </div>
-
-                {/* 장소 */}
-                {selectedSchedule.location && (
-                  <div className="flex items-start gap-3">
-                    <MapPin className="h-5 w-5 text-slate-400 mt-0.5" />
-                    <p className="text-sm text-slate-700">{selectedSchedule.location}</p>
-                  </div>
-                )}
-
-                {/* 참가자 */}
-                {selectedSchedule.participants && selectedSchedule.participants.length > 0 && (
-                  <div className="flex items-start gap-3">
-                    <Users className="h-5 w-5 text-slate-400 mt-0.5" />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-slate-700 mb-2">
-                        참가자 ({selectedSchedule.participants.length}명)
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedSchedule.participants.map(participant => (
-                          <div
-                            key={participant.id}
-                            className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-lg border border-slate-200"
-                          >
-                            <span className="text-sm font-medium text-slate-700">
-                              {participant.name}
-                            </span>
-                            <Badge className={cn('text-xs', PARTICIPANT_STATUS_COLORS[participant.status])}>
-                              {PARTICIPANT_STATUS_LABELS[participant.status]}
-                            </Badge>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* 설명 */}
-                {selectedSchedule.description && (
-                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                    <p className="text-sm text-slate-700 whitespace-pre-wrap">
-                      {selectedSchedule.description}
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              <DialogFooter className="gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => handleDelete(selectedSchedule.id)}
-                  className="gap-2"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  삭제
-                </Button>
-                <Button
-                  onClick={() => handleEdit(selectedSchedule)}
-                  className="gap-2"
-                >
-                  <Pencil className="h-4 w-4" />
-                  수정
-                </Button>
-              </DialogFooter>
-            </>
+            <ScheduleForm
+              schedule={selectedSchedule}
+              projectId={projectId}
+              onSubmit={() => {}}
+              onCancel={() => setDetailDialogOpen(false)}
+              viewMode={true}
+              onEdit={() => handleEdit(selectedSchedule)}
+              onDelete={() => handleDelete(selectedSchedule.id)}
+            />
           )}
         </DialogContent>
       </Dialog>

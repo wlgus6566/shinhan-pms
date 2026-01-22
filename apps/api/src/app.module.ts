@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 
-import { LinksModule } from './links/links.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ProjectsModule } from './projects/projects.module';
 import { AuthModule } from './auth/auth.module';
@@ -13,7 +12,7 @@ import { WorkLogsModule } from './work-logs/work-logs.module';
 import { SchedulesModule } from './schedules/schedules.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, UsersModule, ProjectsModule, LinksModule, TasksModule, WorkLogsModule, SchedulesModule],
+  imports: [PrismaModule, AuthModule, UsersModule, ProjectsModule, TasksModule, WorkLogsModule, SchedulesModule],
   controllers: [AppController],
   providers: [AppService],
 })

@@ -11,6 +11,7 @@ export interface ScheduleParticipant {
   name: string;
   email: string;
   status: ParticipantStatus;
+  workArea?: 'PROJECT_MANAGEMENT' | 'PLANNING' | 'DESIGN' | 'FRONTEND' | 'BACKEND';
 }
 
 export interface Schedule {

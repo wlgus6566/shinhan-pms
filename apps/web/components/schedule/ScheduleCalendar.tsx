@@ -71,10 +71,12 @@ export function ScheduleCalendar({
 
   const getSchedulesForDate = (date: Date) => {
     return schedules.filter((schedule) => {
-      const start = parseISO(schedule.startDate);
-      const end = parseISO(schedule.endDate);
+      // UTC 시간을 로컬 날짜로 변환하지 않고, 날짜 문자열만 비교
+      const scheduleStartDate = schedule.startDate.slice(0, 10); // YYYY-MM-DD
+      const scheduleEndDate = schedule.endDate.slice(0, 10); // YYYY-MM-DD
+      const targetDate = format(date, 'yyyy-MM-dd');
 
-      return isWithinInterval(date, { start, end }) || isSameDay(date, start) || isSameDay(date, end);
+      return targetDate >= scheduleStartDate && targetDate <= scheduleEndDate;
     });
   };
 
