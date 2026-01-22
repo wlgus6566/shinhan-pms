@@ -13,8 +13,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: '신한카드 PMS',
-  description: '신한카드 운영&고도화 프로젝트 관리 시스템',
+  title: '이모션 PMS',
+  description: '이모션의 프로젝트 및 업무 관리를 위한 통합 프로젝트 관리 시스템',
 };
 
 export default function RootLayout({

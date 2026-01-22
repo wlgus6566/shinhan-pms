@@ -1,6 +1,6 @@
 # PMS UI/UX 디자인 가이드 (shadcn/ui 기반)
 
-> 이 문서는 `shadcn/ui + Tailwind CSS`를 기반으로 한 신한카드 PMS 시스템의 UI 구성 및 디자인 원칙을 정의합니다.
+> 이 문서는 `shadcn/ui + Tailwind CSS`를 기반으로 한 이모션 PMS 시스템의 UI 구성 및 디자인 원칙을 정의합니다.
 > 컴포넌트는 [shadcn/ui](https://ui.shadcn.com) 라이브러리를 기반으로 재사용성을 고려하여 설계합니다.
 
 ---

@@ -151,7 +151,7 @@ describe('ProjectsService', () => {
       const mockProjects = [
         {
           id: 1n,
-          projectName: '신한카드 PMS',
+          projectName: '이모션 PMS',
           description: null,
           startDate: null,
           endDate: null,

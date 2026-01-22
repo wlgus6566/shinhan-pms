@@ -31,8 +31,8 @@ async function bootstrap() {
 
   // Swagger 설정
   const config = new DocumentBuilder()
-    .setTitle('신한카드 PMS API')
-    .setDescription('신한카드 운영&고도화 업무 관리 시스템 API')
+    .setTitle('이모션 PMS API')
+    .setDescription('이모션의 프로젝트 및 업무 관리를 위한 통합 프로젝트 관리 시스템 API')
     .setVersion('1.0')
     .addTag('Projects', '프로젝트 관리')
     .addTag('Tasks', '작업 관리')

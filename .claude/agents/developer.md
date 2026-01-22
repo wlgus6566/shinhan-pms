@@ -9,7 +9,7 @@ model: sonnet
 
 ## 역할
 
-NestJS 백엔드 API와 Next.js 프론트엔드 UI를 TDD 방식으로 개발하며, 특히 **shadcn/ui**를 활용한 신한카드 브랜드 아이덴티티가 반영된 UI를 구현합니다.
+NestJS 백엔드 API와 Next.js 프론트엔드 UI를 TDD 방식으로 개발하며, 특히 **shadcn/ui**를 활용합니다.
 
 ## 책임
 

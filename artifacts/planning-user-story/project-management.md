@@ -4,7 +4,7 @@
 
 ### 1.1 목적
 
-웹에이전시의 신한카드 운영 및 고도화 업무를 체계적으로 관리하기 위한 프로젝트 관리 기능을 제공합니다.
+웹에이전시의 운영 및 고도화 업무를 체계적으로 관리하기 위한 프로젝트 관리 기능을 제공합니다.
 
 ### 1.2 배경
 
@@ -267,7 +267,7 @@
 [
   {
     "id": "1",
-    "projectName": "신한카드 PMS",
+    "projectName": "이모션 PMS",
     "description": "프로젝트 관리 시스템 개발",
     "startDate": "2024-01-01",
     "endDate": "2024-12-31",
@@ -287,7 +287,7 @@
 ```json
 {
   "id": "1",
-  "projectName": "신한카드 PMS",
+  "projectName": "이모션 PMS",
   "description": "프로젝트 관리 시스템 개발",
   "startDate": "2024-01-01",
   "endDate": "2024-12-31",
@@ -310,7 +310,7 @@
 **Request Body**
 ```json
 {
-  "projectName": "신한카드 PMS",
+  "projectName": "이모션 PMS",
   "description": "프로젝트 관리 시스템 개발",
   "startDate": "2024-01-01",
   "endDate": "2024-12-31"
@@ -321,7 +321,7 @@
 ```json
 {
   "id": "1",
-  "projectName": "신한카드 PMS",
+  "projectName": "이모션 PMS",
   "description": "프로젝트 관리 시스템 개발",
   "startDate": "2024-01-01",
   "endDate": "2024-12-31",
@@ -343,7 +343,7 @@
 **Request Body** (부분 업데이트 가능)
 ```json
 {
-  "projectName": "신한카드 PMS v2",
+  "projectName": "이모션 PMS v2",
   "status": "COMPLETED"
 }
 ```
@@ -352,7 +352,7 @@
 ```json
 {
   "id": "1",
-  "projectName": "신한카드 PMS v2",
+  "projectName": "이모션 PMS v2",
   "description": "프로젝트 관리 시스템 개발",
   "startDate": "2024-01-01",
   "endDate": "2024-12-31",

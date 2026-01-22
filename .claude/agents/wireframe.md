@@ -382,7 +382,7 @@ fetch('sidebar.html')  // CORS 오류!
 
     <!-- 목록 -->
     <div class="card">
-        <h3><a href="detail.html?id=1">신한카드 PMS</a></h3>
+        <h3><a href="detail.html?id=1">이모션 PMS</a></h3>
         <p>프로젝트 관리 시스템</p>
         <div>2024-01-01 ~ 2024-12-31</div>
         <span class="badge">진행중</span>
@@ -403,7 +403,7 @@ fetch('sidebar.html')  // CORS 오류!
 ```html
 <main class="main-content">
     <div class="header">
-        <h1>신한카드 PMS</h1>
+        <h1>이모션 PMS</h1>
         <div>
             <a href="edit.html?id=1" class="btn btn-secondary">수정</a>
             <button class="btn btn-danger" onclick="confirmDelete()">삭제</button>
@@ -414,7 +414,7 @@ fetch('sidebar.html')  // CORS 오류!
         <h3>프로젝트 정보</h3>
         <dl>
             <dt>프로젝트명</dt>
-            <dd>신한카드 PMS</dd>
+            <dd>이모션 PMS</dd>
             
             <dt>설명</dt>
             <dd>프로젝트 관리 시스템</dd>

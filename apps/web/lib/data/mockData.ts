@@ -2414,7 +2414,7 @@ export const mockWorkLogs: WorkLog[] = [
     taskId: '15',
     userId: '9',
     workDate: '2026-01-02',
-    content: '신한카드 API 문서 검토 및 연동 방식 조사.',
+    content: '이모션 API 문서 검토 및 연동 방식 조사.',
     workHours: 6,
     progress: 10,
     issues: null,
