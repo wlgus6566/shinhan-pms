@@ -2,6 +2,10 @@ export type ScheduleType = 'MEETING' | 'SCRUM' | 'VACATION' | 'HALF_DAY' | 'OTHE
 
 export type ParticipantStatus = 'PENDING' | 'ACCEPTED' | 'DECLINED';
 
+export type TeamScope = 'ALL' | 'PLANNING' | 'DESIGN' | 'FRONTEND' | 'BACKEND';
+
+export type HalfDayType = 'AM' | 'PM';
+
 export interface ScheduleParticipant {
   id: string;
   name: string;
@@ -24,6 +28,9 @@ export interface Schedule {
   createdBy: string;
   createdAt: string;
   updatedAt?: string;
+  teamScope?: TeamScope; // 회의/스크럼 시 팀 범위
+  halfDayType?: HalfDayType; // 반차 시 오전/오후
+  usageDate?: string; // 연차/반차 사용일
 }
 
 export interface CreateScheduleRequest {
@@ -37,6 +44,9 @@ export interface CreateScheduleRequest {
   isAllDay?: boolean;
   color?: string;
   participantIds?: string[];
+  teamScope?: TeamScope;
+  halfDayType?: HalfDayType;
+  usageDate?: string;
 }
 
 export interface UpdateScheduleRequest {
@@ -49,6 +59,9 @@ export interface UpdateScheduleRequest {
   isAllDay?: boolean;
   color?: string;
   participantIds?: string[];
+  teamScope?: TeamScope;
+  halfDayType?: HalfDayType;
+  usageDate?: string;
 }
 
 // 일정 타입 라벨
@@ -90,4 +103,28 @@ export const PARTICIPANT_STATUS_COLORS: Record<ParticipantStatus, string> = {
   PENDING: 'bg-yellow-100 text-yellow-700 border-yellow-200',
   ACCEPTED: 'bg-green-100 text-green-700 border-green-200',
   DECLINED: 'bg-red-100 text-red-700 border-red-200',
+};
+
+// 팀 범위 라벨
+export const TEAM_SCOPE_LABELS: Record<TeamScope, string> = {
+  ALL: '전사 일정',
+  PLANNING: '기획팀 일정',
+  DESIGN: '디자인팀 일정',
+  FRONTEND: '프론트엔드팀 일정',
+  BACKEND: '백엔드팀 일정',
+};
+
+// 팀 범위 필터 색상 (체크박스용 컬러 도트)
+export const TEAM_SCOPE_FILTER_COLORS: Record<TeamScope, string> = {
+  ALL: '#FF8C42',        // Orange
+  PLANNING: '#9B59B6',   // Purple
+  DESIGN: '#3498DB',     // Blue
+  FRONTEND: '#2ECC71',   // Green
+  BACKEND: '#E74C3C',    // Red
+};
+
+// 반차 타입 라벨
+export const HALF_DAY_TYPE_LABELS: Record<HalfDayType, string> = {
+  AM: '오전',
+  PM: '오후',
 };

@@ -15,9 +15,12 @@ import {
 import { Calendar as CalendarIcon, MapPin, Users, Plus, Trash2, Pencil } from 'lucide-react';
 import { ScheduleCalendar } from './ScheduleCalendar';
 import { ScheduleForm } from './ScheduleForm';
-import type { Schedule, ScheduleType, CreateScheduleRequest } from '@/types/schedule';
-import { SCHEDULE_TYPE_LABELS, SCHEDULE_TYPE_COLORS, PARTICIPANT_STATUS_LABELS, PARTICIPANT_STATUS_COLORS } from '@/types/schedule';
+import { SelectedDateScheduleList } from './SelectedDateScheduleList';
+import type { Schedule, ScheduleType, CreateScheduleRequest, TeamScope } from '@/types/schedule';
+import { SCHEDULE_TYPE_LABELS, SCHEDULE_TYPE_COLORS, PARTICIPANT_STATUS_LABELS, PARTICIPANT_STATUS_COLORS, TEAM_SCOPE_LABELS, TEAM_SCOPE_FILTER_COLORS } from '@/types/schedule';
+import type { ProjectMember } from '@/types/project';
 import { getProjectSchedules, createProjectSchedule, updateSchedule, deleteSchedule } from '@/lib/api/schedules';
+import { getProjectMembers } from '@/lib/api/projectMembers';
 import { cn } from '@/lib/utils';
 
 interface ProjectScheduleListProps {
@@ -34,9 +37,24 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
   const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [projectMembers, setProjectMembers] = useState<ProjectMember[]>([]);
 
   // Filter state
   const [selectedTypes, setSelectedTypes] = useState<ScheduleType[]>([]);
+  const [selectedTeams, setSelectedTeams] = useState<TeamScope[]>([]);
+
+  // Fetch project members for dynamic team filtering
+  useEffect(() => {
+    const fetchMembers = async () => {
+      try {
+        const members = await getProjectMembers(projectId);
+        setProjectMembers(members);
+      } catch (error) {
+        console.error('Failed to fetch project members:', error);
+      }
+    };
+    fetchMembers();
+  }, [projectId]);
 
   useEffect(() => {
     const fetchSchedules = async () => {
@@ -59,7 +77,27 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
 
   const resetFilters = () => {
     setSelectedTypes([]);
+    setSelectedTeams([]);
   };
+
+  // Calculate available team scopes based on project members
+  const availableTeamScopes = useMemo(() => {
+    const workAreas = new Set(projectMembers.map(m => m.workArea));
+    const scopes: TeamScope[] = [];
+
+    // Always show ALL if there are any members
+    if (projectMembers.length > 0) {
+      scopes.push('ALL');
+    }
+
+    // Map WorkArea to TeamScope
+    if (workAreas.has('PLANNING')) scopes.push('PLANNING');
+    if (workAreas.has('DESIGN')) scopes.push('DESIGN');
+    if (workAreas.has('FRONTEND')) scopes.push('FRONTEND');
+    if (workAreas.has('BACKEND')) scopes.push('BACKEND');
+
+    return scopes;
+  }, [projectMembers]);
 
   // 필터링된 일정 목록
   const filteredSchedules = useMemo(() => {
@@ -70,11 +108,18 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
       result = result.filter(schedule => selectedTypes.includes(schedule.scheduleType));
     }
 
-    // 2. Sort by start date (ascending - earliest first)
+    // 2. Filter by team scope
+    if (selectedTeams.length > 0) {
+      result = result.filter(schedule =>
+        schedule.teamScope && selectedTeams.includes(schedule.teamScope)
+      );
+    }
+
+    // 3. Sort by start date (ascending - earliest first)
     result.sort((a, b) => a.startDate.localeCompare(b.startDate));
 
     return result;
-  }, [schedules, selectedTypes]);
+  }, [schedules, selectedTypes, selectedTeams]);
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
@@ -138,22 +183,80 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
     }
   };
 
+  const toggleTeamFilter = (team: TeamScope) => {
+    setSelectedTeams(prev =>
+      prev.includes(team)
+        ? prev.filter(t => t !== team)
+        : [...prev, team]
+    );
+  };
+
   return (
-    <div className="space-y-6 relative">
-      {/* 캘린더 */}
-      {loading ? (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">로드 중...</p>
+    <div className="relative">
+      {/* Two-column layout: Sidebar (filters + selected date list) and Calendar */}
+      <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
+        {/* Left Sidebar */}
+        <div className="space-y-6">
+          {/* Team Filter */}
+          <div className="bg-white rounded-lg border p-4">
+            <h3 className="text-sm font-semibold text-slate-700 mb-3">팀별 필터</h3>
+            <div className="space-y-2">
+              {availableTeamScopes.map(teamScope => (
+                <label
+                  key={teamScope}
+                  className="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-2 rounded transition-colors"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedTeams.includes(teamScope)}
+                    onChange={() => toggleTeamFilter(teamScope)}
+                    className="rounded border-slate-300 text-emotion-primary focus:ring-emotion-primary"
+                  />
+                  <span
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: TEAM_SCOPE_FILTER_COLORS[teamScope] }}
+                  />
+                  <span className="text-sm text-slate-700">
+                    {TEAM_SCOPE_LABELS[teamScope]}
+                  </span>
+                </label>
+              ))}
+            </div>
+            {selectedTeams.length > 0 && (
+              <button
+                onClick={resetFilters}
+                className="text-sm text-slate-600 hover:text-slate-900 underline mt-3"
+              >
+                필터 초기화
+              </button>
+            )}
+          </div>
+
+          {/* Selected Date Schedule List */}
+          <SelectedDateScheduleList
+            schedules={filteredSchedules}
+            selectedDate={selectedDate}
+            onScheduleClick={handleScheduleClick}
+          />
         </div>
-      ) : (
-        <ScheduleCalendar
-          schedules={filteredSchedules}
-          selectedDate={selectedDate}
-          onDateSelect={handleDateSelect}
-          onMonthChange={handleMonthChange}
-          onScheduleClick={handleScheduleClick}
-        />
-      )}
+
+        {/* Right Content - Calendar */}
+        <div>
+          {loading ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">로드 중...</p>
+            </div>
+          ) : (
+            <ScheduleCalendar
+              schedules={filteredSchedules}
+              selectedDate={selectedDate}
+              onDateSelect={handleDateSelect}
+              onMonthChange={handleMonthChange}
+              onScheduleClick={handleScheduleClick}
+            />
+          )}
+        </div>
+      </div>
 
       {/* 일정 상세 모달 */}
       <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
