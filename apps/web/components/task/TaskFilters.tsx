@@ -8,7 +8,8 @@ import { ArrowUpDown, X, Search } from 'lucide-react';
 import { STATUS_LABELS, STATUS_COLORS, DIFFICULTY_LABELS, DIFFICULTY_COLORS, type TaskStatus, type TaskDifficulty } from '@/types/task';
 import type { ProjectMember } from '@/types/project';
 import { cn } from '@/lib/utils';
-export type SortBy = 'difficulty' | 'endDate' | 'status' | 'createdAt';
+
+export type SortBy = 'createdAt' | 'updatedAt' | 'startDate' | 'endDate' | 'difficulty' | 'status';
 export type SortOrder = 'asc' | 'desc';
 
 interface TaskFiltersProps {
@@ -93,30 +94,7 @@ export function TaskFilters({
             ))}
           </SelectContent>
         </Select>
-
-        {/* 정렬 */}
-        <div className="flex gap-2">
-          <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortBy)}>
-            <SelectTrigger className="w-full md:w-40">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="difficulty">우선순위순</SelectItem>
-              <SelectItem value="endDate">마감일순</SelectItem>
-              <SelectItem value="status">상태순</SelectItem>
-              <SelectItem value="createdAt">생성일순</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-            title={sortOrder === 'asc' ? '오름차순' : '내림차순'}
-          >
-            <ArrowUpDown className="h-4 w-4" />
-          </Button>
-        </div>
-
+        
         {/* 초기화 버튼 */}
         {hasActiveFilters && (
           <Button variant="outline" onClick={resetFilters} className="gap-2">

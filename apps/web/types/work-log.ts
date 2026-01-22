@@ -10,8 +10,8 @@ export interface WorkLogTask {
   id: string;
   taskName: string;
   projectId: string;
-  status: TaskStatus;
-  difficulty: TaskDifficulty;
+  status?: TaskStatus;
+  difficulty?: TaskDifficulty;
 }
 
 export interface WorkLog {

@@ -24,9 +24,26 @@ export class ProjectsService {
       }
     }
 
-    // 중복 검증
+    // 중복 검증 (활성 프로젝트만)
+    console.log('[DEBUG] 프로젝트 생성 시도:', {
+      projectName: createProjectDto.projectName,
+      userId: userId.toString(),
+    });
+    
     const existingProject = await this.prisma.project.findFirst({
-      where: { projectName: createProjectDto.projectName },
+      where: { 
+        projectName: createProjectDto.projectName,
+        isActive: true,
+      },
+    });
+
+    console.log('[DEBUG] 중복 검증 결과:', {
+      found: !!existingProject,
+      existingProject: existingProject ? {
+        id: existingProject.id.toString(),
+        projectName: existingProject.projectName,
+        isActive: existingProject.isActive,
+      } : null,
     });
 
     if (existingProject) {
@@ -122,12 +139,13 @@ export class ProjectsService {
       }
     }
 
-    // 프로젝트명 중복 검증 (현재 프로젝트 제외)
+    // 프로젝트명 중복 검증 (현재 프로젝트 제외, 활성 프로젝트만)
     if (updateProjectDto.projectName) {
       const existingProject = await this.prisma.project.findFirst({
         where: {
           projectName: updateProjectDto.projectName,
           id: { not: id },
+          isActive: true,
         },
       });
 

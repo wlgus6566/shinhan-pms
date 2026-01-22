@@ -1,4 +1,5 @@
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
+import { z } from 'zod';
 
 // Token Manager
 export const tokenManager = {
@@ -125,6 +126,16 @@ export const fetcher = async <T = any>(
   } catch (error) {
     throw error;
   }
+};
+
+// Validated Fetcher with Zod runtime validation
+export const validatedFetcher = async <T>(
+  url: string,
+  schema: z.ZodType<T>,
+  options: FetcherOptions = {}
+): Promise<T> => {
+  const data = await fetcher(url, options);
+  return schema.parse(data);
 };
 
 export default apiClient;

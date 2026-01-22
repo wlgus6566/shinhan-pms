@@ -897,7 +897,7 @@ export const mockProjectMembers: ProjectMember[] = [
     projectId: 10,
     memberId: 13,
     role: 'PA',
-    workArea: 'OPERATION',
+    workArea: 'PROJECT_MANAGEMENT',
     member: {
       id: 13,
       name: '배수지',

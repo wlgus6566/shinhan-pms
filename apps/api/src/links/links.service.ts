@@ -1,6 +1,24 @@
 import { Injectable } from '@nestjs/common';
 
-import { Link, CreateLinkDto, UpdateLinkDto } from '@repo/api';
+// Temporary inline types (replace @repo/api)
+export interface Link {
+  id: number;
+  title: string;
+  url: string;
+  description: string;
+}
+
+export interface CreateLinkDto {
+  title: string;
+  url: string;
+  description: string;
+}
+
+export interface UpdateLinkDto {
+  title?: string;
+  url?: string;
+  description?: string;
+}
 
 @Injectable()
 export class LinksService {

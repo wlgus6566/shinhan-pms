@@ -52,6 +52,10 @@ export class ProjectsController {
     description: '잘못된 요청 (중복된 프로젝트명, 날짜 오류 등)',
   })
   async create(@Body() createProjectDto: CreateProjectDto) {
+    console.log('[DEBUG Controller] Raw DTO received:', JSON.stringify(createProjectDto, null, 2));
+    console.log('[DEBUG Controller] DTO type:', typeof createProjectDto);
+    console.log('[DEBUG Controller] DTO keys:', Object.keys(createProjectDto));
+    
     // TODO: 실제로는 JWT에서 userId 추출
     const userId = 1n;
     const project = await this.projectsService.create(createProjectDto, userId);

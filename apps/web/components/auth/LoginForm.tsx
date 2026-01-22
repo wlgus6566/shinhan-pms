@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import { LoginSchema } from '@repo/schema';
 import { login as loginApi } from '@/lib/api/auth';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -19,13 +19,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, Loader2 } from 'lucide-react';
+import { z } from 'zod';
 
-const loginSchema = z.object({
-  email: z.string().email('올바른 이메일 형식을 입력해주세요'),
-  password: z.string().min(1, '비밀번호를 입력해주세요'),
-});
-
-type LoginValues = z.infer<typeof loginSchema>;
+type LoginValues = z.infer<typeof LoginSchema>;
 
 export function LoginForm() {
   const router = useRouter();
@@ -34,7 +30,7 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<LoginValues>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(LoginSchema),
     defaultValues: {
       email: '',
       password: '',

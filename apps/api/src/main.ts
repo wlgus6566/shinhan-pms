@@ -1,8 +1,12 @@
 import { NestFactory, Reflector } from '@nestjs/core';
 import { ValidationPipe, ClassSerializerInterceptor } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ZodValidationPipe, patchNestJsSwagger } from 'nestjs-zod';
 
 import { AppModule } from './app.module';
+
+// Swagger 호환성을 위한 패치
+patchNestJsSwagger();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -21,14 +25,9 @@ async function bootstrap() {
   // CORS 설정
   app.enableCors();
 
-  // 전역 ValidationPipe 설정
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true, // DTO에 정의되지 않은 속성 제거
-      forbidNonWhitelisted: true, // DTO에 정의되지 않은 속성이 있으면 에러
-      transform: true, // 자동 타입 변환
-    }),
-  );
+  // 전역 Validation 설정 (Zod만 사용)
+  // ZodValidationPipe만 사용하여 Zod 스키마로 검증
+  app.useGlobalPipes(new ZodValidationPipe());
 
   // Swagger 설정
   const config = new DocumentBuilder()

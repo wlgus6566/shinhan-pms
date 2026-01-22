@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsOptional, IsBoolean } from 'class-validator';
-import { Department } from '../../auth/dto/signup.dto';
+import type { Department } from '@repo/schema';
 
 export enum Role {
   PM = 'PM',
@@ -22,11 +22,11 @@ export class UpdateUserDto {
   @ApiProperty({
     example: 'DEVELOPMENT',
     description: '파트',
-    enum: Department,
+    enum: ['PLANNING', 'DESIGN', 'FRONTEND', 'DEVELOPMENT'],
     required: false,
   })
   @IsOptional()
-  @IsEnum(Department, { message: '올바른 파트를 선택해주세요' })
+  @IsEnum(['PLANNING', 'DESIGN', 'FRONTEND', 'DEVELOPMENT'], { message: '올바른 파트를 선택해주세요' })
   department?: Department;
 
   @ApiProperty({
