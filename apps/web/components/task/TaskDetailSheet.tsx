@@ -20,8 +20,22 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { STATUS_LABELS, STATUS_COLORS, DIFFICULTY_LABELS, DIFFICULTY_COLORS, type Task } from '@/types/task';
-import { Calendar, User, Clock, AlertCircle, FileText, Edit, Trash2 } from 'lucide-react';
+import {
+  STATUS_LABELS,
+  STATUS_COLORS,
+  DIFFICULTY_LABELS,
+  DIFFICULTY_COLORS,
+  type Task,
+} from '@/types/task';
+import {
+  Calendar,
+  User,
+  Clock,
+  AlertCircle,
+  FileText,
+  Edit,
+  Trash2,
+} from 'lucide-react';
 
 interface TaskDetailSheetProps {
   task: Task | null;
@@ -48,7 +62,14 @@ const DeleteDialogContent = memo(() => (
 ));
 DeleteDialogContent.displayName = 'DeleteDialogContent';
 
-export function TaskDetailSheet({ task, open, onOpenChange, isPM = false, onEdit, onDelete }: TaskDetailSheetProps) {
+export function TaskDetailSheet({
+  task,
+  open,
+  onOpenChange,
+  isPM = false,
+  onEdit,
+  onDelete,
+}: TaskDetailSheetProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   // Use useCallback for stable function references (rerender-functional-setstate)
@@ -72,7 +93,7 @@ export function TaskDetailSheet({ task, open, onOpenChange, isPM = false, onEdit
     { label: '디자인 담당자', assignee: task.designAssignee, icon: User },
     { label: '프론트엔드 담당자', assignee: task.frontendAssignee, icon: User },
     { label: '백엔드 담당자', assignee: task.backendAssignee, icon: User },
-  ].filter(a => a.assignee);
+  ].filter((a) => a.assignee);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -82,18 +103,8 @@ export function TaskDetailSheet({ task, open, onOpenChange, isPM = false, onEdit
             <SheetTitle className="text-xl font-bold leading-tight pr-8">
               {task.taskName}
             </SheetTitle>
-            {isPM && (
-              <div className="flex gap-2">
-                <Button size="sm" variant="outline" onClick={handleEdit}>
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button size="sm" variant="destructive" onClick={() => setDeleteDialogOpen(true)}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
           </div>
-          
+
           <div className="flex gap-2">
             <Badge className={DIFFICULTY_COLORS[task.difficulty]}>
               중요도: {DIFFICULTY_LABELS[task.difficulty]}
@@ -104,7 +115,7 @@ export function TaskDetailSheet({ task, open, onOpenChange, isPM = false, onEdit
           </div>
         </SheetHeader>
 
-        <div className="mt-6 space-y-6">
+        <div className="mt-10 space-y-6">
           {/* RM 정보 */}
           {task.clientName && (
             <div className="space-y-2">
@@ -129,9 +140,16 @@ export function TaskDetailSheet({ task, open, onOpenChange, isPM = false, onEdit
                 </h3>
                 <div className="space-y-2 pl-6">
                   {assignees.map(({ label, assignee }) => (
-                    <div key={label} className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">{label}</span>
-                      <span className="text-sm font-medium">{assignee?.name}</span>
+                    <div
+                      key={label}
+                      className="flex items-center justify-between"
+                    >
+                      <span className="text-sm text-muted-foreground">
+                        {label}
+                      </span>
+                      <span className="text-sm font-medium">
+                        {assignee?.name}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -150,7 +168,9 @@ export function TaskDetailSheet({ task, open, onOpenChange, isPM = false, onEdit
                 </h3>
                 <div className="pl-6 flex items-center gap-2 text-base">
                   {task.startDate && <span>{task.startDate}</span>}
-                  {task.startDate && task.endDate && <span className="text-muted-foreground">~</span>}
+                  {task.startDate && task.endDate && (
+                    <span className="text-muted-foreground">~</span>
+                  )}
                   {task.endDate && <span>{task.endDate}</span>}
                 </div>
               </div>
@@ -167,7 +187,9 @@ export function TaskDetailSheet({ task, open, onOpenChange, isPM = false, onEdit
                   업무 설명
                 </h3>
                 <div className="pl-6">
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{task.description}</p>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                    {task.description}
+                  </p>
                 </div>
               </div>
             </>
@@ -183,7 +205,9 @@ export function TaskDetailSheet({ task, open, onOpenChange, isPM = false, onEdit
                   비고
                 </h3>
                 <div className="pl-6">
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{task.notes}</p>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                    {task.notes}
+                  </p>
                 </div>
               </div>
             </>
@@ -198,14 +222,31 @@ export function TaskDetailSheet({ task, open, onOpenChange, isPM = false, onEdit
             </h3>
             <div className="pl-6 space-y-1 text-sm text-muted-foreground">
               {task.createdAt && (
-                <p>생성일: {new Date(task.createdAt).toLocaleString('ko-KR')}</p>
+                <p>
+                  생성일: {new Date(task.createdAt).toLocaleString('ko-KR')}
+                </p>
               )}
               {task.updatedAt && (
-                <p>수정일: {new Date(task.updatedAt).toLocaleString('ko-KR')}</p>
+                <p>
+                  수정일: {new Date(task.updatedAt).toLocaleString('ko-KR')}
+                </p>
               )}
             </div>
           </div>
         </div>
+        {isPM && (
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={handleEdit}>
+              수정
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => setDeleteDialogOpen(true)}
+            >
+              삭제
+            </Button>
+          </div>
+        )}
       </SheetContent>
 
       {/* 삭제 확인 다이얼로그 */}
@@ -213,7 +254,10 @@ export function TaskDetailSheet({ task, open, onOpenChange, isPM = false, onEdit
         <AlertDialogContent>
           <DeleteDialogContent />
           <AlertDialogFooter>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
               삭제
             </AlertDialogAction>
           </AlertDialogFooter>

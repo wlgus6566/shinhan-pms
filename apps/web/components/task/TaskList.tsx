@@ -11,7 +11,6 @@ import { EditTaskDialog } from './EditTaskDialog';
 import { Button } from '@/components/ui/button';
 import { Plus, Loader2 } from 'lucide-react';
 import type { Task, TaskStatus, TaskDifficulty } from '@/types/task';
-import type { ProjectMember } from '@/types/project';
 
 interface TaskListProps {
   projectId: string;
