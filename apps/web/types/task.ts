@@ -1,11 +1,12 @@
-export type TaskDifficulty = 'HIGH' | 'MEDIUM' | 'LOW';
-export type TaskStatus =
-  | 'WAITING'           // 작업 대기
-  | 'IN_PROGRESS'       // 작업 중
-  | 'WORK_COMPLETED'    // 작업 완료
-  | 'OPEN_WAITING'      // 오픈 대기
-  | 'OPEN_RESPONDING'   // 오픈 대응
-  | 'OPEN_COMPLETED';        // 오픈 완료
+import type {
+  TaskDifficulty,
+  TaskStatus,
+  CreateTaskRequest,
+  UpdateTaskRequest,
+} from '@repo/schema';
+
+// Re-export schema types
+export type { TaskDifficulty, TaskStatus };
 
 // 한글 라벨 매핑
 export const STATUS_LABELS: Record<TaskStatus, string> = {
@@ -14,7 +15,7 @@ export const STATUS_LABELS: Record<TaskStatus, string> = {
   WORK_COMPLETED: '작업 완료',
   OPEN_WAITING: '오픈 대기',
   OPEN_RESPONDING: '오픈 대응',
-  OPEN_COMPLETED: '오픈 완료',
+  COMPLETED: '완료',
 };
 
 export const STATUS_COLORS: Record<TaskStatus, string> = {
@@ -26,7 +27,7 @@ export const STATUS_COLORS: Record<TaskStatus, string> = {
   // 오픈 이슈 흐름
   OPEN_WAITING: 'bg-amber-100 text-amber-800 border-amber-300',
   OPEN_RESPONDING: 'bg-orange-100 text-orange-800 border-orange-300',
-  OPEN_COMPLETED: 'bg-green-50 text-green-700 border-green-300',
+  COMPLETED: 'bg-green-50 text-green-700 border-green-300',
 };
 
 // 중요도 라벨 매핑
@@ -78,20 +79,5 @@ export interface Task {
   updatedAt: string;
 }
 
-export interface CreateTaskRequest {
-  taskName: string;
-  description?: string;
-  difficulty: TaskDifficulty;
-  clientName?: string;
-  planningAssigneeId?: number;
-  designAssigneeId?: number;
-  frontendAssigneeId?: number;
-  backendAssigneeId?: number;
-  startDate?: string;
-  endDate?: string;
-  notes?: string;
-}
-
-export interface UpdateTaskRequest extends Partial<CreateTaskRequest> {
-  status?: TaskStatus;
-}
+// Re-export request types from schema
+export type { CreateTaskRequest, UpdateTaskRequest };

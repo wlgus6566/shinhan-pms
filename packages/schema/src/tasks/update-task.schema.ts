@@ -20,14 +20,8 @@ export const UpdateTaskSchema = z.object({
   designAssigneeId: z.number().int().positive().optional(),
   frontendAssigneeId: z.number().int().positive().optional(),
   backendAssigneeId: z.number().int().positive().optional(),
-  startDate: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, '시작일은 YYYY-MM-DD 형식이어야 합니다')
-    .optional(),
-  endDate: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, '종료일은 YYYY-MM-DD 형식이어야 합니다')
-    .optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
   notes: z
     .string()
     .transform(val => val === '' ? undefined : val)

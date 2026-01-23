@@ -1,15 +1,13 @@
-export type ScheduleType =
-  | 'MEETING'
-  | 'SCRUM'
-  | 'VACATION'
-  | 'HALF_DAY'
-  | 'OTHER';
+import type {
+  ScheduleType,
+  TeamScope,
+  HalfDayType,
+  ParticipantStatus,
+  CreateScheduleRequest,
+  UpdateScheduleRequest,
+} from '@repo/schema';
 
-export type ParticipantStatus = 'PENDING' | 'ACCEPTED' | 'DECLINED';
-
-export type TeamScope = 'ALL' | 'PLANNING' | 'DESIGN' | 'FRONTEND' | 'BACKEND';
-
-export type HalfDayType = 'AM' | 'PM';
+export type { ScheduleType, TeamScope, HalfDayType, ParticipantStatus, CreateScheduleRequest, UpdateScheduleRequest };
 
 export interface ScheduleParticipant {
   id: string;
@@ -43,37 +41,6 @@ export interface Schedule {
   teamScope?: TeamScope; // 회의/스크럼 시 팀 범위
   halfDayType?: HalfDayType; // 반차 시 오전/오후
   usageDate?: string; // 연차/반차 사용일
-}
-
-export interface CreateScheduleRequest {
-  projectId?: string;
-  title: string;
-  description?: string;
-  scheduleType: ScheduleType;
-  startDate: string;
-  endDate: string;
-  location?: string;
-  isAllDay?: boolean;
-  color?: string;
-  participantIds?: string[];
-  teamScope?: TeamScope;
-  halfDayType?: HalfDayType;
-  usageDate?: string;
-}
-
-export interface UpdateScheduleRequest {
-  title?: string;
-  description?: string;
-  scheduleType?: ScheduleType;
-  startDate?: string;
-  endDate?: string;
-  location?: string;
-  isAllDay?: boolean;
-  color?: string;
-  participantIds?: string[];
-  teamScope?: TeamScope;
-  halfDayType?: HalfDayType;
-  usageDate?: string;
 }
 
 // 일정 타입 라벨

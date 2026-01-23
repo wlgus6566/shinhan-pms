@@ -27,7 +27,7 @@ const STATUS_ORDER = {
   WORK_COMPLETED: 3,
   OPEN_WAITING: 4,
   OPEN_RESPONDING: 5,
-  OPEN_COMPLETED: 6,
+  COMPLETED: 6,
 } as const;
 
 // Extract loading state as separate component to avoid re-renders
@@ -84,7 +84,7 @@ export function TaskList({ projectId, isPM }: TaskListProps) {
       WORK_COMPLETED: 0,
       OPEN_WAITING: 0,
       OPEN_RESPONDING: 0,
-      OPEN_COMPLETED: 0,
+      COMPLETED: 0,
     } as Record<TaskStatus, number>;
 
     tasks.forEach((task) => {

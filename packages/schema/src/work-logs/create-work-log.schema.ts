@@ -1,9 +1,7 @@
 import { z } from 'zod';
 
 export const CreateWorkLogSchema = z.object({
-  workDate: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, '작업 날짜는 YYYY-MM-DD 형식이어야 합니다'),
+  workDate: z.string(),
   content: z
     .string()
     .max(2000, '작업 내용은 최대 2000자까지 입력 가능합니다'),

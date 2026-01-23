@@ -2,7 +2,8 @@
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import { CreateScheduleSchema } from '@repo/schema';
+import type { CreateScheduleRequest } from '@repo/schema';
 import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
@@ -14,82 +15,12 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import type { Schedule, CreateScheduleRequest, TeamScope } from '@/types/schedule';
+import type { Schedule, TeamScope } from '@/types/schedule';
 import { SCHEDULE_TYPE_LABELS, TEAM_SCOPE_LABELS } from '@/types/schedule';
 import type { ProjectMember, WorkArea } from '@/types/project';
 import { getProjectMembers } from '@/lib/api/projectMembers';
 
-const scheduleFormSchema = z.object({
-  title: z.string().min(1, '제목을 입력해주세요').max(100, '제목은 100자 이하여야 합니다'),
-  description: z.string().optional(),
-  scheduleType: z.enum(['MEETING', 'SCRUM', 'VACATION', 'HALF_DAY', 'OTHER']),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-  location: z.string().max(200, '장소는 200자 이하여야 합니다').optional(),
-  isAllDay: z.boolean().default(false),
-  color: z.string().optional(),
-  participantIds: z.array(z.string()).optional(),
-  teamScope: z.enum(['ALL', 'PLANNING', 'DESIGN', 'FRONTEND', 'BACKEND']).nullable().optional(),
-  halfDayType: z.enum(['AM', 'PM']).nullable().optional(),
-  usageDate: z.string().optional(),
-}).refine((data) => {
-  // 연차/반차가 아닌 경우 startDate와 endDate 필수
-  if (data.scheduleType !== 'VACATION' && data.scheduleType !== 'HALF_DAY') {
-    if (!data.startDate) return false;
-    if (!data.endDate) return false;
-  }
-  return true;
-}, {
-  message: '시작 날짜와 종료 날짜를 입력해주세요',
-  path: ['startDate'],
-}).refine((data) => {
-  // 연차/반차인 경우 usageDate 필수
-  if (data.scheduleType === 'VACATION' || data.scheduleType === 'HALF_DAY') {
-    if (!data.usageDate) return false;
-  }
-  return true;
-}, {
-  message: '사용일을 선택해주세요',
-  path: ['usageDate'],
-}).refine((data) => {
-  // 반차인 경우 halfDayType 필수
-  if (data.scheduleType === 'HALF_DAY') {
-    if (!data.halfDayType) return false;
-  }
-  return true;
-}, {
-  message: '오전/오후를 선택해주세요',
-  path: ['halfDayType'],
-}).refine((data) => {
-  // 종료 날짜가 시작 날짜보다 이후인지 확인 (연차/반차 제외)
-  if (data.startDate && data.endDate && data.scheduleType !== 'VACATION' && data.scheduleType !== 'HALF_DAY') {
-    return new Date(data.endDate) >= new Date(data.startDate);
-  }
-  return true;
-}, {
-  message: '종료 날짜는 시작 날짜보다 이후여야 합니다',
-  path: ['endDate'],
-}).refine((data) => {
-  // MEETING/SCRUM은 장소 필수
-  if ((data.scheduleType === 'MEETING' || data.scheduleType === 'SCRUM') && !data.location) {
-    return false;
-  }
-  return true;
-}, {
-  message: '회의와 스크럼은 장소가 필수입니다',
-  path: ['location'],
-}).refine((data) => {
-  // MEETING/SCRUM은 teamScope 필수
-  if ((data.scheduleType === 'MEETING' || data.scheduleType === 'SCRUM') && !data.teamScope) {
-    return false;
-  }
-  return true;
-}, {
-  message: '팀 범위를 선택해주세요',
-  path: ['teamScope'],
-});
-
-type ScheduleFormValues = z.infer<typeof scheduleFormSchema>;
+type ScheduleFormValues = CreateScheduleRequest;
 
 interface ScheduleFormProps {
   schedule?: Schedule | null;
@@ -145,7 +76,7 @@ export function ScheduleForm({
   };
 
   const form = useForm<ScheduleFormValues>({
-    resolver: zodResolver(scheduleFormSchema),
+    resolver: zodResolver(CreateScheduleSchema),
     defaultValues: schedule
       ? {
           title: schedule.title,

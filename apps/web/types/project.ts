@@ -1,20 +1,25 @@
-// Project status enum
+import type {
+  ProjectType,
+  MemberRole,
+  WorkArea,
+  CreateProjectRequest,
+  UpdateProjectRequest,
+  AddProjectMemberRequest,
+  UpdateProjectMemberRoleRequest,
+} from '@repo/schema';
+
+// Re-export schema types
+export type { ProjectType, WorkArea };
+export type ProjectRole = MemberRole;
+
+// Project status enum (extended for UI)
 export type ProjectStatus = 'PENDING' | 'ACTIVE' | 'IN_PROGRESS' | 'COMPLETED' | 'ON_HOLD';
-
-// Project type enum
-export type ProjectType = 'OPERATION' | 'BUILD';
-
-// Project role enum
-export type ProjectRole = 'PM' | 'PL' | 'PA';
 
 // User role enum (system-wide)
 export type UserRole = 'ADMIN' | 'USER';
 
 // Department enum
 export type Department = 'PLANNING' | 'DESIGN' | 'DEVELOPMENT' | 'OPERATION';
-
-// Work area enum (프로젝트 내 담당 분야)
-export type WorkArea = 'PROJECT_MANAGEMENT' | 'PLANNING' | 'DESIGN' | 'FRONTEND' | 'BACKEND';
 
 // Project interface
 export interface Project {
@@ -57,40 +62,18 @@ export interface ProjectMember {
   updatedAt: string;
 }
 
-// API request/response types
-export interface CreateProjectRequest {
-  name: string;
-  client?: string;
-  projectType: ProjectType;
-  startDate: string;
-  endDate: string;
-}
+// Re-export request types from schema
+export type {
+  CreateProjectRequest,
+  UpdateProjectRequest,
+  AddProjectMemberRequest,
+  UpdateProjectMemberRoleRequest,
+};
 
-export interface UpdateProjectRequest {
-  name?: string;
-  client?: string;
-  projectType?: ProjectType;
-  startDate?: string;
-  endDate?: string;
-  status?: ProjectStatus;
-}
-
+// UI-specific request types
 export interface GetProjectsParams {
   search?: string;
   status?: ProjectStatus;
-}
-
-export interface AddProjectMemberRequest {
-  memberId: number;
-  role: ProjectRole;
-  workArea: WorkArea;
-  notes?: string;
-}
-
-export interface UpdateProjectMemberRoleRequest {
-  role: ProjectRole;
-  workArea?: WorkArea;
-  notes?: string;
 }
 
 // Available member (not yet in project)

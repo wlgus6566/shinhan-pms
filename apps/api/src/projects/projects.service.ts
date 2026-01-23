@@ -26,13 +26,13 @@ export class ProjectsService {
 
     // 중복 검증 (활성 프로젝트만)
     console.log('[DEBUG] 프로젝트 생성 시도:', {
-      projectName: createProjectDto.projectName,
+      projectName: createProjectDto.name,
       userId: userId.toString(),
     });
-    
+
     const existingProject = await this.prisma.project.findFirst({
-      where: { 
-        projectName: createProjectDto.projectName,
+      where: {
+        projectName: createProjectDto.name,
         isActive: true,
       },
     });
@@ -53,7 +53,7 @@ export class ProjectsService {
     // 생성
     return await this.prisma.project.create({
       data: {
-        projectName: createProjectDto.projectName,
+        projectName: createProjectDto.name,
         client: createProjectDto.client,
         projectType: createProjectDto.projectType,
         startDate: createProjectDto.startDate
@@ -140,10 +140,10 @@ export class ProjectsService {
     }
 
     // 프로젝트명 중복 검증 (현재 프로젝트 제외, 활성 프로젝트만)
-    if (updateProjectDto.projectName) {
+    if (updateProjectDto.name) {
       const existingProject = await this.prisma.project.findFirst({
         where: {
-          projectName: updateProjectDto.projectName,
+          projectName: updateProjectDto.name,
           id: { not: id },
           isActive: true,
         },
@@ -158,8 +158,8 @@ export class ProjectsService {
     return await this.prisma.project.update({
       where: { id },
       data: {
-        ...(updateProjectDto.projectName && {
-          projectName: updateProjectDto.projectName,
+        ...(updateProjectDto.name && {
+          projectName: updateProjectDto.name,
         }),
         ...(updateProjectDto.client !== undefined && {
           client: updateProjectDto.client,

@@ -1,6 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { CreateWorkLogSchema } from '@repo/schema';
+import type { CreateWorkLogRequest, UpdateWorkLogRequest } from '@repo/schema';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { Copy, Loader2 } from 'lucide-react';
@@ -13,11 +17,12 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import type { WorkLog, CreateWorkLogRequest, UpdateWorkLogRequest, MyTask } from '@/types/work-log';
+import type { WorkLog, MyTask } from '@/types/work-log';
 import {
   Select,
   SelectContent,
@@ -55,54 +60,56 @@ export function WorkLogDialog({
   onDelete,
 }: WorkLogDialogProps) {
   const [taskId, setTaskId] = useState<string>(selectedTaskId || '');
-  const [content, setContent] = useState('');
-  const [workHours, setWorkHours] = useState<string>('');
-  const [progress, setProgress] = useState<number | undefined>();
-  const [issues, setIssues] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const form = useForm<CreateWorkLogRequest | UpdateWorkLogRequest>({
+    resolver: zodResolver(CreateWorkLogSchema),
+    defaultValues: {
+      workDate: format(selectedDate, 'yyyy-MM-dd'),
+      content: '',
+      workHours: undefined,
+      progress: undefined,
+      issues: '',
+    },
+  });
 
   useEffect(() => {
     if (open) {
       if (mode === 'edit' && workLog) {
         setTaskId(workLog.taskId);
-        setContent(workLog.content);
-        setWorkHours(workLog.workHours?.toString() || '');
-        setProgress(workLog.progress ?? undefined);
-        setIssues(workLog.issues || '');
+        form.reset({
+          workDate: workLog.workDate || format(selectedDate, 'yyyy-MM-dd'),
+          content: workLog.content,
+          workHours: workLog.workHours ?? undefined,
+          progress: workLog.progress ?? undefined,
+          issues: workLog.issues || '',
+        });
       } else {
         setTaskId(selectedTaskId || '');
-        setContent('');
-        setWorkHours('');
-        setProgress(undefined);
-        setIssues('');
+        form.reset({
+          workDate: format(selectedDate, 'yyyy-MM-dd'),
+          content: '',
+          workHours: undefined,
+          progress: undefined,
+          issues: '',
+        });
       }
     }
-  }, [open, mode, workLog, selectedTaskId]);
+  }, [open, mode, workLog, selectedTaskId, selectedDate, form]);
 
   const handleCopyPrevious = () => {
     if (previousLog) {
-      setContent(previousLog.content);
-      setWorkHours(previousLog.workHours?.toString() || '');
-      setProgress(previousLog.progress ?? undefined);
-      setIssues(previousLog.issues || '');
+      form.setValue('content', previousLog.content);
+      form.setValue('workHours', previousLog.workHours ?? undefined);
+      form.setValue('progress', previousLog.progress ?? undefined);
+      form.setValue('issues', previousLog.issues || '');
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!content.trim()) return;
-
+  const handleFormSubmit = async (data: CreateWorkLogRequest | UpdateWorkLogRequest) => {
     setIsSubmitting(true);
     try {
-      const data: CreateWorkLogRequest | UpdateWorkLogRequest = {
-        workDate: format(selectedDate, 'yyyy-MM-dd'),
-        content: content.trim(),
-        workHours: workHours ? Number(workHours) : undefined,
-        progress,
-        issues: issues.trim() || undefined,
-      };
-
       await onSubmit(data, mode === 'create' ? taskId : undefined);
       onOpenChange(false);
     } finally {
@@ -134,175 +141,206 @@ export function WorkLogDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* 업무 선택 */}
-          {mode === 'create' && (
-            <div className="space-y-2">
-              <Label htmlFor="task">업무 선택</Label>
-              <Select value={taskId} onValueChange={setTaskId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="업무를 선택하세요" />
-                </SelectTrigger>
-                <SelectContent>
-                  {myTasks.map((task) => (
-                    <SelectItem key={task.id} value={task.id}>
-                      <div className="flex flex-col">
-                        <span>{task.taskName}</span>
-                        {task.project && (
-                          <span className="text-xs text-slate-500">
-                            {task.project.projectName}
-                          </span>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-5">
+            {/* 업무 선택 */}
+            {mode === 'create' && (
+              <div className="space-y-2">
+                <Label htmlFor="task">업무 선택</Label>
+                <Select value={taskId} onValueChange={setTaskId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="업무를 선택하세요" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {myTasks.map((task) => (
+                      <SelectItem key={task.id} value={task.id}>
+                        <div className="flex flex-col">
+                          <span>{task.taskName}</span>
+                          {task.project && (
+                            <span className="text-xs text-slate-500">
+                              {task.project.projectName}
+                            </span>
+                          )}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {mode === 'edit' && workLog?.task && (
+              <div className="p-3 bg-slate-50 rounded-lg">
+                <p className="text-sm font-medium text-slate-700">
+                  {workLog.task.taskName}
+                </p>
+              </div>
+            )}
+
+            {/* 작업 내용 */}
+            <FormField
+              control={form.control}
+              name="content"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center justify-between">
+                    <FormLabel>작업 내용 *</FormLabel>
+                    {mode === 'create' && previousLog && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleCopyPrevious}
+                        className="h-7 text-xs text-slate-500 hover:text-slate-700"
+                      >
+                        <Copy className="h-3 w-3 mr-1" />
+                        어제 일지 복사
+                      </Button>
+                    )}
+                  </div>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      placeholder="오늘 진행한 작업 내용을 입력하세요"
+                      className="min-h-[120px] resize-none"
+                      maxLength={2000}
+                    />
+                  </FormControl>
+                  <div className="flex justify-between">
+                    <FormMessage />
+                    <p className="text-xs text-slate-500">
+                      {field.value?.length || 0}/2000
+                    </p>
+                  </div>
+                </FormItem>
+              )}
+            />
+
+            {/* 작업 시간 */}
+            <FormField
+              control={form.control}
+              name="workHours"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>작업 시간</FormLabel>
+                  <div className="flex gap-2">
+                    <FormControl>
+                      <Input
+                        type="number"
+                        {...field}
+                        value={field.value ?? ''}
+                        onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                        placeholder="시간"
+                        step={0.5}
+                        className="w-24"
+                      />
+                    </FormControl>
+                    <span className="flex items-center text-sm text-slate-500">시간</span>
+                    <div className="flex gap-1 ml-auto">
+                      {WORK_HOURS_PRESETS.map((hours) => (
+                        <Button
+                          key={hours}
+                          type="button"
+                          variant={field.value === hours ? 'default' : 'outline'}
+                          size="sm"
+                          className="h-8 px-2 text-xs"
+                          onClick={() => field.onChange(hours)}
+                        >
+                          {hours}h
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* 진행률 */}
+            <FormField
+              control={form.control}
+              name="progress"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>진행률</FormLabel>
+                  <div className="flex gap-2">
+                    {PROGRESS_PRESETS.map((p) => (
+                      <Button
+                        key={p}
+                        type="button"
+                        variant={field.value === p ? 'default' : 'outline'}
+                        size="sm"
+                        className={cn(
+                          'flex-1 h-9',
+                          field.value === p && p === 100 && 'bg-emerald-500 hover:bg-emerald-600'
                         )}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+                        onClick={() => field.onChange(p)}
+                      >
+                        {p}%
+                      </Button>
+                    ))}
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          {mode === 'edit' && workLog?.task && (
-            <div className="p-3 bg-slate-50 rounded-lg">
-              <p className="text-sm font-medium text-slate-700">
-                {workLog.task.taskName}
-              </p>
-            </div>
-          )}
+            {/* 이슈/블로커 */}
+            <FormField
+              control={form.control}
+              name="issues"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>이슈/블로커</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      value={field.value ?? ''}
+                      placeholder="진행 중 발생한 이슈나 블로커가 있다면 입력하세요"
+                      className="min-h-[80px] resize-none"
+                      maxLength={1000}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          {/* 작업 내용 */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="content">작업 내용 *</Label>
-              {mode === 'create' && previousLog && (
+            <DialogFooter className="gap-2">
+              {mode === 'edit' && onDelete && (
                 <Button
                   type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleCopyPrevious}
-                  className="h-7 text-xs text-slate-500 hover:text-slate-700"
+                  variant="destructive"
+                  onClick={handleDelete}
+                  disabled={isDeleting || isSubmitting}
+                  className="mr-auto"
                 >
-                  <Copy className="h-3 w-3 mr-1" />
-                  어제 일지 복사
+                  {isDeleting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  삭제
                 </Button>
               )}
-            </div>
-            <Textarea
-              id="content"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="오늘 진행한 작업 내용을 입력하세요"
-              className="min-h-[120px] resize-none"
-              maxLength={2000}
-              required
-            />
-            <p className="text-xs text-slate-500 text-right">
-              {content.length}/2000
-            </p>
-          </div>
-
-          {/* 작업 시간 */}
-          <div className="space-y-2">
-            <Label htmlFor="workHours">작업 시간</Label>
-            <div className="flex gap-2">
-              <Input
-                id="workHours"
-                type="number"
-                value={workHours}
-                onChange={(e) => setWorkHours(e.target.value)}
-                placeholder="시간"
-                min={0.5}
-                max={24}
-                step={0.5}
-                className="w-24"
-              />
-              <span className="flex items-center text-sm text-slate-500">시간</span>
-              <div className="flex gap-1 ml-auto">
-                {WORK_HOURS_PRESETS.map((hours) => (
-                  <Button
-                    key={hours}
-                    type="button"
-                    variant={workHours === hours.toString() ? 'default' : 'outline'}
-                    size="sm"
-                    className="h-8 px-2 text-xs"
-                    onClick={() => setWorkHours(hours.toString())}
-                  >
-                    {hours}h
-                  </Button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* 진행률 */}
-          <div className="space-y-2">
-            <Label>진행률</Label>
-            <div className="flex gap-2">
-              {PROGRESS_PRESETS.map((p) => (
-                <Button
-                  key={p}
-                  type="button"
-                  variant={progress === p ? 'default' : 'outline'}
-                  size="sm"
-                  className={cn(
-                    'flex-1 h-9',
-                    progress === p && p === 100 && 'bg-emerald-500 hover:bg-emerald-600'
-                  )}
-                  onClick={() => setProgress(p)}
-                >
-                  {p}%
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          {/* 이슈/블로커 */}
-          <div className="space-y-2">
-            <Label htmlFor="issues">이슈/블로커</Label>
-            <Textarea
-              id="issues"
-              value={issues}
-              onChange={(e) => setIssues(e.target.value)}
-              placeholder="진행 중 발생한 이슈나 블로커가 있다면 입력하세요"
-              className="min-h-[80px] resize-none"
-              maxLength={1000}
-            />
-          </div>
-
-          <DialogFooter className="gap-2">
-            {mode === 'edit' && onDelete && (
               <Button
                 type="button"
-                variant="destructive"
-                onClick={handleDelete}
-                disabled={isDeleting || isSubmitting}
-                className="mr-auto"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={isSubmitting || isDeleting}
               >
-                {isDeleting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                삭제
+                취소
               </Button>
-            )}
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={isSubmitting || isDeleting}
-            >
-              취소
-            </Button>
-            <Button
-              type="submit"
-              disabled={
-                isSubmitting ||
-                isDeleting ||
-                !content.trim() ||
-                (mode === 'create' && !taskId)
-              }
-            >
-              {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              {mode === 'create' ? '작성' : '수정'}
-            </Button>
-          </DialogFooter>
-        </form>
+              <Button
+                type="submit"
+                disabled={
+                  isSubmitting ||
+                  isDeleting ||
+                  (mode === 'create' && !taskId)
+                }
+              >
+                {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                {mode === 'create' ? '작성' : '수정'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

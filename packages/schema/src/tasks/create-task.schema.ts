@@ -19,18 +19,24 @@ export const CreateTaskSchema = z.object({
   designAssigneeId: z.number().int().positive().optional(),
   frontendAssigneeId: z.number().int().positive().optional(),
   backendAssigneeId: z.number().int().positive().optional(),
-  startDate: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, '시작일은 YYYY-MM-DD 형식이어야 합니다')
-    .optional(),
-  endDate: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, '종료일은 YYYY-MM-DD 형식이어야 합니다')
-    .optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
   notes: z
     .string()
     .transform(val => val === '' ? undefined : val)
     .optional(),
-});
+})
+  .refine(
+    (data) => {
+      if (data.startDate && data.endDate) {
+        return new Date(data.endDate) >= new Date(data.startDate);
+      }
+      return true;
+    },
+    {
+      message: '종료일은 시작일보다 이후여야 합니다',
+      path: ['endDate'],
+    }
+  );
 
 export type CreateTaskRequest = z.infer<typeof CreateTaskSchema>;

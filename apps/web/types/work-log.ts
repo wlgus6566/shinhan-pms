@@ -1,4 +1,8 @@
 import type { TaskStatus, TaskDifficulty } from './task';
+import type { CreateWorkLogRequest, UpdateWorkLogRequest } from '@repo/schema';
+
+// Re-export request types from schema
+export type { CreateWorkLogRequest, UpdateWorkLogRequest };
 
 export interface WorkLogUser {
   id: string;
@@ -27,22 +31,6 @@ export interface WorkLog {
   user?: WorkLogUser;
   createdAt: string;
   updatedAt?: string;
-}
-
-export interface CreateWorkLogRequest {
-  workDate: string;
-  content: string;
-  workHours?: number;
-  progress?: number;
-  issues?: string;
-}
-
-export interface UpdateWorkLogRequest {
-  workDate?: string;
-  content?: string;
-  workHours?: number;
-  progress?: number;
-  issues?: string;
 }
 
 export interface MyTask {

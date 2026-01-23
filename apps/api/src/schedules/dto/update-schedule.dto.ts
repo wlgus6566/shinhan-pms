@@ -1,4 +1,4 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateScheduleDto } from './create-schedule.dto';
+import { createZodDto } from 'nestjs-zod';
+import { UpdateScheduleSchema } from '@repo/schema';
 
-export class UpdateScheduleDto extends PartialType(CreateScheduleDto) {}
+export class UpdateScheduleDto extends createZodDto(UpdateScheduleSchema) {}
