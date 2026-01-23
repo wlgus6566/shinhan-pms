@@ -30,27 +30,26 @@
 ```
 emotion-pms/
 ├── apps/
-│   ├── api/                    # NestJS 백엔드
+│   ├── api/                       # NestJS 백엔드
 │   │   ├── src/
 │   │   ├── prisma/
 │   │   │   └── schema.prisma
 │   │   └── test/
-│   └── web/                    # Next.js 프론트엔드
+│   └── web/                       # Next.js 프론트엔드
 │       ├── app/
 │       ├── components/
 │       └── lib/
 ├── packages/
-│   ├── @repo/api/             # 공유 타입 (DTO, Entity)
-│   ├── @repo/ui/              # 공유 UI 컴포넌트
-│   ├── @repo/eslint-config/   # ESLint 설정
-│   ├── @repo/jest-config/     # Jest 설정
-│   └── @repo/typescript-config/ # TypeScript 설정
-├── artifacts/                  # AI 에이전트 산출물
-│   ├── planning-user-story/   # 기획서
-│   ├── planning-wireframe/    # 와이어프레임 (HTML)
-│   └── database-schema/       # DB 스키마 명세
+│   ├── @repo/schema/              # 공유 Zod 스키마 및 타입 (단일 소스)
+│   ├── @repo/eslint-config/       # ESLint 설정
+│   ├── @repo/jest-config/         # Jest 설정
+│   └── @repo/typescript-config/   # TypeScript 설정
+├── artifacts/                     # AI 에이전트 산출물
+│   ├── planning-user-story/      # 기획서
+│   ├── planning-wireframe/       # 와이어프레임 (HTML)
+│   └── database-schema/          # DB 스키마 명세
 └── .claude/
-    └── agents/                # AI 에이전트 정의
+    └── agents/                   # AI 에이전트 정의
         ├── pm.md
         ├── planner.md
         ├── wireframe.md
@@ -208,7 +207,142 @@ const form = useForm<z.infer<typeof formSchema>>({
 });
 ```
 
-### 5. 산출물 저장 경로
+### 5. 타입 시스템 및 검증 규칙
+
+**핵심 원칙**: `@repo/schema` 패키지를 단일 소스로 사용하여 모든 검증 로직과 타입을 통합 관리합니다.
+
+#### Backend (NestJS)
+
+```typescript
+// DTO는 Zod 스키마에서 생성
+import { createZodDto } from 'nestjs-zod';
+import { CreateProjectSchema } from '@repo/schema';
+
+export class CreateProjectDto extends createZodDto(CreateProjectSchema) {}
+
+// Request 타입도 @repo/schema에서 가져옴
+import type { CreateProjectRequest } from '@repo/schema';
+```
+
+**규칙**:
+- DTO 클래스는 `createZodDto()` 사용하여 Zod 스키마에서 생성
+- 검증 로직을 DTO 내부에 직접 작성 금지
+- Request 타입은 @repo/schema에서 import
+- 중복 타입 정의 절대 금지
+
+#### Frontend (Next.js)
+
+```typescript
+// 1. 스키마와 타입을 @repo/schema에서 가져옴
+import { CreateProjectSchema } from '@repo/schema';
+import type { CreateProjectRequest } from '@repo/schema';
+
+// 2. React Hook Form에 타입 적용
+type FormValues = CreateProjectRequest;
+
+const form = useForm<FormValues>({
+  resolver: zodResolver(CreateProjectSchema),
+});
+
+// 3. 필요시 로컬 타입 재정의 (예: select의 string ID 변환)
+import type { ProjectType, MemberRole } from '@repo/schema';
+
+export type ProjectRole = MemberRole; // 도메인 맥락에 맞게 alias
+```
+
+**규칙**:
+- 폼 검증은 반드시 @repo/schema의 Zod 스키마 사용
+- Request 타입은 @repo/schema에서 import (중복 정의 금지)
+- 로컬 타입은 UI 전용 목적(string ↔ number 변환 등)으로만 정의
+- 검증 로직을 컴포넌트 내부에 inline으로 작성 금지
+
+#### @repo/schema 패키지 구조
+
+```
+packages/schema/src/
+├── common/
+│   ├── enums.ts           # 공통 enum 정의
+│   └── types.ts           # 공통 타입
+├── projects/
+│   ├── create-project.schema.ts
+│   ├── update-project.schema.ts
+│   └── index.ts           # Request 타입 export
+├── tasks/
+├── work-logs/
+└── index.ts
+```
+
+**타입 export 패턴**:
+
+```typescript
+// packages/schema/src/projects/index.ts
+import { z } from 'zod';
+import { CreateProjectSchema, UpdateProjectSchema } from './schemas';
+
+// Request 타입 생성
+export type CreateProjectRequest = z.infer<typeof CreateProjectSchema>;
+export type UpdateProjectRequest = z.infer<typeof UpdateProjectSchema>;
+
+// 스키마와 enum도 함께 export
+export { CreateProjectSchema, UpdateProjectSchema };
+export { ProjectTypeEnum } from '../common/enums';
+```
+
+#### 날짜 검증 패턴
+
+HTML5 date input은 `YYYY-MM-DD` 형식을 자동 제공하므로 regex 검증 불필요:
+
+```typescript
+// ❌ 불필요한 regex
+startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional()
+
+// ✅ 간결한 검증
+startDate: z.string().optional()
+
+// 날짜 범위 검증은 .refine() 사용
+export const CreateProjectSchema = z.object({
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+})
+.refine(
+  (data) => {
+    if (data.startDate && data.endDate) {
+      return new Date(data.endDate) >= new Date(data.startDate);
+    }
+    return true;
+  },
+  { message: '종료일은 시작일 이후여야 합니다', path: ['endDate'] }
+);
+```
+
+#### Null vs Undefined 처리
+
+Prisma는 nullable 필드에 `null`을 반환하지만, Zod `.optional()`은 `undefined`를 기대:
+
+```typescript
+// ❌ 타입 에러
+workHours: workLog.workHours  // number | null | undefined
+
+// ✅ null → undefined 변환
+workHours: workLog.workHours ?? undefined  // number | undefined
+```
+
+#### 체크리스트
+
+**새 기능 개발 시**:
+- [ ] @repo/schema에 Zod 스키마 먼저 정의
+- [ ] Request 타입은 `z.infer<>`로 생성하여 export
+- [ ] Backend DTO는 `createZodDto()` 사용
+- [ ] Frontend는 `zodResolver()` 사용
+- [ ] 로컬 검증 로직 없는지 확인 (inline z.object() 금지)
+- [ ] 중복 타입 정의 없는지 확인
+
+**마이그레이션 시 제거 대상**:
+- 컴포넌트 내부의 inline Zod 스키마 (`z.object({...})`)
+- `apps/web/types/` 내의 중복 Request 타입 정의
+- Backend DTO 클래스 내부의 검증 데코레이터 (`@IsString()`, `@MinLength()` 등)
+
+### 6. 산출물 저장 경로
 
 | 산출물 | 경로 |
 |-------|------|
@@ -371,7 +505,7 @@ pnpm format
 
 ## 주의사항
 
-1. **타입 안전성**: `@repo/api` 패키지를 통해 백엔드-프론트엔드 간 타입 공유
+1. **타입 안전성**: `@repo/schema` 패키지를 통해 백엔드-프론트엔드 간 Zod 스키마 및 타입 공유
 2. **모노레포**: 공통 의존성은 루트 `package.json`에, 앱별 의존성은 각 앱의 `package.json`에
 3. **환경 변수**: `.env` 파일은 각 앱 디렉토리에 위치 (`apps/api/.env`, `apps/web/.env.local`)
 4. **포트**: API (3000), Web (3001), Adminer (8081), PostgreSQL (5432)
@@ -407,4 +541,4 @@ pnpm format
 
 ---
 
-**마지막 업데이트**: 2026-01-22
+**마지막 업데이트**: 2026-01-23
