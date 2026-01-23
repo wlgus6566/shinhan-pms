@@ -7,13 +7,21 @@ import { ChevronLeft, ChevronRight, Calendar, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { Schedule } from '@/types/schedule';
-import { SCHEDULE_TYPE_LABELS } from '@/types/schedule';
+import {
+  SCHEDULE_TYPE_CALENDAR_COLORS,
+  SCHEDULE_TYPE_LABELS,
+} from '@/types/schedule';
 
 // FullCalendar imports
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction';
-import type { EventClickArg, DatesSetArg, EventContentArg, DayCellContentArg } from '@fullcalendar/core';
+import type {
+  EventClickArg,
+  DatesSetArg,
+  EventContentArg,
+  DayCellContentArg,
+} from '@fullcalendar/core';
 import koLocale from '@fullcalendar/core/locales/ko';
 
 // Utilities
@@ -39,7 +47,10 @@ export function ScheduleCalendar({
   const calendarRef = useRef<FullCalendar>(null);
 
   // Transform schedules to FullCalendar events
-  const events = useMemo(() => transformSchedulesToEvents(schedules), [schedules]);
+  const events = useMemo(
+    () => transformSchedulesToEvents(schedules),
+    [schedules],
+  );
 
   // Navigation handlers
   const handlePrevMonth = () => {
@@ -103,10 +114,18 @@ export function ScheduleCalendar({
     } else {
       // Single-day event with left border
       return (
-        <div className="relative w-full pl-2 py-0.5 cursor-pointer hover:bg-slate-50 transition-colors rounded">
-          <span className="text-[10px] font-medium text-slate-700 truncate block">
-            {format(parseISO(schedule.startDate), 'HH:mm')}{' '}
-            {schedule.isAllDay ? '⏰ ' : ''}
+        <div className="relative w-full py-0.5 cursor-pointer hover:bg-slate-50 transition-colors rounded">
+          <span className="text-[10px] font-medium text-slate-700 truncate block flex items-center gap-1">
+            <i
+              className="w-1 h-3 inline-block"
+              style={{
+                backgroundColor:
+                  SCHEDULE_TYPE_CALENDAR_COLORS[schedule.scheduleType],
+              }}
+            />
+            {schedule.scheduleType === 'VACATION'
+              ? '🌴'
+              : format(parseISO(schedule.startDate), 'HH:mm')}{' '}
             {schedule.title}
           </span>
         </div>
@@ -183,19 +202,18 @@ export function ScheduleCalendar({
             size="sm"
             className={cn(
               'h-7 px-3',
-              viewMode === 'month' ? '' : 'text-slate-600'
+              viewMode === 'month' ? '' : 'text-slate-600',
             )}
             onClick={() => setViewMode('month')}
           >
-            <Calendar className="h-4 w-4 mr-1" />
-            월
+            <Calendar className="h-4 w-4 mr-1" />월
           </Button>
           <Button
             variant={viewMode === 'list' ? 'default' : 'ghost'}
             size="sm"
             className={cn(
               'h-7 px-3',
-              viewMode === 'list' ? '' : 'text-slate-600'
+              viewMode === 'list' ? '' : 'text-slate-600',
             )}
             onClick={() => setViewMode('list')}
           >
@@ -241,7 +259,10 @@ export function ScheduleCalendar({
             </div>
           ) : (
             groupedSchedules.map(([date, schedules]) => (
-              <div key={date} className="border-b border-slate-100 last:border-b-0">
+              <div
+                key={date}
+                className="border-b border-slate-100 last:border-b-0"
+              >
                 <div className="px-6 py-3 bg-slate-50 sticky top-0">
                   <span className="font-semibold text-slate-700">
                     {format(new Date(date), 'M월 d일 (EEEE)', { locale: ko })}

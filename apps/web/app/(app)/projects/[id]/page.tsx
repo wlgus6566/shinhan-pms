@@ -106,7 +106,6 @@ export default function ProjectDetailPage() {
         </TabsList>
 
         <TabsContent value="info">
-       
           <Card>
             <CardContent className="pt-6">
               <ProjectDetail project={project} />
