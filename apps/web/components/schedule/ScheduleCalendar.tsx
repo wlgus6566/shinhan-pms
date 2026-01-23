@@ -10,6 +10,7 @@ import type { Schedule } from '@/types/schedule';
 import {
   SCHEDULE_TYPE_CALENDAR_COLORS,
   SCHEDULE_TYPE_LABELS,
+  TEAM_SCOPE_FILTER_COLORS,
   TeamScope,
 } from '@/types/schedule';
 
@@ -121,15 +122,15 @@ export function ScheduleCalendar({
     } else {
       // Single-day event with left border
       return (
-        <div className="relative w-full py-0.5 cursor-pointer transition-colors rounded">
-          <span className="text-[12px] font-medium text-slate-700 truncate block flex items-center gap-1">
-            <i
-              className="w-1 h-3 inline-block"
-              style={{
-                backgroundColor:
-                  SCHEDULE_TYPE_CALENDAR_COLORS[schedule.scheduleType],
-              }}
-            />
+        <div className="flex justify-start items-center gap-1 relative w-full py-0.5 cursor-pointer transition-colors rounded">
+          <i
+            className="w-1 h-3 inline-block"
+            style={{
+              backgroundColor:
+                TEAM_SCOPE_FILTER_COLORS[schedule.teamScope as TeamScope],
+            }}
+          />
+          <span className="text-[12px] font-medium text-slate-700 truncate block gap-1">
             {schedule.scheduleType === 'VACATION'
               ? `🌴 ${schedule.creatorName}  연차`
               : schedule.scheduleType === 'HALF_DAY'
@@ -173,7 +174,7 @@ export function ScheduleCalendar({
   }, [schedules]);
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden max-w-[1200px]">
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden max-w-[1200px] min-w-[900px]">
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
         <div className="flex items-center gap-3">

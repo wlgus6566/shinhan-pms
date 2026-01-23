@@ -8,7 +8,6 @@ import { getProjectMembers } from '@/lib/api/projectMembers';
 import { ProjectDetail } from '@/components/project/ProjectDetail';
 import { ProjectMembersTable } from '@/components/project/ProjectMembersTable';
 import { TeamWorkLogList } from '@/components/work-log/TeamWorkLogList';
-import { ProjectScheduleList } from '@/components/schedule/ProjectScheduleList';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -35,10 +34,7 @@ export default function ProjectDetailPage() {
 
   useEffect(() => {
     if (projectId) {
-      Promise.all([
-        getProject(projectId),
-        getProjectMembers(projectId),
-      ])
+      Promise.all([getProject(projectId), getProjectMembers(projectId)])
         .then(([projectData, membersData]) => {
           setProject(projectData);
           setMembers(membersData);
@@ -87,7 +83,6 @@ export default function ProjectDetailPage() {
             프로젝트 목록으로
           </Link>
         </Button>
-
       </div>
 
       <div className="mb-6">
@@ -102,7 +97,6 @@ export default function ProjectDetailPage() {
           <TabsTrigger value="info">기본 정보</TabsTrigger>
           <TabsTrigger value="members">멤버 관리</TabsTrigger>
           <TabsTrigger value="team-logs">팀 업무일지</TabsTrigger>
-          <TabsTrigger value="schedules">일정</TabsTrigger>
         </TabsList>
 
         <TabsContent value="info">
@@ -111,12 +105,12 @@ export default function ProjectDetailPage() {
               <ProjectDetail project={project} />
               {canEdit && (
                 <div className="flex justify-end">
-                <Button className="mt-4" asChild>
-                  <Link href={`/projects/${projectId}/edit`}>
-                    <Edit className="h-4 w-4 mr-2" />
-                    수정
-                  </Link>
-                </Button>
+                  <Button className="mt-4" asChild>
+                    <Link href={`/projects/${projectId}/edit`}>
+                      <Edit className="h-4 w-4 mr-2" />
+                      수정
+                    </Link>
+                  </Button>
                 </div>
               )}
             </CardContent>
@@ -136,10 +130,6 @@ export default function ProjectDetailPage() {
 
         <TabsContent value="team-logs">
           <TeamWorkLogList projectId={projectId} members={members} />
-        </TabsContent>
-
-        <TabsContent value="schedules">
-          <ProjectScheduleList projectId={projectId} />
         </TabsContent>
       </Tabs>
     </div>

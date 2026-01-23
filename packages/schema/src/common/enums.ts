@@ -63,3 +63,40 @@ export const DepartmentEnum = z.enum([
 });
 
 export type Department = z.infer<typeof DepartmentEnum>;
+
+// Schedule Related Enums
+export const ScheduleTypeEnum = z.enum([
+  'MEETING',
+  'SCRUM',
+  'VACATION',
+  'HALF_DAY',
+  'OTHER',
+], {
+  errorMap: () => ({ message: '일정 유형은 MEETING, SCRUM, VACATION, HALF_DAY, OTHER 중 하나여야 합니다' }),
+});
+
+export type ScheduleType = z.infer<typeof ScheduleTypeEnum>;
+
+export const TeamScopeEnum = z.enum([
+  'ALL',
+  'PLANNING',
+  'DESIGN',
+  'FRONTEND',
+  'BACKEND',
+], {
+  errorMap: () => ({ message: '팀 범위는 ALL, PLANNING, DESIGN, FRONTEND, BACKEND 중 하나여야 합니다' }),
+});
+
+export type TeamScope = z.infer<typeof TeamScopeEnum>;
+
+export const HalfDayTypeEnum = z.enum(['AM', 'PM'], {
+  errorMap: () => ({ message: '반차 유형은 오전(AM) 또는 오후(PM)여야 합니다' }),
+});
+
+export type HalfDayType = z.infer<typeof HalfDayTypeEnum>;
+
+export const ParticipantStatusEnum = z.enum(['PENDING', 'ACCEPTED', 'DECLINED'], {
+  errorMap: () => ({ message: '참가 상태는 PENDING, ACCEPTED, DECLINED 중 하나여야 합니다' }),
+});
+
+export type ParticipantStatus = z.infer<typeof ParticipantStatusEnum>;

@@ -2,12 +2,26 @@
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Check, RefreshCcw } from 'lucide-react';
-import { STATUS_LABELS, STATUS_COLORS, DIFFICULTY_LABELS, DIFFICULTY_COLORS, type TaskStatus, type TaskDifficulty } from '@/types/task';
+import {
+  STATUS_LABELS,
+  STATUS_COLORS,
+  DIFFICULTY_LABELS,
+  DIFFICULTY_COLORS,
+  type TaskStatus,
+  type TaskDifficulty,
+} from '@/types/task';
 import type { ProjectMember } from '@/types/project';
 import { cn } from '@/lib/utils';
 import { useMemo } from 'react';
+import { Card } from '@/components/ui/card';
 
 interface TeamWorkLogFiltersProps {
   selectedWorkArea: string;
@@ -68,12 +82,6 @@ export function TeamWorkLogFilters({
     setAssigneeFilter('all');
   };
 
-  const hasActiveFilters =
-    selectedWorkArea !== 'all' ||
-    assigneeFilter !== 'all' ||
-    statusFilter.length > 0 ||
-    difficultyFilter.length > 0;
-
   // Get label for assignee dropdown based on selected work area
   const assigneeDropdownLabel = useMemo(() => {
     if (selectedWorkArea !== 'all') {
@@ -83,7 +91,7 @@ export function TeamWorkLogFilters({
   }, [selectedWorkArea]);
 
   return (
-    <div className="space-y-4">
+    <Card className="p-4 shadow-none flex flex-col gap-4">
       {/* 첫 번째 줄: 담당 분야, 담당자, 초기화 */}
       <div className="flex flex-col md:flex-row gap-4">
         {/* 담당 분야 필터 */}
@@ -113,7 +121,10 @@ export function TeamWorkLogFilters({
           <SelectContent>
             <SelectItem value="all">{assigneeDropdownLabel}</SelectItem>
             {filteredAssignees.map((member) => (
-              <SelectItem key={member.memberId} value={member.memberId.toString()}>
+              <SelectItem
+                key={member.memberId}
+                value={member.memberId.toString()}
+              >
                 {member.member?.name || '알 수 없음'}
               </SelectItem>
             ))}
@@ -121,10 +132,10 @@ export function TeamWorkLogFilters({
         </Select>
 
         {/* 초기화 버튼 */}
-          <Button variant="outline" onClick={resetFilters} className="gap-2">
-            <RefreshCcw className="h-4 w-4" />
-            초기화
-          </Button>
+        <Button variant="outline" onClick={resetFilters} className="gap-2">
+          <RefreshCcw className="h-4 w-4" />
+          초기화
+        </Button>
       </div>
 
       {/* 두 번째 줄: 상태 및 중요도 필터 */}
@@ -161,30 +172,32 @@ export function TeamWorkLogFilters({
         <div className="w-[30%]">
           <div className="text-sm font-medium mb-2">중요도</div>
           <div className="flex flex-wrap gap-2">
-            {(Object.keys(DIFFICULTY_LABELS) as TaskDifficulty[]).map((difficulty) => {
-              const isSelected = difficultyFilter.includes(difficulty);
-              return (
-                <Badge
-                  key={difficulty}
-                  className={cn(
-                    'cursor-pointer transition-all border-2 flex items-center gap-1.5',
-                    DIFFICULTY_COLORS[difficulty],
-                    isSelected && 'opacity-100 font-semibold',
+            {(Object.keys(DIFFICULTY_LABELS) as TaskDifficulty[]).map(
+              (difficulty) => {
+                const isSelected = difficultyFilter.includes(difficulty);
+                return (
+                  <Badge
+                    key={difficulty}
+                    className={cn(
+                      'cursor-pointer transition-all border-2 flex items-center gap-1.5',
+                      DIFFICULTY_COLORS[difficulty],
+                      isSelected && 'opacity-100 font-semibold',
                     )}
-                  onClick={() => toggleDifficulty(difficulty)}
-                >
-                  {isSelected && (
-                    <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
-                      <Check className="h-3 w-3 text-white" strokeWidth={3} />
-                    </div>
-                  )}
-                  {DIFFICULTY_LABELS[difficulty]}
-                </Badge>
-              );
-            })}
+                    onClick={() => toggleDifficulty(difficulty)}
+                  >
+                    {isSelected && (
+                      <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
+                        <Check className="h-3 w-3 text-white" strokeWidth={3} />
+                      </div>
+                    )}
+                    {DIFFICULTY_LABELS[difficulty]}
+                  </Badge>
+                );
+              },
+            )}
           </div>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }
