@@ -66,7 +66,7 @@ export default function TaskManagementPage() {
 
   if (error || !project) {
     return (
-      <div className="max-w-3xl">
+      <div className="max-w-7xl">
         <Card>
           <CardContent className="pt-6">
             <div className="text-center py-8">

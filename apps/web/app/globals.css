@@ -111,7 +111,6 @@
   }
 }
 
-@layer components {
   /* Status Badge Variants - CRM Style */
   .badge-success {
     @apply bg-emerald-50 text-emerald-700 border-emerald-100;
@@ -326,7 +325,321 @@
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     @apply bg-slate-300;
   }
-}
+
+  /* ============ FullCalendar Base & Custom Styles ============ */
+
+  /* Calendar container and base styles */
+  .fc {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    width: 100%;
+    position: relative;
+  }
+
+
+  /* FullCalendar base table structure */
+  .fc table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+  }
+
+  .fc .fc-scrollgrid {
+    border-collapse: collapse;
+    border: 1px solid #e2e8f0;
+  }
+
+  .fc-theme-standard td,
+  .fc-theme-standard th {
+    border: 1px solid #e2e8f0;
+  }
+
+  .fc-theme-standard .fc-scrollgrid {
+    border: 1px solid #e2e8f0;
+  }
+
+  /* View container */
+  .fc-view-harness {
+    position: relative;
+    flex-grow: 1;
+    min-height: 100%;
+  }
+
+  .fc-view-harness-active > .fc-view {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+
+  /* Week row */
+  .fc-scrollgrid-section-body > td {
+    border-color: #e2e8f0;
+  }
+
+  /* Table sections */
+  .fc-scrollgrid-section {
+    position: relative;
+  }
+
+  .fc-scrollgrid-section > * {
+    border-left-width: 0;
+    border-right-width: 0;
+  }
+
+  .fc-scrollgrid-section-liquid > td {
+    height: 1px;
+  }
+
+  .fc-scrollgrid-section > table {
+    border-top-style: hidden;
+    border-left-style: hidden;
+    border-right-style: hidden;
+  }
+
+  /* Day header styling */
+  .fc-col-header-cell {
+    @apply py-3 text-center border-b border-slate-100;
+  }
+
+  .fc-col-header-cell-cushion {
+    @apply text-xs font-semibold no-underline;
+  }
+
+  /* Sunday header - red */
+  .fc-day-sun .fc-col-header-cell-cushion {
+    @apply text-rose-500;
+  }
+
+  /* Saturday header - blue */
+  .fc-day-sat .fc-col-header-cell-cushion {
+    @apply text-blue-500;
+  }
+
+  /* Weekday headers */
+  .fc-day-mon .fc-col-header-cell-cushion,
+  .fc-day-tue .fc-col-header-cell-cushion,
+  .fc-day-wed .fc-col-header-cell-cushion,
+  .fc-day-thu .fc-col-header-cell-cushion,
+  .fc-day-fri .fc-col-header-cell-cushion {
+    @apply text-slate-500;
+  }
+
+  /* Day cells */
+  .fc-daygrid-day {
+    @apply border-b border-r border-slate-100 transition-all;
+  }
+
+  .fc-daygrid-day:hover {
+    @apply bg-slate-50;
+  }
+
+  /* Remove right border on last column */
+  .fc-day-sat {
+    @apply border-r-0;
+  }
+
+  /* Day number styling */
+  .fc-daygrid-day-number {
+    @apply inline-flex items-center justify-center w-7 h-7 text-sm font-medium rounded-full no-underline whitespace-nowrap;
+  }
+
+
+  /* Weekday numbers */
+  .fc-day-mon .fc-daygrid-day-number,
+  .fc-day-tue .fc-daygrid-day-number,
+  .fc-day-wed .fc-daygrid-day-number,
+  .fc-day-thu .fc-daygrid-day-number,
+  .fc-day-fri .fc-daygrid-day-number {
+    @apply text-slate-700;
+  }
+
+  /* Other month days */
+  .fc-day-other .fc-daygrid-day-number {
+    @apply text-slate-300;
+  }
+
+  /* Other month background */
+  .fc-day-other {
+    @apply bg-slate-50/50;
+  }
+
+  .fc-day-selected .fc-daygrid-day-number:not(.fc-day-today .fc-daygrid-day-number) {
+    @apply bg-blue-100 text-blue-700;
+  }
+
+  /* Today styling */
+  .fc-day-today .fc-daygrid-day-number {
+    @apply font-bold;
+  }
+
+
+  /* Sunday day numbers */
+  .fc .fc-daygrid-day.fc-day-sun a.fc-daygrid-day-number {
+    @apply text-rose-500 !important;
+  }
+  
+  .fc .fc-daygrid-day.fc-day-sat a.fc-daygrid-day-number {
+    @apply text-blue-500;
+  }
+
+    
+  .fc-day-today {
+    @apply bg-transparent;
+  }
+
+  /* Selected date styling */
+  .fc-daygrid-day.fc-day-selected {
+    @apply bg-blue-50;
+  }
+
+  .fc-daygrid-day.fc-day-selected:hover {
+    @apply bg-blue-50;
+  }
+
+ 
+
+  /* Multi-day event bars */
+  .fc-multiday-event {
+    @apply border-0;
+  }
+
+  .fc-multiday-event .fc-event-main {
+    @apply w-full h-5 flex items-center px-1.5 rounded cursor-pointer hover:opacity-80 transition-opacity;
+  }
+
+  .fc-multiday-event .fc-event-title {
+    @apply text-[10px] font-medium text-white truncate;
+  }
+
+  /* Single-day events with left border */
+  .fc-singleday-event {
+    @apply bg-transparent border-0;
+  }
+
+  .fc-singleday-event {
+    @apply relative w-full pl-1 py-0.5 cursor-pointer hover:bg-slate-50 transition-colors rounded;
+  }
+
+  .fc-singleday-event::before {
+    content: '';
+    @apply absolute left-0 top-1 bottom-1 w-1;
+    background-color: var(--fc-event-border-color);
+  }
+
+  .fc-singleday-event .fc-event-title {
+    @apply text-[12px] font-medium text-slate-700 truncate block;
+  }
+
+  /* More link styling */
+  .fc-daygrid-more-link {
+    @apply px-1.5 text-[10px] text-slate-500 no-underline cursor-pointer hover:text-slate-700;
+  }
+
+  /* Day cell top section */
+  .fc-daygrid-day-top {
+    @apply flex justify-start;
+  }
+
+  /* Day frame */
+  .fc-daygrid-day-frame {
+    position: relative;
+    min-height: 100%;
+    @apply h-40 py-2 px-1;
+  }
+
+  /* Event base styles */
+  .fc-event {
+    display: block;
+    font-size: 0.85em;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .fc-event-main {
+    position: relative;
+    z-index: 3;
+  }
+
+  /* Horizontal events */
+  .fc-h-event {
+    display: block;
+    border: 1px solid transparent;
+    background-color: currentColor;
+  }
+
+  .fc-daygrid-event {
+    position: relative;
+    white-space: nowrap;
+    border-radius: 3px;
+    font-size: 0.85em;
+  }
+
+  .fc-daygrid-block-event {
+    display: block;
+    margin: 2px 0;
+  }
+
+  .fc-daygrid-block-event .fc-event-time,
+  .fc-daygrid-block-event .fc-event-title {
+    padding: 1px;
+  }
+
+  /* Event content */
+  .fc-event-title-container {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+  }
+
+  .fc-event-title {
+    display: inline-block;
+    vertical-align: top;
+    left: 0;
+    right: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  /* Daygrid specific */
+  .fc-daygrid-day-bg {
+    z-index: 1;
+  }
+
+  .fc-daygrid-day-bg .fc-non-business {
+    z-index: 1;
+  }
+
+  .fc-daygrid-day-bg .fc-bg-event {
+    z-index: 2;
+  }
+
+  .fc-daygrid-day-events {
+    position: relative;
+    z-index: 3;
+    @apply mt-1 space-y-0.5;
+  }
+
+  .fc-daygrid-event-harness {
+    position: relative;
+  }
+
+  .fc-daygrid-event-harness-abs {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+
+  /* Remove default highlights */
+  .fc-highlight {
+    @apply bg-transparent;
+  }
+
+  /* Event time text - hide for all-day events */
+  .fc-event-time {
+    display: none;
+  }
 
 @layer utilities {
   /* Text Gradient - Blue */

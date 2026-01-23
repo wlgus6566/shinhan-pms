@@ -1,26 +1,23 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import {
-  format,
-  startOfMonth,
-  endOfMonth,
-  startOfWeek,
-  endOfWeek,
-  eachDayOfInterval,
-  isSameMonth,
-  isSameDay,
-  isToday,
-  addMonths,
-  subMonths,
-  parseISO,
-} from 'date-fns';
+import { useState, useMemo, useRef } from 'react';
+import { format, parseISO } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Calendar, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { Schedule } from '@/types/schedule';
-import { SCHEDULE_TYPE_LABELS, SCHEDULE_TYPE_CALENDAR_COLORS, TEAM_SCOPE_FILTER_COLORS } from '@/types/schedule';
+import { SCHEDULE_TYPE_LABELS } from '@/types/schedule';
+
+// FullCalendar imports
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction';
+import type { EventClickArg, DatesSetArg, EventContentArg, DayCellContentArg } from '@fullcalendar/core';
+import koLocale from '@fullcalendar/core/locales/ko';
+
+// Utilities
+import { transformSchedulesToEvents, getScheduleColor } from './calendarUtils';
 
 interface ScheduleCalendarProps {
   schedules: Schedule[];
@@ -37,51 +34,102 @@ export function ScheduleCalendar({
   onMonthChange,
   onScheduleClick,
 }: ScheduleCalendarProps) {
-  const [currentMonth, setCurrentMonth] = useState(startOfMonth(selectedDate));
+  const [currentMonth, setCurrentMonth] = useState(new Date(selectedDate));
   const [viewMode, setViewMode] = useState<'month' | 'list'>('month');
+  const calendarRef = useRef<FullCalendar>(null);
 
-  const calendarDays = useMemo(() => {
-    const monthStart = startOfMonth(currentMonth);
-    const monthEnd = endOfMonth(currentMonth);
-    const startDate = startOfWeek(monthStart, { weekStartsOn: 0 });
-    const endDate = endOfWeek(monthEnd, { weekStartsOn: 0 });
+  // Transform schedules to FullCalendar events
+  const events = useMemo(() => transformSchedulesToEvents(schedules), [schedules]);
 
-    return eachDayOfInterval({ start: startDate, end: endDate });
-  }, [currentMonth]);
-
+  // Navigation handlers
   const handlePrevMonth = () => {
-    const newMonth = subMonths(currentMonth, 1);
-    setCurrentMonth(newMonth);
-    onMonthChange(newMonth);
+    const calendarApi = calendarRef.current?.getApi();
+    if (calendarApi) {
+      calendarApi.prev();
+    }
   };
 
   const handleNextMonth = () => {
-    const newMonth = addMonths(currentMonth, 1);
-    setCurrentMonth(newMonth);
-    onMonthChange(newMonth);
+    const calendarApi = calendarRef.current?.getApi();
+    if (calendarApi) {
+      calendarApi.next();
+    }
   };
 
   const handleToday = () => {
-    const today = new Date();
-    setCurrentMonth(startOfMonth(today));
-    onDateSelect(today);
-    onMonthChange(startOfMonth(today));
+    const calendarApi = calendarRef.current?.getApi();
+    if (calendarApi) {
+      calendarApi.today();
+      const today = new Date();
+      onDateSelect(today);
+    }
   };
 
-  const getSchedulesForDate = (date: Date) => {
-    return schedules.filter((schedule) => {
-      // UTC 시간을 로컬 날짜로 변환하지 않고, 날짜 문자열만 비교
-      const scheduleStartDate = schedule.startDate.slice(0, 10); // YYYY-MM-DD
-      const scheduleEndDate = schedule.endDate.slice(0, 10); // YYYY-MM-DD
-      const targetDate = format(date, 'yyyy-MM-dd');
-
-      return targetDate >= scheduleStartDate && targetDate <= scheduleEndDate;
-    });
+  // FullCalendar callbacks
+  const handleDateClick = (arg: DateClickArg) => {
+    onDateSelect(arg.date);
   };
 
-  const weekDays = ['일', '월', '화', '수', '목', '금', '토'];
+  const handleEventClick = (arg: EventClickArg) => {
+    arg.jsEvent.stopPropagation();
+    const schedule = arg.event.extendedProps.schedule as Schedule;
+    onScheduleClick?.(schedule);
+  };
 
-  // 목록 뷰용 그룹화
+  const handleDatesSet = (arg: DatesSetArg) => {
+    const newMonth = arg.view.currentStart;
+
+    // Only trigger onMonthChange if the month actually changed
+    if (format(newMonth, 'yyyy-MM') !== format(currentMonth, 'yyyy-MM')) {
+      setCurrentMonth(newMonth);
+      onMonthChange(newMonth);
+    }
+  };
+
+  // Custom event rendering
+  const renderEventContent = (eventInfo: EventContentArg) => {
+    const schedule = eventInfo.event.extendedProps.schedule as Schedule;
+    const isMultiDay = eventInfo.event.extendedProps.isMultiDay as boolean;
+
+    if (isMultiDay) {
+      // Multi-day event bar
+      return (
+        <div className="w-full h-5 flex items-center px-1.5 rounded cursor-pointer hover:opacity-80 transition-opacity">
+          <span className="text-[10px] font-medium text-white truncate">
+            {schedule.title}
+          </span>
+        </div>
+      );
+    } else {
+      // Single-day event with left border
+      return (
+        <div className="relative w-full pl-2 py-0.5 cursor-pointer hover:bg-slate-50 transition-colors rounded">
+          <span className="text-[10px] font-medium text-slate-700 truncate block">
+            {format(parseISO(schedule.startDate), 'HH:mm')}{' '}
+            {schedule.isAllDay ? '⏰ ' : ''}
+            {schedule.title}
+          </span>
+        </div>
+      );
+    }
+  };
+
+  // Day cell class names for selected date highlighting
+  const getDayCellClassNames = (arg: DayCellContentArg) => {
+    const classes: string[] = [];
+
+    // Check if this day is the selected date
+    const argDate = format(arg.date, 'yyyy-MM-dd');
+    const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
+
+    if (argDate === selectedDateStr) {
+      classes.push('fc-day-selected');
+    }
+
+    return classes;
+  };
+
+  // List view grouped schedules (keep existing implementation)
   const groupedSchedules = useMemo(() => {
     const grouped: Record<string, Schedule[]> = {};
     schedules.forEach((schedule) => {
@@ -95,8 +143,8 @@ export function ScheduleCalendar({
   }, [schedules]);
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-      {/* 헤더 */}
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden max-w-[1200px]">
+      {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
         <div className="flex items-center gap-3">
           <Button
@@ -158,99 +206,34 @@ export function ScheduleCalendar({
       </div>
 
       {viewMode === 'month' ? (
-        <>
-          {/* 요일 헤더 */}
-          <div className="grid grid-cols-7 border-b border-slate-100">
-            {weekDays.map((day, index) => (
-              <div
-                key={day}
-                className={cn(
-                  'py-3 text-center text-xs font-semibold',
-                  index === 0 && 'text-rose-500',
-                  index === 6 && 'text-blue-500',
-                  index !== 0 && index !== 6 && 'text-slate-500'
-                )}
-              >
-                {day}
-              </div>
-            ))}
-          </div>
-
-          {/* 달력 그리드 */}
-          <div className="grid grid-cols-7">
-            {calendarDays.map((day, index) => {
-              const schedulesForDay = getSchedulesForDate(day);
-              const isCurrentMonth = isSameMonth(day, currentMonth);
-              const isSelected = isSameDay(day, selectedDate);
-              const isTodayDate = isToday(day);
-              const dayOfWeek = day.getDay();
-
-              return (
-                <button
-                  key={format(day, 'yyyy-MM-dd')}
-                  onClick={() => onDateSelect(day)}
-                  className={cn(
-                    'relative h-24 py-2 px-1 border-b border-r border-slate-100 transition-all hover:bg-slate-50',
-                    !isCurrentMonth && 'bg-slate-50/50',
-                    isSelected && 'bg-blue-50 hover:bg-blue-50',
-                    index % 7 === 6 && 'border-r-0'
-                  )}
-                >
-                  <div className="flex flex-col h-full">
-                    <span
-                      className={cn(
-                        'inline-flex items-center justify-center w-7 h-7 text-sm font-medium rounded-full',
-                        !isCurrentMonth && 'text-slate-300',
-                        isCurrentMonth && dayOfWeek === 0 && 'text-rose-500',
-                        isCurrentMonth && dayOfWeek === 6 && 'text-blue-500',
-                        isCurrentMonth &&
-                          dayOfWeek !== 0 &&
-                          dayOfWeek !== 6 &&
-                          'text-slate-700',
-                        isTodayDate &&
-                          'bg-blue-500 text-white font-bold',
-                        isSelected && !isTodayDate && 'bg-blue-100 text-blue-700'
-                      )}
-                    >
-                      {format(day, 'd')}
-                    </span>
-
-                    {/* 일정 표시 */}
-                    {schedulesForDay.length > 0 && isCurrentMonth && (
-                      <div className="mt-1 space-y-0.5 overflow-hidden flex-1">
-                        {schedulesForDay.slice(0, 2).map((schedule) => (
-                          <span
-                            key={schedule.id}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onScheduleClick?.(schedule);
-                            }}
-                            className="w-full inline-block px-1.5 py-0.5 text-[10px] font-medium rounded truncate text-left"
-                            style={{
-                              backgroundColor: schedule.color || (schedule.teamScope ? TEAM_SCOPE_FILTER_COLORS[schedule.teamScope] : SCHEDULE_TYPE_CALENDAR_COLORS[schedule.scheduleType]),
-                              color: 'white',
-                            }}
-                            title={schedule.title}
-                          >
-                            {schedule.isAllDay ? '⏰ ' : ''}
-                            {schedule.title}
-                          </span>
-                        ))}
-                        {schedulesForDay.length > 2 && (
-                          <div className="px-1.5 text-[10px] text-slate-500">
-                            +{schedulesForDay.length - 2}개
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </>
+        /* FullCalendar Month View */
+        <FullCalendar
+          ref={calendarRef}
+          plugins={[dayGridPlugin, interactionPlugin]}
+          initialView="dayGridMonth"
+          initialDate={currentMonth}
+          locale={koLocale}
+          headerToolbar={false} // Use custom header
+          height="auto"
+          events={events}
+          eventClick={handleEventClick}
+          dateClick={handleDateClick}
+          datesSet={handleDatesSet}
+          dayMaxEvents={2}
+          moreLinkText={(num) => `+${num}개`}
+          eventContent={renderEventContent}
+          dayCellClassNames={getDayCellClassNames}
+          fixedWeekCount={false}
+          showNonCurrentDates={true}
+          firstDay={0} // Sunday
+          dayHeaderFormat={{ weekday: 'short' }}
+          eventClassNames={(arg) => {
+            const isMultiDay = arg.event.extendedProps.isMultiDay as boolean;
+            return isMultiDay ? 'fc-multiday-event' : 'fc-singleday-event';
+          }}
+        />
       ) : (
-        /* 목록 뷰 */
+        /* List View - Keep existing implementation */
         <div className="max-h-[600px] overflow-y-auto">
           {groupedSchedules.length === 0 ? (
             <div className="py-16 text-center text-slate-500">
@@ -278,7 +261,7 @@ export function ScheduleCalendar({
                         <div
                           className="w-2 h-2 rounded-full"
                           style={{
-                            backgroundColor: schedule.color || (schedule.teamScope ? TEAM_SCOPE_FILTER_COLORS[schedule.teamScope] : SCHEDULE_TYPE_CALENDAR_COLORS[schedule.scheduleType]),
+                            backgroundColor: getScheduleColor(schedule),
                           }}
                         />
                         <div className="flex-1 min-w-0">

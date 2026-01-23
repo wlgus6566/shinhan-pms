@@ -117,11 +117,11 @@ export const TEAM_SCOPE_LABELS: Record<TeamScope, string> = {
 
 // 팀 범위 필터 색상 (체크박스용 컬러 도트)
 export const TEAM_SCOPE_FILTER_COLORS: Record<TeamScope, string> = {
-  ALL: '#FF8C42',        // Orange
-  PLANNING: '#9B59B6',   // Purple
-  DESIGN: '#3498DB',     // Blue
-  FRONTEND: '#2ECC71',   // Green
-  BACKEND: '#E74C3C',    // Red
+  ALL: '#F2994A',        // Muted Orange
+  PLANNING: '#9B51E0',   // Soft Purple
+  DESIGN: '#2D9CDB',     // Calm Blue
+  FRONTEND: '#27AE60',   // Balanced Green
+  BACKEND: '#EB5757',    // Soft Red
 };
 
 // 반차 타입 라벨

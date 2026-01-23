@@ -34,7 +34,7 @@ export default function EditProjectPage() {
   }
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-7xl">
       <div className="mb-6">
         <Button variant="ghost" size="sm" asChild>
           <Link href={`/projects/${projectId}`}>

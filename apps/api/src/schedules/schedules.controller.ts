@@ -34,7 +34,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 export class SchedulesController {
   constructor(private readonly schedulesService: SchedulesService) {}
 
-  @Post('projects/:projectId/schedules')
+  //@Post('projects/:projectId/schedules')
   @ApiOperation({ summary: '프로젝트 일정 생성' })
   @ApiParam({ name: 'projectId', description: '프로젝트 ID' })
   @ApiBody({ type: CreateScheduleDto })
@@ -211,7 +211,7 @@ export class SchedulesController {
 
   private transformSchedule(schedule: any): any {
     // 🔍 디버깅: Prisma 결과 확인
-    console.log('🔍 [transformSchedule] Schedule raw data:', {
+    console.log('🔍 [SchedulesController] transformSchedule Schedule raw data:', {
       id: schedule.id,
       title: schedule.title,
       teamScope: schedule.teamScope,

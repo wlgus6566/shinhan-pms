@@ -29,7 +29,6 @@
     "@nestjs/swagger": "^8.0.7",
     "@prisma/adapter-pg": "^6.19.2",
     "@prisma/client": "^6.5.0",
-    "@repo/api": "workspace:*",
     "@repo/schema": "workspace:*",
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",

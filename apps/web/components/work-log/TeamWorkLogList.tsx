@@ -177,7 +177,7 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
 
       {/* 업무일지 상세 모달 */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-7xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {format(selectedDate, 'yyyy년 MM월 dd일 (EEEE)', { locale: ko })} 팀 업무일지

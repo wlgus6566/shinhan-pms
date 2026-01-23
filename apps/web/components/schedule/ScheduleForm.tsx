@@ -40,8 +40,8 @@ const scheduleFormSchema = z.object({
   isAllDay: z.boolean().default(false),
   color: z.string().optional(),
   participantIds: z.array(z.string()).optional(),
-  teamScope: z.enum(['ALL', 'PLANNING', 'DESIGN', 'FRONTEND', 'BACKEND']).optional(),
-  halfDayType: z.enum(['AM', 'PM']).optional(),
+  teamScope: z.enum(['ALL', 'PLANNING', 'DESIGN', 'FRONTEND', 'BACKEND']).nullable().optional(),
+  halfDayType: z.enum(['AM', 'PM']).nullable().optional(),
   usageDate: z.string().optional(),
 }).refine((data) => {
   // 연차/반차가 아닌 경우 startDate와 endDate 필수
@@ -168,8 +168,8 @@ export function ScheduleForm({
           isAllDay: schedule.isAllDay,
           color: schedule.color || '',
           participantIds: schedule.participants?.map(p => p.id) || [],
-          teamScope: schedule.teamScope,
-          halfDayType: schedule.halfDayType,
+          teamScope: schedule.teamScope || undefined,
+          halfDayType: schedule.halfDayType || undefined,
           usageDate: schedule.usageDate?.slice(0, 10) || '', // Format for date
         }
       : {
@@ -188,29 +188,70 @@ export function ScheduleForm({
         },
   });
 
+  // Reset form when schedule or viewMode changes
+  useEffect(() => {
+    if (schedule) {
+      form.reset({
+        title: schedule.title,
+        description: schedule.description || '',
+        scheduleType: schedule.scheduleType,
+        startDate: schedule.startDate ? formatDateTimeLocal(schedule.startDate) : '',
+        endDate: schedule.endDate ? formatDateTimeLocal(schedule.endDate) : '',
+        location: schedule.location || '',
+        isAllDay: schedule.isAllDay,
+        color: schedule.color || '',
+        participantIds: schedule.participants?.map(p => p.id) || [],
+        teamScope: schedule.teamScope || undefined,
+        halfDayType: schedule.halfDayType || undefined,
+        usageDate: schedule.usageDate?.slice(0, 10) || '',
+      });
+    } else {
+      form.reset({
+        title: '',
+        description: '',
+        scheduleType: 'MEETING',
+        startDate: '',
+        endDate: '',
+        location: '',
+        isAllDay: false,
+        color: '',
+        participantIds: [],
+        teamScope: undefined,
+        halfDayType: undefined,
+        usageDate: '',
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [schedule, viewMode]);
+
   const handleSubmit = (data: ScheduleFormValues) => {
+    console.log('🔵 [ScheduleForm] handleSubmit called', { data, isEditing });
+
     let submitData: CreateScheduleRequest;
 
     if (data.scheduleType === 'VACATION' || data.scheduleType === 'HALF_DAY') {
       // 연차/반차: usageDate를 startDate와 endDate로 변환
       const usageDateTime = new Date(data.usageDate + 'T00:00:00');
+      const { halfDayType, teamScope, ...restData } = data;
       submitData = {
-        ...data,
+        ...restData,
         startDate: usageDateTime.toISOString(),
         endDate: usageDateTime.toISOString(),
         usageDate: data.usageDate,
-        halfDayType: data.halfDayType,
+        halfDayType: halfDayType ?? undefined,
       };
     } else {
       // 일반 일정: datetime-local 형식을 ISO 8601 형식으로 변환
+      const { halfDayType, teamScope, ...restData } = data;
       submitData = {
-        ...data,
+        ...restData,
         startDate: new Date(data.startDate!).toISOString(),
         endDate: new Date(data.endDate!).toISOString(),
-        teamScope: data.teamScope,
+        teamScope: teamScope ?? undefined,
       };
     }
 
+    console.log('🔵 [ScheduleForm] submitData:', submitData);
     onSubmit(submitData);
   };
 
@@ -330,7 +371,7 @@ export function ScheduleForm({
                     />
                   </FormControl>
                 ) : (
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value ?? undefined}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="팀 범위 선택" />
@@ -585,18 +626,32 @@ export function ScheduleForm({
             )}
           </div>
         ) : (
-          <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
-              disabled={isLoading}
-            >
-              취소
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? '저장 중...' : isEditing ? '수정' : '생성'}
-            </Button>
+          <div className="space-y-2">
+            {/* 디버깅: 폼 에러 표시 */}
+            {Object.keys(form.formState.errors).length > 0 && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+                <p className="font-semibold mb-1">폼 검증 오류:</p>
+                <ul className="list-disc list-inside space-y-0.5">
+                  {Object.entries(form.formState.errors).map(([key, error]) => (
+                    <li key={key}>{key}: {error.message}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCancel}
+                disabled={isLoading}
+              >
+                취소
+              </Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? '저장 중...' : isEditing ? '수정' : '생성'}
+              </Button>
+            </div>
           </div>
         )}
       </form>

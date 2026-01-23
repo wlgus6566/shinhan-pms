@@ -203,7 +203,7 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
                   </div>
                   <span
                     className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: TEAM_SCOPE_FILTER_COLORS[teamScope] }}
+                    style={{ backgroundColor: TEAM_SCOPE_FILTER_COLORS[teamScope] as string }}
                   />
                 </label>
               ))}

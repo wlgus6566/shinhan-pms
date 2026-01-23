@@ -61,7 +61,7 @@ export default function ProjectDetailPage() {
 
   if (error || !project) {
     return (
-      <div className="max-w-3xl">
+      <div className="max-w-7xl">
         <Card>
           <CardContent className="pt-6">
             <div className="text-center py-8">
@@ -79,7 +79,7 @@ export default function ProjectDetailPage() {
   }
 
   return (
-    <div className="max-w-5xl">
+    <div className="max-w-7xl">
       <div className="mb-6 flex items-center justify-between">
         <Button variant="ghost" size="sm" asChild>
           <Link href="/projects">
@@ -88,14 +88,6 @@ export default function ProjectDetailPage() {
           </Link>
         </Button>
 
-        {canEdit && (
-          <Button asChild>
-            <Link href={`/projects/${projectId}/edit`}>
-              <Edit className="h-4 w-4 mr-2" />
-              수정
-            </Link>
-          </Button>
-        )}
       </div>
 
       <div className="mb-6">
@@ -114,9 +106,20 @@ export default function ProjectDetailPage() {
         </TabsList>
 
         <TabsContent value="info">
+       
           <Card>
             <CardContent className="pt-6">
               <ProjectDetail project={project} />
+              {canEdit && (
+                <div className="flex justify-end">
+                <Button className="mt-4" asChild>
+                  <Link href={`/projects/${projectId}/edit`}>
+                    <Edit className="h-4 w-4 mr-2" />
+                    수정
+                  </Link>
+                </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

@@ -357,6 +357,14 @@ export class ProjectsController {
    * Schedule 변환 헬퍼
    */
   private transformSchedule(schedule: any): any {
+    // 🔍 디버깅: Prisma 결과 확인
+    console.log('🔍 [ProjectsController] transformSchedule Schedule raw data:', {
+      id: schedule.id,
+      title: schedule.title,
+      teamScope: schedule.teamScope,
+      hasTeamScope: 'teamScope' in schedule,
+      allKeys: Object.keys(schedule),
+    });
     return {
       id: schedule.id.toString(),
       projectId: schedule.projectId?.toString(),
