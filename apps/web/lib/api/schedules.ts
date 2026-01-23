@@ -6,6 +6,29 @@ import type {
   UpdateScheduleRequest,
 } from '@/types/schedule';
 
+// ============================================================================
+// Legacy GET Functions (for components not yet migrated to SWR)
+// TODO: Remove these after migrating all components to use SWR hooks
+// ============================================================================
+
+export async function getProjectSchedules(
+  projectId: string,
+  startDate?: string,
+  endDate?: string
+): Promise<Schedule[]> {
+  const params = new URLSearchParams();
+  if (startDate) params.append('startDate', startDate);
+  if (endDate) params.append('endDate', endDate);
+  const query = params.toString();
+  return fetcher<Schedule[]>(
+    `/api/projects/${projectId}/schedules${query ? `?${query}` : ''}`
+  );
+}
+
+// ============================================================================
+// Mutation Functions (POST/PATCH/DELETE)
+// ============================================================================
+
 /**
  * 프로젝트 일정 생성
  */
@@ -29,46 +52,6 @@ export async function createSchedule(
     method: 'POST',
     body: data,
   });
-}
-
-/**
- * 프로젝트 일정 목록 조회
- */
-export async function getProjectSchedules(
-  projectId: string,
-  startDate?: string,
-  endDate?: string
-): Promise<Schedule[]> {
-  const params = new URLSearchParams();
-  if (startDate) params.append('startDate', startDate);
-  if (endDate) params.append('endDate', endDate);
-  const query = params.toString();
-  return fetcher<Schedule[]>(
-    `/api/projects/${projectId}/schedules${query ? `?${query}` : ''}`
-  );
-}
-
-/**
- * 내 일정 목록 조회
- */
-export async function getMySchedules(
-  startDate?: string,
-  endDate?: string
-): Promise<Schedule[]> {
-  const params = new URLSearchParams();
-  if (startDate) params.append('startDate', startDate);
-  if (endDate) params.append('endDate', endDate);
-  const query = params.toString();
-  return fetcher<Schedule[]>(
-    `/api/schedules/my${query ? `?${query}` : ''}`
-  );
-}
-
-/**
- * 일정 상세 조회
- */
-export async function getSchedule(id: string): Promise<Schedule> {
-  return fetcher<Schedule>(`/api/schedules/${id}`);
 }
 
 /**

@@ -7,12 +7,35 @@ import type {
   MyTask,
 } from '@/types/work-log';
 
+// ============================================================================
+// Legacy GET Functions (for components not yet migrated to SWR)
+// TODO: Remove these after migrating all components to use SWR hooks
+// ============================================================================
+
+export async function getProjectWorkLogs(
+  projectId: string,
+  startDate?: string,
+  endDate?: string,
+): Promise<WorkLog[]> {
+  const params = new URLSearchParams();
+  if (startDate) params.append('startDate', startDate);
+  if (endDate) params.append('endDate', endDate);
+  const query = params.toString();
+  return fetcher<WorkLog[]>(
+    `/api/projects/${projectId}/work-logs${query ? `?${query}` : ''}`,
+  );
+}
+
+// ============================================================================
+// Mutation Functions (POST/PATCH/DELETE)
+// ============================================================================
+
 /**
  * 업무일지 작성
  */
 export async function createWorkLog(
   taskId: string,
-  data: CreateWorkLogRequest
+  data: CreateWorkLogRequest,
 ): Promise<WorkLog> {
   return fetcher<WorkLog>(`/api/tasks/${taskId}/work-logs`, {
     method: 'POST',
@@ -21,69 +44,11 @@ export async function createWorkLog(
 }
 
 /**
- * 업무별 일지 목록 조회
- */
-export async function getTaskWorkLogs(
-  taskId: string,
-  startDate?: string,
-  endDate?: string
-): Promise<WorkLog[]> {
-  const params = new URLSearchParams();
-  if (startDate) params.append('startDate', startDate);
-  if (endDate) params.append('endDate', endDate);
-  const query = params.toString();
-  return fetcher<WorkLog[]>(`/api/tasks/${taskId}/work-logs${query ? `?${query}` : ''}`);
-}
-
-/**
- * 내 업무일지 목록 조회
- */
-export async function getMyWorkLogs(
-  startDate: string,
-  endDate: string
-): Promise<WorkLog[]> {
-  return fetcher<WorkLog[]>(
-    `/api/work-logs/my?startDate=${startDate}&endDate=${endDate}`
-  );
-}
-
-/**
- * 내가 담당하는 업무 목록 조회
- */
-export async function getMyTasks(): Promise<MyTask[]> {
-  return fetcher<MyTask[]>('/api/work-logs/my-tasks');
-}
-
-/**
- * 프로젝트 팀 일지 조회
- */
-export async function getProjectWorkLogs(
-  projectId: string,
-  startDate?: string,
-  endDate?: string
-): Promise<WorkLog[]> {
-  const params = new URLSearchParams();
-  if (startDate) params.append('startDate', startDate);
-  if (endDate) params.append('endDate', endDate);
-  const query = params.toString();
-  return fetcher<WorkLog[]>(
-    `/api/projects/${projectId}/work-logs${query ? `?${query}` : ''}`
-  );
-}
-
-/**
- * 업무일지 상세 조회
- */
-export async function getWorkLog(id: string): Promise<WorkLog> {
-  return fetcher<WorkLog>(`/api/work-logs/${id}`);
-}
-
-/**
  * 업무일지 수정
  */
 export async function updateWorkLog(
   id: string,
-  data: UpdateWorkLogRequest
+  data: UpdateWorkLogRequest,
 ): Promise<WorkLog> {
   return fetcher<WorkLog>(`/api/work-logs/${id}`, {
     method: 'PATCH',
@@ -110,9 +75,10 @@ export async function deleteWorkLog(id: string): Promise<void> {
  * @param endDate - End date (required)
  */
 export function useMyWorkLogs(startDate: string, endDate: string) {
-  const url = startDate && endDate
-    ? `/api/work-logs/my?startDate=${startDate}&endDate=${endDate}`
-    : null;
+  const url =
+    startDate && endDate
+      ? `/api/work-logs/my?startDate=${startDate}&endDate=${endDate}`
+      : null;
 
   const { data, error, isLoading, mutate } = useSWR<WorkLog[]>(url);
 
@@ -129,7 +95,7 @@ export function useMyWorkLogs(startDate: string, endDate: string) {
  */
 export function useMyTasks() {
   const { data, error, isLoading, mutate } = useSWR<MyTask[]>(
-    '/api/work-logs/my-tasks'
+    '/api/work-logs/my-tasks',
   );
 
   return {
@@ -149,7 +115,7 @@ export function useMyTasks() {
 export function useTaskWorkLogs(
   taskId: string | null,
   startDate?: string,
-  endDate?: string
+  endDate?: string,
 ) {
   let url: string | null = null;
   if (taskId) {
@@ -179,7 +145,7 @@ export function useTaskWorkLogs(
 export function useProjectWorkLogs(
   projectId: string | null,
   startDate?: string,
-  endDate?: string
+  endDate?: string,
 ) {
   let url: string | null = null;
   if (projectId) {
@@ -206,7 +172,7 @@ export function useProjectWorkLogs(
  */
 export function useWorkLog(id: string | null) {
   const { data, error, isLoading, mutate } = useSWR<WorkLog>(
-    id ? `/api/work-logs/${id}` : null
+    id ? `/api/work-logs/${id}` : null,
   );
 
   return {

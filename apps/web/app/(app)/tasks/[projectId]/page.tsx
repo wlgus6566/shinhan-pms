@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { getProject } from '@/lib/api/projects';
+import { useProject } from '@/lib/api/projects';
+import { useProjectMembers } from '@/lib/api/projectMembers';
 import { TaskList } from '@/components/task/TaskList';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,10 +33,11 @@ export default function TaskManagementPage() {
   const { user } = useAuth();
   const projectId = params.projectId as string;
 
-  const [project, setProject] = useState<Project | null>(null);
-  const [members, setMembers] = useState<ProjectMember[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { project, isLoading: projectLoading, error: projectError } = useProject(projectId);
+  const { members, isLoading: membersLoading } = useProjectMembers(projectId);
+
+  const loading = projectLoading || membersLoading;
+  const error = projectError;
 
   // Check if current user is PM of this project
   const isPM = useMemo(() => {
@@ -45,19 +47,6 @@ export default function TaskManagementPage() {
       (m) => String(m.memberId) === String(user.id) && m.role === 'PM',
     );
   }, [user, members]);
-
-  useEffect(() => {
-    if (projectId) {
-      Promise.all([getProject(projectId)])
-        .then(([projectData]) => {
-          setProject(projectData);
-        })
-        .catch((err) => {
-          setError(err.message || '프로젝트를 불러오는데 실패했습니다');
-        })
-        .finally(() => setLoading(false));
-    }
-  }, [projectId]);
 
   if (loading) {
     return (
@@ -74,7 +63,7 @@ export default function TaskManagementPage() {
           <CardContent className="pt-6">
             <div className="text-center py-8">
               <p className="text-destructive">
-                {error || '프로젝트를 찾을 수 없습니다'}
+                {error?.message || '프로젝트를 찾을 수 없습니다'}
               </p>
               <Button
                 variant="outline"

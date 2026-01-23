@@ -8,33 +8,16 @@ import type {
 } from '../../types/project';
 
 /**
- * Get all projects with optional filters
+ * 내가 속한 프로젝트 타입
  */
-export async function getProjects(
-  params: GetProjectsParams = {},
-): Promise<Project[]> {
-  const query = new URLSearchParams();
-
-  if (params.search) {
-    query.append('search', params.search);
-  }
-
-  if (params.status) {
-    query.append('status', params.status);
-  }
-
-  const queryString = query.toString();
-  return fetcher<Project[]>(
-    `/api/projects${queryString ? `?${queryString}` : ''}`,
-  );
+export interface MyProject extends Project {
+  myRole: string;
+  myWorkArea: string;
 }
 
-/**
- * Get a single project by ID
- */
-export async function getProject(id: string | number): Promise<Project> {
-  return fetcher<Project>(`/api/projects/${id}`);
-}
+// ============================================================================
+// Mutation Functions (POST/PATCH/DELETE)
+// ============================================================================
 
 /**
  * Create a new project
@@ -72,18 +55,6 @@ export async function deleteProject(id: string | number): Promise<void> {
   return fetcher<void>(`/api/projects/${id}`, {
     method: 'DELETE',
   });
-}
-
-/**
- * 내가 속한 프로젝트 목록 조회
- */
-export interface MyProject extends Project {
-  myRole: string;
-  myWorkArea: string;
-}
-
-export async function getMyProjects(): Promise<MyProject[]> {
-  return fetcher<MyProject[]>('/api/projects/my');
 }
 
 // ============================================================================

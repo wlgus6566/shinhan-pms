@@ -7,12 +7,18 @@ import type {
   UpdateProjectMemberRoleRequest,
 } from '../../types/project';
 
-/**
- * Get all members of a project
- */
+// ============================================================================
+// Legacy GET Functions (for components not yet migrated to SWR)
+// TODO: Remove these after migrating all components to use SWR hooks
+// ============================================================================
+
 export async function getProjectMembers(projectId: string | number): Promise<ProjectMember[]> {
   return fetcher<ProjectMember[]>(`/api/projects/${projectId}/members`);
 }
+
+// ============================================================================
+// Mutation Functions (POST/PATCH/DELETE)
+// ============================================================================
 
 /**
  * Add a member to a project
@@ -55,22 +61,6 @@ export async function removeProjectMember(
   return fetcher<void>(`/api/projects/${projectId}/members/${memberId}`, {
     method: 'DELETE',
   });
-}
-
-/**
- * Get available members (not yet in the project)
- * Used for adding new members
- */
-export async function getAvailableMembers(
-  projectId: string | number,
-  search?: string
-): Promise<AvailableMember[]> {
-  const query = new URLSearchParams({ excludeProject: projectId.toString() });
-  if (search) {
-    query.append('search', search);
-  }
-  const response = await fetcher<{ users: AvailableMember[] }>(`/api/users?${query.toString()}`);
-  return response.users;
 }
 
 // ============================================================================

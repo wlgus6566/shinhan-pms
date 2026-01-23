@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { 
-  getProjectMembers, 
+  useProjectMembers, 
   removeProjectMember
 } from '@/lib/api/projectMembers';
 import {
@@ -62,37 +62,22 @@ interface ProjectMembersTableProps {
 
 export function ProjectMembersTable({ projectId, creatorId }: ProjectMembersTableProps) {
   const { user } = useAuth();
-  const [members, setMembers] = useState<ProjectMember[]>([]);
-  const [loading, setLoading] = useState(true);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [memberToRemove, setMemberToRemove] = useState<ProjectMember | null>(null);
   const [isRemoving, setIsRemoving] = useState(false);
 
-  const canManage = user?.role === 'PM' || members.find(m => m.memberId === user?.id && (m.role === 'PM' || m.role === 'PL'));
+  // SWR hook
+  const { members, isLoading: loading, mutate } = useProjectMembers(projectId);
 
-  const fetchMembers = async () => {
-    setLoading(true);
-    try {
-      const result = await getProjectMembers(projectId);
-      setMembers(result);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchMembers();
-  }, [projectId]);
+  const canManage = user?.role === 'PM' || members?.find(m => m.memberId === user?.id && (m.role === 'PM' || m.role === 'PL'));
 
   const handleRemove = async () => {
     if (!memberToRemove) return;
-    
+
     setIsRemoving(true);
     try {
       await removeProjectMember(projectId, memberToRemove.memberId);
-      setMembers(members.filter(m => m.id !== memberToRemove.id));
+      mutate(); // SWR 캐시 갱신
       setMemberToRemove(null);
     } catch (error: any) {
       alert(error.message);
@@ -150,7 +135,7 @@ export function ProjectMembersTable({ projectId, creatorId }: ProjectMembersTabl
                   <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                 </TableCell>
               </TableRow>
-            ) : members.length === 0 ? (
+            ) : !members || members.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={canManage ? 7 : 6} className="h-24 text-center">
                   멤버가 없습니다
@@ -223,7 +208,7 @@ export function ProjectMembersTable({ projectId, creatorId }: ProjectMembersTabl
         projectId={projectId}
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
-        onSuccess={fetchMembers}
+        onSuccess={() => mutate()}
       />
 
       <Dialog open={!!memberToRemove} onOpenChange={(open) => !open && setMemberToRemove(null)}>

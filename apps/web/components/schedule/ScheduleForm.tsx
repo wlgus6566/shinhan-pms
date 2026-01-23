@@ -18,7 +18,7 @@ import {
 import type { Schedule, TeamScope } from '@/types/schedule';
 import { SCHEDULE_TYPE_LABELS, TEAM_SCOPE_LABELS } from '@/types/schedule';
 import type { ProjectMember, WorkArea } from '@/types/project';
-import { getProjectMembers } from '@/lib/api/projectMembers';
+import { useProjectMembers, getProjectMembers } from '@/lib/api/projectMembers';
 
 type ScheduleFormValues = CreateScheduleRequest;
 

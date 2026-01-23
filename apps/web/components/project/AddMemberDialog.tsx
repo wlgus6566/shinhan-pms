@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { getAvailableMembers, addProjectMember } from '@/lib/api/projectMembers';
+import { useAvailableMembers, addProjectMember } from '@/lib/api/projectMembers';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -77,11 +77,12 @@ const projectRoleOptions = [
 ];
 
 export function AddMemberDialog({ projectId, open, onOpenChange, onSuccess }: AddMemberDialogProps) {
-  const [availableMembers, setAvailableMembers] = useState<AvailableMember[]>([]);
-  const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [comboboxOpen, setComboboxOpen] = useState(false);
+
+  // SWR hook - open일 때만 데이터 가져오기
+  const { members: availableMembers, isLoading: loading } = useAvailableMembers(open ? projectId : null);
 
   const form = useForm<AddMemberFormValues>({
     resolver: zodResolver(addMemberSchema),
@@ -95,17 +96,9 @@ export function AddMemberDialog({ projectId, open, onOpenChange, onSuccess }: Ad
 
   useEffect(() => {
     if (open) {
-      setLoading(true);
-      setError(null);
       form.reset();
-      getAvailableMembers(projectId)
-        .then((members) => {
-          setAvailableMembers(members);
-        })
-        .catch((err) => setError(err.message))
-        .finally(() => setLoading(false));
     }
-  }, [open, projectId, form]);
+  }, [open, form]);
 
   async function onSubmit(values: AddMemberFormValues) {
     setSubmitting(true);
@@ -128,7 +121,7 @@ export function AddMemberDialog({ projectId, open, onOpenChange, onSuccess }: Ad
     }
   }
 
-  const selectedMember = availableMembers.find(
+  const selectedMember = availableMembers?.find(
     (member) => member.id === form.watch('memberId')
   );
 
@@ -193,7 +186,7 @@ export function AddMemberDialog({ projectId, open, onOpenChange, onSuccess }: Ad
                           <CommandList>
                             <CommandEmpty>검색 결과가 없습니다.</CommandEmpty>
                             <CommandGroup>
-                              {availableMembers.length === 0 ? (
+                              {!availableMembers || availableMembers.length === 0 ? (
                                 <div className="py-6 text-center text-sm text-muted-foreground">
                                   추가 가능한 멤버가 없습니다
                                 </div>
@@ -291,7 +284,7 @@ export function AddMemberDialog({ projectId, open, onOpenChange, onSuccess }: Ad
                 </Button>
                 <Button
                   type="submit"
-                  disabled={submitting || availableMembers.length === 0}
+                  disabled={submitting || !availableMembers || availableMembers.length === 0}
                 >
                   {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   추가

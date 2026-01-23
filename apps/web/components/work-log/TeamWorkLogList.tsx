@@ -18,7 +18,7 @@ import type { WorkLog } from '@/types/work-log';
 import type { ProjectMember } from '@/types/project';
 import type { TaskStatus, TaskDifficulty } from '@/types/task';
 import { STATUS_LABELS, STATUS_COLORS, DIFFICULTY_LABELS, DIFFICULTY_COLORS } from '@/types/task';
-import { getProjectWorkLogs } from '@/lib/api/workLogs';
+import { useProjectWorkLogs, getProjectWorkLogs } from '@/lib/api/workLogs';
 import { cn } from '@/lib/utils';
 
 interface TeamWorkLogListProps {

@@ -21,12 +21,12 @@ import type {
 import { TEAM_SCOPE_LABELS, TEAM_SCOPE_FILTER_COLORS } from '@/types/schedule';
 import type { ProjectMember } from '@/types/project';
 import {
-  getProjectSchedules,
+  useProjectSchedules, getProjectSchedules,
   createProjectSchedule,
   updateSchedule,
   deleteSchedule,
 } from '@/lib/api/schedules';
-import { getProjectMembers } from '@/lib/api/projectMembers';
+import { useProjectMembers, getProjectMembers } from '@/lib/api/projectMembers';
 
 interface ProjectScheduleListProps {
   projectId: string;

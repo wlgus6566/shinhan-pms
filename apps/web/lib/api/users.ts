@@ -29,20 +29,9 @@ export interface GetUsersResponse {
   limit: number;
 }
 
-export async function getUsers(params: any = {}): Promise<GetUsersResponse> {
-  const query = new URLSearchParams();
-  Object.keys(params).forEach((key) => {
-    if (params[key] !== undefined && params[key] !== null) {
-      query.append(key, params[key]);
-    }
-  });
-
-  return fetcher<GetUsersResponse>(`/api/users?${query.toString()}`);
-}
-
-export async function getUser(id: string | number): Promise<User> {
-  return fetcher<User>(`/api/users/${id}`);
-}
+// ============================================================================
+// Mutation Functions (POST/PATCH/DELETE)
+// ============================================================================
 
 export async function createUser(data: CreateUserRequest): Promise<User> {
   return fetcher<User>('/api/users', {

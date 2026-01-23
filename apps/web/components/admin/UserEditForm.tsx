@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { getUser, updateUser, deactivateUser } from '@/lib/api/users';
+import { useUser, updateUser, deactivateUser } from '@/lib/api/users';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -48,12 +48,12 @@ type UserUpdateValues = z.infer<typeof userUpdateSchema>;
 
 export function UserEditForm({ userId }: { userId: string }) {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeactivating, setIsDeactivating] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [userData, setUserData] = useState<any>(null);
+
+  const { user: userData, isLoading, error: fetchError } = useUser(userId);
 
   const form = useForm<UserUpdateValues>({
     resolver: zodResolver(userUpdateSchema),
@@ -65,18 +65,20 @@ export function UserEditForm({ userId }: { userId: string }) {
   });
 
   useEffect(() => {
-    getUser(userId)
-      .then((user) => {
-        setUserData(user);
-        form.reset({
-          department: user.department,
-          role: user.role as 'SUPER_ADMIN' | 'PM' | 'MEMBER',
-          isActive: user.isActive,
-        });
-      })
-      .catch((err) => setError(err.message))
-      .finally(() => setIsLoading(false));
-  }, [userId, form]);
+    if (userData) {
+      form.reset({
+        department: userData.department,
+        role: userData.role as 'SUPER_ADMIN' | 'PM' | 'MEMBER',
+        isActive: userData.isActive,
+      });
+    }
+  }, [userData, form]);
+
+  useEffect(() => {
+    if (fetchError) {
+      setError(fetchError.message || '사용자 정보를 불러오는데 실패했습니다');
+    }
+  }, [fetchError]);
 
   async function onSubmit(values: UserUpdateValues) {
     setIsSaving(true);
@@ -106,6 +108,10 @@ export function UserEditForm({ userId }: { userId: string }) {
 
   if (isLoading) {
     return <div className="flex justify-center py-8"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+  }
+
+  if (!userData) {
+    return null;
   }
 
   return (

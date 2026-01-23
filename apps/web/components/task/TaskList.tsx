@@ -56,13 +56,24 @@ export function TaskList({ projectId, isPM }: TaskListProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [assigneeFilter, setAssigneeFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<TaskStatus[]>([]);
-  const [difficultyFilter, setDifficultyFilter] = useState<TaskDifficulty[]>([]);
+  const [difficultyFilter, setDifficultyFilter] = useState<TaskDifficulty[]>(
+    [],
+  );
   const [sortBy, setSortBy] = useState<SortBy>('createdAt');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
-  const { tasks, error: tasksError, isLoading: tasksLoading, mutate: mutateTasks } = useTasks(projectId);
+  const {
+    tasks,
+    error: tasksError,
+    isLoading: tasksLoading,
+    mutate: mutateTasks,
+  } = useTasks(projectId);
 
-  const { members: projectMembers, error: membersError, isLoading: membersLoading } = useProjectMembers(projectId);
+  const {
+    members: projectMembers,
+    error: membersError,
+    isLoading: membersLoading,
+  } = useProjectMembers(projectId);
 
   const loading = tasksLoading || membersLoading;
   const error = tasksError || membersError;
@@ -89,7 +100,10 @@ export function TaskList({ projectId, isPM }: TaskListProps) {
 
   // Convert arrays to Sets for O(1) lookups (js-set-map-lookups)
   const statusFilterSet = useMemo(() => new Set(statusFilter), [statusFilter]);
-  const difficultyFilterSet = useMemo(() => new Set(difficultyFilter), [difficultyFilter]);
+  const difficultyFilterSet = useMemo(
+    () => new Set(difficultyFilter),
+    [difficultyFilter],
+  );
 
   // Filtering logic
   const filteredTasks = useMemo(() => {
@@ -100,7 +114,10 @@ export function TaskList({ projectId, isPM }: TaskListProps) {
 
     return tasks.filter((task) => {
       // Search query filter - early exit for better performance
-      if (lowerSearchQuery && !task.taskName.toLowerCase().includes(lowerSearchQuery)) {
+      if (
+        lowerSearchQuery &&
+        !task.taskName.toLowerCase().includes(lowerSearchQuery)
+      ) {
         return false;
       }
 
@@ -120,13 +137,22 @@ export function TaskList({ projectId, isPM }: TaskListProps) {
       }
 
       // Difficulty filter - use Set for O(1) lookup
-      if (difficultyFilterSet.size > 0 && !difficultyFilterSet.has(task.difficulty)) {
+      if (
+        difficultyFilterSet.size > 0 &&
+        !difficultyFilterSet.has(task.difficulty)
+      ) {
         return false;
       }
 
       return true;
     });
-  }, [tasks, searchQuery, assigneeFilter, statusFilterSet, difficultyFilterSet]);
+  }, [
+    tasks,
+    searchQuery,
+    assigneeFilter,
+    statusFilterSet,
+    difficultyFilterSet,
+  ]);
 
   // Sorting logic - use hoisted constants
   const sortedTasks = useMemo(() => {
@@ -137,7 +163,8 @@ export function TaskList({ projectId, isPM }: TaskListProps) {
 
       switch (sortBy) {
         case 'difficulty':
-          comparison = DIFFICULTY_ORDER[b.difficulty] - DIFFICULTY_ORDER[a.difficulty];
+          comparison =
+            DIFFICULTY_ORDER[b.difficulty] - DIFFICULTY_ORDER[a.difficulty];
           break;
         case 'endDate':
           const aDate = a.endDate ? new Date(a.endDate).getTime() : Infinity;
@@ -148,7 +175,8 @@ export function TaskList({ projectId, isPM }: TaskListProps) {
           comparison = STATUS_ORDER[a.status] - STATUS_ORDER[b.status];
           break;
         case 'createdAt':
-          comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          comparison =
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
           break;
       }
 
@@ -181,15 +209,18 @@ export function TaskList({ projectId, isPM }: TaskListProps) {
     setSheetOpen(false); // Close detail sheet
   }, []);
 
-  const handleDelete = useCallback(async (taskId: string) => {
-    try {
-      await deleteTask(taskId);
-      mutateTasks(); // Refresh task list
-      setSheetOpen(false);
-    } catch (err: any) {
-      console.error('Error deleting task:', err);
-    }
-  }, [mutateTasks]);
+  const handleDelete = useCallback(
+    async (taskId: string) => {
+      try {
+        await deleteTask(taskId);
+        mutateTasks(); // Refresh task list
+        setSheetOpen(false);
+      } catch (err: any) {
+        console.error('Error deleting task:', err);
+      }
+    },
+    [mutateTasks],
+  );
 
   if (loading) {
     return <LoadingState />;
@@ -201,15 +232,6 @@ export function TaskList({ projectId, isPM }: TaskListProps) {
 
   return (
     <div className="space-y-4">
-      {isPM && (
-        <div className="flex justify-end">
-          <Button onClick={() => setDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            업무 추가
-          </Button>
-        </div>
-      )}
-
       {/* Filters and Sorting */}
       <TaskFilters
         searchQuery={searchQuery}
@@ -231,6 +253,15 @@ export function TaskList({ projectId, isPM }: TaskListProps) {
 
       {/* Table */}
       <TaskTable tasks={sortedTasks} onTaskClick={handleTaskClick} />
+
+      {isPM && (
+        <div className="flex justify-end">
+          <Button onClick={() => setDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            업무 추가
+          </Button>
+        </div>
+      )}
 
       {isPM && projectMembers && (
         <AddTaskDialog
