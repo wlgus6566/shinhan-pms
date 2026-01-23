@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import dynamic from 'next/dynamic';
 import {
   getProject,
   createProject,
@@ -14,7 +13,7 @@ import {
 } from '@/lib/api/projects';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
-import { FormInput, FormTextarea, FormSelect } from '@/components/form';
+import { FormInput, FormSelect } from '@/components/form';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Dialog,

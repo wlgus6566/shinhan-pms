@@ -30,18 +30,41 @@ export function isMultiDaySchedule(schedule: Schedule): boolean {
 }
 
 /**
+ * UTC 시간 문자열을 로컬 시간으로 변환 (타임존 무시)
+ * "2026-01-21T20:50:00.000Z" -> "2026-01-21T20:50:00"
+ */
+function convertUTCToLocalIgnoringTimezone(utcString: string): string {
+  // 'Z'를 제거하여 타임존 정보 제거
+  return utcString.replace('Z', '');
+}
+
+/**
  * Transforms a Schedule object to FullCalendar EventInput format
  */
 export function transformScheduleToEvent(schedule: Schedule): EventInput {
   const isMultiDay = isMultiDaySchedule(schedule);
   const color = getScheduleColor(schedule);
 
+  // 연차/반차의 경우 usageDate를 기준으로 표시
+  let startDate: string;
+  let endDate: string;
+
+  if (schedule.usageDate) {
+    // usageDate가 있으면 (연차/반차) usageDate 사용
+    startDate = schedule.usageDate;
+    endDate = schedule.usageDate;
+  } else {
+    // 일반 일정은 기존 로직 사용
+    startDate = convertUTCToLocalIgnoringTimezone(schedule.startDate);
+    endDate = convertUTCToLocalIgnoringTimezone(schedule.endDate);
+  }
+
   return {
     id: schedule.id,
     title: schedule.title,
-    start: schedule.startDate,
-    end: schedule.endDate,
-    allDay: schedule.isAllDay,
+    start: startDate,
+    end: endDate,
+    allDay: schedule.isAllDay || !!schedule.usageDate, // 연차/반차는 종일 이벤트로 표시
     backgroundColor: color,
     borderColor: color,
     textColor: isMultiDay ? '#ffffff' : '#334155', // white for multi-day, slate-700 for single-day

@@ -7,10 +7,11 @@ export class CreateScheduleDto {
   @IsString()
   projectId?: string;
 
-  @ApiProperty({ description: 'Schedule title', example: '프로젝트 킥오프 미팅' })
+  @ApiPropertyOptional({ description: 'Schedule title (optional for VACATION/HALF_DAY)', example: '프로젝트 킥오프 미팅' })
+  @IsOptional()
   @IsString()
   @MaxLength(100)
-  title: string;
+  title?: string;
 
   @ApiPropertyOptional({ description: 'Schedule description', example: '프로젝트 시작 회의 및 요구사항 논의' })
   @IsOptional()

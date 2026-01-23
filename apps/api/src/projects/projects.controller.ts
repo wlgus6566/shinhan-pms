@@ -52,14 +52,17 @@ export class ProjectsController {
     description: '잘못된 요청 (중복된 프로젝트명, 날짜 오류 등)',
   })
   async create(@Body() createProjectDto: CreateProjectDto) {
-    console.log('[DEBUG Controller] Raw DTO received:', JSON.stringify(createProjectDto, null, 2));
+    console.log(
+      '[DEBUG Controller] Raw DTO received:',
+      JSON.stringify(createProjectDto, null, 2),
+    );
     console.log('[DEBUG Controller] DTO type:', typeof createProjectDto);
     console.log('[DEBUG Controller] DTO keys:', Object.keys(createProjectDto));
-    
+
     // TODO: 실제로는 JWT에서 userId 추출
     const userId = 1n;
     const project = await this.projectsService.create(createProjectDto, userId);
-    
+
     return this.transformProject(project);
   }
 
@@ -229,7 +232,10 @@ export class ProjectsController {
     description: '멤버가 추가되었습니다',
     type: ProjectMemberResponseDto,
   })
-  @ApiResponse({ status: 404, description: '프로젝트 또는 사용자를 찾을 수 없습니다' })
+  @ApiResponse({
+    status: 404,
+    description: '프로젝트 또는 사용자를 찾을 수 없습니다',
+  })
   @ApiResponse({ status: 409, description: '이미 프로젝트 멤버입니다' })
   async addProjectMember(
     @Param('id') id: string,
@@ -280,7 +286,10 @@ export class ProjectsController {
     @Param('id') id: string,
     @Param('memberId', ParseIntPipe) memberId: number,
   ) {
-    await this.projectsService.removeProjectMember(BigInt(id), BigInt(memberId));
+    await this.projectsService.removeProjectMember(
+      BigInt(id),
+      BigInt(memberId),
+    );
   }
 
   /**
@@ -318,8 +327,16 @@ export class ProjectsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: '프로젝트 일정 목록 조회' })
   @ApiParam({ name: 'id', description: '프로젝트 ID' })
-  @ApiQuery({ name: 'startDate', required: false, description: '시작일 (ISO 8601)' })
-  @ApiQuery({ name: 'endDate', required: false, description: '종료일 (ISO 8601)' })
+  @ApiQuery({
+    name: 'startDate',
+    required: false,
+    description: '시작일 (ISO 8601)',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: false,
+    description: '종료일 (ISO 8601)',
+  })
   @ApiResponse({ status: 200, description: '프로젝트 일정 목록' })
   async getProjectSchedules(
     @Param('id') id: string,
@@ -358,13 +375,16 @@ export class ProjectsController {
    */
   private transformSchedule(schedule: any): any {
     // 🔍 디버깅: Prisma 결과 확인
-    console.log('🔍 [ProjectsController] transformSchedule Schedule raw data:', {
-      id: schedule.id,
-      title: schedule.title,
-      teamScope: schedule.teamScope,
-      hasTeamScope: 'teamScope' in schedule,
-      allKeys: Object.keys(schedule),
-    });
+    console.log(
+      '🔍 [ProjectsController] transformSchedule Schedule raw data:',
+      {
+        id: schedule.id,
+        title: schedule.title,
+        teamScope: schedule.teamScope,
+        hasTeamScope: 'teamScope' in schedule,
+        allKeys: Object.keys(schedule),
+      },
+    );
     return {
       id: schedule.id.toString(),
       projectId: schedule.projectId?.toString(),
@@ -379,13 +399,15 @@ export class ProjectsController {
       teamScope: schedule.teamScope,
       halfDayType: schedule.halfDayType,
       usageDate: schedule.usageDate?.toISOString().split('T')[0],
-      participants: schedule.participants?.map((p: any) => ({
-        id: p.user.id.toString(),
-        name: p.user.name,
-        email: p.user.email,
-        status: p.status,
-      })) || [],
+      participants:
+        schedule.participants?.map((p: any) => ({
+          id: p.user.id.toString(),
+          name: p.user.name,
+          email: p.user.email,
+          status: p.status,
+        })) || [],
       createdBy: schedule.createdBy.toString(),
+      creatorName: schedule.creator?.name || '',
       createdAt: schedule.createdAt.toISOString(),
       updatedAt: schedule.updatedAt?.toISOString(),
     };

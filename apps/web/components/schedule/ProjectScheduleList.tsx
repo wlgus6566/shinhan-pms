@@ -13,10 +13,19 @@ import { Plus } from 'lucide-react';
 import { ScheduleCalendar } from './ScheduleCalendar';
 import { ScheduleForm } from './ScheduleForm';
 import { SelectedDateScheduleList } from './SelectedDateScheduleList';
-import type { Schedule, CreateScheduleRequest, TeamScope } from '@/types/schedule';
+import type {
+  Schedule,
+  CreateScheduleRequest,
+  TeamScope,
+} from '@/types/schedule';
 import { TEAM_SCOPE_LABELS, TEAM_SCOPE_FILTER_COLORS } from '@/types/schedule';
 import type { ProjectMember } from '@/types/project';
-import { getProjectSchedules, createProjectSchedule, updateSchedule, deleteSchedule } from '@/lib/api/schedules';
+import {
+  getProjectSchedules,
+  createProjectSchedule,
+  updateSchedule,
+  deleteSchedule,
+} from '@/lib/api/schedules';
 import { getProjectMembers } from '@/lib/api/projectMembers';
 
 interface ProjectScheduleListProps {
@@ -27,7 +36,9 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null);
+  const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(
+    null,
+  );
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null);
@@ -72,7 +83,7 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
 
   // Calculate available team scopes based on project members
   const availableTeamScopes = useMemo(() => {
-    const workAreas = new Set(projectMembers.map(m => m.workArea));
+    const workAreas = new Set(projectMembers.map((m) => m.workArea));
     const scopes: TeamScope[] = [];
 
     // Always show ALL if there are any members
@@ -95,8 +106,9 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
 
     // 1. Filter by team scope
     if (selectedTeams.length > 0) {
-      result = result.filter(schedule =>
-        schedule.teamScope && selectedTeams.includes(schedule.teamScope)
+      result = result.filter(
+        (schedule) =>
+          schedule.teamScope && selectedTeams.includes(schedule.teamScope),
       );
     }
 
@@ -137,7 +149,7 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
 
     try {
       await deleteSchedule(scheduleId);
-      setSchedules(schedules.filter(s => s.id !== scheduleId));
+      setSchedules(schedules.filter((s) => s.id !== scheduleId));
       setDetailDialogOpen(false);
     } catch (error) {
       console.error('Failed to delete schedule:', error);
@@ -151,7 +163,7 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
       if (editingSchedule) {
         // Update
         const updated = await updateSchedule(editingSchedule.id, data);
-        setSchedules(schedules.map(s => s.id === updated.id ? updated : s));
+        setSchedules(schedules.map((s) => (s.id === updated.id ? updated : s)));
       } else {
         // Create
         const created = await createProjectSchedule(projectId, data);
@@ -169,10 +181,8 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
   };
 
   const toggleTeamFilter = (team: TeamScope) => {
-    setSelectedTeams(prev =>
-      prev.includes(team)
-        ? prev.filter(t => t !== team)
-        : [...prev, team]
+    setSelectedTeams((prev) =>
+      prev.includes(team) ? prev.filter((t) => t !== team) : [...prev, team],
     );
   };
 
@@ -185,7 +195,7 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
           {/* Team Filter */}
           <div className="bg-white rounded-lg border p-4">
             <div className="space-y-2">
-              {availableTeamScopes.map(teamScope => (
+              {availableTeamScopes.map((teamScope) => (
                 <label
                   key={teamScope}
                   className="flex items-center justify-between gap-2 cursor-pointer hover:bg-slate-50 p-2 rounded transition-colors"
@@ -203,7 +213,11 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
                   </div>
                   <span
                     className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: TEAM_SCOPE_FILTER_COLORS[teamScope] as string }}
+                    style={{
+                      backgroundColor: TEAM_SCOPE_FILTER_COLORS[
+                        teamScope
+                      ] as string,
+                    }}
                   />
                 </label>
               ))}

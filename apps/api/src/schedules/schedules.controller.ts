@@ -34,32 +34,6 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 export class SchedulesController {
   constructor(private readonly schedulesService: SchedulesService) {}
 
-  //@Post('projects/:projectId/schedules')
-  @ApiOperation({ summary: '프로젝트 일정 생성' })
-  @ApiParam({ name: 'projectId', description: '프로젝트 ID' })
-  @ApiBody({ type: CreateScheduleDto })
-  @ApiResponse({
-    status: 201,
-    description: '일정이 생성되었습니다',
-    type: ScheduleResponseDto,
-  })
-  @ApiResponse({ status: 400, description: '잘못된 요청' })
-  @ApiResponse({ status: 403, description: '프로젝트 멤버만 생성 가능합니다' })
-  @ApiResponse({ status: 404, description: '프로젝트를 찾을 수 없습니다' })
-  async createProjectSchedule(
-    @Param('projectId') projectId: string,
-    @Body() createScheduleDto: CreateScheduleDto,
-    @CurrentUser() user: any,
-  ) {
-    // projectId를 DTO에 설정
-    const dtoWithProject = { ...createScheduleDto, projectId };
-    const schedule = await this.schedulesService.create(
-      BigInt(user.id),
-      dtoWithProject,
-    );
-    return this.transformSchedule(schedule);
-  }
-
   @Post('schedules')
   @ApiOperation({ summary: '개인 일정 생성' })
   @ApiBody({ type: CreateScheduleDto })
@@ -78,30 +52,6 @@ export class SchedulesController {
       createScheduleDto,
     );
     return this.transformSchedule(schedule);
-  }
-
-  @Get('projects/:projectId/schedules')
-  @ApiOperation({ summary: '프로젝트 일정 목록 조회' })
-  @ApiParam({ name: 'projectId', description: '프로젝트 ID' })
-  @ApiQuery({ name: 'startDate', required: false, description: '시작일 (ISO 8601)' })
-  @ApiQuery({ name: 'endDate', required: false, description: '종료일 (ISO 8601)' })
-  @ApiResponse({
-    status: 200,
-    description: '프로젝트 일정 목록',
-    type: [ScheduleResponseDto],
-  })
-  async findProjectSchedules(
-    @Param('projectId') projectId: string,
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
-  ) {
-    const schedules = await this.schedulesService.findByProject(
-      BigInt(projectId),
-      startDate,
-      endDate,
-    );
-
-    return schedules.map((schedule) => this.transformSchedule(schedule));
   }
 
   @Get('schedules/my')
@@ -240,6 +190,7 @@ export class SchedulesController {
         status: p.status,
       })) || [],
       createdBy: schedule.createdBy.toString(),
+      creatorName: schedule.creator?.name || '',
       createdAt: schedule.createdAt.toISOString(),
       updatedAt: schedule.updatedAt?.toISOString(),
     };

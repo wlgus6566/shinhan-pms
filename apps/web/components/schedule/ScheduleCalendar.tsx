@@ -10,6 +10,7 @@ import type { Schedule } from '@/types/schedule';
 import {
   SCHEDULE_TYPE_CALENDAR_COLORS,
   SCHEDULE_TYPE_LABELS,
+  TeamScope,
 } from '@/types/schedule';
 
 // FullCalendar imports
@@ -34,6 +35,12 @@ interface ScheduleCalendarProps {
   onMonthChange: (date: Date) => void;
   onScheduleClick?: (schedule: Schedule) => void;
 }
+
+// UTC 시간 문자열을 로컬 시간으로 변환 (타임존 무시)
+const parseUTCAsLocal = (utcString: string) => {
+  // 'Z'를 제거하여 타임존 정보 제거한 후 파싱
+  return parseISO(utcString.replace('Z', ''));
+};
 
 export function ScheduleCalendar({
   schedules,
@@ -106,7 +113,7 @@ export function ScheduleCalendar({
       // Multi-day event bar
       return (
         <div className="w-full h-5 flex items-center px-1.5 rounded cursor-pointer hover:opacity-80 transition-opacity">
-          <span className="text-[10px] font-medium text-white truncate">
+          <span className="text-[12px] font-medium text-white truncate">
             {schedule.title}
           </span>
         </div>
@@ -114,8 +121,8 @@ export function ScheduleCalendar({
     } else {
       // Single-day event with left border
       return (
-        <div className="relative w-full py-0.5 cursor-pointer hover:bg-slate-50 transition-colors rounded">
-          <span className="text-[10px] font-medium text-slate-700 truncate block flex items-center gap-1">
+        <div className="relative w-full py-0.5 cursor-pointer transition-colors rounded">
+          <span className="text-[12px] font-medium text-slate-700 truncate block flex items-center gap-1">
             <i
               className="w-1 h-3 inline-block"
               style={{
@@ -124,9 +131,10 @@ export function ScheduleCalendar({
               }}
             />
             {schedule.scheduleType === 'VACATION'
-              ? '🌴'
-              : format(parseISO(schedule.startDate), 'HH:mm')}{' '}
-            {schedule.title}
+              ? `🌴 ${schedule.creatorName}  연차`
+              : schedule.scheduleType === 'HALF_DAY'
+                ? `🌴 ${schedule.creatorName}  반차`
+                : `${format(parseUTCAsLocal(schedule.startDate), 'HH:mm')} ${schedule.title}`}
           </span>
         </div>
       );
@@ -152,7 +160,10 @@ export function ScheduleCalendar({
   const groupedSchedules = useMemo(() => {
     const grouped: Record<string, Schedule[]> = {};
     schedules.forEach((schedule) => {
-      const startDate = format(parseISO(schedule.startDate), 'yyyy-MM-dd');
+      // 연차/반차는 usageDate 기준, 일반 일정은 startDate 기준
+      const startDate = schedule.usageDate
+        ? schedule.usageDate
+        : format(parseUTCAsLocal(schedule.startDate), 'yyyy-MM-dd');
       if (!grouped[startDate]) {
         grouped[startDate] = [];
       }
@@ -296,7 +307,7 @@ export function ScheduleCalendar({
                             <span className="text-sm text-slate-500">
                               {schedule.isAllDay
                                 ? '하루 종일'
-                                : `${format(parseISO(schedule.startDate), 'HH:mm')} - ${format(parseISO(schedule.endDate), 'HH:mm')}`}
+                                : `${format(parseUTCAsLocal(schedule.startDate), 'HH:mm')} - ${format(parseUTCAsLocal(schedule.endDate), 'HH:mm')}`}
                             </span>
                           </div>
                         </div>

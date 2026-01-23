@@ -5,26 +5,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
+import { Form } from '@/components/ui/form';
+import { FormInput, FormTextarea, FormSelect, FormRadioGroup } from '@/components/form';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
-  Form,
-  FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
 import type { Schedule, CreateScheduleRequest, TeamScope } from '@/types/schedule';
 import { SCHEDULE_TYPE_LABELS, TEAM_SCOPE_LABELS } from '@/types/schedule';
 import type { ProjectMember, WorkArea } from '@/types/project';
@@ -224,6 +213,14 @@ export function ScheduleForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [schedule, viewMode]);
 
+  // datetime-local 값을 로컬 타임존 기준 ISO 문자열로 변환
+  const convertLocalDateTimeToISO = (localDateTime: string) => {
+    // datetime-local 형식: "2026-01-21T20:50"
+    // 로컬 타임존으로 해석하여 ISO 문자열로 변환
+    const date = new Date(localDateTime);
+    return date.toISOString();
+  };
+
   const handleSubmit = (data: ScheduleFormValues) => {
     console.log('🔵 [ScheduleForm] handleSubmit called', { data, isEditing });
 
@@ -231,7 +228,8 @@ export function ScheduleForm({
 
     if (data.scheduleType === 'VACATION' || data.scheduleType === 'HALF_DAY') {
       // 연차/반차: usageDate를 startDate와 endDate로 변환
-      const usageDateTime = new Date(data.usageDate + 'T00:00:00');
+      // UTC 기준 00:00:00으로 설정하여 타임존 문제 방지
+      const usageDateTime = new Date(data.usageDate + 'T00:00:00Z');
       const { halfDayType, teamScope, ...restData } = data;
       submitData = {
         ...restData,
@@ -245,8 +243,8 @@ export function ScheduleForm({
       const { halfDayType, teamScope, ...restData } = data;
       submitData = {
         ...restData,
-        startDate: new Date(data.startDate!).toISOString(),
-        endDate: new Date(data.endDate!).toISOString(),
+        startDate: convertLocalDateTimeToISO(data.startDate!),
+        endDate: convertLocalDateTimeToISO(data.endDate!),
         teamScope: teamScope ?? undefined,
       };
     }
@@ -307,204 +305,119 @@ export function ScheduleForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <FormField
+        <FormInput
           control={form.control}
           name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>제목 *</FormLabel>
-              <FormControl>
-                <Input placeholder="일정 제목을 입력하세요" {...field} disabled={viewMode} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="제목 *"
+          placeholder="일정 제목을 입력하세요"
+          disabled={viewMode}
         />
 
-        <FormField
-          control={form.control}
-          name="scheduleType"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>일정 유형 *</FormLabel>
-              {viewMode ? (
-                <FormControl>
-                  <Input
-                    value={SCHEDULE_TYPE_LABELS[field.value]}
-                    disabled
-                  />
-                </FormControl>
-              ) : (
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="일정 유형 선택" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {Object.entries(SCHEDULE_TYPE_LABELS).map(([value, label]) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {viewMode ? (
+          <FormInput
+            control={form.control}
+            name="scheduleType"
+            label="일정 유형 *"
+            disabled
+            value={SCHEDULE_TYPE_LABELS[form.watch('scheduleType')]}
+          />
+        ) : (
+          <FormSelect
+            control={form.control}
+            name="scheduleType"
+            label="일정 유형 *"
+            placeholder="일정 유형 선택"
+            options={Object.entries(SCHEDULE_TYPE_LABELS).map(([value, label]) => ({ value, label }))}
+          />
+        )}
 
         {/* 회의/스크럼 시 팀 범위 선택 */}
         {showParticipants && (
-          <FormField
-            control={form.control}
-            name="teamScope"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>팀 범위 *</FormLabel>
-                {viewMode ? (
-                  <FormControl>
-                    <Input
-                      value={field.value ? TEAM_SCOPE_LABELS[field.value] : ''}
-                      disabled
-                    />
-                  </FormControl>
-                ) : (
-                  <Select onValueChange={field.onChange} value={field.value ?? undefined}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="팀 범위 선택" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {availableTeamScopes.map(scope => (
-                        <SelectItem key={scope} value={scope}>
-                          {TEAM_SCOPE_LABELS[scope]}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          viewMode ? (
+            <FormInput
+              control={form.control}
+              name="teamScope"
+              label="팀 범위 *"
+              disabled
+              value={form.watch('teamScope') ? TEAM_SCOPE_LABELS[form.watch('teamScope')!] : ''}
+            />
+          ) : (
+            <FormSelect
+              control={form.control}
+              name="teamScope"
+              label="팀 범위 *"
+              placeholder="팀 범위 선택"
+              options={availableTeamScopes.map(scope => ({ value: scope, label: TEAM_SCOPE_LABELS[scope] }))}
+            />
+          )
         )}
 
         {/* 연차/반차 시 사용일 필드 */}
         {isVacation ? (
           <>
-            <FormField
+            <FormInput
               control={form.control}
               name="usageDate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>사용일 *</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} disabled={viewMode} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="사용일 *"
+              type="date"
+              disabled={viewMode}
             />
 
             {/* 반차 시 오전/오후 선택 */}
             {isHalfDay && (
-              <FormField
-                control={form.control}
-                name="halfDayType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>유형 *</FormLabel>
-                    <FormControl>
-                      {viewMode ? (
-                        <Input
-                          value={field.value === 'AM' ? '오전' : field.value === 'PM' ? '오후' : ''}
-                          disabled
-                        />
-                      ) : (
-                        <RadioGroup
-                          value={field.value}
-                          onValueChange={field.onChange}
-                          className="flex gap-4"
-                        >
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="AM" id="am" />
-                            <Label htmlFor="am" className="cursor-pointer">오전</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="PM" id="pm" />
-                            <Label htmlFor="pm" className="cursor-pointer">오후</Label>
-                          </div>
-                        </RadioGroup>
-                      )}
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              viewMode ? (
+                <FormInput
+                  control={form.control}
+                  name="halfDayType"
+                  label="유형 *"
+                  disabled
+                  value={form.watch('halfDayType') === 'AM' ? '오전' : form.watch('halfDayType') === 'PM' ? '오후' : ''}
+                />
+              ) : (
+                <FormRadioGroup
+                  control={form.control}
+                  name="halfDayType"
+                  label="유형 *"
+                  className="flex gap-4"
+                  options={[
+                    { value: 'AM', label: '오전' },
+                    { value: 'PM', label: '오후' },
+                  ]}
+                />
+              )
             )}
           </>
         ) : (
           /* 일반 일정 시 시작일시/종료일시 */
           <div className="grid grid-cols-2 gap-4">
-            <FormField
+            <FormInput
               control={form.control}
               name="startDate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>시작 일시 *</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="datetime-local"
-                      step="1800"
-                      {...field}
-                      disabled={viewMode}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="시작 일시 *"
+              type="datetime-local"
+              step="1800"
+              disabled={viewMode}
             />
 
-            <FormField
+            <FormInput
               control={form.control}
               name="endDate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>종료 일시 *</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="datetime-local"
-                      step="1800"
-                      {...field}
-                      disabled={viewMode}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="종료 일시 *"
+              type="datetime-local"
+              step="1800"
+              disabled={viewMode}
             />
           </div>
         )}
-
-        <FormField
+        {scheduleType !== 'VACATION' && scheduleType !== 'HALF_DAY' && (
+        <FormInput
           control={form.control}
           name="location"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                장소{(scheduleType === 'MEETING' || scheduleType === 'SCRUM') && ' *'}
-              </FormLabel>
-              <FormControl>
-                <Input placeholder="장소를 입력하세요 (예: 회의실 A)" {...field} disabled={viewMode} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          label={`장소${(scheduleType === 'MEETING' || scheduleType === 'SCRUM') ? ' *' : ''}`}
+          placeholder="장소를 입력하세요 (예: 회의실 A)"
+          disabled={viewMode}
         />
-
+        )}
         {showParticipants && (
           <FormField
             control={form.control}
@@ -520,7 +433,7 @@ export function ScheduleForm({
               };
 
               const teamLabels = {
-                PROJECT_MANAGEMENT: 'PM/PL',
+                PROJECT_MANAGEMENT: 'PM',
                 PLANNING: '기획팀',
                 DESIGN: '디자인팀',
                 FRONTEND: '프론트엔드팀',
@@ -577,27 +490,17 @@ export function ScheduleForm({
             }}
           />
         )}
-
-        <FormField
+      
+        <FormTextarea
           control={form.control}
           name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>설명</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="일정에 대한 상세 설명을 입력하세요"
-                  className="resize-none"
-                  rows={4}
-                  {...field}
-                  disabled={viewMode}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="설명"
+          placeholder="일정에 대한 상세 설명을 입력하세요"
+          className="resize-none"
+          rows={4}
+          disabled={viewMode}
         />
-
+  
         {viewMode ? (
           <div className="flex justify-end gap-2">
             {onDelete && (

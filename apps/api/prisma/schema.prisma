@@ -205,7 +205,7 @@ model WorkLog {
 model Schedule {
   id          BigInt    @id @default(autoincrement())
   projectId   BigInt?   @map("project_id")
-  title       String    @db.VarChar(100)
+  title       String?   @db.VarChar(100)
   description String?   @db.Text
   scheduleType String   @map("schedule_type") @db.VarChar(20) // MEETING, SCRUM, VACATION, HALF_DAY, OTHER
   startDate   DateTime  @map("start_date") @db.Timestamp(6)

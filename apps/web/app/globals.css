@@ -449,7 +449,7 @@
 
 /* Day number styling */
 .fc-daygrid-day-number {
-  @apply inline-flex items-center justify-center w-7 h-7 text-sm font-medium rounded-full no-underline whitespace-nowrap;
+  @apply !bg-transparent inline-flex items-center justify-center w-7 h-7 text-sm font-medium rounded-full no-underline whitespace-nowrap;
 }
 
 /* Weekday numbers */
@@ -513,14 +513,13 @@
 }
 
 .fc-multiday-event .fc-event-title {
-  @apply text-[10px] font-medium text-white truncate;
+  @apply text-[12px] font-medium text-white truncate;
 }
 
 /* Single-day events with left border */
 .fc-singleday-event {
   @apply bg-transparent border-0;
 }
-
 
 .fc-singleday-event .fc-event-title {
   @apply text-[12px] font-medium text-slate-700 truncate block;

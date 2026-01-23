@@ -1,4 +1,9 @@
-export type ScheduleType = 'MEETING' | 'SCRUM' | 'VACATION' | 'HALF_DAY' | 'OTHER';
+export type ScheduleType =
+  | 'MEETING'
+  | 'SCRUM'
+  | 'VACATION'
+  | 'HALF_DAY'
+  | 'OTHER';
 
 export type ParticipantStatus = 'PENDING' | 'ACCEPTED' | 'DECLINED';
 
@@ -11,7 +16,12 @@ export interface ScheduleParticipant {
   name: string;
   email: string;
   status: ParticipantStatus;
-  workArea?: 'PROJECT_MANAGEMENT' | 'PLANNING' | 'DESIGN' | 'FRONTEND' | 'BACKEND';
+  workArea?:
+    | 'PROJECT_MANAGEMENT'
+    | 'PLANNING'
+    | 'DESIGN'
+    | 'FRONTEND'
+    | 'BACKEND';
 }
 
 export interface Schedule {
@@ -27,6 +37,7 @@ export interface Schedule {
   color?: string;
   participants: ScheduleParticipant[];
   createdBy: string;
+  creatorName: string;
   createdAt: string;
   updatedAt?: string;
   teamScope?: TeamScope; // 회의/스크럼 시 팀 범위
@@ -85,11 +96,11 @@ export const SCHEDULE_TYPE_COLORS: Record<ScheduleType, string> = {
 
 // 캘린더 이벤트 색상 (배경색만)
 export const SCHEDULE_TYPE_CALENDAR_COLORS: Record<ScheduleType, string> = {
-  MEETING: '#3b82f6',      // blue-500
-  SCRUM: '#6366f1',        // indigo-500
-  VACATION: '#10b981',     // emerald-500
-  HALF_DAY: '#14b8a6',     // teal-500
-  OTHER: '#64748b',        // slate-500
+  MEETING: '#3b82f6', // blue-500
+  SCRUM: '#6366f1', // indigo-500
+  VACATION: '#10b981', // emerald-500
+  HALF_DAY: '#14b8a6', // teal-500
+  OTHER: '#64748b', // slate-500
 };
 
 // 참가 상태 라벨
@@ -117,11 +128,11 @@ export const TEAM_SCOPE_LABELS: Record<TeamScope, string> = {
 
 // 팀 범위 필터 색상 (체크박스용 컬러 도트)
 export const TEAM_SCOPE_FILTER_COLORS: Record<TeamScope, string> = {
-  ALL: '#F2994A',        // Muted Orange
-  PLANNING: '#9B51E0',   // Soft Purple
-  DESIGN: '#2D9CDB',     // Calm Blue
-  FRONTEND: '#27AE60',   // Balanced Green
-  BACKEND: '#EB5757',    // Soft Red
+  ALL: '#F2994A', // Muted Orange
+  PLANNING: '#9B51E0', // Soft Purple
+  DESIGN: '#2D9CDB', // Calm Blue
+  FRONTEND: '#27AE60', // Balanced Green
+  BACKEND: '#EB5757', // Soft Red
 };
 
 // 반차 타입 라벨

@@ -27,8 +27,8 @@ export class ScheduleResponseDto {
   @ApiPropertyOptional({ description: 'Project ID' })
   projectId?: string;
 
-  @ApiProperty({ description: 'Schedule title' })
-  title: string;
+  @ApiPropertyOptional({ description: 'Schedule title' })
+  title?: string;
 
   @ApiPropertyOptional({ description: 'Schedule description' })
   description?: string;
@@ -59,6 +59,9 @@ export class ScheduleResponseDto {
 
   @ApiProperty({ description: 'Creator user ID' })
   createdBy: string;
+
+  @ApiProperty({ description: 'Creator user name' })
+  creatorName: string;
 
   @ApiProperty({ description: 'Created timestamp' })
   createdAt: string;
