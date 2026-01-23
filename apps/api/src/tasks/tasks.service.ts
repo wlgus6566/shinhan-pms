@@ -30,15 +30,42 @@ export class TasksService {
     }
 
     // 4. 담당자 유효성 검증
+    console.log('Service received assignee IDs:', {
+      planning: createTaskDto.planningAssigneeIds,
+      design: createTaskDto.designAssigneeIds,
+      frontend: createTaskDto.frontendAssigneeIds,
+      backend: createTaskDto.backendAssigneeIds,
+    });
     await this.validateAssignees(
       projectId,
-      createTaskDto.planningAssigneeId,
-      createTaskDto.designAssigneeId,
-      createTaskDto.frontendAssigneeId,
-      createTaskDto.backendAssigneeId,
+      createTaskDto.planningAssigneeIds,
+      createTaskDto.designAssigneeIds,
+      createTaskDto.frontendAssigneeIds,
+      createTaskDto.backendAssigneeIds,
     );
+    console.log('Assignee validation passed');
 
     // 5. 업무 생성
+    const assigneesToCreate = [
+      ...(createTaskDto.planningAssigneeIds?.map(id => ({
+        userId: BigInt(id),
+        workArea: 'PLANNING',
+      })) || []),
+      ...(createTaskDto.designAssigneeIds?.map(id => ({
+        userId: BigInt(id),
+        workArea: 'DESIGN',
+      })) || []),
+      ...(createTaskDto.frontendAssigneeIds?.map(id => ({
+        userId: BigInt(id),
+        workArea: 'FRONTEND',
+      })) || []),
+      ...(createTaskDto.backendAssigneeIds?.map(id => ({
+        userId: BigInt(id),
+        workArea: 'BACKEND',
+      })) || []),
+    ];
+    console.log('Assignees to create:', assigneesToCreate.length, assigneesToCreate);
+
     return await this.prisma.task.create({
       data: {
         projectId,
@@ -46,20 +73,20 @@ export class TasksService {
         description: createTaskDto.description,
         difficulty: createTaskDto.difficulty,
         clientName: createTaskDto.clientName,
-        planningAssigneeId: createTaskDto.planningAssigneeId ? BigInt(createTaskDto.planningAssigneeId) : null,
-        designAssigneeId: createTaskDto.designAssigneeId ? BigInt(createTaskDto.designAssigneeId) : null,
-        frontendAssigneeId: createTaskDto.frontendAssigneeId ? BigInt(createTaskDto.frontendAssigneeId) : null,
-        backendAssigneeId: createTaskDto.backendAssigneeId ? BigInt(createTaskDto.backendAssigneeId) : null,
         startDate: createTaskDto.startDate ? new Date(createTaskDto.startDate) : null,
         endDate: createTaskDto.endDate ? new Date(createTaskDto.endDate) : null,
         notes: createTaskDto.notes,
         createdBy: userId,
+        assignees: {
+          create: assigneesToCreate,
+        },
       },
       include: {
-        planningAssignee: { select: { id: true, name: true, email: true } },
-        designAssignee: { select: { id: true, name: true, email: true } },
-        frontendAssignee: { select: { id: true, name: true, email: true } },
-        backendAssignee: { select: { id: true, name: true, email: true } },
+        assignees: {
+          include: {
+            user: { select: { id: true, name: true, email: true } },
+          },
+        },
       },
     });
   }
@@ -71,10 +98,11 @@ export class TasksService {
         isActive: true,
       },
       include: {
-        planningAssignee: { select: { id: true, name: true, email: true } },
-        designAssignee: { select: { id: true, name: true, email: true } },
-        frontendAssignee: { select: { id: true, name: true, email: true } },
-        backendAssignee: { select: { id: true, name: true, email: true } },
+        assignees: {
+          include: {
+            user: { select: { id: true, name: true, email: true } },
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -84,10 +112,11 @@ export class TasksService {
     const task = await this.prisma.task.findUnique({
       where: { id: taskId },
       include: {
-        planningAssignee: { select: { id: true, name: true, email: true } },
-        designAssignee: { select: { id: true, name: true, email: true } },
-        frontendAssignee: { select: { id: true, name: true, email: true } },
-        backendAssignee: { select: { id: true, name: true, email: true } },
+        assignees: {
+          include: {
+            user: { select: { id: true, name: true, email: true } },
+          },
+        },
       },
     });
 
@@ -121,43 +150,68 @@ export class TasksService {
     // 담당자 유효성 검증
     await this.validateAssignees(
       task.projectId,
-      updateTaskDto.planningAssigneeId,
-      updateTaskDto.designAssigneeId,
-      updateTaskDto.frontendAssigneeId,
-      updateTaskDto.backendAssigneeId,
+      updateTaskDto.planningAssigneeIds,
+      updateTaskDto.designAssigneeIds,
+      updateTaskDto.frontendAssigneeIds,
+      updateTaskDto.backendAssigneeIds,
     );
 
     // 업무 수정
+    const updateData: any = {
+      taskName: updateTaskDto.taskName,
+      description: updateTaskDto.description,
+      difficulty: updateTaskDto.difficulty,
+      clientName: updateTaskDto.clientName,
+      startDate: updateTaskDto.startDate ? new Date(updateTaskDto.startDate) : undefined,
+      endDate: updateTaskDto.endDate ? new Date(updateTaskDto.endDate) : undefined,
+      notes: updateTaskDto.notes,
+      status: updateTaskDto.status,
+      updatedBy: userId,
+    };
+
+    // 담당자가 제공된 경우에만 업데이트
+    if (updateTaskDto.planningAssigneeIds !== undefined ||
+        updateTaskDto.designAssigneeIds !== undefined ||
+        updateTaskDto.frontendAssigneeIds !== undefined ||
+        updateTaskDto.backendAssigneeIds !== undefined) {
+
+      // 기존 할당 삭제
+      await this.prisma.taskAssignee.deleteMany({
+        where: { taskId },
+      });
+
+      // 새 할당 생성
+      updateData.assignees = {
+        create: [
+          ...(updateTaskDto.planningAssigneeIds?.map(id => ({
+            userId: BigInt(id),
+            workArea: 'PLANNING',
+          })) || []),
+          ...(updateTaskDto.designAssigneeIds?.map(id => ({
+            userId: BigInt(id),
+            workArea: 'DESIGN',
+          })) || []),
+          ...(updateTaskDto.frontendAssigneeIds?.map(id => ({
+            userId: BigInt(id),
+            workArea: 'FRONTEND',
+          })) || []),
+          ...(updateTaskDto.backendAssigneeIds?.map(id => ({
+            userId: BigInt(id),
+            workArea: 'BACKEND',
+          })) || []),
+        ],
+      };
+    }
+
     return await this.prisma.task.update({
       where: { id: taskId },
-      data: {
-        taskName: updateTaskDto.taskName,
-        description: updateTaskDto.description,
-        difficulty: updateTaskDto.difficulty,
-        clientName: updateTaskDto.clientName,
-        planningAssigneeId: updateTaskDto.planningAssigneeId !== undefined
-          ? (updateTaskDto.planningAssigneeId ? BigInt(updateTaskDto.planningAssigneeId) : null)
-          : undefined,
-        designAssigneeId: updateTaskDto.designAssigneeId !== undefined
-          ? (updateTaskDto.designAssigneeId ? BigInt(updateTaskDto.designAssigneeId) : null)
-          : undefined,
-        frontendAssigneeId: updateTaskDto.frontendAssigneeId !== undefined
-          ? (updateTaskDto.frontendAssigneeId ? BigInt(updateTaskDto.frontendAssigneeId) : null)
-          : undefined,
-        backendAssigneeId: updateTaskDto.backendAssigneeId !== undefined
-          ? (updateTaskDto.backendAssigneeId ? BigInt(updateTaskDto.backendAssigneeId) : null)
-          : undefined,
-        startDate: updateTaskDto.startDate ? new Date(updateTaskDto.startDate) : undefined,
-        endDate: updateTaskDto.endDate ? new Date(updateTaskDto.endDate) : undefined,
-        notes: updateTaskDto.notes,
-        status: updateTaskDto.status,
-        updatedBy: userId,
-      },
+      data: updateData,
       include: {
-        planningAssignee: { select: { id: true, name: true, email: true } },
-        designAssignee: { select: { id: true, name: true, email: true } },
-        frontendAssignee: { select: { id: true, name: true, email: true } },
-        backendAssignee: { select: { id: true, name: true, email: true } },
+        assignees: {
+          include: {
+            user: { select: { id: true, name: true, email: true } },
+          },
+        },
       },
     });
   }
@@ -196,37 +250,39 @@ export class TasksService {
   // 담당자 유효성 검증
   private async validateAssignees(
     projectId: bigint,
-    planningAssigneeId?: number,
-    designAssigneeId?: number,
-    frontendAssigneeId?: number,
-    backendAssigneeId?: number,
+    planningAssigneeIds?: number[],
+    designAssigneeIds?: number[],
+    frontendAssigneeIds?: number[],
+    backendAssigneeIds?: number[],
   ): Promise<void> {
     const assignees = [
-      { id: planningAssigneeId, workArea: 'PLANNING', name: '기획' },
-      { id: designAssigneeId, workArea: 'DESIGN', name: '디자인' },
-      { id: frontendAssigneeId, workArea: 'FRONTEND', name: '프론트엔드' },
-      { id: backendAssigneeId, workArea: 'BACKEND', name: '백엔드' },
+      { ids: planningAssigneeIds, workArea: 'PLANNING', name: '기획' },
+      { ids: designAssigneeIds, workArea: 'DESIGN', name: '디자인' },
+      { ids: frontendAssigneeIds, workArea: 'FRONTEND', name: '프론트엔드' },
+      { ids: backendAssigneeIds, workArea: 'BACKEND', name: '백엔드' },
     ];
 
     for (const assignee of assignees) {
-      if (assignee.id) {
-        const member = await this.prisma.projectMember.findFirst({
-          where: {
-            projectId,
-            memberId: BigInt(assignee.id),
-          },
-        });
+      if (assignee.ids && assignee.ids.length > 0) {
+        for (const id of assignee.ids) {
+          const member = await this.prisma.projectMember.findFirst({
+            where: {
+              projectId,
+              memberId: BigInt(id),
+            },
+          });
 
-        if (!member) {
-          throw new BadRequestException(
-            `${assignee.name} 담당자가 프로젝트 멤버가 아닙니다`,
-          );
-        }
+          if (!member) {
+            throw new BadRequestException(
+              `${assignee.name} 담당자가 프로젝트 멤버가 아닙니다`,
+            );
+          }
 
-        if (member.workArea !== assignee.workArea) {
-          throw new BadRequestException(
-            `${assignee.name} 담당자의 작업 영역이 일치하지 않습니다`,
-          );
+          if (member.workArea !== assignee.workArea) {
+            throw new BadRequestException(
+              `${assignee.name} 담당자의 작업 영역이 일치하지 않습니다`,
+            );
+          }
         }
       }
     }

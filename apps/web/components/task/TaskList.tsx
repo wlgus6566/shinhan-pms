@@ -123,10 +123,10 @@ export function TaskList({ projectId, isPM }: TaskListProps) {
       // Assignee filter
       if (assigneeFilter !== 'all') {
         const isAssignee =
-          task.planningAssignee?.id === assigneeFilter ||
-          task.designAssignee?.id === assigneeFilter ||
-          task.frontendAssignee?.id === assigneeFilter ||
-          task.backendAssignee?.id === assigneeFilter;
+          task.planningAssignees?.some(a => a.id === assigneeFilter) ||
+          task.designAssignees?.some(a => a.id === assigneeFilter) ||
+          task.frontendAssignees?.some(a => a.id === assigneeFilter) ||
+          task.backendAssignees?.some(a => a.id === assigneeFilter);
         if (!isAssignee) return false;
       }
 

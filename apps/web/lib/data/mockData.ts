@@ -1312,26 +1312,26 @@ export const mockTasks: Task[] = [
     description: '홈페이지 전체 구조 기획 및 와이어프레임 작성',
     difficulty: 'HIGH',
     clientName: '이모션',
-    planningAssignee: {
+    planningAssignees: [{
       id: '2',
       name: '이영희',
       email: 'lee@emotion.co.kr',
-    },
-    designAssignee: {
+    }],
+    designAssignees: [{
       id: '3',
       name: '박민수',
       email: 'park@emotion.co.kr',
-    },
-    frontendAssignee: {
+    }],
+    frontendAssignees: [{
       id: '8',
       name: '임지훈',
       email: 'lim@emotion.co.kr',
-    },
-    backendAssignee: {
+    }],
+    backendAssignees: [{
       id: '4',
       name: '정수진',
       email: 'jung@emotion.co.kr',
-    },
+    }],
     startDate: '2024-01-15T00:00:00Z',
     endDate: '2024-02-15T00:00:00Z',
     status: 'WORK_COMPLETED',
@@ -1345,16 +1345,16 @@ export const mockTasks: Task[] = [
     description: '통일된 디자인 규격 및 컴포넌트 라이브러리 구축',
     difficulty: 'HIGH',
     clientName: '이모션',
-    designAssignee: {
+    designAssignees: [{
       id: '3',
       name: '박민수',
       email: 'park@emotion.co.kr',
-    },
-    frontendAssignee: {
+    }],
+    frontendAssignees: [{
       id: '8',
       name: '임지훈',
       email: 'lim@emotion.co.kr',
-    },
+    }],
     startDate: '2024-02-01T00:00:00Z',
     endDate: '2024-03-15T00:00:00Z',
     status: 'IN_PROGRESS',
@@ -1368,11 +1368,11 @@ export const mockTasks: Task[] = [
     description: 'React와 Next.js를 이용한 프론트엔드 개발',
     difficulty: 'MEDIUM',
     clientName: '이모션',
-    frontendAssignee: {
+    frontendAssignees: [{
       id: '8',
       name: '임지훈',
       email: 'lim@emotion.co.kr',
-    },
+    }],
     startDate: '2024-02-15T00:00:00Z',
     endDate: '2024-04-30T00:00:00Z',
     status: 'IN_PROGRESS',
@@ -1386,11 +1386,11 @@ export const mockTasks: Task[] = [
     description: '데이터베이스 설계 및 REST API 개발',
     difficulty: 'HIGH',
     clientName: '이모션',
-    backendAssignee: {
+    backendAssignees: [{
       id: '4',
       name: '정수진',
       email: 'jung@emotion.co.kr',
-    },
+    }],
     startDate: '2024-02-01T00:00:00Z',
     endDate: '2024-05-15T00:00:00Z',
     status: 'IN_PROGRESS',
@@ -1405,11 +1405,11 @@ export const mockTasks: Task[] = [
     description: '시스템 요구사항 정의 및 사용자 스토리 작성',
     difficulty: 'MEDIUM',
     clientName: '이모션',
-    planningAssignee: {
+    planningAssignees: [{
       id: '2',
       name: '이영희',
       email: 'lee@emotion.co.kr',
-    },
+    }],
     startDate: '2024-02-01T00:00:00Z',
     endDate: '2024-02-28T00:00:00Z',
     status: 'WORK_COMPLETED',
@@ -1423,11 +1423,11 @@ export const mockTasks: Task[] = [
     description: 'PMS 시스템의 데이터베이스 스키마 설계',
     difficulty: 'HIGH',
     clientName: '이모션',
-    backendAssignee: {
+    backendAssignees: [{
       id: '1',
       name: '김철수',
       email: 'kim@emotion.co.kr',
-    },
+    }],
     startDate: '2024-02-15T00:00:00Z',
     endDate: '2024-03-15T00:00:00Z',
     status: 'IN_PROGRESS',
@@ -1441,11 +1441,11 @@ export const mockTasks: Task[] = [
     description: 'RESTful API 엔드포인트 구현',
     difficulty: 'MEDIUM',
     clientName: '이모션',
-    backendAssignee: {
+    backendAssignees: [{
       id: '4',
       name: '정수진',
       email: 'jung@emotion.co.kr',
-    },
+    }],
     startDate: '2024-03-01T00:00:00Z',
     endDate: '2024-05-15T00:00:00Z',
     status: 'IN_PROGRESS',
@@ -1459,11 +1459,11 @@ export const mockTasks: Task[] = [
     description: '사용자 인터페이스 및 경험 설계',
     difficulty: 'MEDIUM',
     clientName: '이모션',
-    frontendAssignee: {
+    frontendAssignees: [{
       id: '5',
       name: '최동욱',
       email: 'choi@emotion.co.kr',
-    },
+    }],
     startDate: '2024-02-20T00:00:00Z',
     endDate: '2024-04-10T00:00:00Z',
     status: 'IN_PROGRESS',
@@ -1478,11 +1478,11 @@ export const mockTasks: Task[] = [
     description: 'AWS 기반 클라우드 아키텍처 설계',
     difficulty: 'HIGH',
     clientName: '클라우드 서비스',
-    backendAssignee: {
+    backendAssignees: [{
       id: '4',
       name: '정수진',
       email: 'jung@emotion.co.kr',
-    },
+    }],
     startDate: '2024-04-01T00:00:00Z',
     endDate: '2024-04-30T00:00:00Z',
     status: 'IN_PROGRESS',
@@ -1496,11 +1496,11 @@ export const mockTasks: Task[] = [
     description: '온프레미스 데이터 및 애플리케이션 마이그레이션',
     difficulty: 'HIGH',
     clientName: '클라우드 서비스',
-    backendAssignee: {
+    backendAssignees: [{
       id: '1',
       name: '김철수',
       email: 'kim@emotion.co.kr',
-    },
+    }],
     startDate: '2024-05-01T00:00:00Z',
     endDate: '2024-08-31T00:00:00Z',
     status: 'WAITING',
@@ -1514,11 +1514,11 @@ export const mockTasks: Task[] = [
     description: '클라우드 환경에서의 성능 최적화 및 튜닝',
     difficulty: 'MEDIUM',
     clientName: '클라우드 서비스',
-    backendAssignee: {
+    backendAssignees: [{
       id: '5',
       name: '최동욱',
       email: 'choi@emotion.co.kr',
-    },
+    }],
     startDate: '2024-07-01T00:00:00Z',
     endDate: '2024-09-30T00:00:00Z',
     status: 'WAITING',
@@ -1533,11 +1533,11 @@ export const mockTasks: Task[] = [
     description: 'GPT 기반 자연어 처리 모델 개발 및 훈련',
     difficulty: 'HIGH',
     clientName: '기술 스타트업',
-    backendAssignee: {
+    backendAssignees: [{
       id: '1',
       name: '김철수',
       email: 'kim@emotion.co.kr',
-    },
+    }],
     startDate: '2024-03-15T00:00:00Z',
     endDate: '2024-06-30T00:00:00Z',
     status: 'IN_PROGRESS',
@@ -1551,11 +1551,11 @@ export const mockTasks: Task[] = [
     description: '사용자 친화적인 챗봇 인터페이스 구현',
     difficulty: 'MEDIUM',
     clientName: '기술 스타트업',
-    frontendAssignee: {
+    frontendAssignees: [{
       id: '8',
       name: '임지훈',
       email: 'lim@emotion.co.kr',
-    },
+    }],
     startDate: '2024-04-01T00:00:00Z',
     endDate: '2024-06-30T00:00:00Z',
     status: 'IN_PROGRESS',
@@ -1569,11 +1569,11 @@ export const mockTasks: Task[] = [
     description: 'NLP 모델과 UI의 통합 테스트',
     difficulty: 'MEDIUM',
     clientName: '기술 스타트업',
-    backendAssignee: {
+    backendAssignees: [{
       id: '4',
       name: '정수진',
       email: 'jung@emotion.co.kr',
-    },
+    }],
     startDate: '2024-06-01T00:00:00Z',
     endDate: '2024-08-15T00:00:00Z',
     status: 'WAITING',
@@ -1588,16 +1588,16 @@ export const mockTasks: Task[] = [
     description: '카드사 시스템과의 API 연동 구조 설계',
     difficulty: 'HIGH',
     clientName: '신한카드',
-    planningAssignee: {
+    planningAssignees: [{
       id: '2',
       name: '이영희',
       email: 'lee@emotion.co.kr',
-    },
-    backendAssignee: {
+    }],
+    backendAssignees: [{
       id: '9',
       name: '한지민',
       email: 'han@emotion.co.kr',
-    },
+    }],
     startDate: '2026-01-05T00:00:00Z',
     endDate: '2026-02-28T00:00:00Z',
     status: 'IN_PROGRESS',
@@ -1611,11 +1611,11 @@ export const mockTasks: Task[] = [
     description: '2단계 인증 및 생체 인증 시스템 구현',
     difficulty: 'HIGH',
     clientName: '신한카드',
-    backendAssignee: {
+    backendAssignees: [{
       id: '12',
       name: '신지영',
       email: 'shin@emotion.co.kr',
-    },
+    }],
     startDate: '2026-01-08T00:00:00Z',
     endDate: '2026-03-15T00:00:00Z',
     status: 'IN_PROGRESS',
@@ -1629,11 +1629,11 @@ export const mockTasks: Task[] = [
     description: '모바일 우선 반응형 UI 디자인',
     difficulty: 'MEDIUM',
     clientName: '신한카드',
-    designAssignee: {
+    designAssignees: [{
       id: '10',
       name: '송하늘',
       email: 'song@emotion.co.kr',
-    },
+    }],
     startDate: '2026-01-10T00:00:00Z',
     endDate: '2026-02-20T00:00:00Z',
     status: 'IN_PROGRESS',
@@ -1647,11 +1647,11 @@ export const mockTasks: Task[] = [
     description: 'React 기반 웹 애플리케이션 개발',
     difficulty: 'MEDIUM',
     clientName: '신한카드',
-    frontendAssignee: {
+    frontendAssignees: [{
       id: '14',
       name: '황인규',
       email: 'hwang@emotion.co.kr',
-    },
+    }],
     startDate: '2026-01-15T00:00:00Z',
     endDate: '2026-04-30T00:00:00Z',
     status: 'IN_PROGRESS',
@@ -1665,11 +1665,11 @@ export const mockTasks: Task[] = [
     description: '다양한 결제 수단 통합 및 테스트',
     difficulty: 'HIGH',
     clientName: '신한카드',
-    backendAssignee: {
+    backendAssignees: [{
       id: '9',
       name: '한지민',
       email: 'han@emotion.co.kr',
-    },
+    }],
     startDate: '2026-02-01T00:00:00Z',
     endDate: '2026-03-31T00:00:00Z',
     status: 'WAITING',
@@ -1684,11 +1684,11 @@ export const mockTasks: Task[] = [
     description: 'LG전자의 영업 프로세스 분석 및 요구사항 정의',
     difficulty: 'MEDIUM',
     clientName: 'LG전자',
-    planningAssignee: {
+    planningAssignees: [{
       id: '11',
       name: '오세훈',
       email: 'oh@emotion.co.kr',
-    },
+    }],
     startDate: '2026-01-10T00:00:00Z',
     endDate: '2026-02-10T00:00:00Z',
     status: 'IN_PROGRESS',
@@ -1702,11 +1702,11 @@ export const mockTasks: Task[] = [
     description: '고객 관리 및 영업 데이터 스키마 설계',
     difficulty: 'HIGH',
     clientName: 'LG전자',
-    backendAssignee: {
+    backendAssignees: [{
       id: '4',
       name: '정수진',
       email: 'jung@emotion.co.kr',
-    },
+    }],
     startDate: '2026-01-12T00:00:00Z',
     endDate: '2026-02-28T00:00:00Z',
     status: 'IN_PROGRESS',
@@ -1720,11 +1720,11 @@ export const mockTasks: Task[] = [
     description: '실시간 영업 현황 API 개발',
     difficulty: 'MEDIUM',
     clientName: 'LG전자',
-    backendAssignee: {
+    backendAssignees: [{
       id: '4',
       name: '정수진',
       email: 'jung@emotion.co.kr',
-    },
+    }],
     startDate: '2026-01-20T00:00:00Z',
     endDate: '2026-03-20T00:00:00Z',
     status: 'IN_PROGRESS',
@@ -1738,11 +1738,11 @@ export const mockTasks: Task[] = [
     description: '영업 KPI 시각화 대시보드 개발',
     difficulty: 'MEDIUM',
     clientName: 'LG전자',
-    frontendAssignee: {
+    frontendAssignees: [{
       id: '5',
       name: '최동욱',
       email: 'choi@emotion.co.kr',
-    },
+    }],
     startDate: '2026-01-15T00:00:00Z',
     endDate: '2026-03-31T00:00:00Z',
     status: 'IN_PROGRESS',
@@ -1756,11 +1756,11 @@ export const mockTasks: Task[] = [
     description: '영업 프로세스 자동화 및 알림 시스템',
     difficulty: 'HIGH',
     clientName: 'LG전자',
-    backendAssignee: {
+    backendAssignees: [{
       id: '13',
       name: '배수지',
       email: 'bae@emotion.co.kr',
-    },
+    }],
     startDate: '2026-02-01T00:00:00Z',
     endDate: '2026-04-30T00:00:00Z',
     status: 'WAITING',
@@ -1774,11 +1774,11 @@ export const mockTasks: Task[] = [
     description: '영업 사원용 모바일 앱 개발',
     difficulty: 'MEDIUM',
     clientName: 'LG전자',
-    frontendAssignee: {
+    frontendAssignees: [{
       id: '5',
       name: '최동욱',
       email: 'choi@emotion.co.kr',
-    },
+    }],
     startDate: '2026-02-15T00:00:00Z',
     endDate: '2026-05-31T00:00:00Z',
     status: 'WAITING',
@@ -1793,11 +1793,11 @@ export const mockTasks: Task[] = [
     description: '병원 예약 및 대기 관리 시스템',
     difficulty: 'MEDIUM',
     clientName: '삼성병원',
-    backendAssignee: {
+    backendAssignees: [{
       id: '12',
       name: '신지영',
       email: 'shin@emotion.co.kr',
-    },
+    }],
     startDate: '2025-12-01T00:00:00Z',
     endDate: '2026-02-28T00:00:00Z',
     status: 'IN_PROGRESS',
@@ -1811,16 +1811,16 @@ export const mockTasks: Task[] = [
     description: '환자 건강 지표 시각화 대시보드',
     difficulty: 'MEDIUM',
     clientName: '삼성병원',
-    designAssignee: {
+    designAssignees: [{
       id: '15',
       name: '권나래',
       email: 'kwon@emotion.co.kr',
-    },
-    frontendAssignee: {
+    }],
+    frontendAssignees: [{
       id: '8',
       name: '임지훈',
       email: 'lim@emotion.co.kr',
-    },
+    }],
     startDate: '2025-12-10T00:00:00Z',
     endDate: '2026-03-10T00:00:00Z',
     status: 'IN_PROGRESS',
@@ -1834,11 +1834,11 @@ export const mockTasks: Task[] = [
     description: '전자 처방전 발급 및 조회 시스템',
     difficulty: 'HIGH',
     clientName: '삼성병원',
-    backendAssignee: {
+    backendAssignees: [{
       id: '12',
       name: '신지영',
       email: 'shin@emotion.co.kr',
-    },
+    }],
     startDate: '2026-01-05T00:00:00Z',
     endDate: '2026-03-31T00:00:00Z',
     status: 'IN_PROGRESS',
@@ -1852,11 +1852,11 @@ export const mockTasks: Task[] = [
     description: '복약 알림 및 건강 체크 푸시 알림',
     difficulty: 'LOW',
     clientName: '삼성병원',
-    frontendAssignee: {
+    frontendAssignees: [{
       id: '8',
       name: '임지훈',
       email: 'lim@emotion.co.kr',
-    },
+    }],
     startDate: '2026-01-15T00:00:00Z',
     endDate: '2026-02-28T00:00:00Z',
     status: 'IN_PROGRESS',
@@ -1870,16 +1870,16 @@ export const mockTasks: Task[] = [
     description: '환자-의사 간 메시징 시스템',
     difficulty: 'MEDIUM',
     clientName: '삼성병원',
-    backendAssignee: {
+    backendAssignees: [{
       id: '12',
       name: '신지영',
       email: 'shin@emotion.co.kr',
-    },
-    frontendAssignee: {
+    }],
+    frontendAssignees: [{
       id: '8',
       name: '임지훈',
       email: 'lim@emotion.co.kr',
-    },
+    }],
     startDate: '2026-02-01T00:00:00Z',
     endDate: '2026-04-30T00:00:00Z',
     status: 'WAITING',
@@ -1894,11 +1894,11 @@ export const mockTasks: Task[] = [
     description: '공장 설비 센서 데이터 수집 시스템',
     difficulty: 'HIGH',
     clientName: '현대모비스',
-    backendAssignee: {
+    backendAssignees: [{
       id: '9',
       name: '한지민',
       email: 'han@emotion.co.kr',
-    },
+    }],
     startDate: '2026-01-15T00:00:00Z',
     endDate: '2026-03-31T00:00:00Z',
     status: 'IN_PROGRESS',
@@ -1912,16 +1912,16 @@ export const mockTasks: Task[] = [
     description: '공정 실시간 모니터링 UI 개발',
     difficulty: 'MEDIUM',
     clientName: '현대모비스',
-    designAssignee: {
+    designAssignees: [{
       id: '7',
       name: '윤서준',
       email: 'yoon@emotion.co.kr',
-    },
-    frontendAssignee: {
+    }],
+    frontendAssignees: [{
       id: '14',
       name: '황인규',
       email: 'hwang@emotion.co.kr',
-    },
+    }],
     startDate: '2026-01-20T00:00:00Z',
     endDate: '2026-04-15T00:00:00Z',
     status: 'IN_PROGRESS',
@@ -1935,11 +1935,11 @@ export const mockTasks: Task[] = [
     description: 'AI 기반 설비 이상 감지 시스템',
     difficulty: 'HIGH',
     clientName: '현대모비스',
-    backendAssignee: {
+    backendAssignees: [{
       id: '9',
       name: '한지민',
       email: 'han@emotion.co.kr',
-    },
+    }],
     startDate: '2026-02-01T00:00:00Z',
     endDate: '2026-05-31T00:00:00Z',
     status: 'WAITING',
@@ -1953,11 +1953,11 @@ export const mockTasks: Task[] = [
     description: '데이터 분석을 통한 공정 최적화',
     difficulty: 'HIGH',
     clientName: '현대모비스',
-    backendAssignee: {
+    backendAssignees: [{
       id: '4',
       name: '정수진',
       email: 'jung@emotion.co.kr',
-    },
+    }],
     startDate: '2026-03-01T00:00:00Z',
     endDate: '2026-06-30T00:00:00Z',
     status: 'WAITING',
@@ -1971,11 +1971,11 @@ export const mockTasks: Task[] = [
     description: '일일 생산 보고서 자동 생성 시스템',
     difficulty: 'MEDIUM',
     clientName: '현대모비스',
-    backendAssignee: {
+    backendAssignees: [{
       id: '9',
       name: '한지민',
       email: 'han@emotion.co.kr',
-    },
+    }],
     startDate: '2026-03-15T00:00:00Z',
     endDate: '2026-07-31T00:00:00Z',
     status: 'WAITING',

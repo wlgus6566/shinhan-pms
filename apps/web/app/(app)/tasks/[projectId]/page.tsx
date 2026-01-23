@@ -33,7 +33,11 @@ export default function TaskManagementPage() {
   const { user } = useAuth();
   const projectId = params.projectId as string;
 
-  const { project, isLoading: projectLoading, error: projectError } = useProject(projectId);
+  const {
+    project,
+    isLoading: projectLoading,
+    error: projectError,
+  } = useProject(projectId);
   const { members, isLoading: membersLoading } = useProjectMembers(projectId);
 
   const loading = projectLoading || membersLoading;
@@ -97,43 +101,29 @@ export default function TaskManagementPage() {
       </div>
 
       {/* 프로젝트 정보 카드 */}
-      <Card className="bg-gradient-to-r from-slate-50 to-white border-slate-200">
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-xl">
-                <FolderKanban className="h-6 w-6 text-blue-600" />
-              </div>
-              <div>
-                <CardTitle className="text-xl font-bold text-slate-800">
-                  {project.name}
-                </CardTitle>
-                {project.client && (
-                  <p className="text-sm text-slate-500 mt-0.5">
-                    {project.client}
-                  </p>
-                )}
-              </div>
+      <div className="flex flex-col gap-4 p-3 bg-transparent border-none">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-100 rounded-xl">
+              <FolderKanban className="h-6 w-6 text-blue-600" />
             </div>
+            <CardTitle className="text-xl font-bold text-slate-800">
+              {project.name}
+            </CardTitle>
             <Badge variant={statusConfig.variant}>{statusConfig.label}</Badge>
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-6 text-sm text-slate-600">
-            {(project.startDate || project.endDate) && (
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-slate-400" />
-                <span>
-                  {project.startDate || '미정'} ~ {project.endDate || '미정'}
-                </span>
-              </div>
-            )}
-            {project.description && (
-              <p className="text-slate-500">{project.description}</p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+        </div>
+        <div className="flex flex-col items-start gap-2 text-sm text-slate-600">
+          {(project.startDate || project.endDate) && (
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-slate-400" />
+              <span>
+                {project.startDate || '미정'} ~ {project.endDate || '미정'}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* 업무 목록 */}
       <Card>

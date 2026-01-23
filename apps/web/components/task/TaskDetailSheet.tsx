@@ -47,20 +47,15 @@ interface TaskDetailSheetProps {
 }
 
 // Hoist static dialog text to prevent recreation (rendering-hoist-jsx)
-const DeleteDialogContent = memo(() => (
-  <>
-    <AlertDialogHeader>
-      <AlertDialogTitle>업무 삭제</AlertDialogTitle>
-      <AlertDialogDescription>
-        정말로 이 업무를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
-      </AlertDialogDescription>
-    </AlertDialogHeader>
-    <AlertDialogFooter>
-      <AlertDialogCancel>취소</AlertDialogCancel>
-    </AlertDialogFooter>
-  </>
+const DeleteDialogHeader = memo(() => (
+  <AlertDialogHeader>
+    <AlertDialogTitle>업무 삭제</AlertDialogTitle>
+    <AlertDialogDescription>
+      정말로 이 업무를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+    </AlertDialogDescription>
+  </AlertDialogHeader>
 ));
-DeleteDialogContent.displayName = 'DeleteDialogContent';
+DeleteDialogHeader.displayName = 'DeleteDialogHeader';
 
 export function TaskDetailSheet({
   task,
@@ -89,11 +84,27 @@ export function TaskDetailSheet({
   if (!task) return null;
 
   const assignees = [
-    { label: '기획 담당자', assignee: task.planningAssignee, icon: User },
-    { label: '디자인 담당자', assignee: task.designAssignee, icon: User },
-    { label: '프론트엔드 담당자', assignee: task.frontendAssignee, icon: User },
-    { label: '백엔드 담당자', assignee: task.backendAssignee, icon: User },
-  ].filter((a) => a.assignee);
+    {
+      label: '기획 담당자',
+      assignees: task.planningAssignees,
+      icon: User,
+    },
+    {
+      label: '디자인 담당자',
+      assignees: task.designAssignees,
+      icon: User,
+    },
+    {
+      label: '프론트엔드 담당자',
+      assignees: task.frontendAssignees,
+      icon: User,
+    },
+    {
+      label: '백엔드 담당자',
+      assignees: task.backendAssignees,
+      icon: User,
+    },
+  ].filter((a) => a.assignees && a.assignees.length > 0);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -139,17 +150,21 @@ export function TaskDetailSheet({
                   담당자
                 </h3>
                 <div className="space-y-2 pl-6">
-                  {assignees.map(({ label, assignee }) => (
-                    <div
-                      key={label}
-                      className="flex items-center justify-between"
-                    >
+                  {assignees.map(({ label, assignees: assigneeList }) => (
+                    <div key={label} className="space-y-1">
                       <span className="text-sm text-muted-foreground">
                         {label}
                       </span>
-                      <span className="text-sm font-medium">
-                        {assignee?.name}
-                      </span>
+                      <div className="flex flex-wrap gap-2">
+                        {assigneeList?.map((assignee) => (
+                          <span
+                            key={assignee.id}
+                            className="text-sm font-medium px-2 py-1 bg-slate-100 rounded"
+                          >
+                            {assignee.name}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -252,8 +267,9 @@ export function TaskDetailSheet({
       {/* 삭제 확인 다이얼로그 */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
-          <DeleteDialogContent />
+          <DeleteDialogHeader />
           <AlertDialogFooter>
+            <AlertDialogCancel>취소</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"

@@ -23,10 +23,13 @@ export function SelectedDateScheduleList({
   // Filter schedules for selected date
   const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
   const schedulesForDate = useMemo(() => {
-    return schedules.filter(schedule => {
-      const scheduleDate = schedule.usageDate || schedule.startDate.split('T')[0];
-      return scheduleDate === selectedDateStr;
-    }).sort((a, b) => a.startDate.localeCompare(b.startDate));
+    return schedules
+      .filter((schedule) => {
+        const scheduleDate =
+          schedule.usageDate || schedule.startDate.split('T')[0];
+        return scheduleDate === selectedDateStr;
+      })
+      .sort((a, b) => a.startDate.localeCompare(b.startDate));
   }, [schedules, selectedDateStr]);
 
   return (
@@ -50,7 +53,7 @@ export function SelectedDateScheduleList({
           </div>
         ) : (
           <div className="space-y-3">
-            {schedulesForDate.map(schedule => (
+            {schedulesForDate.map((schedule) => (
               <div
                 key={schedule.id}
                 onClick={() => onScheduleClick?.(schedule)}
@@ -59,20 +62,41 @@ export function SelectedDateScheduleList({
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-semibold text-slate-900 truncate">
-                        {schedule.title}
-                      </h4>
-                      <Badge className={cn('text-xs', SCHEDULE_TYPE_COLORS[schedule.scheduleType])}>
-                        {SCHEDULE_TYPE_LABELS[schedule.scheduleType]}
-                      </Badge>
+                      {schedule.scheduleType === 'VACATION' ||
+                      schedule.scheduleType === 'HALF_DAY' ? (
+                        <h4 className="text-green-800 truncate">
+                          🌴 {schedule.creatorName}{' '}
+                          {SCHEDULE_TYPE_LABELS[schedule.scheduleType]}
+                        </h4>
+                      ) : (
+                        <h4 className="font-semibold text-slate-900 truncate">
+                          {schedule.title}
+                        </h4>
+                      )}
+                      {schedule.scheduleType !== 'VACATION' &&
+                        schedule.scheduleType !== 'HALF_DAY' && (
+                          <Badge
+                            className={cn(
+                              'text-xs',
+                              SCHEDULE_TYPE_COLORS[schedule.scheduleType],
+                            )}
+                          >
+                            {SCHEDULE_TYPE_LABELS[schedule.scheduleType]}
+                          </Badge>
+                        )}
                     </div>
-                    {!schedule.isAllDay && schedule.startDate && (
-                      <p className="text-sm text-slate-600">
-                        {format(new Date(schedule.startDate), 'HH:mm')} - {format(new Date(schedule.endDate), 'HH:mm')}
+                    <span className="text-[12px] font-medium text-slate-700 truncate block gap-1"></span>
+                    {schedule.scheduleType !== 'VACATION' &&
+                      schedule.scheduleType !== 'HALF_DAY' && (
+                        <p className="text-sm text-slate-600">
+                          {format(new Date(schedule?.startDate || ''), 'HH:mm')}{' '}
+                          - {format(new Date(schedule?.endDate || ''), 'HH:mm')}
+                        </p>
+                      )}
+                    {schedule?.location && (
+                      <p className="text-sm text-slate-500 mt-1">
+                        {schedule.location}
                       </p>
-                    )}
-                    {schedule.location && (
-                      <p className="text-sm text-slate-500 mt-1">{schedule.location}</p>
                     )}
                   </div>
                 </div>

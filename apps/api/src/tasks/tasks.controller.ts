@@ -49,11 +49,13 @@ export class TasksController {
     @Body() createTaskDto: CreateTaskDto,
     @CurrentUser() user: any,
   ) {
+    console.log('Controller received DTO:', JSON.stringify(createTaskDto, null, 2));
     const task = await this.tasksService.create(
       BigInt(projectId),
       BigInt(user.id),
       createTaskDto,
     );
+    console.log('Service returned task with assignees:', task.assignees?.length || 0);
     return this.transformTask(task);
   }
 
@@ -128,34 +130,38 @@ export class TasksController {
       ...task,
       id: task.id.toString(),
       projectId: task.projectId.toString(),
-      planningAssigneeId: task.planningAssigneeId?.toString(),
-      designAssigneeId: task.designAssigneeId?.toString(),
-      frontendAssigneeId: task.frontendAssigneeId?.toString(),
-      backendAssigneeId: task.backendAssigneeId?.toString(),
       createdBy: task.createdBy?.toString(),
       updatedBy: task.updatedBy?.toString(),
       startDate: task.startDate ? task.startDate.toISOString().split('T')[0] : null,
       endDate: task.endDate ? task.endDate.toISOString().split('T')[0] : null,
-      planningAssignee: task.planningAssignee ? {
-        id: task.planningAssignee.id.toString(),
-        name: task.planningAssignee.name,
-        email: task.planningAssignee.email,
-      } : undefined,
-      designAssignee: task.designAssignee ? {
-        id: task.designAssignee.id.toString(),
-        name: task.designAssignee.name,
-        email: task.designAssignee.email,
-      } : undefined,
-      frontendAssignee: task.frontendAssignee ? {
-        id: task.frontendAssignee.id.toString(),
-        name: task.frontendAssignee.name,
-        email: task.frontendAssignee.email,
-      } : undefined,
-      backendAssignee: task.backendAssignee ? {
-        id: task.backendAssignee.id.toString(),
-        name: task.backendAssignee.name,
-        email: task.backendAssignee.email,
-      } : undefined,
+      planningAssignees: task.assignees
+        ?.filter((a: any) => a.workArea === 'PLANNING')
+        .map((a: any) => ({
+          id: a.user.id.toString(),
+          name: a.user.name,
+          email: a.user.email,
+        })) || [],
+      designAssignees: task.assignees
+        ?.filter((a: any) => a.workArea === 'DESIGN')
+        .map((a: any) => ({
+          id: a.user.id.toString(),
+          name: a.user.name,
+          email: a.user.email,
+        })) || [],
+      frontendAssignees: task.assignees
+        ?.filter((a: any) => a.workArea === 'FRONTEND')
+        .map((a: any) => ({
+          id: a.user.id.toString(),
+          name: a.user.name,
+          email: a.user.email,
+        })) || [],
+      backendAssignees: task.assignees
+        ?.filter((a: any) => a.workArea === 'BACKEND')
+        .map((a: any) => ({
+          id: a.user.id.toString(),
+          name: a.user.name,
+          email: a.user.email,
+        })) || [],
     };
   }
 }

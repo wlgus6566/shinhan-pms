@@ -71,27 +71,34 @@ export function TaskTable({ tasks, onTaskClick }: TaskTableProps) {
                 </TableCell>
                 <TableCell>
                   <div className="flex gap-1 flex-wrap">
-                    {task.planningAssignee && (
+                    {task.planningAssignees && task.planningAssignees.length > 0 && (
                       <Badge variant="outline" className="text-xs">
-                        기획: {task.planningAssignee.name}
+                        기획: {task.planningAssignees[0]!.name}
+                        {task.planningAssignees.length > 1 && ` 외 ${task.planningAssignees.length - 1}`}
                       </Badge>
                     )}
-                    {task.designAssignee && (
+                    {task.designAssignees && task.designAssignees.length > 0 && (
                       <Badge variant="outline" className="text-xs">
-                        디자인: {task.designAssignee.name}
+                        디자인: {task.designAssignees[0]!.name}
+                        {task.designAssignees.length > 1 && ` 외 ${task.designAssignees.length - 1}`}
                       </Badge>
                     )}
-                    {task.frontendAssignee && (
+                    {task.frontendAssignees && task.frontendAssignees.length > 0 && (
                       <Badge variant="outline" className="text-xs">
-                        FE: {task.frontendAssignee.name}
+                        FE: {task.frontendAssignees[0]!.name}
+                        {task.frontendAssignees.length > 1 && ` 외 ${task.frontendAssignees.length - 1}`}
                       </Badge>
                     )}
-                    {task.backendAssignee && (
+                    {task.backendAssignees && task.backendAssignees.length > 0 && (
                       <Badge variant="outline" className="text-xs">
-                        BE: {task.backendAssignee.name}
+                        BE: {task.backendAssignees[0]!.name}
+                        {task.backendAssignees.length > 1 && ` 외 ${task.backendAssignees.length - 1}`}
                       </Badge>
                     )}
-                    {!task.planningAssignee && !task.designAssignee && !task.frontendAssignee && !task.backendAssignee && (
+                    {(!task.planningAssignees || task.planningAssignees.length === 0) &&
+                     (!task.designAssignees || task.designAssignees.length === 0) &&
+                     (!task.frontendAssignees || task.frontendAssignees.length === 0) &&
+                     (!task.backendAssignees || task.backendAssignees.length === 0) && (
                       <span className="text-xs text-muted-foreground">미배정</span>
                     )}
                   </div>

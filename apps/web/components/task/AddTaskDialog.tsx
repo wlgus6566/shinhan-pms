@@ -19,20 +19,21 @@ import {
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import FormSelect from '@/components/form/FormSelect';
 import { Loader2 } from 'lucide-react';
 import type { ProjectMember } from '@/types/project';
 
-// Form schema with string IDs for selects (converted to numbers on submit)
+// Form schema with string IDs for checkboxes (converted to numbers on submit)
 const AddTaskFormSchema = z.object({
   taskName: z.string().min(2, '작업명은 2자 이상이어야 합니다').max(100, '작업명은 100자 이하여야 합니다'),
   description: z.string().max(1000, '작업내용은 1000자 이하여야 합니다').optional(),
   difficulty: TaskDifficultyEnum,
   clientName: z.string().max(100, '담당 RM은 100자 이하여야 합니다').optional(),
-  planningAssigneeId: z.string().optional(),
-  designAssigneeId: z.string().optional(),
-  frontendAssigneeId: z.string().optional(),
-  backendAssigneeId: z.string().optional(),
+  planningAssigneeIds: z.array(z.string()).optional(),
+  designAssigneeIds: z.array(z.string()).optional(),
+  frontendAssigneeIds: z.array(z.string()).optional(),
+  backendAssigneeIds: z.array(z.string()).optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
   notes: z
@@ -69,8 +70,6 @@ export function AddTaskDialog({ projectId, projectMembers, open, onOpenChange, o
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const NONE_VALUE = '_NONE_';
-
   const form = useForm<AddTaskFormValues>({
     resolver: zodResolver(AddTaskFormSchema),
     defaultValues: {
@@ -78,10 +77,10 @@ export function AddTaskDialog({ projectId, projectMembers, open, onOpenChange, o
       description: '',
       difficulty: 'MEDIUM',
       clientName: '',
-      planningAssigneeId: NONE_VALUE,
-      designAssigneeId: NONE_VALUE,
-      frontendAssigneeId: NONE_VALUE,
-      backendAssigneeId: NONE_VALUE,
+      planningAssigneeIds: [],
+      designAssigneeIds: [],
+      frontendAssigneeIds: [],
+      backendAssigneeIds: [],
       startDate: '',
       endDate: '',
       notes: '',
@@ -94,16 +93,6 @@ export function AddTaskDialog({ projectId, projectMembers, open, onOpenChange, o
   const frontendMembers = projectMembers.filter(m => m.workArea === 'FRONTEND');
   const backendMembers = projectMembers.filter(m => m.workArea === 'BACKEND');
 
-  const getMemberOptions = (members: ProjectMember[]) => [
-    { value: NONE_VALUE, label: '선택 안 함' },
-    ...members
-      .filter(m => m.member)
-      .map(m => ({
-        value: m.member!.id.toString(),
-        label: `${m.member!.name} (${m.member!.email})`,
-      })),
-  ];
-
   const onSubmit = async (data: AddTaskFormValues) => {
     try {
       setSubmitting(true);
@@ -114,26 +103,17 @@ export function AddTaskDialog({ projectId, projectMembers, open, onOpenChange, o
         description: data.description || undefined,
         difficulty: data.difficulty,
         clientName: data.clientName || undefined,
-      planningAssigneeId:
-        data.planningAssigneeId && data.planningAssigneeId !== NONE_VALUE
-          ? Number(data.planningAssigneeId)
-          : undefined,
-      designAssigneeId:
-        data.designAssigneeId && data.designAssigneeId !== NONE_VALUE
-          ? Number(data.designAssigneeId)
-          : undefined,
-      frontendAssigneeId:
-        data.frontendAssigneeId && data.frontendAssigneeId !== NONE_VALUE
-          ? Number(data.frontendAssigneeId)
-          : undefined,
-      backendAssigneeId:
-        data.backendAssigneeId && data.backendAssigneeId !== NONE_VALUE
-          ? Number(data.backendAssigneeId)
-          : undefined,
+        planningAssigneeIds: data.planningAssigneeIds?.map(id => Number(id)),
+        designAssigneeIds: data.designAssigneeIds?.map(id => Number(id)),
+        frontendAssigneeIds: data.frontendAssigneeIds?.map(id => Number(id)),
+        backendAssigneeIds: data.backendAssigneeIds?.map(id => Number(id)),
         startDate: data.startDate || undefined,
         endDate: data.endDate || undefined,
         notes: data.notes || undefined,
       };
+
+      console.log('Form data:', JSON.stringify(data, null, 2));
+      console.log('Request data:', JSON.stringify(requestData, null, 2));
 
       await createTask(projectId, requestData);
       onSuccess();
@@ -219,36 +199,148 @@ export function AddTaskDialog({ projectId, projectMembers, open, onOpenChange, o
             />
 
             <div className="grid grid-cols-2 gap-4">
-              <FormSelect
+              <FormField
                 control={form.control}
-                name="planningAssigneeId"
-                label="기획 담당자"
-                placeholder="선택 안 함"
-                options={getMemberOptions(planningMembers)}
+                name="planningAssigneeIds"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>기획 담당자</FormLabel>
+                    <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-3">
+                      {planningMembers.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">기획팀 멤버가 없습니다</p>
+                      ) : (
+                        planningMembers.map((member) => (
+                          <div key={member.memberId} className="flex items-center space-x-2">
+                            <Checkbox
+                              checked={field.value?.includes(member.member!.id.toString())}
+                              onCheckedChange={(checked) => {
+                                const currentValue = field.value || [];
+                                const memberId = member.member!.id.toString();
+                                if (checked) {
+                                  field.onChange([...currentValue, memberId]);
+                                } else {
+                                  field.onChange(currentValue.filter((id) => id !== memberId));
+                                }
+                              }}
+                            />
+                            <label className="text-sm cursor-pointer">
+                              {member.member!.name} ({member.member!.email})
+                            </label>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
 
-              <FormSelect
+              <FormField
                 control={form.control}
-                name="designAssigneeId"
-                label="디자인 담당자"
-                placeholder="선택 안 함"
-                options={getMemberOptions(designMembers)}
+                name="designAssigneeIds"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>디자인 담당자</FormLabel>
+                    <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-3">
+                      {designMembers.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">디자인팀 멤버가 없습니다</p>
+                      ) : (
+                        designMembers.map((member) => (
+                          <div key={member.memberId} className="flex items-center space-x-2">
+                            <Checkbox
+                              checked={field.value?.includes(member.member!.id.toString())}
+                              onCheckedChange={(checked) => {
+                                const currentValue = field.value || [];
+                                const memberId = member.member!.id.toString();
+                                if (checked) {
+                                  field.onChange([...currentValue, memberId]);
+                                } else {
+                                  field.onChange(currentValue.filter((id) => id !== memberId));
+                                }
+                              }}
+                            />
+                            <label className="text-sm cursor-pointer">
+                              {member.member!.name} ({member.member!.email})
+                            </label>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
 
-              <FormSelect
+              <FormField
                 control={form.control}
-                name="frontendAssigneeId"
-                label="프론트엔드 담당자"
-                placeholder="선택 안 함"
-                options={getMemberOptions(frontendMembers)}
+                name="frontendAssigneeIds"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>프론트엔드 담당자</FormLabel>
+                    <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-3">
+                      {frontendMembers.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">프론트엔드팀 멤버가 없습니다</p>
+                      ) : (
+                        frontendMembers.map((member) => (
+                          <div key={member.memberId} className="flex items-center space-x-2">
+                            <Checkbox
+                              checked={field.value?.includes(member.member!.id.toString())}
+                              onCheckedChange={(checked) => {
+                                const currentValue = field.value || [];
+                                const memberId = member.member!.id.toString();
+                                if (checked) {
+                                  field.onChange([...currentValue, memberId]);
+                                } else {
+                                  field.onChange(currentValue.filter((id) => id !== memberId));
+                                }
+                              }}
+                            />
+                            <label className="text-sm cursor-pointer">
+                              {member.member!.name} ({member.member!.email})
+                            </label>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
 
-              <FormSelect
+              <FormField
                 control={form.control}
-                name="backendAssigneeId"
-                label="백엔드 담당자"
-                placeholder="선택 안 함"
-                options={getMemberOptions(backendMembers)}
+                name="backendAssigneeIds"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>백엔드 담당자</FormLabel>
+                    <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-3">
+                      {backendMembers.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">백엔드팀 멤버가 없습니다</p>
+                      ) : (
+                        backendMembers.map((member) => (
+                          <div key={member.memberId} className="flex items-center space-x-2">
+                            <Checkbox
+                              checked={field.value?.includes(member.member!.id.toString())}
+                              onCheckedChange={(checked) => {
+                                const currentValue = field.value || [];
+                                const memberId = member.member!.id.toString();
+                                if (checked) {
+                                  field.onChange([...currentValue, memberId]);
+                                } else {
+                                  field.onChange(currentValue.filter((id) => id !== memberId));
+                                }
+                              }}
+                            />
+                            <label className="text-sm cursor-pointer">
+                              {member.member!.name} ({member.member!.email})
+                            </label>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
 

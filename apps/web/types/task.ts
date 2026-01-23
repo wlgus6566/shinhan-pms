@@ -44,6 +44,12 @@ export const DIFFICULTY_COLORS: Record<TaskDifficulty, string> = {
   LOW: 'bg-green-100 text-green-700 border-green-300',
 };
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
 export interface Task {
   id: string;
   projectId: string;
@@ -51,26 +57,10 @@ export interface Task {
   description?: string;
   difficulty: TaskDifficulty;
   clientName?: string;
-  planningAssignee?: {
-    id: string;
-    name: string;
-    email: string;
-  };
-  designAssignee?: {
-    id: string;
-    name: string;
-    email: string;
-  };
-  frontendAssignee?: {
-    id: string;
-    name: string;
-    email: string;
-  };
-  backendAssignee?: {
-    id: string;
-    name: string;
-    email: string;
-  };
+  planningAssignees?: User[];
+  designAssignees?: User[];
+  frontendAssignees?: User[];
+  backendAssignees?: User[];
   startDate?: string;
   endDate?: string;
   notes?: string;

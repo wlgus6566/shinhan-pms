@@ -69,10 +69,7 @@ model User {
 
   // 관계 설정
   projectMemberships  ProjectMember[]
-  tasksAsPlanning     Task[]          @relation("TaskPlanningAssignee")
-  tasksAsDesign       Task[]          @relation("TaskDesignAssignee")
-  tasksAsFrontend     Task[]          @relation("TaskFrontendAssignee")
-  tasksAsBackend      Task[]          @relation("TaskBackendAssignee")
+  taskAssignments     TaskAssignee[]
   createdTasks        Task[]          @relation("TaskCreator")
   workLogs            WorkLog[]       @relation("WorkLogAuthor")
   createdSchedules    Schedule[]      @relation("ScheduleCreator")
@@ -133,12 +130,6 @@ model Task {
   difficulty           String    @db.VarChar(10) // HIGH, MEDIUM, LOW
   clientName           String?   @map("client_name") @db.VarChar(100)
 
-  // 파트별 담당자
-  planningAssigneeId   BigInt?   @map("planning_assignee_id")
-  designAssigneeId     BigInt?   @map("design_assignee_id")
-  frontendAssigneeId   BigInt?   @map("frontend_assignee_id")
-  backendAssigneeId    BigInt?   @map("backend_assignee_id")
-
   startDate            DateTime? @map("start_date") @db.Date
   endDate              DateTime? @map("end_date") @db.Date
   notes                String?   @db.Text
@@ -152,10 +143,7 @@ model Task {
 
   // 관계
   project              Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  planningAssignee     User?     @relation("TaskPlanningAssignee", fields: [planningAssigneeId], references: [id], onDelete: SetNull)
-  designAssignee       User?     @relation("TaskDesignAssignee", fields: [designAssigneeId], references: [id], onDelete: SetNull)
-  frontendAssignee     User?     @relation("TaskFrontendAssignee", fields: [frontendAssigneeId], references: [id], onDelete: SetNull)
-  backendAssignee      User?     @relation("TaskBackendAssignee", fields: [backendAssigneeId], references: [id], onDelete: SetNull)
+  assignees            TaskAssignee[]
   creator              User      @relation("TaskCreator", fields: [createdBy], references: [id], onDelete: Restrict)
   workLogs             WorkLog[]
 
@@ -166,6 +154,30 @@ model Task {
   @@index([isActive], map: "idx_tasks_is_active")
 
   @@map("tasks")
+}
+
+// =============================================
+// 업무 담당자 관리
+// =============================================
+
+model TaskAssignee {
+  id        BigInt   @id @default(autoincrement())
+  taskId    BigInt   @map("task_id")
+  userId    BigInt   @map("user_id")
+  workArea  String   @map("work_area") @db.VarChar(30) // PLANNING, DESIGN, FRONTEND, BACKEND
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+
+  // 관계
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 제약조건 및 인덱스
+  @@unique([taskId, userId, workArea], map: "unique_task_user_workarea")
+  @@index([taskId], map: "idx_task_assignees_task_id")
+  @@index([userId], map: "idx_task_assignees_user_id")
+  @@index([workArea], map: "idx_task_assignees_work_area")
+
+  @@map("task_assignees")
 }
 
 // =============================================

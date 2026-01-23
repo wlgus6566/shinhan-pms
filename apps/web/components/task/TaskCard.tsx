@@ -12,10 +12,10 @@ interface TaskCardProps {
 
 export function TaskCard({ task, onClick }: TaskCardProps) {
   const assignees = [
-    { label: '기획', assignee: task.planningAssignee },
-    { label: '디자인', assignee: task.designAssignee },
-    { label: '프론트', assignee: task.frontendAssignee },
-    { label: '백엔드', assignee: task.backendAssignee },
+    { label: '기획', assignee: task.planningAssignees?.[0] },
+    { label: '디자인', assignee: task.designAssignees?.[0] },
+    { label: '프론트', assignee: task.frontendAssignees?.[0] },
+    { label: '백엔드', assignee: task.backendAssignees?.[0] },
   ].filter(a => a.assignee);
 
   return (

@@ -15,10 +15,10 @@ export const CreateTaskSchema = z.object({
     .string()
     .max(100, '담당 RM은 최대 100자까지 입력 가능합니다')
     .optional(),
-  planningAssigneeId: z.number().int().positive().optional(),
-  designAssigneeId: z.number().int().positive().optional(),
-  frontendAssigneeId: z.number().int().positive().optional(),
-  backendAssigneeId: z.number().int().positive().optional(),
+  planningAssigneeIds: z.array(z.number().int().positive()).optional(),
+  designAssigneeIds: z.array(z.number().int().positive()).optional(),
+  frontendAssigneeIds: z.array(z.number().int().positive()).optional(),
+  backendAssigneeIds: z.array(z.number().int().positive()).optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
   notes: z
