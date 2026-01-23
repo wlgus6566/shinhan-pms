@@ -6,7 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-export default function AppLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -29,7 +29,7 @@ export default function AppLayout({
   }
 
   return (
-    <div className="min-h-screen min-w-[1024px] bg-emotion-lightgray">
+    <div className="min-h-screen min-w-[1600px] bg-emotion-lightgray">
       {/* 고정 사이드바 */}
       <Sidebar />
 
