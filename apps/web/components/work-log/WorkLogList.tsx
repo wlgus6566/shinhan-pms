@@ -55,12 +55,16 @@ export function WorkLogList({
       <div className="p-4">
         {logsForSelectedDate.length === 0 ? (
           <div className="py-4 text-center">
-            <AlertCircle className="w-5 h-5 text-red-500 mx-auto mb-3" />
-            <p className="text-red-500 mb-4 text-center">
-            오늘 작성된 업무일지가 없어요.
+            <AlertCircle className="w-8 h-8 text-red-500 mx-auto mb-3" />
+            <p className="text-red-500 mb-4 text-center font-bold">
+              작성된 업무일지가 없어요.
             </p>
             {onCreate && (
-              <Button variant="outline" onClick={onCreate}>
+              <Button
+                variant="outline"
+                onClick={onCreate}
+                className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+              >
                 <Plus className="h-4 w-4 mr-1" />
                 업무일지 작성하기
               </Button>
@@ -80,15 +84,15 @@ export function WorkLogList({
           </div>
         )}
       </div>
-        {/* Floating Action Button */}
-        {onCreate && (
+      {/* Floating Action Button */}
+      {onCreate && (
         <Button
-        onClick={onCreate}
-        className="fixed bottom-8 right-8 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow z-50"
-        size="icon"
-      >
-        <Plus className="h-6 w-6" />
-      </Button>
+          onClick={onCreate}
+          className="fixed bottom-8 right-8 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow z-50"
+          size="icon"
+        >
+          <Plus className="h-6 w-6" />
+        </Button>
       )}
     </div>
   );

@@ -5,7 +5,7 @@ import { format, startOfMonth, endOfMonth, subDays } from 'date-fns';
 import { FileText, Loader2 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/context/AuthContext';
-import { useMyWorkLogs, useMyTasks } from '@/lib/hooks/useWorkLogs';
+import { useMyWorkLogs, useMyTasks } from '@/lib/api/workLogs';
 import {
   WorkLogCalendar,
   WorkLogDialog,

@@ -1,3 +1,4 @@
+import useSWR from 'swr';
 import { fetcher } from './fetcher';
 import type {
   ProjectMember,
@@ -70,4 +71,53 @@ export async function getAvailableMembers(
   }
   const response = await fetcher<{ users: AvailableMember[] }>(`/api/users?${query.toString()}`);
   return response.users;
+}
+
+// ============================================================================
+// SWR Hooks
+// ============================================================================
+
+/**
+ * SWR hook for fetching project members
+ * @param projectId - Project ID (null to skip fetching)
+ */
+export function useProjectMembers(projectId: string | number | null) {
+  const { data, error, isLoading, mutate } = useSWR<ProjectMember[]>(
+    projectId ? `/api/projects/${projectId}/members` : null
+  );
+
+  return {
+    members: data,
+    isLoading,
+    error,
+    mutate,
+  };
+}
+
+/**
+ * SWR hook for fetching available members to add to a project
+ * @param projectId - Project ID (null to skip fetching)
+ * @param search - Optional search query
+ */
+export function useAvailableMembers(
+  projectId: string | number | null,
+  search?: string
+) {
+  let url: string | null = null;
+  if (projectId) {
+    const query = new URLSearchParams({ excludeProject: projectId.toString() });
+    if (search) {
+      query.append('search', search);
+    }
+    url = `/api/users?${query.toString()}`;
+  }
+
+  const { data, error, isLoading, mutate } = useSWR<{ users: AvailableMember[] }>(url);
+
+  return {
+    members: data?.users,
+    isLoading,
+    error,
+    mutate,
+  };
 }

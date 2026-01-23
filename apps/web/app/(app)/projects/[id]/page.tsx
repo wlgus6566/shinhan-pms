@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { getProject } from '@/lib/api/projects';
-import { getProjectMembers } from '@/lib/api/projectMembers';
+import { useProject } from '@/lib/api/projects';
+import { useProjectMembers } from '@/lib/api/projectMembers';
 import { ProjectDetail } from '@/components/project/ProjectDetail';
 import { ProjectMembersTable } from '@/components/project/ProjectMembersTable';
 import { TeamWorkLogList } from '@/components/work-log/TeamWorkLogList';
@@ -21,31 +21,18 @@ export default function ProjectDetailPage() {
   const { user } = useAuth();
   const projectId = params.id as string;
 
-  const [project, setProject] = useState<Project | null>(null);
-  const [members, setMembers] = useState<ProjectMember[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Fetch data using SWR hooks
+  const { project, isLoading: projectLoading, error: projectError } = useProject(projectId);
+  const { members, isLoading: membersLoading, error: membersError } = useProjectMembers(projectId);
+
+  const loading = projectLoading || membersLoading;
+  const error = projectError || membersError;
 
   // Derive state with useMemo (rerender-derived-state)
   const canEdit = useMemo(
     () => user?.role === 'SUPER_ADMIN' || user?.role === 'PM',
     [user?.role],
   );
-
-  useEffect(() => {
-    if (projectId) {
-      Promise.all([getProject(projectId), getProjectMembers(projectId)])
-        .then(([projectData, membersData]) => {
-          setProject(projectData);
-          setMembers(membersData);
-        })
-        .catch((err) => {
-          setError(err.message);
-          setTimeout(() => router.push('/projects'), 2000);
-        })
-        .finally(() => setLoading(false));
-    }
-  }, [projectId, router]);
 
   if (loading) {
     return (
@@ -55,23 +42,28 @@ export default function ProjectDetailPage() {
     );
   }
 
-  if (error || !project) {
+  if (error || (!loading && !project)) {
     return (
       <div className="max-w-7xl">
         <Card>
           <CardContent className="pt-6">
             <div className="text-center py-8">
               <p className="text-destructive">
-                {error || '프로젝트를 찾을 수 없습니다'}
+                {error?.message || '프로젝트를 찾을 수 없습니다'}
               </p>
-              <p className="text-sm text-muted-foreground mt-2">
-                잠시 후 목록으로 이동합니다...
-              </p>
+              <Button variant="outline" className="mt-4" asChild>
+                <Link href="/projects">프로젝트 목록으로</Link>
+              </Button>
             </div>
           </CardContent>
         </Card>
       </div>
     );
+  }
+
+  // Show nothing if data is still loading or missing
+  if (!project) {
+    return null;
   }
 
   return (
@@ -129,7 +121,7 @@ export default function ProjectDetailPage() {
         </TabsContent>
 
         <TabsContent value="team-logs">
-          <TeamWorkLogList projectId={projectId} members={members} />
+          <TeamWorkLogList projectId={projectId} members={members || []} />
         </TabsContent>
       </Tabs>
     </div>

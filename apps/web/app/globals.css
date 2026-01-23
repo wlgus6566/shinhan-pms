@@ -567,6 +567,7 @@
   white-space: nowrap;
   border-radius: 3px;
   font-size: 0.85em;
+  border: none;
 }
 
 .fc-daygrid-block-event {

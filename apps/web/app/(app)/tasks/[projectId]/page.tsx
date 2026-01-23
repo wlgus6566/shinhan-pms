@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { getProject } from '@/lib/api/projects';
-import { getProjectMembers } from '@/lib/api/projectMembers';
 import { TaskList } from '@/components/task/TaskList';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,7 +14,13 @@ import type { Project, ProjectMember } from '@/types/project';
 
 type ProjectStatus = 'ACTIVE' | 'COMPLETED' | 'SUSPENDED';
 
-const statusLabels: Record<ProjectStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+const statusLabels: Record<
+  ProjectStatus,
+  {
+    label: string;
+    variant: 'default' | 'secondary' | 'destructive' | 'outline';
+  }
+> = {
   ACTIVE: { label: '진행중', variant: 'default' },
   COMPLETED: { label: '완료', variant: 'secondary' },
   SUSPENDED: { label: '중단', variant: 'destructive' },
@@ -36,18 +41,16 @@ export default function TaskManagementPage() {
   const isPM = useMemo(() => {
     if (!user || !members || members.length === 0) return false;
     // Convert both to string for comparison to handle type mismatches
-    return members.some(m => String(m.memberId) === String(user.id) && m.role === 'PM');
+    return members.some(
+      (m) => String(m.memberId) === String(user.id) && m.role === 'PM',
+    );
   }, [user, members]);
 
   useEffect(() => {
     if (projectId) {
-      Promise.all([
-        getProject(projectId),
-        getProjectMembers(projectId),
-      ])
-        .then(([projectData, membersData]) => {
+      Promise.all([getProject(projectId)])
+        .then(([projectData]) => {
           setProject(projectData);
-          setMembers(membersData);
         })
         .catch((err) => {
           setError(err.message || '프로젝트를 불러오는데 실패했습니다');
@@ -87,7 +90,8 @@ export default function TaskManagementPage() {
     );
   }
 
-  const statusConfig = statusLabels[project.status as ProjectStatus] ?? statusLabels.ACTIVE;
+  const statusConfig =
+    statusLabels[project.status as ProjectStatus] ?? statusLabels.ACTIVE;
 
   return (
     <div className="space-y-6">
@@ -122,9 +126,7 @@ export default function TaskManagementPage() {
                 )}
               </div>
             </div>
-            <Badge variant={statusConfig.variant}>
-              {statusConfig.label}
-            </Badge>
+            <Badge variant={statusConfig.variant}>{statusConfig.label}</Badge>
           </div>
         </CardHeader>
         <CardContent>

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { useMyProjects } from '@/lib/hooks/useProjects';
+import { useMyProjects } from '@/lib/api/projects';
 import { cn } from '@/lib/utils';
 import {
   LayoutDashboard,

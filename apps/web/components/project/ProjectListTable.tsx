@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback, memo } from 'react';
 import Link from 'next/link';
-import { useProjects } from '@/lib/hooks/useProjects';
+import { useProjects } from '@/lib/api/projects';
 import {
   Table,
   TableBody,

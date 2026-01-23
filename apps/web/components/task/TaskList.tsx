@@ -1,9 +1,8 @@
 'use client';
 
 import { useState, useMemo, useCallback, memo } from 'react';
-import useSWR from 'swr';
-import { getTasks, deleteTask } from '@/lib/api/tasks';
-import { getProjectMembers } from '@/lib/api/projectMembers';
+import { useTasks, deleteTask } from '@/lib/api/tasks';
+import { useProjectMembers } from '@/lib/api/projectMembers';
 import { TaskTable } from './TaskTable';
 import { TaskFilters, type SortBy, type SortOrder } from './TaskFilters';
 import { TaskDetailSheet } from './TaskDetailSheet';
@@ -61,15 +60,9 @@ export function TaskList({ projectId, isPM }: TaskListProps) {
   const [sortBy, setSortBy] = useState<SortBy>('createdAt');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
-  const { data: tasks, error: tasksError, isLoading: tasksLoading, mutate: mutateTasks } = useSWR<Task[]>(
-    `/api/projects/${projectId}/tasks`,
-    () => getTasks(projectId),
-  );
+  const { tasks, error: tasksError, isLoading: tasksLoading, mutate: mutateTasks } = useTasks(projectId);
 
-  const { data: projectMembers, error: membersError, isLoading: membersLoading } = useSWR<ProjectMember[]>(
-    `/api/projects/${projectId}/members`,
-    () => getProjectMembers(projectId),
-  );
+  const { members: projectMembers, error: membersError, isLoading: membersLoading } = useProjectMembers(projectId);
 
   const loading = tasksLoading || membersLoading;
   const error = tasksError || membersError;

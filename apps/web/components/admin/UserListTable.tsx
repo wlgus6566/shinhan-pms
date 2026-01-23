@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
-import { useUsers } from '@/lib/hooks/useUsers';
+import { useUsers } from '@/lib/api/users';
 import {
   Table,
   TableBody,

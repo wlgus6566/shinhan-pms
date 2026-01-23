@@ -10,6 +10,7 @@
 
 **Frontend**:
 - Next.js (CSR 전용)
+- SWR (Data Fetching & Caching)
 - shadcn/ui + Radix UI
 - React Hook Form + Zod
 - Tailwind CSS
@@ -351,6 +352,99 @@ workHours: workLog.workHours ?? undefined  // number | undefined
 | DB 스키마 명세 | `artifacts/database-schema/{domain}/{domain}.md` |
 | DDL/DML | `artifacts/database-schema/{domain}/{domain}.sql` |
 
+### 7. SWR 기반 API 호출 패턴
+
+**핵심 원칙**: 모든 API 호출 로직은 `lib/api/` 디렉토리에 통합 관리합니다.
+
+#### 패턴 정의
+
+```typescript
+// lib/api/{domain}.ts 구조
+
+// 1. GET 요청 → SWR 훅
+export function useDomain(params) {
+  const { data, error, isLoading, mutate } = useSWR(url);
+  return { data, isLoading, error, mutate };
+}
+
+// 2. POST/PATCH/DELETE → async 함수
+export async function createDomain(data) {
+  return fetcher('/api/domain', { method: 'POST', body: data });
+}
+```
+
+#### 조건부 Fetching 규칙
+
+SWR에 `null`을 전달하면 요청하지 않습니다:
+
+```typescript
+// 단일 항목 조회 - ID 없으면 요청 안 함
+export function useProject(id: string | number | null) {
+  const { data, error, isLoading, mutate } = useSWR<Project>(
+    id ? `/api/projects/${id}` : null
+  );
+  return { project: data, isLoading, error, mutate };
+}
+
+// 날짜 범위 필수 - 파라미터 없으면 요청 안 함
+export function useMyWorkLogs(startDate: string, endDate: string) {
+  const url = startDate && endDate
+    ? `/api/work-logs/my?startDate=${startDate}&endDate=${endDate}`
+    : null;
+  const { data, error, isLoading, mutate } = useSWR<WorkLog[]>(url);
+  return { workLogs: data, isLoading, error, mutate };
+}
+```
+
+#### 캐시 Revalidation
+
+Mutation 후 관련 캐시를 갱신합니다:
+
+```typescript
+// 패턴 1: 부모에서 mutate 전달
+const { tasks, mutate } = useTasks(projectId);
+<AddTaskDialog onSuccess={() => mutate()} />
+
+// 패턴 2: 전역 mutate 사용
+import { useSWRConfig } from 'swr';
+const { mutate: globalMutate } = useSWRConfig();
+await createTask(projectId, data);
+globalMutate(`/api/projects/${projectId}/tasks`);
+```
+
+#### 금지 사항
+
+```typescript
+// ❌ 컴포넌트에서 직접 useSWR 호출 금지
+const { data } = useSWR('/api/projects', fetcher);
+
+// ✅ lib/api/의 훅 사용
+const { projects } = useProjects();
+
+// ❌ useState + useEffect 패턴 금지
+const [data, setData] = useState(null);
+useEffect(() => {
+  fetchData().then(setData);
+}, []);
+
+// ✅ SWR 훅 사용
+const { data, isLoading } = useData();
+```
+
+#### 체크리스트
+
+**새 API 개발 시**:
+- [ ] GET 요청은 `lib/api/`에 SWR 훅으로 작성
+- [ ] POST/PATCH/DELETE는 async 함수로 작성
+- [ ] 조건부 fetching 필요시 `null` 전달 구현
+- [ ] Mutation 함수 호출 후 `mutate()` 호출하여 캐시 갱신
+- [ ] 컴포넌트에서 직접 `useSWR` 호출하지 않기
+
+**기존 코드 발견 시**:
+- useState + useEffect → SWR 훅으로 마이그레이션
+- 직접 useSWR 호출 → lib/api/ 훅으로 마이그레이션
+- Promise.all → 개별 SWR 훅으로 분리 (SWR이 자동 병렬 처리)
+
 ## 주요 명령어
 
 ### 개발
@@ -463,6 +557,7 @@ pnpm format
 - [ ] 에러 메시지 표시
 - [ ] 로딩 상태 표시
 - [ ] 브랜드 가이드 준수
+- [ ] **범용 플러그인 우선 검토**: 새로운 UI 컴포넌트나 기능 개발 전 관련 플러그인/라이브러리 먼저 검토 (예: 캘린더 → FullCalendar, 차트 → Recharts, 테이블 → TanStack Table 등)
 
 ## Best Practices
 
@@ -541,4 +636,4 @@ pnpm format
 
 ---
 
-**마지막 업데이트**: 2026-01-23
+**마지막 업데이트**: 2026-01-23 (SWR 패턴 추가)

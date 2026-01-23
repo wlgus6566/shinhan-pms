@@ -1,3 +1,4 @@
+import useSWR from 'swr';
 import { fetcher } from './fetcher';
 
 export interface CreateUserRequest {
@@ -61,4 +62,51 @@ export async function deactivateUser(id: string | number): Promise<void> {
   return fetcher<void>(`/api/users/${id}`, {
     method: 'DELETE',
   });
+}
+
+// ============================================================================
+// SWR Hooks
+// ============================================================================
+
+/**
+ * SWR hook for fetching users list with optional filters
+ * @param params - Query parameters (search, page, limit, etc.)
+ */
+export function useUsers(params: any = {}) {
+  const query = new URLSearchParams();
+  Object.keys(params).forEach((key) => {
+    if (params[key] !== undefined && params[key] !== null) {
+      query.append(key, params[key]);
+    }
+  });
+
+  const url = `/api/users?${query.toString()}`;
+  const { data, error, isLoading, mutate } = useSWR<GetUsersResponse>(url);
+
+  return {
+    users: data?.users,
+    total: data?.total,
+    page: data?.page,
+    limit: data?.limit,
+    isLoading,
+    error,
+    mutate,
+  };
+}
+
+/**
+ * SWR hook for fetching a single user by ID
+ * @param id - User ID (null to skip fetching)
+ */
+export function useUser(id: string | number | null) {
+  const { data, error, isLoading, mutate } = useSWR<User>(
+    id ? `/api/users/${id}` : null
+  );
+
+  return {
+    user: data,
+    isLoading,
+    error,
+    mutate,
+  };
 }

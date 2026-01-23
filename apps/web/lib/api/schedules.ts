@@ -1,3 +1,4 @@
+import useSWR from 'swr';
 import { fetcher } from './fetcher';
 import type {
   Schedule,
@@ -103,4 +104,77 @@ export async function updateParticipationStatus(
     method: 'PATCH',
     body: { status },
   });
+}
+
+// ============================================================================
+// SWR Hooks
+// ============================================================================
+
+/**
+ * SWR hook for fetching project schedules
+ * @param projectId - Project ID (null to skip fetching)
+ * @param startDate - Optional start date filter
+ * @param endDate - Optional end date filter
+ */
+export function useProjectSchedules(
+  projectId: string | null,
+  startDate?: string,
+  endDate?: string
+) {
+  let url: string | null = null;
+  if (projectId) {
+    const params = new URLSearchParams();
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    const query = params.toString();
+    url = `/api/projects/${projectId}/schedules${query ? `?${query}` : ''}`;
+  }
+
+  const { data, error, isLoading, mutate } = useSWR<Schedule[]>(url);
+
+  return {
+    schedules: data,
+    isLoading,
+    error,
+    mutate,
+  };
+}
+
+/**
+ * SWR hook for fetching my schedules
+ * @param startDate - Optional start date filter
+ * @param endDate - Optional end date filter
+ */
+export function useMySchedules(startDate?: string, endDate?: string) {
+  const params = new URLSearchParams();
+  if (startDate) params.append('startDate', startDate);
+  if (endDate) params.append('endDate', endDate);
+  const query = params.toString();
+  const url = `/api/schedules/my${query ? `?${query}` : ''}`;
+
+  const { data, error, isLoading, mutate } = useSWR<Schedule[]>(url);
+
+  return {
+    schedules: data,
+    isLoading,
+    error,
+    mutate,
+  };
+}
+
+/**
+ * SWR hook for fetching a single schedule by ID
+ * @param id - Schedule ID (null to skip fetching)
+ */
+export function useSchedule(id: string | null) {
+  const { data, error, isLoading, mutate } = useSWR<Schedule>(
+    id ? `/api/schedules/${id}` : null
+  );
+
+  return {
+    schedule: data,
+    isLoading,
+    error,
+    mutate,
+  };
 }

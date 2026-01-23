@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useMyProjects } from '@/lib/hooks/useProjects';
+import { useMyProjects } from '@/lib/api/projects';
 import { ProjectScheduleList } from '@/components/schedule/ProjectScheduleList';
 import { Loader2, Calendar } from 'lucide-react';
 

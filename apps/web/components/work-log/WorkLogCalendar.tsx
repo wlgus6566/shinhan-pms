@@ -1,25 +1,27 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import {
-  format,
-  startOfMonth,
-  endOfMonth,
-  startOfWeek,
-  endOfWeek,
-  eachDayOfInterval,
-  isSameMonth,
-  isSameDay,
-  isToday,
-  addMonths,
-  subMonths,
-  isWeekend,
-} from 'date-fns';
+import { useState, useMemo, useRef } from 'react';
+import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Calendar, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { WorkLog } from '@/types/work-log';
+
+// FullCalendar imports
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction';
+import type {
+  EventClickArg,
+  DatesSetArg,
+  EventContentArg,
+  DayCellContentArg,
+} from '@fullcalendar/core';
+import koLocale from '@fullcalendar/core/locales/ko';
+
+// Utilities
+import { transformWorkLogsToEvents } from './workLogCalendarUtils';
 
 interface WorkLogCalendarProps {
   workLogs: WorkLog[];
@@ -34,51 +36,85 @@ export function WorkLogCalendar({
   onDateSelect,
   onMonthChange,
 }: WorkLogCalendarProps) {
-  const [currentMonth, setCurrentMonth] = useState(startOfMonth(selectedDate));
+  const [currentMonth, setCurrentMonth] = useState(new Date(selectedDate));
   const [viewMode, setViewMode] = useState<'month' | 'list'>('month');
+  const calendarRef = useRef<FullCalendar>(null);
 
-  const workLogDates = useMemo(() => {
-    const dates = new Set<string>();
-    workLogs.forEach((log) => {
-      dates.add(log.workDate);
-    });
-    return dates;
-  }, [workLogs]);
+  // Transform workLogs to FullCalendar events
+  const events = useMemo(() => transformWorkLogsToEvents(workLogs), [workLogs]);
 
-  const calendarDays = useMemo(() => {
-    const monthStart = startOfMonth(currentMonth);
-    const monthEnd = endOfMonth(currentMonth);
-    const startDate = startOfWeek(monthStart, { weekStartsOn: 0 });
-    const endDate = endOfWeek(monthEnd, { weekStartsOn: 0 });
-
-    return eachDayOfInterval({ start: startDate, end: endDate });
-  }, [currentMonth]);
-
+  // Navigation handlers
   const handlePrevMonth = () => {
-    const newMonth = subMonths(currentMonth, 1);
-    setCurrentMonth(newMonth);
-    onMonthChange(newMonth);
+    const calendarApi = calendarRef.current?.getApi();
+    if (calendarApi) {
+      calendarApi.prev();
+    }
   };
 
   const handleNextMonth = () => {
-    const newMonth = addMonths(currentMonth, 1);
-    setCurrentMonth(newMonth);
-    onMonthChange(newMonth);
+    const calendarApi = calendarRef.current?.getApi();
+    if (calendarApi) {
+      calendarApi.next();
+    }
   };
 
   const handleToday = () => {
-    const today = new Date();
-    setCurrentMonth(startOfMonth(today));
-    onDateSelect(today);
-    onMonthChange(startOfMonth(today));
+    const calendarApi = calendarRef.current?.getApi();
+    if (calendarApi) {
+      calendarApi.today();
+      const today = new Date();
+      onDateSelect(today);
+    }
   };
 
-  const getLogsForDate = (date: Date) => {
-    const dateStr = format(date, 'yyyy-MM-dd');
-    return workLogs.filter((log) => log.workDate === dateStr);
+  // FullCalendar callbacks
+  const handleDateClick = (arg: DateClickArg) => {
+    onDateSelect(arg.date);
   };
 
-  const weekDays = ['일', '월', '화', '수', '목', '금', '토'];
+  const handleEventClick = (arg: EventClickArg) => {
+    arg.jsEvent.stopPropagation();
+    // Select the date of the clicked event
+    onDateSelect(arg.event.start || new Date());
+  };
+
+  const handleDatesSet = (arg: DatesSetArg) => {
+    const newMonth = arg.view.currentStart;
+
+    // Only trigger onMonthChange if the month actually changed
+    if (format(newMonth, 'yyyy-MM') !== format(currentMonth, 'yyyy-MM')) {
+      setCurrentMonth(newMonth);
+      onMonthChange(newMonth);
+    }
+  };
+
+  // Custom event rendering
+  const renderEventContent = (eventInfo: EventContentArg) => {
+    const workLog = eventInfo.event.extendedProps.workLog as WorkLog;
+
+    return (
+      <div className="flex justify-start items-center gap-1 relative w-full px-1 py-0.5 cursor-pointer transition-colors rounded border-none">
+        <span className="text-[12px] font-medium text-blue-700 truncate block">
+          {workLog.task?.taskName || '업무일지'}
+        </span>
+      </div>
+    );
+  };
+
+  // Day cell class names for selected date highlighting
+  const getDayCellClassNames = (arg: DayCellContentArg) => {
+    const classes: string[] = [];
+
+    // Check if this day is the selected date
+    const argDate = format(arg.date, 'yyyy-MM-dd');
+    const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
+
+    if (argDate === selectedDateStr) {
+      classes.push('fc-day-selected');
+    }
+
+    return classes;
+  };
 
   // 목록 뷰용 그룹화
   const groupedLogs = useMemo(() => {
@@ -133,19 +169,18 @@ export function WorkLogCalendar({
             size="sm"
             className={cn(
               'h-7 px-3',
-              viewMode === 'month' ? '' : 'text-slate-600'
+              viewMode === 'month' ? '' : 'text-slate-600',
             )}
             onClick={() => setViewMode('month')}
           >
-            <Calendar className="h-4 w-4 mr-1" />
-            월
+            <Calendar className="h-4 w-4 mr-1" />월
           </Button>
           <Button
             variant={viewMode === 'list' ? 'default' : 'ghost'}
             size="sm"
             className={cn(
               'h-7 px-3',
-              viewMode === 'list' ? '' : 'text-slate-600'
+              viewMode === 'list' ? '' : 'text-slate-600',
             )}
             onClick={() => setViewMode('list')}
           >
@@ -156,91 +191,27 @@ export function WorkLogCalendar({
       </div>
 
       {viewMode === 'month' ? (
-        <>
-          {/* 요일 헤더 */}
-          <div className="grid grid-cols-7 border-b border-slate-100">
-            {weekDays.map((day, index) => (
-              <div
-                key={day}
-                className={cn(
-                  'py-3 text-center text-xs font-semibold',
-                  index === 0 && 'text-rose-500',
-                  index === 6 && 'text-blue-500',
-                  index !== 0 && index !== 6 && 'text-slate-500'
-                )}
-              >
-                {day}
-              </div>
-            ))}
-          </div>
-
-          {/* 달력 그리드 */}
-          <div className="grid grid-cols-7">
-            {calendarDays.map((day, index) => {
-              const dateStr = format(day, 'yyyy-MM-dd');
-              const hasLogs = workLogDates.has(dateStr);
-              const logsForDay = getLogsForDate(day);
-              const isCurrentMonth = isSameMonth(day, currentMonth);
-              const isSelected = isSameDay(day, selectedDate);
-              const isTodayDate = isToday(day);
-              const isWeekendDay = isWeekend(day);
-              const dayOfWeek = day.getDay();
-
-              return (
-                <button
-                  key={dateStr}
-                  onClick={() => onDateSelect(day)}
-                  className={cn(
-                    'relative h-24 py-2 px-1 border-b border-r border-slate-100 transition-all hover:bg-slate-50',
-                    !isCurrentMonth && 'bg-slate-50/50',
-                    isSelected && 'bg-blue-50 hover:bg-blue-50',
-                    index % 7 === 6 && 'border-r-0'
-                  )}
-                >
-                  <div className="flex flex-col h-full">
-                    <span
-                      className={cn(
-                        'inline-flex items-center justify-center w-7 h-7 text-sm font-medium rounded-full',
-                        !isCurrentMonth && 'text-slate-300',
-                        isCurrentMonth && dayOfWeek === 0 && 'text-rose-500',
-                        isCurrentMonth && dayOfWeek === 6 && 'text-blue-500',
-                        isCurrentMonth &&
-                          dayOfWeek !== 0 &&
-                          dayOfWeek !== 6 &&
-                          'text-slate-700',
-                        isTodayDate &&
-                          'bg-blue-500 text-white font-bold',
-                        isSelected && !isTodayDate && 'bg-blue-100 text-blue-700'
-                      )}
-                    >
-                      {format(day, 'd')}
-                    </span>
-
-                    {/* 일지 표시 */}
-                    {hasLogs && isCurrentMonth && (
-                      <div className="mt-1 space-y-0.5 overflow-hidden flex-1">
-                        {logsForDay.slice(0, 2).map((log) => (
-                          <div
-                            key={log.id}
-                            className="px-1.5 py-0.5 text-[10px] font-medium text-blue-700 bg-blue-100 rounded truncate"
-                            title={log.task?.taskName}
-                          >
-                            {log.task?.taskName}
-                          </div>
-                        ))}
-                        {logsForDay.length > 2 && (
-                          <div className="px-1.5 text-[10px] text-slate-500">
-                            +{logsForDay.length - 2}개
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </>
+        /* FullCalendar Month View */
+        <FullCalendar
+          ref={calendarRef}
+          plugins={[dayGridPlugin, interactionPlugin]}
+          initialView="dayGridMonth"
+          initialDate={currentMonth}
+          locale={koLocale}
+          headerToolbar={false}
+          height="auto"
+          events={events}
+          dateClick={handleDateClick}
+          eventClick={handleEventClick}
+          datesSet={handleDatesSet}
+          dayMaxEvents={2}
+          moreLinkText={(num) => `+${num}개`}
+          eventContent={renderEventContent}
+          dayCellClassNames={getDayCellClassNames}
+          fixedWeekCount={false}
+          showNonCurrentDates={true}
+          firstDay={0}
+        />
       ) : (
         /* 목록 뷰 */
         <div className="max-h-[600px] overflow-y-auto">
@@ -250,7 +221,10 @@ export function WorkLogCalendar({
             </div>
           ) : (
             groupedLogs.map(([date, logs]) => (
-              <div key={date} className="border-b border-slate-100 last:border-b-0">
+              <div
+                key={date}
+                className="border-b border-slate-100 last:border-b-0"
+              >
                 <div className="px-6 py-3 bg-slate-50 sticky top-0">
                   <span className="font-semibold text-slate-700">
                     {format(new Date(date), 'M월 d일 (EEEE)', { locale: ko })}
@@ -276,21 +250,24 @@ export function WorkLogCalendar({
                             {log.content}
                           </p>
                         </div>
-                        {log.progress !== null && log.progress !== undefined && (
-                         <>
-                          <div className="flex items-center gap-2">
-                            <div className="w-20 h-2 bg-slate-100 rounded-full overflow-hidden">
-                              <div
-                                className={'h-full rounded-full transition-all bg-primary'}
-                                style={{ width: `${log.progress}%` }}
-                              />
-                            </div>
-                          </div>
-                          <span className="text-sm font-medium text-blue-600">
-                            {log.progress}%
-                          </span>
-                          </>
-                        )}
+                        {log.progress !== null &&
+                          log.progress !== undefined && (
+                            <>
+                              <div className="flex items-center gap-2">
+                                <div className="w-20 h-2 bg-slate-100 rounded-full overflow-hidden">
+                                  <div
+                                    className={
+                                      'h-full rounded-full transition-all bg-primary'
+                                    }
+                                    style={{ width: `${log.progress}%` }}
+                                  />
+                                </div>
+                              </div>
+                              <span className="text-sm font-medium text-blue-600">
+                                {log.progress}%
+                              </span>
+                            </>
+                          )}
                       </div>
                     </button>
                   ))}

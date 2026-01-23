@@ -1,3 +1,4 @@
+import useSWR from 'swr';
 import { fetcher } from './fetcher';
 import type {
   Project,
@@ -9,19 +10,23 @@ import type {
 /**
  * Get all projects with optional filters
  */
-export async function getProjects(params: GetProjectsParams = {}): Promise<Project[]> {
+export async function getProjects(
+  params: GetProjectsParams = {},
+): Promise<Project[]> {
   const query = new URLSearchParams();
-  
+
   if (params.search) {
     query.append('search', params.search);
   }
-  
+
   if (params.status) {
     query.append('status', params.status);
   }
-  
+
   const queryString = query.toString();
-  return fetcher<Project[]>(`/api/projects${queryString ? `?${queryString}` : ''}`);
+  return fetcher<Project[]>(
+    `/api/projects${queryString ? `?${queryString}` : ''}`,
+  );
 }
 
 /**
@@ -36,7 +41,9 @@ export async function getProject(id: string | number): Promise<Project> {
  * Only PM can create projects
  * Creator is automatically assigned as PM
  */
-export async function createProject(data: CreateProjectRequest): Promise<Project> {
+export async function createProject(
+  data: CreateProjectRequest,
+): Promise<Project> {
   return fetcher<Project>('/api/projects', {
     method: 'POST',
     body: data,
@@ -49,7 +56,7 @@ export async function createProject(data: CreateProjectRequest): Promise<Project
  */
 export async function updateProject(
   id: string | number,
-  data: UpdateProjectRequest
+  data: UpdateProjectRequest,
 ): Promise<Project> {
   return fetcher<Project>(`/api/projects/${id}`, {
     method: 'PATCH',
@@ -77,4 +84,68 @@ export interface MyProject extends Project {
 
 export async function getMyProjects(): Promise<MyProject[]> {
   return fetcher<MyProject[]>('/api/projects/my');
+}
+
+// ============================================================================
+// SWR Hooks
+// ============================================================================
+
+/**
+ * SWR hook for fetching projects list with optional filters
+ */
+export function useProjects(params: GetProjectsParams = {}) {
+  const query = new URLSearchParams();
+
+  if (params.search) {
+    query.append('search', params.search);
+  }
+
+  if (params.status) {
+    query.append('status', params.status);
+  }
+
+  const queryString = query.toString();
+  const url = `/api/projects${queryString ? `?${queryString}` : ''}`;
+
+  const { data, error, isLoading, mutate } = useSWR<Project[]>(url);
+
+  return {
+    projects: data,
+    isLoading,
+    error,
+    mutate,
+  };
+}
+
+/**
+ * SWR hook for fetching a single project by ID
+ * @param id - Project ID (null to skip fetching)
+ */
+export function useProject(id: string | number | null) {
+  const { data, error, isLoading, mutate } = useSWR<Project>(
+    id ? `/api/projects/${id}` : null
+  );
+
+  return {
+    project: data,
+    isLoading,
+    error,
+    mutate,
+  };
+}
+
+/**
+ * SWR hook for fetching my projects
+ */
+export function useMyProjects() {
+  const { data, error, isLoading, mutate } = useSWR<MyProject[]>(
+    '/api/projects/my'
+  );
+
+  return {
+    projects: data,
+    isLoading,
+    error,
+    mutate,
+  };
 }

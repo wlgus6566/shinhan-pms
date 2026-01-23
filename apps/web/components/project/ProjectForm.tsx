@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { CreateProjectSchema } from '@repo/schema';
 import type { CreateProjectRequest } from '@repo/schema';
 import {
-  getProject,
+  useProject,
   createProject,
   updateProject,
   deleteProject,
@@ -43,11 +43,15 @@ interface ProjectFormProps {
 
 export function ProjectForm({ projectId, mode }: ProjectFormProps) {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(mode === 'edit');
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Fetch project data using SWR hook
+  const { project, isLoading, error: fetchError } = useProject(
+    mode === 'edit' ? (projectId ?? null) : null
+  );
 
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(CreateProjectSchema),
@@ -60,27 +64,29 @@ export function ProjectForm({ projectId, mode }: ProjectFormProps) {
     },
   });
 
-  // Narrow dependencies: remove form from deps (rerender-dependencies)
+  // Update form when project data is loaded
   useEffect(() => {
-    if (mode === 'edit' && projectId) {
-      getProject(projectId)
-        .then((project) => {
-          // Convert ISO date strings to YYYY-MM-DD format
-          const startDate = project.startDate ? project.startDate.split('T')[0] : '';
-          const endDate = project.endDate ? project.endDate.split('T')[0] : '';
+    if (project && mode === 'edit') {
+      // Convert ISO date strings to YYYY-MM-DD format
+      const startDate = project.startDate ? project.startDate.split('T')[0] : '';
+      const endDate = project.endDate ? project.endDate.split('T')[0] : '';
 
-          form.reset({
-            name: project.name,
-            client: project.client || '',
-            projectType: (project.projectType as 'OPERATION' | 'BUILD') || 'BUILD',
-            startDate,
-            endDate,
-          });
-        })
-        .catch((err) => setError(err.message))
-        .finally(() => setIsLoading(false));
+      form.reset({
+        name: project.name,
+        client: project.client || '',
+        projectType: (project.projectType as 'OPERATION' | 'BUILD') || 'BUILD',
+        startDate,
+        endDate,
+      });
     }
-  }, [projectId, mode]); // Removed form from deps
+  }, [project, mode]); // Removed form from deps
+
+  // Set error from fetch
+  useEffect(() => {
+    if (fetchError) {
+      setError(fetchError.message || 'Failed to load project');
+    }
+  }, [fetchError]);
 
   // Use useCallback for stable callback refs
   const onSubmit = useCallback(

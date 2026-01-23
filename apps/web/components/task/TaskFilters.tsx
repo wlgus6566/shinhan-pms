@@ -3,13 +3,25 @@
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowUpDown, X, Search } from 'lucide-react';
-import { STATUS_LABELS, STATUS_COLORS, DIFFICULTY_LABELS, DIFFICULTY_COLORS, type TaskStatus, type TaskDifficulty } from '@/types/task';
+import { X, Search } from 'lucide-react';
+import {
+  STATUS_LABELS,
+  STATUS_COLORS,
+  DIFFICULTY_LABELS,
+  DIFFICULTY_COLORS,
+  type TaskStatus,
+  type TaskDifficulty,
+} from '@/types/task';
 import type { ProjectMember } from '@/types/project';
 import { cn } from '@/lib/utils';
 
-export type SortBy = 'createdAt' | 'updatedAt' | 'startDate' | 'endDate' | 'difficulty' | 'status';
+export type SortBy =
+  | 'createdAt'
+  | 'updatedAt'
+  | 'startDate'
+  | 'endDate'
+  | 'difficulty'
+  | 'status';
 export type SortOrder = 'asc' | 'desc';
 
 interface TaskFiltersProps {
@@ -33,17 +45,10 @@ interface TaskFiltersProps {
 export function TaskFilters({
   searchQuery,
   setSearchQuery,
-  assigneeFilter,
-  setAssigneeFilter,
   statusFilter,
   setStatusFilter,
   difficultyFilter,
   setDifficultyFilter,
-  sortBy,
-  setSortBy,
-  sortOrder,
-  setSortOrder,
-  projectMembers,
   resetFilters,
   statusCounts,
 }: TaskFiltersProps) {
@@ -63,7 +68,8 @@ export function TaskFilters({
     }
   };
 
-  const hasActiveFilters = searchQuery || assigneeFilter !== 'all' || statusFilter.length > 0 || difficultyFilter.length > 0;
+  const hasActiveFilters =
+    searchQuery || statusFilter.length > 0 || difficultyFilter.length > 0;
 
   return (
     <div className="space-y-4">
@@ -80,21 +86,6 @@ export function TaskFilters({
           />
         </div>
 
-        {/* 담당자 필터 */}
-        <Select value={assigneeFilter} onValueChange={setAssigneeFilter}>
-          <SelectTrigger className="w-full md:w-48">
-            <SelectValue placeholder="담당자 전체" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">담당자 전체</SelectItem>
-            {projectMembers.map((member) => (
-              <SelectItem key={member.id} value={member.id.toString()}>
-                {member.member?.name || 'Unknown'}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        
         {/* 초기화 버튼 */}
         {hasActiveFilters && (
           <Button variant="outline" onClick={resetFilters} className="gap-2">
@@ -118,7 +109,9 @@ export function TaskFilters({
                   className={cn(
                     STATUS_COLORS[status],
                     'cursor-pointer',
-                    statusFilter.includes(status) ? 'bg-primary text-primary-foreground' : ''
+                    statusFilter.includes(status)
+                      ? 'bg-primary text-primary-foreground'
+                      : '',
                   )}
                   onClick={() => toggleStatus(status)}
                 >
@@ -133,15 +126,23 @@ export function TaskFilters({
         <div className="flex-1">
           <div className="text-sm font-medium mb-2">중요도</div>
           <div className="flex flex-wrap gap-2">
-            {(Object.keys(DIFFICULTY_LABELS) as TaskDifficulty[]).map((difficulty) => (
-              <Badge
-                key={difficulty}
-                className={cn(DIFFICULTY_COLORS[difficulty], 'cursor-pointer', difficultyFilter.includes(difficulty) ? 'bg-primary text-primary-foreground' : '')}
-                onClick={() => toggleDifficulty(difficulty)}
-              >
-                {DIFFICULTY_LABELS[difficulty]}
-              </Badge>
-            ))}
+            {(Object.keys(DIFFICULTY_LABELS) as TaskDifficulty[]).map(
+              (difficulty) => (
+                <Badge
+                  key={difficulty}
+                  className={cn(
+                    DIFFICULTY_COLORS[difficulty],
+                    'cursor-pointer',
+                    difficultyFilter.includes(difficulty)
+                      ? 'bg-primary text-primary-foreground'
+                      : '',
+                  )}
+                  onClick={() => toggleDifficulty(difficulty)}
+                >
+                  {DIFFICULTY_LABELS[difficulty]}
+                </Badge>
+              ),
+            )}
           </div>
         </div>
       </div>
