@@ -208,7 +208,72 @@ const form = useForm<z.infer<typeof formSchema>>({
 });
 ```
 
-### 5. 타입 시스템 및 검증 규칙
+### 5. 폼 컴포넌트 패턴
+
+**핵심 원칙**: FormField를 직접 사용하는 대신 `@/components/form`의 재사용 가능한 컴포넌트를 사용합니다.
+
+#### 사용 가능한 폼 컴포넌트
+
+| 컴포넌트 | 용도 | 사용 예시 |
+|---------|------|----------|
+| **FormInput** | 텍스트/숫자/날짜 입력 | `<FormInput control={form.control} name="title" label="제목 *" type="text" />` |
+| **FormTextarea** | 여러 줄 텍스트 입력 | `<FormTextarea control={form.control} name="description" label="설명" rows={3} />` |
+| **FormSelect** | 단일 선택 드롭다운 | `<FormSelect control={form.control} name="type" options={typeOptions} />` |
+| **FormCheckbox** | 단일 체크박스 (boolean) | `<FormCheckbox control={form.control} name="isActive" label="활성화" />` |
+| **FormCheckboxGroup** | 다중 체크박스 (string[]) | `<FormCheckboxGroup control={form.control} name="assigneeIds" options={members} />` |
+| **FormRadioGroup** | 라디오 버튼 그룹 | `<FormRadioGroup control={form.control} name="priority" options={priorities} />` |
+| **FormSwitch** | 토글 스위치 | `<FormSwitch control={form.control} name="enabled" label="활성화" />` |
+
+#### 금지 패턴
+
+**❌ FormField 직접 사용 금지**:
+```typescript
+// 나쁜 예
+<FormField
+  control={form.control}
+  name="title"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>제목</FormLabel>
+      <FormControl>
+        <Input {...field} />
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+```
+
+**✅ 재사용 컴포넌트 사용**:
+```typescript
+// 좋은 예
+<FormInput
+  control={form.control}
+  name="title"
+  label="제목"
+/>
+```
+
+#### Import 패턴
+
+```typescript
+// ❌ 나쁜 예
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+
+// ✅ 좋은 예
+import { Form } from '@/components/ui/form';
+import { FormInput, FormTextarea, FormSelect } from '@/components/form';
+```
+
+#### 예외 사항
+
+다음 경우에만 FormField 직접 사용 허용:
+- 커스텀 UI가 필요한 경우 (예: progress 버튼 그룹)
+- 기존 재사용 컴포넌트로 구현 불가능한 특수한 경우
+
+### 6. 타입 시스템 및 검증 규칙
 
 **핵심 원칙**: `@repo/schema` 패키지를 단일 소스로 사용하여 모든 검증 로직과 타입을 통합 관리합니다.
 
@@ -343,7 +408,7 @@ workHours: workLog.workHours ?? undefined  // number | undefined
 - `apps/web/types/` 내의 중복 Request 타입 정의
 - Backend DTO 클래스 내부의 검증 데코레이터 (`@IsString()`, `@MinLength()` 등)
 
-### 6. 산출물 저장 경로
+### 7. 산출물 저장 경로
 
 | 산출물 | 경로 |
 |-------|------|
@@ -352,7 +417,7 @@ workHours: workLog.workHours ?? undefined  // number | undefined
 | DB 스키마 명세 | `artifacts/database-schema/{domain}/{domain}.md` |
 | DDL/DML | `artifacts/database-schema/{domain}/{domain}.sql` |
 
-### 7. SWR 기반 API 호출 패턴
+### 8. SWR 기반 API 호출 패턴
 
 **핵심 원칙**: 모든 API 호출 로직은 `lib/api/` 디렉토리에 통합 관리합니다.
 

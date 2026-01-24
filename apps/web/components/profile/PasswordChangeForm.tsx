@@ -6,15 +6,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { changePassword } from '@/lib/api/auth';
 import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+import { Form } from '@/components/ui/form';
+import { FormInput } from '@/components/form';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle2, Loader2 } from 'lucide-react';
 
@@ -77,44 +70,23 @@ export function PasswordChangeForm() {
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
-        <FormField
+        <FormInput
           control={form.control}
           name="currentPassword"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>현재 비밀번호</FormLabel>
-              <FormControl>
-                <Input type="password" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="현재 비밀번호"
+          type="password"
         />
-        <FormField
+        <FormInput
           control={form.control}
           name="newPassword"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>새 비밀번호</FormLabel>
-              <FormControl>
-                <Input type="password" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="새 비밀번호"
+          type="password"
         />
-        <FormField
+        <FormInput
           control={form.control}
           name="confirmPassword"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>새 비밀번호 확인</FormLabel>
-              <FormControl>
-                <Input type="password" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="새 비밀번호 확인"
+          type="password"
         />
         <Button type="submit" disabled={isSaving}>
           {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

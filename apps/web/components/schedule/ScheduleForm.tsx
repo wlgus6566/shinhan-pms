@@ -7,7 +7,12 @@ import type { CreateScheduleRequest } from '@repo/schema';
 import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
-import { FormInput, FormTextarea, FormSelect, FormRadioGroup } from '@/components/form';
+import {
+  FormInput,
+  FormTextarea,
+  FormSelect,
+  FormRadioGroup,
+} from '@/components/form';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   FormField,
@@ -82,12 +87,16 @@ export function ScheduleForm({
           title: schedule.title,
           description: schedule.description || '',
           scheduleType: schedule.scheduleType,
-          startDate: schedule.startDate ? formatDateTimeLocal(schedule.startDate) : '',
-          endDate: schedule.endDate ? formatDateTimeLocal(schedule.endDate) : '',
+          startDate: schedule.startDate
+            ? formatDateTimeLocal(schedule.startDate)
+            : '',
+          endDate: schedule.endDate
+            ? formatDateTimeLocal(schedule.endDate)
+            : '',
           location: schedule.location || '',
           isAllDay: schedule.isAllDay,
           color: schedule.color || '',
-          participantIds: schedule.participants?.map(p => p.id) || [],
+          participantIds: schedule.participants?.map((p) => p.id) || [],
           teamScope: schedule.teamScope || undefined,
           halfDayType: schedule.halfDayType || undefined,
           usageDate: schedule.usageDate?.slice(0, 10) || '', // Format for date
@@ -115,12 +124,14 @@ export function ScheduleForm({
         title: schedule.title,
         description: schedule.description || '',
         scheduleType: schedule.scheduleType,
-        startDate: schedule.startDate ? formatDateTimeLocal(schedule.startDate) : '',
+        startDate: schedule.startDate
+          ? formatDateTimeLocal(schedule.startDate)
+          : '',
         endDate: schedule.endDate ? formatDateTimeLocal(schedule.endDate) : '',
         location: schedule.location || '',
         isAllDay: schedule.isAllDay,
         color: schedule.color || '',
-        participantIds: schedule.participants?.map(p => p.id) || [],
+        participantIds: schedule.participants?.map((p) => p.id) || [],
         teamScope: schedule.teamScope || undefined,
         halfDayType: schedule.halfDayType || undefined,
         usageDate: schedule.usageDate?.slice(0, 10) || '',
@@ -161,9 +172,15 @@ export function ScheduleForm({
       // 연차/반차: usageDate를 startDate와 endDate로 변환
       // UTC 기준 00:00:00으로 설정하여 타임존 문제 방지
       const usageDateTime = new Date(data.usageDate + 'T00:00:00Z');
+
+      // 제목 자동 설정
+      const autoTitle = data.scheduleType === 'VACATION' ? '연차' :
+                        data.halfDayType === 'AM' ? '반차 (오전)' : '반차 (오후)';
+
       const { halfDayType, teamScope, ...restData } = data;
       submitData = {
         ...restData,
+        title: autoTitle,
         startDate: usageDateTime.toISOString(),
         endDate: usageDateTime.toISOString(),
         usageDate: data.usageDate,
@@ -186,13 +203,14 @@ export function ScheduleForm({
 
   const scheduleType = form.watch('scheduleType');
   const teamScope = form.watch('teamScope');
-  const showParticipants = scheduleType === 'MEETING' || scheduleType === 'SCRUM';
+  const showParticipants =
+    scheduleType === 'MEETING' || scheduleType === 'SCRUM';
   const isVacation = scheduleType === 'VACATION' || scheduleType === 'HALF_DAY';
   const isHalfDay = scheduleType === 'HALF_DAY';
 
   // 프로젝트에 있는 팀 범위만 필터링
   const availableTeamScopes = useMemo(() => {
-    const workAreas = new Set(projectMembers.map(m => m.workArea));
+    const workAreas = new Set(projectMembers.map((m) => m.workArea));
     const scopes: TeamScope[] = ['ALL']; // Always include ALL
 
     if (workAreas.has('PLANNING')) scopes.push('PLANNING');
@@ -211,7 +229,7 @@ export function ScheduleForm({
 
     if (teamScope === 'ALL') {
       // 전사 일정: 모든 멤버 선택
-      selectedMembers.push(...projectMembers.map(m => String(m.memberId)));
+      selectedMembers.push(...projectMembers.map((m) => String(m.memberId)));
     } else {
       // 팀별 필터링
       const workAreaMap: Record<TeamScope, WorkArea[]> = {
@@ -225,8 +243,8 @@ export function ScheduleForm({
       const targetAreas = workAreaMap[teamScope];
       selectedMembers.push(
         ...projectMembers
-          .filter(m => targetAreas.includes(m.workArea))
-          .map(m => String(m.memberId))
+          .filter((m) => targetAreas.includes(m.workArea))
+          .map((m) => String(m.memberId)),
       );
     }
 
@@ -236,14 +254,6 @@ export function ScheduleForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <FormInput
-          control={form.control}
-          name="title"
-          label="제목 *"
-          placeholder="일정 제목을 입력하세요"
-          disabled={viewMode}
-        />
-
         {viewMode ? (
           <FormInput
             control={form.control}
@@ -258,19 +268,35 @@ export function ScheduleForm({
             name="scheduleType"
             label="일정 유형 *"
             placeholder="일정 유형 선택"
-            options={Object.entries(SCHEDULE_TYPE_LABELS).map(([value, label]) => ({ value, label }))}
+            options={Object.entries(SCHEDULE_TYPE_LABELS).map(
+              ([value, label]) => ({ value, label }),
+            )}
+          />
+        )}
+
+        {!isVacation && (
+          <FormInput
+            control={form.control}
+            name="title"
+            label="제목 *"
+            placeholder="일정 제목을 입력하세요"
+            disabled={viewMode}
           />
         )}
 
         {/* 회의/스크럼 시 팀 범위 선택 */}
-        {showParticipants && (
-          viewMode ? (
+        {showParticipants &&
+          (viewMode ? (
             <FormInput
               control={form.control}
               name="teamScope"
               label="팀 범위 *"
               disabled
-              value={form.watch('teamScope') ? TEAM_SCOPE_LABELS[form.watch('teamScope')!] : ''}
+              value={
+                form.watch('teamScope')
+                  ? TEAM_SCOPE_LABELS[form.watch('teamScope')!]
+                  : ''
+              }
             />
           ) : (
             <FormSelect
@@ -278,10 +304,12 @@ export function ScheduleForm({
               name="teamScope"
               label="팀 범위 *"
               placeholder="팀 범위 선택"
-              options={availableTeamScopes.map(scope => ({ value: scope, label: TEAM_SCOPE_LABELS[scope] }))}
+              options={availableTeamScopes.map((scope) => ({
+                value: scope,
+                label: TEAM_SCOPE_LABELS[scope],
+              }))}
             />
-          )
-        )}
+          ))}
 
         {/* 연차/반차 시 사용일 필드 */}
         {isVacation ? (
@@ -295,14 +323,20 @@ export function ScheduleForm({
             />
 
             {/* 반차 시 오전/오후 선택 */}
-            {isHalfDay && (
-              viewMode ? (
+            {isHalfDay &&
+              (viewMode ? (
                 <FormInput
                   control={form.control}
                   name="halfDayType"
                   label="유형 *"
                   disabled
-                  value={form.watch('halfDayType') === 'AM' ? '오전' : form.watch('halfDayType') === 'PM' ? '오후' : ''}
+                  value={
+                    form.watch('halfDayType') === 'AM'
+                      ? '오전'
+                      : form.watch('halfDayType') === 'PM'
+                        ? '오후'
+                        : ''
+                  }
                 />
               ) : (
                 <FormRadioGroup
@@ -315,8 +349,7 @@ export function ScheduleForm({
                     { value: 'PM', label: '오후' },
                   ]}
                 />
-              )
-            )}
+              ))}
           </>
         ) : (
           /* 일반 일정 시 시작일시/종료일시 */
@@ -341,13 +374,13 @@ export function ScheduleForm({
           </div>
         )}
         {scheduleType !== 'VACATION' && scheduleType !== 'HALF_DAY' && (
-        <FormInput
-          control={form.control}
-          name="location"
-          label={`장소${(scheduleType === 'MEETING' || scheduleType === 'SCRUM') ? ' *' : ''}`}
-          placeholder="장소를 입력하세요 (예: 회의실 A)"
-          disabled={viewMode}
-        />
+          <FormInput
+            control={form.control}
+            name="location"
+            label={`장소${scheduleType === 'MEETING' || scheduleType === 'SCRUM' ? ' *' : ''}`}
+            placeholder="장소를 입력하세요 (예: 회의실 A)"
+            disabled={viewMode}
+          />
         )}
         {showParticipants && (
           <FormField
@@ -356,11 +389,17 @@ export function ScheduleForm({
             render={({ field }) => {
               // 팀별로 멤버 그룹핑
               const membersByTeam = {
-                PROJECT_MANAGEMENT: projectMembers.filter(m => m.workArea === 'PROJECT_MANAGEMENT'),
-                PLANNING: projectMembers.filter(m => m.workArea === 'PLANNING'),
-                DESIGN: projectMembers.filter(m => m.workArea === 'DESIGN'),
-                FRONTEND: projectMembers.filter(m => m.workArea === 'FRONTEND'),
-                BACKEND: projectMembers.filter(m => m.workArea === 'BACKEND'),
+                PROJECT_MANAGEMENT: projectMembers.filter(
+                  (m) => m.workArea === 'PROJECT_MANAGEMENT',
+                ),
+                PLANNING: projectMembers.filter(
+                  (m) => m.workArea === 'PLANNING',
+                ),
+                DESIGN: projectMembers.filter((m) => m.workArea === 'DESIGN'),
+                FRONTEND: projectMembers.filter(
+                  (m) => m.workArea === 'FRONTEND',
+                ),
+                BACKEND: projectMembers.filter((m) => m.workArea === 'BACKEND'),
               };
 
               const teamLabels = {
@@ -376,9 +415,13 @@ export function ScheduleForm({
                   <FormLabel>참가자</FormLabel>
                   <div className="space-y-4 max-h-96 overflow-y-auto border rounded-md p-4">
                     {loadingMembers ? (
-                      <p className="text-sm text-muted-foreground">참가자 목록을 불러오는 중...</p>
+                      <p className="text-sm text-muted-foreground">
+                        참가자 목록을 불러오는 중...
+                      </p>
                     ) : projectMembers.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">프로젝트 멤버가 없습니다</p>
+                      <p className="text-sm text-muted-foreground">
+                        프로젝트 멤버가 없습니다
+                      </p>
                     ) : (
                       Object.entries(membersByTeam).map(([team, members]) => {
                         if (members.length === 0) return null;
@@ -390,22 +433,35 @@ export function ScheduleForm({
                             </h4>
                             <div className="space-y-2 pl-2">
                               {members.map((member) => (
-                                <div key={member.memberId} className="flex items-center space-x-2">
+                                <div
+                                  key={member.memberId}
+                                  className="flex items-center space-x-2"
+                                >
                                   <Checkbox
-                                    checked={field.value?.includes(String(member.memberId))}
+                                    checked={field.value?.includes(
+                                      String(member.memberId),
+                                    )}
                                     onCheckedChange={(checked) => {
                                       const currentValue = field.value || [];
                                       const memberId = String(member.memberId);
                                       if (checked) {
-                                        field.onChange([...currentValue, memberId]);
+                                        field.onChange([
+                                          ...currentValue,
+                                          memberId,
+                                        ]);
                                       } else {
-                                        field.onChange(currentValue.filter((id) => id !== memberId));
+                                        field.onChange(
+                                          currentValue.filter(
+                                            (id) => id !== memberId,
+                                          ),
+                                        );
                                       }
                                     }}
                                     disabled={viewMode}
                                   />
                                   <label className="text-sm cursor-pointer">
-                                    {member.member?.name || '알 수 없음'} ({member.role})
+                                    {member.member?.name || '알 수 없음'} (
+                                    {member.role})
                                   </label>
                                 </div>
                               ))}
@@ -421,7 +477,7 @@ export function ScheduleForm({
             }}
           />
         )}
-      
+
         <FormTextarea
           control={form.control}
           name="description"
@@ -431,30 +487,19 @@ export function ScheduleForm({
           rows={4}
           disabled={viewMode}
         />
-  
+
         {viewMode ? (
           <div className="flex justify-end gap-2">
             {onDelete && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onDelete}
-              >
+              <Button type="button" variant="outline" onClick={onDelete}>
                 삭제
               </Button>
             )}
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
-            >
+            <Button type="button" variant="outline" onClick={onCancel}>
               닫기
             </Button>
             {onEdit && (
-              <Button
-                type="button"
-                onClick={onEdit}
-              >
+              <Button type="button" onClick={onEdit}>
                 수정
               </Button>
             )}
@@ -467,7 +512,9 @@ export function ScheduleForm({
                 <p className="font-semibold mb-1">폼 검증 오류:</p>
                 <ul className="list-disc list-inside space-y-0.5">
                   {Object.entries(form.formState.errors).map(([key, error]) => (
-                    <li key={key}>{key}: {error.message}</li>
+                    <li key={key}>
+                      {key}: {error.message}
+                    </li>
                   ))}
                 </ul>
               </div>

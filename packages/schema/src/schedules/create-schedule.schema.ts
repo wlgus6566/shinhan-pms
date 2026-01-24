@@ -107,6 +107,19 @@ export const CreateScheduleSchema = z
       message: '팀 범위를 선택해주세요',
       path: ['teamScope'],
     }
+  )
+  // 조건부 검증 7: VACATION/HALF_DAY가 아닌 경우 title 필수
+  .refine(
+    (data) => {
+      if (data.scheduleType !== 'VACATION' && data.scheduleType !== 'HALF_DAY') {
+        return data.title !== undefined && data.title.trim().length > 0;
+      }
+      return true;
+    },
+    {
+      message: '제목을 입력해주세요',
+      path: ['title'],
+    }
   );
 
 export type CreateScheduleRequest = z.infer<typeof CreateScheduleSchema>;

@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { FormTextarea } from '@/components/form';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import type { WorkLog, MyTask } from '@/types/work-log';
@@ -289,24 +290,13 @@ export function WorkLogDialog({
             />
 
             {/* 이슈/블로커 */}
-            <FormField
+            <FormTextarea
               control={form.control}
               name="issues"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>이슈/블로커</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      value={field.value ?? ''}
-                      placeholder="진행 중 발생한 이슈나 블로커가 있다면 입력하세요"
-                      className="min-h-[80px] resize-none"
-                      maxLength={1000}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="이슈/블로커"
+              placeholder="진행 중 발생한 이슈나 블로커가 있다면 입력하세요"
+              className="min-h-[80px] resize-none"
+              rows={3}
             />
 
             <DialogFooter className="gap-2">
