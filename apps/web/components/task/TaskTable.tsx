@@ -1,8 +1,21 @@
 'use client';
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { STATUS_LABELS, STATUS_COLORS, DIFFICULTY_LABELS, DIFFICULTY_COLORS, type Task } from '@/types/task';
+import {
+  STATUS_LABELS,
+  STATUS_COLORS,
+  DIFFICULTY_LABELS,
+  DIFFICULTY_COLORS,
+  type Task,
+} from '@/types/task';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 
@@ -40,14 +53,20 @@ export function TaskTable({ tasks, onTaskClick }: TaskTableProps) {
             <TableHead className="w-[100px]">중요도</TableHead>
             <TableHead className="w-[120px]">진행상태</TableHead>
             <TableHead className="min-w-[200px]">담당자</TableHead>
+            <TableHead className="w-[120px]">오픈일</TableHead>
             <TableHead className="w-[200px]">기간</TableHead>
-            <TableHead className="w-[120px] hidden md:table-cell">담당PM</TableHead>
+            <TableHead className="w-[120px] hidden md:table-cell">
+              담당PM
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {tasks.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+              <TableCell
+                colSpan={6}
+                className="text-center py-12 text-muted-foreground"
+              >
                 조건에 맞는 업무가 없습니다
               </TableCell>
             </TableRow>
@@ -71,37 +90,54 @@ export function TaskTable({ tasks, onTaskClick }: TaskTableProps) {
                 </TableCell>
                 <TableCell>
                   <div className="flex gap-1 flex-wrap">
-                    {task.planningAssignees && task.planningAssignees.length > 0 && (
-                      <Badge variant="outline" className="text-xs">
-                        기획: {task.planningAssignees[0]!.name}
-                        {task.planningAssignees.length > 1 && ` 외 ${task.planningAssignees.length - 1}`}
-                      </Badge>
-                    )}
-                    {task.designAssignees && task.designAssignees.length > 0 && (
-                      <Badge variant="outline" className="text-xs">
-                        디자인: {task.designAssignees[0]!.name}
-                        {task.designAssignees.length > 1 && ` 외 ${task.designAssignees.length - 1}`}
-                      </Badge>
-                    )}
-                    {task.frontendAssignees && task.frontendAssignees.length > 0 && (
-                      <Badge variant="outline" className="text-xs">
-                        FE: {task.frontendAssignees[0]!.name}
-                        {task.frontendAssignees.length > 1 && ` 외 ${task.frontendAssignees.length - 1}`}
-                      </Badge>
-                    )}
-                    {task.backendAssignees && task.backendAssignees.length > 0 && (
-                      <Badge variant="outline" className="text-xs">
-                        BE: {task.backendAssignees[0]!.name}
-                        {task.backendAssignees.length > 1 && ` 외 ${task.backendAssignees.length - 1}`}
-                      </Badge>
-                    )}
-                    {(!task.planningAssignees || task.planningAssignees.length === 0) &&
-                     (!task.designAssignees || task.designAssignees.length === 0) &&
-                     (!task.frontendAssignees || task.frontendAssignees.length === 0) &&
-                     (!task.backendAssignees || task.backendAssignees.length === 0) && (
-                      <span className="text-xs text-muted-foreground">미배정</span>
-                    )}
+                    {task.planningAssignees &&
+                      task.planningAssignees.length > 0 && (
+                        <Badge variant="outline" className="text-xs">
+                          기획: {task.planningAssignees[0]!.name}
+                          {task.planningAssignees.length > 1 &&
+                            ` 외 ${task.planningAssignees.length - 1}`}
+                        </Badge>
+                      )}
+                    {task.designAssignees &&
+                      task.designAssignees.length > 0 && (
+                        <Badge variant="outline" className="text-xs">
+                          디자인: {task.designAssignees[0]!.name}
+                          {task.designAssignees.length > 1 &&
+                            ` 외 ${task.designAssignees.length - 1}`}
+                        </Badge>
+                      )}
+                    {task.frontendAssignees &&
+                      task.frontendAssignees.length > 0 && (
+                        <Badge variant="outline" className="text-xs">
+                          FE: {task.frontendAssignees[0]!.name}
+                          {task.frontendAssignees.length > 1 &&
+                            ` 외 ${task.frontendAssignees.length - 1}`}
+                        </Badge>
+                      )}
+                    {task.backendAssignees &&
+                      task.backendAssignees.length > 0 && (
+                        <Badge variant="outline" className="text-xs">
+                          BE: {task.backendAssignees[0]!.name}
+                          {task.backendAssignees.length > 1 &&
+                            ` 외 ${task.backendAssignees.length - 1}`}
+                        </Badge>
+                      )}
+                    {(!task.planningAssignees ||
+                      task.planningAssignees.length === 0) &&
+                      (!task.designAssignees ||
+                        task.designAssignees.length === 0) &&
+                      (!task.frontendAssignees ||
+                        task.frontendAssignees.length === 0) &&
+                      (!task.backendAssignees ||
+                        task.backendAssignees.length === 0) && (
+                        <span className="text-xs text-muted-foreground">
+                          미배정
+                        </span>
+                      )}
                   </div>
+                </TableCell>
+                <TableCell className="text-xs">
+                  {formatDate(task.openDate)}
                 </TableCell>
                 <TableCell className="text-xs">
                   {formatDateRange(task.startDate, task.endDate)}

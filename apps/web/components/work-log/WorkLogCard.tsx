@@ -13,16 +13,20 @@ interface WorkLogCardProps {
   onEdit?: () => void;
   onDelete?: () => void;
 }
+export function progressColor(progress: number) {
+  if (progress >= 100) return 'bg-emerald-500';
+  if (progress >= 75) return 'bg-blue-500';
+  if (progress >= 50) return 'bg-amber-500';
+  if (progress >= 25) return 'bg-orange-500';
+  return 'bg-slate-300';
+}
 
-export function WorkLogCard({ workLog, isOwner, onEdit, onDelete }: WorkLogCardProps) {
-  const progressColor = (progress: number) => {
-    if (progress >= 100) return 'bg-emerald-500';
-    if (progress >= 75) return 'bg-blue-500';
-    if (progress >= 50) return 'bg-amber-500';
-    if (progress >= 25) return 'bg-orange-500';
-    return 'bg-slate-300';
-  };
-
+export function WorkLogCard({
+  workLog,
+  isOwner,
+  onEdit,
+  onDelete,
+}: WorkLogCardProps) {
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow p-4">
       {/* 헤더 */}
@@ -32,7 +36,9 @@ export function WorkLogCard({ workLog, isOwner, onEdit, onDelete }: WorkLogCardP
             {workLog.task?.taskName}
           </h3>
           <p className="text-sm text-slate-500 mt-0.5">
-            {format(new Date(workLog.workDate), 'M월 d일 (EEEE)', { locale: ko })}
+            {format(new Date(workLog.workDate), 'M월 d일 (EEEE)', {
+              locale: ko,
+            })}
           </p>
         </div>
         {isOwner && (
@@ -79,7 +85,10 @@ export function WorkLogCard({ workLog, isOwner, onEdit, onDelete }: WorkLogCardP
           <div className="flex items-center gap-2">
             <div className="w-20 h-2 bg-slate-100 rounded-full overflow-hidden">
               <div
-                className={cn('h-full rounded-full transition-all', progressColor(workLog.progress))}
+                className={cn(
+                  'h-full rounded-full transition-all',
+                  progressColor(workLog.progress),
+                )}
                 style={{ width: `${workLog.progress}%` }}
               />
             </div>

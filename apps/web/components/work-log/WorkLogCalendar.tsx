@@ -22,6 +22,7 @@ import koLocale from '@fullcalendar/core/locales/ko';
 
 // Utilities
 import { transformWorkLogsToEvents } from './workLogCalendarUtils';
+import { progressColor } from './WorkLogCard';
 
 interface WorkLogCalendarProps {
   workLogs: WorkLog[];
@@ -214,7 +215,7 @@ export function WorkLogCalendar({
         />
       ) : (
         /* 목록 뷰 */
-        <div className="max-h-[600px] overflow-y-auto">
+        <div className="max-h-[1000px] overflow-y-auto">
           {groupedLogs.length === 0 ? (
             <div className="py-16 text-center text-slate-500">
               작성된 업무일지가 없습니다
@@ -256,16 +257,14 @@ export function WorkLogCalendar({
                               <div className="flex items-center gap-2">
                                 <div className="w-20 h-2 bg-slate-100 rounded-full overflow-hidden">
                                   <div
-                                    className={
-                                      'h-full rounded-full transition-all bg-primary'
-                                    }
+                                    className={`${progressColor(log.progress)} h-full rounded-full transition-all`}
                                     style={{ width: `${log.progress}%` }}
                                   />
                                 </div>
+                                <span className="text-sm font-medium text-blue-600">
+                                  {log.progress}%
+                                </span>
                               </div>
-                              <span className="text-sm font-medium text-blue-600">
-                                {log.progress}%
-                              </span>
                             </>
                           )}
                       </div>

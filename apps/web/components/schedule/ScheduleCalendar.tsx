@@ -264,7 +264,7 @@ export function ScheduleCalendar({
         />
       ) : (
         /* List View - Keep existing implementation */
-        <div className="max-h-[600px] overflow-y-auto">
+        <div className="max-h-[1000px] overflow-y-auto">
           {groupedSchedules.length === 0 ? (
             <div className="py-16 text-center text-slate-500">
               등록된 일정이 없습니다
