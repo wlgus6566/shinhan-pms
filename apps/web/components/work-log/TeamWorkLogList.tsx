@@ -135,7 +135,9 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
   };
 
   const handleMonthChange = (date: Date) => {
-    setCurrentMonth(startOfMonth(date));
+    const newMonth = startOfMonth(date);
+    setCurrentMonth(newMonth);
+    setSelectedDate(newMonth); // Sync selected date to first day of new month
   };
 
   // 프로젝트에 있는 담당 분야 목록 추출

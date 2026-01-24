@@ -123,7 +123,9 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
   };
 
   const handleMonthChange = (date: Date) => {
-    setCurrentMonth(startOfMonth(date));
+    const newMonth = startOfMonth(date);
+    setCurrentMonth(newMonth);
+    setSelectedDate(newMonth); // Sync selected date to first day of new month
   };
 
   const handleScheduleClick = (schedule: Schedule) => {

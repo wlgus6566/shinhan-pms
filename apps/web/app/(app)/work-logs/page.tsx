@@ -109,7 +109,9 @@ export default function WorkLogsPage() {
 
   // 월 변경 핸들러
   const handleMonthChange = useCallback((date: Date) => {
-    setCurrentMonth(startOfMonth(date));
+    const newMonth = startOfMonth(date);
+    setCurrentMonth(newMonth);
+    setSelectedDate(newMonth); // Sync selected date to first day of new month
   }, []);
 
   // 일지 작성 다이얼로그 열기
