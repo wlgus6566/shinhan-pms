@@ -112,6 +112,9 @@ export function WorkLogDialog({
     try {
       await onSubmit(data, mode === 'create' ? taskId : undefined);
       onOpenChange(false);
+    } catch (error) {
+      // 에러는 부모 컴포넌트에서 처리되므로 여기서는 다이얼로그를 열어둠
+      // 로딩 상태만 해제
     } finally {
       setIsSubmitting(false);
     }

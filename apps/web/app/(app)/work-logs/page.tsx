@@ -130,12 +130,23 @@ export default function WorkLogsPage() {
   // 일지 작성/수정 제출
   const handleSubmit = useCallback(
     async (data: CreateWorkLogRequest | UpdateWorkLogRequest, taskId?: string) => {
-      if (dialogMode === 'create' && taskId) {
-        await createWorkLog(taskId, data as CreateWorkLogRequest);
-      } else if (dialogMode === 'edit' && editingWorkLog) {
-        await updateWorkLog(editingWorkLog.id, data as UpdateWorkLogRequest);
+      try {
+        if (dialogMode === 'create' && taskId) {
+          await createWorkLog(taskId, data as CreateWorkLogRequest);
+        } else if (dialogMode === 'edit' && editingWorkLog) {
+          await updateWorkLog(editingWorkLog.id, data as UpdateWorkLogRequest);
+        }
+        mutateWorkLogs();
+      } catch (error: any) {
+        // 409 Conflict: 중복 업무일지
+        if (error?.statusCode === 409) {
+          alert(error.message || '해당 날짜에 이미 업무일지가 존재합니다');
+        } else {
+          // 기타 에러
+          alert(error?.message || '업무일지 저장 중 오류가 발생했습니다');
+        }
+        throw error; // 에러를 다시 던져서 다이얼로그가 닫히지 않도록 함
       }
-      mutateWorkLogs();
     },
     [dialogMode, editingWorkLog, mutateWorkLogs]
   );

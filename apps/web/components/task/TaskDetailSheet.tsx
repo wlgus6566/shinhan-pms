@@ -36,6 +36,7 @@ import {
   Edit,
   Trash2,
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface TaskDetailSheetProps {
   task: Task | null;
@@ -143,23 +144,52 @@ export function TaskDetailSheet({
           {/* 담당자 정보 */}
           {assignees.length > 0 && (
             <>
-              <Separator />
-              <div className="space-y-3">
-                <h3 className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  담당자
-                </h3>
-                <div className="space-y-2 pl-6">
+              <Separator className="my-4" />
+              <section className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    담당자
+                  </h3>
+                  <span className="text-xs text-muted-foreground">
+                    총{' '}
+                    {assignees.reduce(
+                      (acc, cur) => acc + (cur.assignees?.length ?? 0),
+                      0,
+                    )}
+                    명
+                  </span>
+                </div>
+
+                <div className="space-y-3">
                   {assignees.map(({ label, assignees: assigneeList }) => (
-                    <div key={label} className="space-y-1">
-                      <span className="text-sm text-muted-foreground">
-                        {label}
-                      </span>
+                    <div
+                      key={label}
+                      className="rounded-lg border bg-background p-3"
+                    >
+                      {/* 그룹 헤더 */}
+                      <div className="mb-2 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          {/* 팀 컬러 포인트 (원하면 label별 색 매핑해서 className 바꾸면 됨) */}
+                          <span className={cn("h-4 w-1.5 rounded-full bg-slate-400")} />
+                          <span className="text-sm font-semibold">{label}</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          {assigneeList?.length ?? 0}명
+                        </span>
+                      </div>
+
+                      {/* 담당자 뱃지 */}
                       <div className="flex flex-wrap gap-2">
                         {assigneeList?.map((assignee) => (
                           <span
                             key={assignee.id}
-                            className="text-sm font-medium px-2 py-1 bg-slate-100 rounded"
+                            className="
+                    inline-flex items-center rounded-full border bg-muted/40
+                    px-3 py-1 text-sm font-medium text-foreground
+                    hover:bg-muted transition
+                  "
+                            title={assignee.name}
                           >
                             {assignee.name}
                           </span>
@@ -168,7 +198,7 @@ export function TaskDetailSheet({
                     </div>
                   ))}
                 </div>
-              </div>
+              </section>
             </>
           )}
 

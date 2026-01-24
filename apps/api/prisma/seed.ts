@@ -315,10 +315,17 @@ async function main() {
       description: '사용자 요구사항 수집 및 기능 명세서 작성',
       difficulty: 'MEDIUM',
       status: 'IN_PROGRESS',
-      planningAssigneeId: kim.id,
       startDate: new Date('2026-01-02'),
       endDate: new Date('2026-01-31'),
       createdBy: admin.id,
+      assignees: {
+        create: [
+          {
+            userId: kim.id,
+            workArea: 'PLANNING',
+          },
+        ],
+      },
     },
   });
 
@@ -329,10 +336,17 @@ async function main() {
       description: '화면 설계 및 디자인 시안 작성',
       difficulty: 'MEDIUM',
       status: 'IN_PROGRESS',
-      designAssigneeId: jung.id,
       startDate: new Date('2026-01-06'),
       endDate: new Date('2026-01-31'),
       createdBy: admin.id,
+      assignees: {
+        create: [
+          {
+            userId: jung.id,
+            workArea: 'DESIGN',
+          },
+        ],
+      },
     },
   });
 
@@ -343,10 +357,17 @@ async function main() {
       description: 'RESTful API 설계 및 구현',
       difficulty: 'HIGH',
       status: 'IN_PROGRESS',
-      backendAssigneeId: lee.id,
       startDate: new Date('2026-01-10'),
       endDate: new Date('2026-02-28'),
       createdBy: admin.id,
+      assignees: {
+        create: [
+          {
+            userId: lee.id,
+            workArea: 'BACKEND',
+          },
+        ],
+      },
     },
   });
 
@@ -357,10 +378,17 @@ async function main() {
       description: 'ERD 작성 및 테이블 구조 설계',
       difficulty: 'HIGH',
       status: 'IN_PROGRESS',
-      backendAssigneeId: lee.id,
       startDate: new Date('2026-01-03'),
       endDate: new Date('2026-01-20'),
       createdBy: admin.id,
+      assignees: {
+        create: [
+          {
+            userId: lee.id,
+            workArea: 'BACKEND',
+          },
+        ],
+      },
     },
   });
 
@@ -371,10 +399,17 @@ async function main() {
       description: '모바일 앱 화면 구조 및 플로우 기획',
       difficulty: 'MEDIUM',
       status: 'IN_PROGRESS',
-      planningAssigneeId: kim.id,
       startDate: new Date('2026-01-02'),
       endDate: new Date('2026-01-31'),
       createdBy: admin.id,
+      assignees: {
+        create: [
+          {
+            userId: kim.id,
+            workArea: 'PLANNING',
+          },
+        ],
+      },
     },
   });
 
@@ -385,10 +420,17 @@ async function main() {
       description: '앱 디자인 시안 제작 및 검토',
       difficulty: 'MEDIUM',
       status: 'IN_PROGRESS',
-      designAssigneeId: jung.id,
       startDate: new Date('2026-01-08'),
       endDate: new Date('2026-01-31'),
       createdBy: admin.id,
+      assignees: {
+        create: [
+          {
+            userId: jung.id,
+            workArea: 'DESIGN',
+          },
+        ],
+      },
     },
   });
 

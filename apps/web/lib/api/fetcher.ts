@@ -53,9 +53,11 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response.data,
   async (error: AxiosError<any>) => {
+    // 로그인 요청은 401 처리 건너뜀
+    const isLoginRequest = error.config?.url?.includes('/auth/login');
 
     // 401 Unauthorized 처리
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && !isLoginRequest) {
       // 중복 처리 방지
       if (isHandlingAuthError) {
         return Promise.reject(error.response?.data || error);

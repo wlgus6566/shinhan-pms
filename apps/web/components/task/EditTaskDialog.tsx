@@ -234,6 +234,7 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
                 </FormItem>
               )}
             />
+            
 
             <div className="grid grid-cols-2 gap-4">
               <FormField

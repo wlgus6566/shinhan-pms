@@ -28,7 +28,7 @@ export class WorkLogsService {
     }
 
     // 2. 담당자인지 확인
-    const isAssignee = this.checkIsAssignee(task, userId);
+    const isAssignee = await this.checkIsAssignee(taskId, userId);
     if (!isAssignee) {
       throw new ForbiddenException('해당 업무의 담당자만 일지를 작성할 수 있습니다');
     }
@@ -234,12 +234,11 @@ export class WorkLogsService {
     return await this.prisma.task.findMany({
       where: {
         isActive: true,
-        OR: [
-          { planningAssigneeId: userId },
-          { designAssigneeId: userId },
-          { frontendAssigneeId: userId },
-          { backendAssigneeId: userId },
-        ],
+        assignees: {
+          some: {
+            userId,
+          },
+        },
       },
       include: {
         project: { select: { id: true, projectName: true } },
@@ -251,12 +250,13 @@ export class WorkLogsService {
   /**
    * 담당자 여부 확인
    */
-  private checkIsAssignee(task: any, userId: bigint): boolean {
-    return (
-      task.planningAssigneeId === userId ||
-      task.designAssigneeId === userId ||
-      task.frontendAssigneeId === userId ||
-      task.backendAssigneeId === userId
-    );
+  private async checkIsAssignee(taskId: bigint, userId: bigint): Promise<boolean> {
+    const assignee = await this.prisma.taskAssignee.findFirst({
+      where: {
+        taskId,
+        userId,
+      },
+    });
+    return !!assignee;
   }
 }

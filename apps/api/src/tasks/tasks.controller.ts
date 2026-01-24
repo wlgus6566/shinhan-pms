@@ -126,36 +126,37 @@ export class TasksController {
   }
 
   private transformTask(task: any): any {
+    const { assignees, ...rest } = task;
     return {
-      ...task,
-      id: task.id.toString(),
-      projectId: task.projectId.toString(),
-      createdBy: task.createdBy?.toString(),
-      updatedBy: task.updatedBy?.toString(),
-      startDate: task.startDate ? task.startDate.toISOString().split('T')[0] : null,
-      endDate: task.endDate ? task.endDate.toISOString().split('T')[0] : null,
-      planningAssignees: task.assignees
+      ...rest,
+      id: rest.id.toString(),
+      projectId: rest.projectId.toString(),
+      createdBy: rest.createdBy?.toString(),
+      updatedBy: rest.updatedBy?.toString(),
+      startDate: rest.startDate ? rest.startDate.toISOString().split('T')[0] : null,
+      endDate: rest.endDate ? rest.endDate.toISOString().split('T')[0] : null,
+      planningAssignees: assignees
         ?.filter((a: any) => a.workArea === 'PLANNING')
         .map((a: any) => ({
           id: a.user.id.toString(),
           name: a.user.name,
           email: a.user.email,
         })) || [],
-      designAssignees: task.assignees
+      designAssignees: assignees
         ?.filter((a: any) => a.workArea === 'DESIGN')
         .map((a: any) => ({
           id: a.user.id.toString(),
           name: a.user.name,
           email: a.user.email,
         })) || [],
-      frontendAssignees: task.assignees
+      frontendAssignees: assignees
         ?.filter((a: any) => a.workArea === 'FRONTEND')
         .map((a: any) => ({
           id: a.user.id.toString(),
           name: a.user.name,
           email: a.user.email,
         })) || [],
-      backendAssignees: task.assignees
+      backendAssignees: assignees
         ?.filter((a: any) => a.workArea === 'BACKEND')
         .map((a: any) => ({
           id: a.user.id.toString(),
