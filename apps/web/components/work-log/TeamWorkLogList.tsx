@@ -174,6 +174,7 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
           selectedDate={selectedDate}
           onDateSelect={handleDateSelect}
           onMonthChange={handleMonthChange}
+          showUserName={true}
         />
       )}
 

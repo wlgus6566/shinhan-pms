@@ -7,7 +7,14 @@ import type {
   UpdateScheduleRequest,
 } from '@repo/schema';
 
-export type { ScheduleType, TeamScope, HalfDayType, ParticipantStatus, CreateScheduleRequest, UpdateScheduleRequest };
+export type {
+  ScheduleType,
+  TeamScope,
+  HalfDayType,
+  ParticipantStatus,
+  CreateScheduleRequest,
+  UpdateScheduleRequest,
+};
 
 export interface ScheduleParticipant {
   id: string;
@@ -65,8 +72,8 @@ export const SCHEDULE_TYPE_COLORS: Record<ScheduleType, string> = {
 export const SCHEDULE_TYPE_CALENDAR_COLORS: Record<ScheduleType, string> = {
   MEETING: '#3b82f6', // blue-500
   SCRUM: '#6366f1', // indigo-500
-  VACATION: '#71e178', // emerald-500
-  HALF_DAY: '#14b8a6', // teal-500
+  VACATION: '#abe3c3',
+  HALF_DAY: '#abe3c3',
   OTHER: '#64748b', // slate-500
 };
 

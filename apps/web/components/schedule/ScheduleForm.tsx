@@ -251,6 +251,13 @@ export function ScheduleForm({
     form.setValue('participantIds', selectedMembers);
   }, [teamScope, showParticipants, projectMembers, form]);
 
+  // 연차/반차 선택 시 title을 undefined로 설정 (Zod 검증 통과용)
+  useEffect(() => {
+    if (isVacation) {
+      form.setValue('title', undefined as any);
+    }
+  }, [isVacation, form]);
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">

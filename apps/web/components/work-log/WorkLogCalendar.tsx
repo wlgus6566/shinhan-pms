@@ -29,6 +29,7 @@ interface WorkLogCalendarProps {
   selectedDate: Date;
   onDateSelect: (date: Date) => void;
   onMonthChange: (date: Date) => void;
+  showUserName?: boolean;
 }
 
 export function WorkLogCalendar({
@@ -36,6 +37,7 @@ export function WorkLogCalendar({
   selectedDate,
   onDateSelect,
   onMonthChange,
+  showUserName = false,
 }: WorkLogCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date(selectedDate));
   const [viewMode, setViewMode] = useState<'month' | 'list'>('month');
@@ -96,6 +98,7 @@ export function WorkLogCalendar({
     return (
       <div className="flex justify-start items-center gap-1 relative w-full px-1 py-0.5 cursor-pointer transition-colors rounded border-none">
         <span className="text-[12px] font-medium text-blue-700 truncate block">
+          {showUserName && workLog.user?.name && `${workLog.user.name} - `}
           {workLog.task?.taskName || '업무일지'}
         </span>
       </div>
@@ -245,6 +248,9 @@ export function WorkLogCalendar({
                         <div className="w-2 h-2 rounded-full bg-blue-500" />
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-slate-800 truncate">
+                            {showUserName && log.user?.name && (
+                              <span className="text-slate-500 mr-1">{log.user.name}</span>
+                            )}
                             {log.task?.taskName}
                           </p>
                           <p className="text-sm text-slate-500 truncate mt-0.5">

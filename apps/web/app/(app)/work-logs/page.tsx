@@ -17,12 +17,18 @@ import {
   updateWorkLog,
   deleteWorkLog,
 } from '@/lib/api/workLogs';
-import type { WorkLog, CreateWorkLogRequest, UpdateWorkLogRequest } from '@/types/work-log';
+import type {
+  WorkLog,
+  CreateWorkLogRequest,
+  UpdateWorkLogRequest,
+} from '@/types/work-log';
 
 export default function WorkLogsPage() {
   const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [currentMonth, setCurrentMonth] = useState<Date>(startOfMonth(new Date()));
+  const [currentMonth, setCurrentMonth] = useState<Date>(
+    startOfMonth(new Date()),
+  );
   const [selectedTaskId, setSelectedTaskId] = useState<string | undefined>();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
@@ -52,24 +58,24 @@ export default function WorkLogsPage() {
   const uniqueProjects = useMemo(() => {
     const projectMap = new Map<string, { id: string; projectName: string }>();
 
-    myTasks.forEach(task => {
+    myTasks.forEach((task) => {
       if (task.project && task.project.id) {
         projectMap.set(task.project.id, {
           id: task.project.id,
-          projectName: task.project.projectName
+          projectName: task.project.projectName,
         });
       }
     });
 
     return Array.from(projectMap.values()).sort((a, b) =>
-      a.projectName.localeCompare(b.projectName, 'ko')
+      a.projectName.localeCompare(b.projectName, 'ko'),
     );
   }, [myTasks]);
 
   // 프로젝트별 필터링된 업무 목록
   const filteredTasks = useMemo(() => {
     if (selectedProjectId === 'all') return myTasks;
-    return myTasks.filter(task => task.projectId === selectedProjectId);
+    return myTasks.filter((task) => task.projectId === selectedProjectId);
   }, [myTasks, selectedProjectId]);
 
   // 프로젝트별 필터링된 일지 목록
@@ -79,25 +85,30 @@ export default function WorkLogsPage() {
     // 선택된 프로젝트에 속한 taskId 추출
     const projectTaskIds = new Set(
       myTasks
-        .filter(task => task.projectId === selectedProjectId)
-        .map(task => task.id)
+        .filter((task) => task.projectId === selectedProjectId)
+        .map((task) => task.id),
     );
 
-    return workLogs.filter(log => projectTaskIds.has(log.taskId));
+    return workLogs.filter((log) => projectTaskIds.has(log.taskId));
   }, [workLogs, myTasks, selectedProjectId]);
 
   // 어제 일지 (복사 기능용)
   const previousLog = useMemo(() => {
     if (!selectedTaskId) return null;
     const yesterday = format(subDays(selectedDate, 1), 'yyyy-MM-dd');
-    return workLogs.find(
-      (log) => log.taskId === selectedTaskId && log.workDate === yesterday
-    ) || null;
+    return (
+      workLogs.find(
+        (log) => log.taskId === selectedTaskId && log.workDate === yesterday,
+      ) || null
+    );
   }, [workLogs, selectedTaskId, selectedDate]);
 
   // 프로젝트 전환 시 선택된 업무가 필터 범위에 없으면 리셋
   useEffect(() => {
-    if (selectedTaskId && !filteredTasks.some(task => task.id === selectedTaskId)) {
+    if (
+      selectedTaskId &&
+      !filteredTasks.some((task) => task.id === selectedTaskId)
+    ) {
       setSelectedTaskId(undefined);
     }
   }, [selectedTaskId, filteredTasks]);
@@ -131,7 +142,10 @@ export default function WorkLogsPage() {
 
   // 일지 작성/수정 제출
   const handleSubmit = useCallback(
-    async (data: CreateWorkLogRequest | UpdateWorkLogRequest, taskId?: string) => {
+    async (
+      data: CreateWorkLogRequest | UpdateWorkLogRequest,
+      taskId?: string,
+    ) => {
       try {
         if (dialogMode === 'create' && taskId) {
           await createWorkLog(taskId, data as CreateWorkLogRequest);
@@ -150,7 +164,7 @@ export default function WorkLogsPage() {
         throw error; // 에러를 다시 던져서 다이얼로그가 닫히지 않도록 함
       }
     },
-    [dialogMode, editingWorkLog, mutateWorkLogs]
+    [dialogMode, editingWorkLog, mutateWorkLogs],
   );
 
   // 일지 삭제
@@ -169,7 +183,7 @@ export default function WorkLogsPage() {
         mutateWorkLogs();
       }
     },
-    [mutateWorkLogs]
+    [mutateWorkLogs],
   );
 
   const isLoading = workLogsLoading || tasksLoading;
@@ -179,7 +193,7 @@ export default function WorkLogsPage() {
       {/* 페이지 헤더 */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">업무일지</h1>
+          <h1 className="text-3xl font-bold text-slate-800">업무일지</h1>
           <p className="text-slate-500 mt-1">
             담당 업무의 일지를 작성하고 관리하세요
           </p>
@@ -188,13 +202,10 @@ export default function WorkLogsPage() {
 
       {/* 프로젝트 필터 탭 */}
       {!isLoading && myTasks.length > 0 && uniqueProjects.length > 0 && (
-        <Tabs
-          value={selectedProjectId}
-          onValueChange={setSelectedProjectId}
-        >
+        <Tabs value={selectedProjectId} onValueChange={setSelectedProjectId}>
           <TabsList>
             <TabsTrigger value="all">전체</TabsTrigger>
-            {uniqueProjects.map(project => (
+            {uniqueProjects.map((project) => (
               <TabsTrigger
                 key={project.id}
                 value={project.id}
@@ -230,7 +241,7 @@ export default function WorkLogsPage() {
               selectedTaskId={selectedTaskId}
               onTaskSelect={setSelectedTaskId}
             />
-             <WorkLogList
+            <WorkLogList
               workLogs={filteredWorkLogs}
               currentUserId={user?.id.toString()}
               selectedDate={selectedDate}
@@ -239,7 +250,7 @@ export default function WorkLogsPage() {
               onCreate={handleCreateClick}
             />
           </div>
-          
+
           {/* 가운데: 달력 */}
           <div className="flex-1">
             <WorkLogCalendar
@@ -247,6 +258,7 @@ export default function WorkLogsPage() {
               selectedDate={selectedDate}
               onDateSelect={handleDateSelect}
               onMonthChange={handleMonthChange}
+              showUserName={false}
             />
           </div>
         </div>
