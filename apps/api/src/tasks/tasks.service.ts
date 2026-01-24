@@ -75,6 +75,7 @@ export class TasksService {
         clientName: createTaskDto.clientName,
         startDate: createTaskDto.startDate ? new Date(createTaskDto.startDate) : null,
         endDate: createTaskDto.endDate ? new Date(createTaskDto.endDate) : null,
+        openDate: createTaskDto.openDate ? new Date(createTaskDto.openDate) : null,
         notes: createTaskDto.notes,
         createdBy: userId,
         assignees: {
@@ -164,6 +165,7 @@ export class TasksService {
       clientName: updateTaskDto.clientName,
       startDate: updateTaskDto.startDate ? new Date(updateTaskDto.startDate) : undefined,
       endDate: updateTaskDto.endDate ? new Date(updateTaskDto.endDate) : undefined,
+      openDate: updateTaskDto.openDate ? new Date(updateTaskDto.openDate) : undefined,
       notes: updateTaskDto.notes,
       status: updateTaskDto.status,
       updatedBy: userId,

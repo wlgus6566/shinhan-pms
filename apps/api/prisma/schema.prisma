@@ -132,6 +132,7 @@ model Task {
 
   startDate            DateTime? @map("start_date") @db.Date
   endDate              DateTime? @map("end_date") @db.Date
+  openDate             DateTime? @map("open_date") @db.Date
   notes                String?   @db.Text
 
   status               String    @default("WAITING") @db.VarChar(20)

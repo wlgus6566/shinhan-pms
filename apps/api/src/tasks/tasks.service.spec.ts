@@ -124,6 +124,76 @@ describe('TasksService', () => {
         service.create(BigInt(1), BigInt(1), { taskName: 'Test' } as any),
       ).rejects.toThrow(ForbiddenException);
     });
+
+    it('should create a task with openDate', async () => {
+      const projectId = BigInt(1);
+      const userId = BigInt(1);
+      const createTaskDto = {
+        taskName: 'Test Task',
+        difficulty: 'MEDIUM',
+        startDate: '2026-01-01',
+        endDate: '2026-01-31',
+        openDate: '2026-02-01',
+      };
+
+      const mockProject = { id: projectId };
+      const mockMember = { projectId, memberId: userId, role: 'PM' };
+      const mockTask = {
+        id: BigInt(1),
+        projectId,
+        taskName: 'Test Task',
+        difficulty: 'MEDIUM',
+        startDate: new Date('2026-01-01'),
+        endDate: new Date('2026-01-31'),
+        openDate: new Date('2026-02-01'),
+        assignees: [],
+      };
+
+      mockPrismaService.project.findUnique.mockResolvedValue(mockProject);
+      mockPrismaService.projectMember.findFirst.mockResolvedValue(mockMember);
+      mockPrismaService.task.create.mockResolvedValue(mockTask);
+
+      await service.create(projectId, userId, createTaskDto as any);
+
+      expect(mockPrismaService.task.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            openDate: new Date('2026-02-01'),
+          }),
+        }),
+      );
+    });
+
+    it('should create a task with null openDate when not provided', async () => {
+      const projectId = BigInt(1);
+      const userId = BigInt(1);
+      const createTaskDto = {
+        taskName: 'Test Task',
+        difficulty: 'MEDIUM',
+      };
+
+      const mockProject = { id: projectId };
+      const mockMember = { projectId, memberId: userId, role: 'PM' };
+      const mockTask = {
+        id: BigInt(1),
+        openDate: null,
+        assignees: [],
+      };
+
+      mockPrismaService.project.findUnique.mockResolvedValue(mockProject);
+      mockPrismaService.projectMember.findFirst.mockResolvedValue(mockMember);
+      mockPrismaService.task.create.mockResolvedValue(mockTask);
+
+      await service.create(projectId, userId, createTaskDto as any);
+
+      expect(mockPrismaService.task.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            openDate: null,
+          }),
+        }),
+      );
+    });
   });
 
   describe('update', () => {
@@ -171,6 +241,41 @@ describe('TasksService', () => {
                 { userId: BigInt(3), workArea: 'PLANNING' },
               ]),
             },
+          }),
+        }),
+      );
+    });
+
+    it('should update task with new openDate', async () => {
+      const taskId = BigInt(1);
+      const userId = BigInt(1);
+      const updateTaskDto = {
+        openDate: '2026-03-01',
+      };
+
+      const mockTask = {
+        id: taskId,
+        projectId: BigInt(1),
+        isActive: true,
+      };
+
+      const mockMember = { projectId: BigInt(1), memberId: userId, role: 'PM' };
+      const mockUpdatedTask = {
+        id: taskId,
+        openDate: new Date('2026-03-01'),
+        assignees: [],
+      };
+
+      mockPrismaService.task.findUnique.mockResolvedValue(mockTask);
+      mockPrismaService.projectMember.findFirst.mockResolvedValue(mockMember);
+      mockPrismaService.task.update.mockResolvedValue(mockUpdatedTask);
+
+      await service.update(taskId, userId, updateTaskDto as any);
+
+      expect(mockPrismaService.task.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            openDate: new Date('2026-03-01'),
           }),
         }),
       );

@@ -38,6 +38,7 @@ const EditTaskFormSchema = z.object({
   backendAssigneeIds: z.array(z.string()).optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
+  openDate: z.string().optional(),
   notes: z
     .string()
     .transform(val => val === '' ? undefined : val)
@@ -95,6 +96,7 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
       backendAssigneeIds: task.backendAssignees?.map(a => a.id.toString()) || [],
       startDate: task.startDate || '',
       endDate: task.endDate || '',
+      openDate: task.openDate || '',
       notes: task.notes || '',
     },
   });
@@ -113,6 +115,7 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
       backendAssigneeIds: task.backendAssignees?.map(a => a.id.toString()) || [],
       startDate: task.startDate || '',
       endDate: task.endDate || '',
+      openDate: task.openDate || '',
       notes: task.notes || '',
     });
   }, [task, form]);
@@ -140,6 +143,7 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
         backendAssigneeIds: data.backendAssigneeIds?.map(id => Number(id)),
         startDate: data.startDate || undefined,
         endDate: data.endDate || undefined,
+        openDate: data.openDate || undefined,
         notes: data.notes || undefined,
       };
 
@@ -411,6 +415,20 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
                 )}
               />
             </div>
+
+            <FormField
+              control={form.control}
+              name="openDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>오픈일 (상용배포일)</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}

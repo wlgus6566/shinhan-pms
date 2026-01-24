@@ -22,6 +22,7 @@ export const UpdateTaskSchema = z.object({
   backendAssigneeIds: z.array(z.number().int().positive()).optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
+  openDate: z.string().optional(),
   notes: z
     .string()
     .transform(val => val === '' ? undefined : val)

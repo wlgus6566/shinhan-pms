@@ -36,6 +36,7 @@ const AddTaskFormSchema = z.object({
   backendAssigneeIds: z.array(z.string()).optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
+  openDate: z.string().optional(),
   notes: z
     .string()
     .transform(val => val === '' ? undefined : val)
@@ -83,6 +84,7 @@ export function AddTaskDialog({ projectId, projectMembers, open, onOpenChange, o
       backendAssigneeIds: [],
       startDate: '',
       endDate: '',
+      openDate: '',
       notes: '',
     },
   });
@@ -109,6 +111,7 @@ export function AddTaskDialog({ projectId, projectMembers, open, onOpenChange, o
         backendAssigneeIds: data.backendAssigneeIds?.map(id => Number(id)),
         startDate: data.startDate || undefined,
         endDate: data.endDate || undefined,
+        openDate: data.openDate || undefined,
         notes: data.notes || undefined,
       };
 
@@ -373,6 +376,20 @@ export function AddTaskDialog({ projectId, projectMembers, open, onOpenChange, o
                 )}
               />
             </div>
+
+            <FormField
+              control={form.control}
+              name="openDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>오픈일 (상용배포일)</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}

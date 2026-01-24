@@ -63,6 +63,7 @@ export interface Task {
   backendAssignees?: User[];
   startDate?: string;
   endDate?: string;
+  openDate?: string;
   notes?: string;
   status: TaskStatus;
   createdAt: string;
