@@ -21,7 +21,7 @@ import type {
 import koLocale from '@fullcalendar/core/locales/ko';
 
 // Utilities
-import { transformWorkLogsToEvents } from './workLogCalendarUtils';
+import { transformWorkLogsToEvents, type ColorBy } from './workLogCalendarUtils';
 import { progressColor } from './WorkLogCard';
 
 interface WorkLogCalendarProps {
@@ -44,7 +44,12 @@ export function WorkLogCalendar({
   const calendarRef = useRef<FullCalendar>(null);
 
   // Transform workLogs to FullCalendar events
-  const events = useMemo(() => transformWorkLogsToEvents(workLogs), [workLogs]);
+  // showUserName이 true면 팀 업무일지 → 작성자별 색상, false면 내 업무일지 → 업무별 색상
+  const colorBy: ColorBy = showUserName ? 'user' : 'task';
+  const events = useMemo(
+    () => transformWorkLogsToEvents(workLogs, colorBy),
+    [workLogs, colorBy],
+  );
 
   // Navigation handlers
   const handlePrevMonth = () => {
@@ -94,10 +99,18 @@ export function WorkLogCalendar({
   // Custom event rendering
   const renderEventContent = (eventInfo: EventContentArg) => {
     const workLog = eventInfo.event.extendedProps.workLog as WorkLog;
+    const bgColor = eventInfo.event.backgroundColor;
+    const textColor = eventInfo.event.textColor;
 
     return (
-      <div className="flex justify-start items-center gap-1 relative w-full px-1 py-0.5 cursor-pointer transition-colors rounded border-none">
-        <span className="text-[12px] font-medium text-blue-700 truncate block">
+      <div
+        className="flex justify-start items-center gap-1 relative w-full px-1.5 py-0.5 cursor-pointer transition-colors rounded"
+        style={{ backgroundColor: bgColor }}
+      >
+        <span
+          className="text-[12px] font-medium truncate block"
+          style={{ color: textColor }}
+        >
           {showUserName && workLog.user?.name && `${workLog.user.name} - `}
           {workLog.task?.taskName || '업무일지'}
         </span>
@@ -208,7 +221,7 @@ export function WorkLogCalendar({
           dateClick={handleDateClick}
           eventClick={handleEventClick}
           datesSet={handleDatesSet}
-          dayMaxEvents={2}
+          dayMaxEvents={4}
           moreLinkText={(num) => `+${num}개`}
           eventContent={renderEventContent}
           dayCellClassNames={getDayCellClassNames}
@@ -249,7 +262,9 @@ export function WorkLogCalendar({
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-slate-800 truncate">
                             {showUserName && log.user?.name && (
-                              <span className="text-slate-500 mr-1">{log.user.name}</span>
+                              <span className="text-slate-500 mr-1">
+                                {log.user.name}
+                              </span>
                             )}
                             {log.task?.taskName}
                           </p>

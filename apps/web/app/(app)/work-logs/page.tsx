@@ -236,11 +236,6 @@ export default function WorkLogsPage() {
       ) : (
         <div className="flex gap-6">
           <div className="flex flex-col gap-6 w-[30%]">
-            <MyTaskList
-              tasks={filteredTasks}
-              selectedTaskId={selectedTaskId}
-              onTaskSelect={setSelectedTaskId}
-            />
             <WorkLogList
               workLogs={filteredWorkLogs}
               currentUserId={user?.id.toString()}
@@ -249,6 +244,7 @@ export default function WorkLogsPage() {
               onDelete={handleDeleteFromCard}
               onCreate={handleCreateClick}
             />
+            <MyTaskList tasks={filteredTasks} />
           </div>
 
           {/* 가운데: 달력 */}

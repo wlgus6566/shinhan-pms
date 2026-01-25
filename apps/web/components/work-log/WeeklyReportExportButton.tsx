@@ -12,6 +12,7 @@ import {
   formatWeekDisplay,
   formatWeekDisplayWithWeekNumber,
 } from '@/lib/utils/week';
+import { Card } from '../ui/card';
 
 interface WeeklyReportExportButtonProps {
   projectId: string;
@@ -62,7 +63,7 @@ export function WeeklyReportExportButton({
   };
 
   return (
-    <div className="flex flex-row gap-2">
+    <Card className="p-2 flex flex-row gap-2 hover:shadow-none">
       <div className="flex items-center gap-2">
         <Button
           variant="outline"
@@ -109,6 +110,6 @@ export function WeeklyReportExportButton({
           </>
         )}
       </Button>
-    </div>
+    </Card>
   );
 }

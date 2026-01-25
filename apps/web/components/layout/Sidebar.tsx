@@ -27,13 +27,11 @@ const menuItems = [
   // "업무" 메뉴는 확장 드롭다운으로 별도 처리
   { icon: FileText, label: '업무일지', href: '/work-logs' },
   { icon: CalendarIcon, label: '일정', href: '/schedule' },
-  { icon: BarChart3, label: '현황', href: '/status' },
+  // { icon: BarChart3, label: '현황', href: '/status' },
   { icon: Palette, label: '디자인', href: '/dashboard/design-system' },
 ];
 
-const adminMenuItems = [
-  { icon: Users, label: '멤버 관리', href: '/users' },
-];
+const adminMenuItems = [{ icon: Users, label: '멤버 관리', href: '/users' }];
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -41,22 +39,22 @@ export function Sidebar() {
   const { projects: myProjects } = useMyProjects();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isTaskMenuOpen, setIsTaskMenuOpen] = useState(
-    pathname?.startsWith('/tasks') || false
+    pathname?.startsWith('/tasks') || false,
   );
 
   // Memoize isActive check to avoid recreating on every render
   const isActive = useCallback(
     (href: string) => pathname === href || pathname?.startsWith(`${href}/`),
-    [pathname]
+    [pathname],
   );
 
   // Stable toggle handler
   const toggleCollapsed = useCallback(() => {
-    setIsCollapsed(prev => !prev);
+    setIsCollapsed((prev) => !prev);
   }, []);
 
   const toggleTaskMenu = useCallback(() => {
-    setIsTaskMenuOpen(prev => !prev);
+    setIsTaskMenuOpen((prev) => !prev);
   }, []);
 
   const isTasksActive = pathname?.startsWith('/tasks');
@@ -307,7 +305,9 @@ export function Sidebar() {
           <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
             진행중 프로젝트
           </p>
-          <p className="text-2xl font-bold text-white">{myProjects?.length || 0}</p>
+          <p className="text-2xl font-bold text-white">
+            {myProjects?.length || 0}
+          </p>
           <div className="flex items-center gap-1 mt-1">
             <span className="text-slate-500 text-xs">내 프로젝트</span>
           </div>

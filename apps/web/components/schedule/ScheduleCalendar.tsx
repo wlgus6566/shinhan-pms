@@ -114,7 +114,7 @@ export function ScheduleCalendar({
       // Multi-day event bar
       return (
         <div className="w-full h-5 flex items-center px-1.5 rounded cursor-pointer hover:opacity-80 transition-opacity">
-          <span className="text-[12px] font-medium text-white truncate">
+          <span className="text-[12px] font-medium text-slate-700 truncate">
             {schedule.title}
           </span>
         </div>
@@ -249,7 +249,7 @@ export function ScheduleCalendar({
           eventClick={handleEventClick}
           dateClick={handleDateClick}
           datesSet={handleDatesSet}
-          dayMaxEvents={2}
+          dayMaxEvents={4}
           moreLinkText={(num) => `+${num}개`}
           eventContent={renderEventContent}
           dayCellClassNames={getDayCellClassNames}

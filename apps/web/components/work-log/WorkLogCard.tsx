@@ -28,26 +28,19 @@ export function WorkLogCard({
   onDelete,
 }: WorkLogCardProps) {
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow p-4">
+    <div className="bg-white rounded-xl border border-slate-200 p-4">
       {/* 헤더 */}
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-slate-800 truncate">
-            {workLog.task?.taskName}
-          </h3>
-          <p className="text-sm text-slate-500 mt-0.5">
-            {format(new Date(workLog.workDate), 'M월 d일 (EEEE)', {
-              locale: ko,
-            })}
-          </p>
-        </div>
+      <div className="flex items-start justify-between">
+        <h3 className="font-semibold text-slate-800 truncate">
+          {workLog.task?.taskName}
+        </h3>
         {isOwner && (
           <div className="flex items-center gap-1 ml-2">
             {onEdit && (
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-slate-400 hover:text-blue-600"
+                className="h-6 w-6 text-slate-400 hover:text-blue-600"
                 onClick={onEdit}
               >
                 <Edit className="h-4 w-4" />
@@ -57,7 +50,7 @@ export function WorkLogCard({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-slate-400 hover:text-rose-600"
+                className="h-6 w-6 text-slate-400 hover:text-rose-600"
                 onClick={onDelete}
               >
                 <Trash2 className="h-4 w-4" />
@@ -76,7 +69,7 @@ export function WorkLogCard({
       <div className="flex items-center gap-4 flex-wrap">
         {workLog.workHours && (
           <div className="flex items-center gap-1.5 text-sm text-slate-500">
-            <Clock className="h-4 w-4" />
+            <Clock className="h-3 w-3" />
             <span>{workLog.workHours}시간</span>
           </div>
         )}

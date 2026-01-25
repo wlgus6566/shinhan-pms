@@ -69,9 +69,8 @@ export function ProjectListTable() {
   const { projects, pagination, isLoading, error } = useProjects(params);
   const projectList = projects || [];
 
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-2">
       {/* Filters */}
       <div className="flex flex-wrap gap-4 items-center justify-between">
         <div className="flex gap-3 items-center">
@@ -132,7 +131,9 @@ export function ProjectListTable() {
             ) : error ? (
               <TableError
                 colSpan={8}
-                message={error.message || '프로젝트 목록을 불러오는데 실패했습니다'}
+                message={
+                  error.message || '프로젝트 목록을 불러오는데 실패했습니다'
+                }
                 onRetry={() => {
                   setSearch('');
                   setStatus('ALL');
@@ -158,11 +159,16 @@ export function ProjectListTable() {
                   </TableCell>
                   <TableCell className="text-center">
                     <Badge variant="outline" className="font-normal">
-                      {PROJECT_TYPE_LABELS[project.projectType] || project.projectType}
+                      {PROJECT_TYPE_LABELS[project.projectType] ||
+                        project.projectType}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-center">
-                    <Badge variant={PROJECT_STATUS_VARIANTS[project.status] || 'outline'}>
+                    <Badge
+                      variant={
+                        PROJECT_STATUS_VARIANTS[project.status] || 'outline'
+                      }
+                    >
                       {PROJECT_STATUS_LABELS[project.status] || project.status}
                     </Badge>
                   </TableCell>
@@ -194,16 +200,16 @@ export function ProjectListTable() {
             )}
           </TableBody>
         </Table>
-
-        {/* Pagination */}
-        {!isLoading && pagination && pagination.pages > 1 && (
-          <TablePagination
-            currentPage={currentPage}
-            totalPages={pagination.pages}
-            onPageChange={setCurrentPage}
-          />
-        )}
       </div>
+
+      {/* Pagination */}
+      {!isLoading && pagination && pagination.pages > 1 && (
+        <TablePagination
+          currentPage={currentPage}
+          totalPages={pagination.pages}
+          onPageChange={setCurrentPage}
+        />
+      )}
     </div>
   );
 }

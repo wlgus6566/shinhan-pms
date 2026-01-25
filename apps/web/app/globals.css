@@ -513,7 +513,7 @@
 }
 
 .fc-multiday-event .fc-event-title {
-  @apply text-[12px] font-medium text-white truncate;
+  @apply text-[12px] font-medium text-slate-700 truncate;
 }
 
 /* Single-day events with left border */

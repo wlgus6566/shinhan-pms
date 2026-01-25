@@ -35,14 +35,13 @@ export function WorkLogList({
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
       {/* 헤더 */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
-        <div>
-          <h3 className="font-bold text-slate-800">
-            {format(selectedDate, 'M월 d일 (EEEE)', { locale: ko })}
-          </h3>
-          <p className="text-sm text-slate-500 mt-0.5">
-            {logsForSelectedDate.length}건의 업무일지
-          </p>
-        </div>
+        <h3 className="font-bold text-slate-800">
+          {format(selectedDate, 'M월 d일 (EEEE)', { locale: ko })}
+        </h3>
+        <p className="text-sm text-slate-500 mt-0.5">
+          <span className="font-bold">{logsForSelectedDate.length}</span>건의
+          업무일지
+        </p>
         {/* {onCreate && (
           <Button onClick={onCreate} size="sm">
             <Plus className="h-4 w-4 mr-1" />
@@ -52,7 +51,7 @@ export function WorkLogList({
       </div>
 
       {/* 일지 목록 */}
-      <div className="p-4">
+      <div className="max-h-[400px] overflow-y-auto p-4">
         {logsForSelectedDate.length === 0 ? (
           <div className="py-4 text-center">
             <AlertCircle className="w-8 h-8 text-red-500 mx-auto mb-3" />
