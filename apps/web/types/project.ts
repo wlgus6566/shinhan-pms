@@ -13,7 +13,7 @@ export type { ProjectType, WorkArea };
 export type ProjectRole = MemberRole;
 
 // Project status enum (extended for UI)
-export type ProjectStatus = 'PENDING' | 'ACTIVE' | 'IN_PROGRESS' | 'COMPLETED' | 'ON_HOLD';
+export type ProjectStatus = 'PENDING' | 'ACTIVE' | 'IN_PROGRESS' | 'COMPLETED' | 'ON_HOLD' | 'SUSPENDED';
 
 // User role enum (system-wide)
 export type UserRole = 'ADMIN' | 'USER';

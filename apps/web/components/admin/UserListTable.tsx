@@ -28,18 +28,7 @@ import {
   TableEmpty,
 } from '@/components/common/table';
 import { Search, MoreHorizontal, ArrowUpDown } from 'lucide-react';
-
-const roleLabels: Record<string, string> = {
-  SUPER_ADMIN: '슈퍼 관리자',
-  PM: '프로젝트 관리자',
-  MEMBER: '일반',
-};
-
-const roleVariants: Record<string, 'default' | 'secondary' | 'outline'> = {
-  SUPER_ADMIN: 'default',
-  PM: 'secondary',
-  MEMBER: 'outline',
-};
+import { ROLE_LABELS, ROLE_VARIANTS } from '@/lib/constants/roles';
 
 export function UserListTable() {
   const [search, setSearch] = useState('');
@@ -159,8 +148,8 @@ export function UserListTable() {
                     </span>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={roleVariants[user.role]}>
-                      {roleLabels[user.role] || user.role}
+                    <Badge variant={ROLE_VARIANTS[user.role as keyof typeof ROLE_VARIANTS] || 'outline'}>
+                      {ROLE_LABELS[user.role as keyof typeof ROLE_LABELS] || user.role}
                     </Badge>
                   </TableCell>
                   <TableCell>

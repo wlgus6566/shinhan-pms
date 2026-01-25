@@ -29,6 +29,8 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
 };
 
 // ===== Pagination =====
+export const DEFAULT_PAGE_SIZE = 10;
+
 export interface PaginationParams {
   pageNum?: number;
   pageSize?: number;

@@ -25,9 +25,18 @@ export function SelectedDateScheduleList({
   const schedulesForDate = useMemo(() => {
     return schedules
       .filter((schedule) => {
-        const scheduleDate =
-          schedule.usageDate || schedule.startDate.split('T')[0];
-        return scheduleDate === selectedDateStr;
+        if (schedule.usageDate) {
+          // 연차/반차: usageDate와 정확히 비교
+          return schedule.usageDate === selectedDateStr;
+        }
+
+        // 일반 일정: 날짜 범위 체크 (startDate <= selectedDate <= endDate)
+        const rangeStart = schedule.startDate.split('T')[0];
+        const rangeEnd = schedule.endDate.split('T')[0];
+        return (
+          selectedDateStr >= (rangeStart ?? '') &&
+          selectedDateStr <= (rangeEnd ?? '')
+        );
       })
       .sort((a, b) => a.startDate.localeCompare(b.startDate));
   }, [schedules, selectedDateStr]);

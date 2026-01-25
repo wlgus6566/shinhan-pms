@@ -3,23 +3,14 @@
 import { memo, useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import type { Project } from '@/types/project';
+import {
+  PROJECT_STATUS_BADGE_STYLES,
+  PROJECT_TYPE_LABELS,
+} from '@/lib/constants/project';
 
 interface ProjectDetailProps {
   project: Project;
 }
-
-// Hoist static data outside component (rendering-hoist-jsx)
-const statusMap: Record<string, { label: string; className: string }> = {
-  PENDING: { label: '대기', className: 'bg-gray-100 text-gray-700 hover:bg-gray-100' },
-  ACTIVE: { label: '진행중', className: 'bg-blue-100 text-blue-700 hover:bg-blue-100' },
-  IN_PROGRESS: { label: '진행중', className: 'bg-blue-100 text-blue-700 hover:bg-blue-100' },
-  COMPLETED: { label: '완료', className: 'bg-green-100 text-green-700 hover:bg-green-100' },
-} as const;
-
-const typeLabels: Record<string, string> = {
-  BUILD: '구축',
-  OPERATION: '운영',
-} as const;
 
 const fallbackStatus = { label: '알 수 없음', className: 'bg-slate-100 text-slate-700' };
 
@@ -41,7 +32,7 @@ const formatDate = (dateString: string): string => {
 export const ProjectDetail = memo(function ProjectDetail({
   project,
 }: ProjectDetailProps) {
-  const status = statusMap[project.status] || fallbackStatus;
+  const status = PROJECT_STATUS_BADGE_STYLES[project.status] || fallbackStatus;
 
   // Memoize formatted dates
   const formattedStartDate = useMemo(
@@ -84,7 +75,7 @@ export const ProjectDetail = memo(function ProjectDetail({
             타입
           </h3>
           <Badge variant="outline" className="font-normal">
-            {typeLabels[project.projectType] || project.projectType}
+            {PROJECT_TYPE_LABELS[project.projectType] || project.projectType}
           </Badge>
         </div>
         <div>

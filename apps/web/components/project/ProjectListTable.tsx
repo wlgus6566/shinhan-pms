@@ -29,30 +29,11 @@ import {
 } from '@/components/common/table';
 import { Search, MoreHorizontal, ArrowUpDown } from 'lucide-react';
 import type { Project, ProjectStatus } from '@/types/project';
-
-// Hoist static data outside component (rendering-hoist-jsx)
-const statusLabels: Record<string, string> = {
-  PENDING: '대기',
-  ACTIVE: '진행중',
-  IN_PROGRESS: '진행중',
-  COMPLETED: '완료',
-} as const;
-
-const typeLabels: Record<string, string> = {
-  BUILD: '구축',
-  OPERATION: '운영',
-} as const;
-
-const statusVariants: Record<
-  string,
-  'default' | 'secondary' | 'outline' | 'destructive'
-> = {
-  PENDING: 'secondary',
-  ACTIVE: 'default',
-  IN_PROGRESS: 'default',
-  COMPLETED: 'outline',
-  ON_HOLD: 'destructive',
-} as const;
+import {
+  PROJECT_STATUS_LABELS,
+  PROJECT_STATUS_VARIANTS,
+  PROJECT_TYPE_LABELS,
+} from '@/lib/constants/project';
 
 // Format date helper (cache function results)
 const formatDateCache = new Map<string, string>();
@@ -73,28 +54,20 @@ export function ProjectListTable() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<string>('ALL');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
 
-  // SWR로 데이터 패칭
+  // SWR로 데이터 패칭 (서버 사이드 페이지네이션)
   const params = useMemo(() => {
-    const p: any = {};
+    const p: any = {
+      pageNum: currentPage,
+      // pageSize는 생략 (백엔드 기본값 10 사용)
+    };
     if (search) p.search = search;
     if (status !== 'ALL') p.status = status as ProjectStatus;
     return p;
-  }, [search, status]);
+  }, [search, status, currentPage]);
 
-  const { projects, isLoading, error } = useProjects(params);
+  const { projects, pagination, isLoading, error } = useProjects(params);
   const projectList = projects || [];
-
-  // Pagination (useMemo to avoid recalculation on every render)
-  const { totalPages, paginatedProjects } = useMemo(() => {
-    const total = Math.ceil(projectList.length / itemsPerPage);
-    const paginated = projectList.slice(
-      (currentPage - 1) * itemsPerPage,
-      currentPage * itemsPerPage,
-    );
-    return { totalPages: total, paginatedProjects: paginated };
-  }, [projectList, currentPage, itemsPerPage]);
 
 
   return (
@@ -126,7 +99,7 @@ export function ProjectListTable() {
         <p className="text-sm text-slate-500">
           총{' '}
           <span className="font-semibold text-slate-900">
-            {projectList.length}
+            {pagination?.totalCount ?? 0}
           </span>
           개 프로젝트
         </p>
@@ -165,10 +138,10 @@ export function ProjectListTable() {
                   setStatus('ALL');
                 }}
               />
-            ) : paginatedProjects.length === 0 ? (
+            ) : projectList.length === 0 ? (
               <TableEmpty colSpan={8} message="프로젝트가 없습니다" />
             ) : (
-              paginatedProjects.map((project) => (
+              projectList.map((project) => (
                 <TableRow key={project.id} className="group">
                   <TableCell>
                     <Link
@@ -185,12 +158,12 @@ export function ProjectListTable() {
                   </TableCell>
                   <TableCell className="text-center">
                     <Badge variant="outline" className="font-normal">
-                      {typeLabels[project.projectType] || project.projectType}
+                      {PROJECT_TYPE_LABELS[project.projectType] || project.projectType}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-center">
-                    <Badge variant={statusVariants[project.status] || 'outline'}>
-                      {statusLabels[project.status] || project.status}
+                    <Badge variant={PROJECT_STATUS_VARIANTS[project.status] || 'outline'}>
+                      {PROJECT_STATUS_LABELS[project.status] || project.status}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -223,10 +196,10 @@ export function ProjectListTable() {
         </Table>
 
         {/* Pagination */}
-        {!isLoading && projectList.length > 0 && (
+        {!isLoading && pagination && pagination.pages > 1 && (
           <TablePagination
             currentPage={currentPage}
-            totalPages={totalPages}
+            totalPages={pagination.pages}
             onPageChange={setCurrentPage}
           />
         )}

@@ -33,27 +33,9 @@ import {
 } from '@/components/ui/tooltip';
 import { Loader2, UserPlus, Trash2 } from 'lucide-react';
 import { AddMemberDialog } from './AddMemberDialog';
-import type { ProjectMember, ProjectRole, Department, UserRole, WorkArea } from '@/types/project';
+import type { ProjectMember, ProjectRole, Department } from '@/types/project';
 import { POSITION_LABELS, type Position } from '@/lib/constants/roles';
-
-const workAreaLabels: Record<WorkArea, string> = {
-  PROJECT_MANAGEMENT: '프로젝트 관리',
-  PLANNING: '기획',
-  DESIGN: '디자인',
-  FRONTEND: '프론트엔드',
-  BACKEND: '백엔드',
-};
-
-const userRoleLabels: Record<UserRole, string> = {
-  ADMIN: '관리자',
-  USER: '사용자',
-};
-
-const projectRoleVariants: Record<ProjectRole, 'default' | 'secondary' | 'outline'> = {
-  PM: 'default',
-  PL: 'secondary',
-  PA: 'outline',
-};
+import { WORK_AREA_LABELS_STRICT, PROJECT_ROLE_VARIANTS } from '@/lib/constants/project';
 
 interface ProjectMembersTableProps {
   projectId: string;
@@ -158,14 +140,14 @@ export function ProjectMembersTable({ projectId, creatorId }: ProjectMembersTabl
                   <TableCell>
                     {member.workArea ? (
                       <Badge variant="secondary">
-                        {workAreaLabels[member.workArea] || member.workArea}
+                        {WORK_AREA_LABELS_STRICT[member.workArea] || member.workArea}
                       </Badge>
                     ) : (
                       <span className="text-sm text-slate-500">-</span>
                     )}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={projectRoleVariants[member.role]}>
+                    <Badge variant={PROJECT_ROLE_VARIANTS[member.role]}>
                       {member.role}
                     </Badge>
                   </TableCell>

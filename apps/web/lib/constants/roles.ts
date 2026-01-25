@@ -13,6 +13,12 @@ export const ROLE_LABELS: Record<Role, string> = {
   MEMBER: '일반',
 };
 
+export const ROLE_VARIANTS: Record<Role, 'default' | 'secondary' | 'outline'> = {
+  SUPER_ADMIN: 'default',
+  PM: 'secondary',
+  MEMBER: 'outline',
+};
+
 export const ROLE_DESCRIPTIONS: Record<Role, string> = {
   SUPER_ADMIN: '전체 권한 (멤버 등록, 프로젝트 등록)',
   PM: '프로젝트 등록/수정/삭제, 프로젝트 멤버 관리',

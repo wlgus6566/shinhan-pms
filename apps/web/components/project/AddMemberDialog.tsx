@@ -34,7 +34,10 @@ import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import FormSelect from '@/components/form/FormSelect';
 import type { AvailableMember } from '@/types/project';
-import { DEPARTMENTS } from '@/lib/constants/roles';
+import {
+  WORK_AREA_OPTIONS,
+  PROJECT_ROLE_OPTIONS,
+} from '@/lib/constants/project';
 
 const addMemberSchema = z.object({
   memberId: z.coerce.number().min(1, '멤버를 선택하세요'),
@@ -59,22 +62,6 @@ const departmentMap: Record<string, string> = {
   FRONTEND: '프론트엔드',
   DEVELOPMENT: '개발',
 };
-
-// 담당 분야 옵션
-const workAreaOptions = [
-  { value: 'PROJECT_MANAGEMENT', label: '프로젝트 관리 (Project Management)' },
-  { value: 'PLANNING', label: '기획 (Planning)' },
-  { value: 'DESIGN', label: '디자인 (Design)' },
-  { value: 'FRONTEND', label: '프론트엔드 (Frontend)' },
-  { value: 'BACKEND', label: '백엔드 (Backend)' },
-];
-
-// 프로젝트 역할 옵션
-const projectRoleOptions = [
-  { value: 'PM', label: 'PM (Project Manager)' },
-  { value: 'PL', label: 'PL (Project Leader)' },
-  { value: 'PA', label: 'PA (Project Assistant)' },
-];
 
 export function AddMemberDialog({ projectId, open, onOpenChange, onSuccess }: AddMemberDialogProps) {
   const [submitting, setSubmitting] = useState(false);
@@ -244,7 +231,7 @@ export function AddMemberDialog({ projectId, open, onOpenChange, onSuccess }: Ad
                 name="workArea"
                 label="담당 분야 *"
                 placeholder="담당 분야를 선택하세요"
-                options={workAreaOptions}
+                options={WORK_AREA_OPTIONS}
               />
 
               <FormSelect
@@ -252,7 +239,7 @@ export function AddMemberDialog({ projectId, open, onOpenChange, onSuccess }: Ad
                 name="role"
                 label="프로젝트 역할 *"
                 placeholder="프로젝트 역할을 선택하세요"
-                options={projectRoleOptions}
+                options={PROJECT_ROLE_OPTIONS}
               />
 
               <FormTextarea

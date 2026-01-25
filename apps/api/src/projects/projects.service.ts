@@ -101,13 +101,39 @@ export class ProjectsService {
 
   /**
    * 내가 속한 프로젝트 목록 조회
+   * (슈퍼관리자는 모든 프로젝트 조회)
    */
   async findMyProjects(
     userId: bigint,
+    userRole: string,
     params?: { pageNum?: number; pageSize?: number },
   ) {
     const { pageSize, skip } = parsePaginationParams(params ?? {});
 
+    // 슈퍼관리자는 모든 프로젝트 조회
+    if (userRole === 'SUPER_ADMIN') {
+      const where = { isActive: true };
+
+      const [projects, totalCount] = await Promise.all([
+        this.prisma.project.findMany({
+          where,
+          skip,
+          take: pageSize,
+          orderBy: { projectName: 'asc' },
+        }),
+        this.prisma.project.count({ where }),
+      ]);
+
+      const list = projects.map((project) => ({
+        ...project,
+        myRole: 'SUPER_ADMIN',
+        myWorkArea: null,
+      }));
+
+      return { list, totalCount };
+    }
+
+    // 일반 사용자는 자신이 속한 프로젝트만 조회
     const where = {
       memberId: userId,
       project: {

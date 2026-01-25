@@ -22,6 +22,7 @@ import type { ProjectMember } from '@/types/project';
 import { cn } from '@/lib/utils';
 import { useMemo } from 'react';
 import { Card } from '@/components/ui/card';
+import { WORK_AREA_LABELS } from '@/lib/constants/project';
 
 interface TeamWorkLogFiltersProps {
   selectedWorkArea: string;
@@ -50,15 +51,6 @@ export function TeamWorkLogFilters({
   setDifficultyFilter,
   resetFilters,
 }: TeamWorkLogFiltersProps) {
-  const workAreaLabels: Record<string, string> = {
-    all: '전체',
-    PLANNING: '기획',
-    DESIGN: '디자인',
-    FRONTEND: '프론트엔드',
-    BACKEND: '백엔드',
-    OPERATION: '운영',
-    PROJECT_MANAGEMENT: 'PM',
-  };
 
   const toggleStatus = (status: TaskStatus) => {
     if (statusFilter.includes(status)) {
@@ -85,7 +77,7 @@ export function TeamWorkLogFilters({
   // Get label for assignee dropdown based on selected work area
   const assigneeDropdownLabel = useMemo(() => {
     if (selectedWorkArea !== 'all') {
-      return `담당자 (${workAreaLabels[selectedWorkArea]})`;
+      return `담당자 (${WORK_AREA_LABELS[selectedWorkArea]})`;
     }
     return '담당자 전체';
   }, [selectedWorkArea]);
@@ -103,7 +95,7 @@ export function TeamWorkLogFilters({
             <SelectItem value="all">담당 분야 전체</SelectItem>
             {availableWorkAreas.map((area) => (
               <SelectItem key={area} value={area}>
-                {workAreaLabels[area] || area}
+                {WORK_AREA_LABELS[area] || area}
               </SelectItem>
             ))}
           </SelectContent>

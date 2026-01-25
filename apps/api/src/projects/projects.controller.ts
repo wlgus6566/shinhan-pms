@@ -112,12 +112,12 @@ export class ProjectsController {
   @Get('my')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: '내가 속한 프로젝트 목록 조회' })
+  @ApiOperation({ summary: '내가 속한 프로젝트 목록 조회 (슈퍼관리자는 모든 프로젝트)' })
   @ApiQuery({ name: 'pageNum', required: false, description: '페이지 번호', type: Number })
   @ApiQuery({ name: 'pageSize', required: false, description: '페이지당 개수', type: Number })
   @ApiResponse({
     status: 200,
-    description: '내가 멤버로 속한 프로젝트 목록',
+    description: '내가 멤버로 속한 프로젝트 목록 (슈퍼관리자는 모든 프로젝트)',
     type: [ProjectResponseDto],
   })
   async findMyProjects(
@@ -129,6 +129,7 @@ export class ProjectsController {
 
     const { list, totalCount } = await this.projectsService.findMyProjects(
       BigInt(user.id),
+      user.role,
       pagination,
     );
 

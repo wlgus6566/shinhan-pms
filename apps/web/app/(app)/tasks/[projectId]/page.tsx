@@ -11,21 +11,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Loader2, FolderKanban, Calendar } from 'lucide-react';
-import type { Project, ProjectMember } from '@/types/project';
-
-type ProjectStatus = 'ACTIVE' | 'COMPLETED' | 'SUSPENDED';
-
-const statusLabels: Record<
-  ProjectStatus,
-  {
-    label: string;
-    variant: 'default' | 'secondary' | 'destructive' | 'outline';
-  }
-> = {
-  ACTIVE: { label: '진행중', variant: 'default' },
-  COMPLETED: { label: '완료', variant: 'secondary' },
-  SUSPENDED: { label: '중단', variant: 'destructive' },
-};
+import type { Project, ProjectMember, ProjectStatus } from '@/types/project';
+import {
+  PROJECT_STATUS_LABELS,
+  PROJECT_STATUS_VARIANTS,
+} from '@/lib/constants/project';
 
 export default function TaskManagementPage() {
   const params = useParams();
@@ -83,8 +73,10 @@ export default function TaskManagementPage() {
     );
   }
 
-  const statusConfig =
-    statusLabels[project.status as ProjectStatus] ?? statusLabels.ACTIVE;
+  const statusConfig = {
+    label: PROJECT_STATUS_LABELS[project.status] || '알 수 없음',
+    variant: PROJECT_STATUS_VARIANTS[project.status] || 'outline',
+  };
 
   return (
     <div className="space-y-6">
