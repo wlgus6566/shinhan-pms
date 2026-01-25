@@ -510,6 +510,81 @@ const { data, isLoading } = useData();
 - 직접 useSWR 호출 → lib/api/ 훅으로 마이그레이션
 - Promise.all → 개별 SWR 훅으로 분리 (SWR이 자동 병렬 처리)
 
+### 9. API 응답 구조 표준화
+
+**핵심 원칙**: 모든 API 응답은 `ResponseInterceptor`에 의해 표준 래퍼 형식으로 감싸집니다.
+
+#### 표준 응답 구조
+
+```typescript
+// @repo/schema의 ApiResponse 타입
+interface ApiResponse<T> {
+  code: string;      // 'SUC001', 'SUC002', 'SUC003' 등
+  message: string;   // '처리가 완료되었습니다.' 등
+  data: T;           // 실제 데이터
+}
+
+// 페이지네이션 응답
+interface PaginatedData<T> {
+  list: T[];
+  totalCount: number;
+  pageNum: number;
+  pageSize: number;
+  pages: number;
+  nextPage: number | null;
+  isFirstPage: boolean;
+  isLastPage: boolean;
+  hasNextPage: boolean;
+}
+```
+
+#### Axios Interceptor 동작
+
+`lib/api/fetcher.ts`의 axios interceptor가 자동으로 `data` 필드를 추출합니다:
+
+```typescript
+// API 원본 응답
+{ code: 'SUC001', message: '...', data: [...] }
+
+// axios interceptor 처리 후 (SWR이 받는 데이터)
+[...]  // data 필드만 추출됨
+```
+
+#### 페이지네이션 응답 처리 패턴
+
+목록 조회 API는 페이지네이션 래퍼를 반환하므로, SWR 훅에서 `list` 필드를 추출해야 합니다:
+
+```typescript
+import type { PaginatedData } from '@repo/schema';
+
+// ❌ 잘못된 패턴 - 배열을 직접 기대
+export function useProjectMembers(projectId: string | null) {
+  const { data } = useSWR<ProjectMember[]>(url);  // 타입 오류!
+  return { members: data };  // data는 PaginatedData 객체
+}
+
+// ✅ 올바른 패턴 - PaginatedData에서 list 추출
+export function useProjectMembers(projectId: string | null) {
+  const { data } = useSWR<PaginatedData<ProjectMember>>(url);
+  return {
+    members: data?.list,        // 실제 배열
+    totalCount: data?.totalCount,
+    // ...기타 페이지네이션 정보
+  };
+}
+```
+
+#### 체크리스트
+
+**새 SWR 훅 작성 시**:
+- [ ] 목록 조회 API인 경우 `PaginatedData<T>` 타입 사용
+- [ ] `data?.list`로 실제 배열 추출
+- [ ] 필요시 `totalCount`, `pageNum` 등 페이지네이션 정보도 반환
+
+**런타임 에러 발생 시**:
+- `TypeError: xxx.some is not a function` → 배열 대신 객체를 받고 있음
+- `TypeError: Cannot read property 'length' of undefined` → `data?.list` 패턴 확인
+
 ## 주요 명령어
 
 ### 개발
@@ -701,4 +776,4 @@ pnpm format
 
 ---
 
-**마지막 업데이트**: 2026-01-23 (SWR 패턴 추가)
+**마지막 업데이트**: 2026-01-25 (API 응답 구조 표준화 패턴 추가)

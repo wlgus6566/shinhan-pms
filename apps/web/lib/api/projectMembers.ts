@@ -6,6 +6,7 @@ import type {
   AddProjectMemberRequest,
   UpdateProjectMemberRoleRequest,
 } from '../../types/project';
+import type { PaginatedData } from '@repo/schema';
 
 // ============================================================================
 // Legacy GET Functions (for components not yet migrated to SWR)
@@ -13,7 +14,8 @@ import type {
 // ============================================================================
 
 export async function getProjectMembers(projectId: string | number): Promise<ProjectMember[]> {
-  return fetcher<ProjectMember[]>(`/api/projects/${projectId}/members`);
+  const response = await fetcher<PaginatedData<ProjectMember>>(`/api/projects/${projectId}/members`);
+  return response.list;
 }
 
 // ============================================================================
@@ -72,12 +74,13 @@ export async function removeProjectMember(
  * @param projectId - Project ID (null to skip fetching)
  */
 export function useProjectMembers(projectId: string | number | null) {
-  const { data, error, isLoading, mutate } = useSWR<ProjectMember[]>(
+  const { data, error, isLoading, mutate } = useSWR<PaginatedData<ProjectMember>>(
     projectId ? `/api/projects/${projectId}/members` : null
   );
 
   return {
-    members: data,
+    members: data?.list,
+    totalCount: data?.totalCount,
     isLoading,
     error,
     mutate,
