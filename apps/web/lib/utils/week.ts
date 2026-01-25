@@ -51,12 +51,20 @@ export function getWeekOfMonth(date: Date): WeekInfo {
 }
 
 /**
- * 화면 표시: "2026년 1월 2주차 (2026-01-05 ~ 2026-01-11)"
+ * 화면 표시: "(2026-01-05 ~ 2026-01-11)"
  */
 export function formatWeekDisplay(date: Date): string {
-  const { year, month, weekNumber } = getWeekOfMonth(date);
   const monday = startOfWeek(date, { weekStartsOn: 1 });
   const sunday = endOfWeek(date, { weekStartsOn: 1 });
 
-  return `${year}년 ${month}월 ${weekNumber}주차 (${format(monday, 'yyyy-MM-dd')} ~ ${format(sunday, 'yyyy-MM-dd')})`;
+  return `${format(monday, 'yyyy-MM-dd')} ~ ${format(sunday, 'yyyy-MM-dd')}`;
+}
+
+/**
+ * 화면 표시: "1월 2주차"
+ */
+export function formatWeekDisplayWithWeekNumber(date: Date): string {
+  const { month, weekNumber } = getWeekOfMonth(date);
+
+  return `<span class="text-sm font-bold">${month}월 ${weekNumber}주차</span>`;
 }

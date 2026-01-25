@@ -24,7 +24,7 @@ import {
   DIFFICULTY_LABELS,
   DIFFICULTY_COLORS,
 } from '@/types/task';
-import { useProjectWorkLogs, getProjectWorkLogs } from '@/lib/api/workLogs';
+import { getProjectWorkLogs } from '@/lib/api/workLogs';
 import { cn } from '@/lib/utils';
 
 interface TeamWorkLogListProps {
@@ -162,6 +162,14 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
 
   return (
     <div className="space-y-6">
+      {/* Export Button */}
+      <div className="flex justify-end">
+        <WeeklyReportExportButton
+          projectId={projectId}
+          defaultStartDate={format(startOfMonth(currentMonth), 'yyyy-MM-dd')}
+          defaultEndDate={format(endOfMonth(currentMonth), 'yyyy-MM-dd')}
+        />
+      </div>
       {/* Filters */}
       <TeamWorkLogFilters
         selectedWorkArea={selectedWorkArea}
@@ -176,15 +184,6 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
         setDifficultyFilter={setDifficultyFilter}
         resetFilters={resetFilters}
       />
-
-      {/* Export Button */}
-      <div className="flex justify-end">
-        <WeeklyReportExportButton
-          projectId={projectId}
-          defaultStartDate={format(startOfMonth(currentMonth), 'yyyy-MM-dd')}
-          defaultEndDate={format(endOfMonth(currentMonth), 'yyyy-MM-dd')}
-        />
-      </div>
 
       {/* 캘린더 */}
       {loading ? (

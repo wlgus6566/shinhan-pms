@@ -3,19 +3,21 @@
 import { useState } from 'react';
 import { addWeeks, subWeeks, format } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Download, Loader2, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Download, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { exportWeeklyReport } from '@/lib/api/workLogs';
 import {
   getWeekMonday,
   getWeekSunday,
   getWeekOfMonth,
   formatWeekDisplay,
+  formatWeekDisplayWithWeekNumber,
 } from '@/lib/utils/week';
 
 interface WeeklyReportExportButtonProps {
   projectId: string;
   defaultDate?: Date;
+  defaultStartDate?: string;
+  defaultEndDate?: string;
 }
 
 export function WeeklyReportExportButton({
@@ -60,18 +62,7 @@ export function WeeklyReportExportButton({
   };
 
   return (
-    <div className="space-y-2">
-      {success && (
-        <Alert className="bg-green-50 text-green-700 border-green-200">
-          <CheckCircle2 className="h-4 w-4" />
-          <AlertDescription>주간 업무일지가 다운로드되었습니다.</AlertDescription>
-        </Alert>
-      )}
-      {error && (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
+    <div className="flex flex-row gap-2">
       <div className="flex items-center gap-2">
         <Button
           variant="outline"
@@ -82,7 +73,7 @@ export function WeeklyReportExportButton({
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <span className="text-sm font-medium min-w-[280px] text-center">
+        <span className="text-sm font-medium w-[200px] text-center">
           {displayText}
         </span>
         <Button
@@ -94,24 +85,30 @@ export function WeeklyReportExportButton({
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
-        <Button
-          onClick={handleExport}
-          disabled={isExporting}
-          className="whitespace-nowrap"
-        >
-          {isExporting ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              다운로드 중...
-            </>
-          ) : (
-            <>
-              <Download className="w-4 h-4 mr-2" />
-              주간보고 다운로드
-            </>
-          )}
-        </Button>
       </div>
+      <Button
+        onClick={handleExport}
+        disabled={isExporting}
+        variant="success"
+        className="whitespace-nowrap"
+      >
+        {isExporting ? (
+          <>
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            다운로드 중...
+          </>
+        ) : (
+          <>
+            <Download className="w-4 h-4 mr-2" />
+            <span
+              dangerouslySetInnerHTML={{
+                __html: formatWeekDisplayWithWeekNumber(selectedDate),
+              }}
+            />
+            주간보고 엑셀 다운로드
+          </>
+        )}
+      </Button>
     </div>
   );
 }

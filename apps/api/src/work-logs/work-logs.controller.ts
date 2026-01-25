@@ -28,8 +28,14 @@ import { UpdateWorkLogDto } from './dto/update-work-log.dto';
 import { WorkLogResponseDto } from './dto/work-log-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { ResponseCode, SkipResponseWrapper } from '../common/decorators/response.decorator';
-import { parsePaginationParams, createPaginationMeta } from '../common/helpers/pagination.helper';
+import {
+  ResponseCode,
+  SkipResponseWrapper,
+} from '../common/decorators/response.decorator';
+import {
+  parsePaginationParams,
+  createPaginationMeta,
+} from '../common/helpers/pagination.helper';
 
 @ApiTags('WorkLogs')
 @Controller()
@@ -51,7 +57,10 @@ export class WorkLogsController {
   @ApiResponse({ status: 400, description: '잘못된 요청' })
   @ApiResponse({ status: 403, description: '담당자만 작성 가능 (PM 제외)' })
   @ApiResponse({ status: 404, description: '업무를 찾을 수 없습니다' })
-  @ApiResponse({ status: 409, description: '해당 날짜에 이미 일지가 존재합니다' })
+  @ApiResponse({
+    status: 409,
+    description: '해당 날짜에 이미 일지가 존재합니다',
+  })
   async create(
     @Param('taskId') taskId: string,
     @Body() createWorkLogDto: CreateWorkLogDto,
@@ -68,10 +77,28 @@ export class WorkLogsController {
   @Get('tasks/:taskId/work-logs')
   @ApiOperation({ summary: '업무별 일지 목록 조회' })
   @ApiParam({ name: 'taskId', description: '업무 ID' })
-  @ApiQuery({ name: 'startDate', required: false, description: '시작일 (YYYY-MM-DD)' })
-  @ApiQuery({ name: 'endDate', required: false, description: '종료일 (YYYY-MM-DD)' })
-  @ApiQuery({ name: 'pageNum', required: false, description: '페이지 번호', type: Number })
-  @ApiQuery({ name: 'pageSize', required: false, description: '페이지당 개수', type: Number })
+  @ApiQuery({
+    name: 'startDate',
+    required: false,
+    description: '시작일 (YYYY-MM-DD)',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: false,
+    description: '종료일 (YYYY-MM-DD)',
+  })
+  @ApiQuery({
+    name: 'pageNum',
+    required: false,
+    description: '페이지 번호',
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    description: '페이지당 개수',
+    type: Number,
+  })
   @ApiResponse({
     status: 200,
     description: '업무일지 목록',
@@ -92,17 +119,39 @@ export class WorkLogsController {
     );
 
     return {
-      ...createPaginationMeta(totalCount, pagination.pageNum, pagination.pageSize),
+      ...createPaginationMeta(
+        totalCount,
+        pagination.pageNum,
+        pagination.pageSize,
+      ),
       list: list.map((log) => this.transformWorkLog(log)),
     };
   }
 
   @Get('work-logs/my')
   @ApiOperation({ summary: '내 업무일지 목록 조회' })
-  @ApiQuery({ name: 'startDate', required: false, description: '시작일 (YYYY-MM-DD)' })
-  @ApiQuery({ name: 'endDate', required: false, description: '종료일 (YYYY-MM-DD)' })
-  @ApiQuery({ name: 'pageNum', required: false, description: '페이지 번호', type: Number })
-  @ApiQuery({ name: 'pageSize', required: false, description: '페이지당 개수', type: Number })
+  @ApiQuery({
+    name: 'startDate',
+    required: false,
+    description: '시작일 (YYYY-MM-DD)',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: false,
+    description: '종료일 (YYYY-MM-DD)',
+  })
+  @ApiQuery({
+    name: 'pageNum',
+    required: false,
+    description: '페이지 번호',
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    description: '페이지당 개수',
+    type: Number,
+  })
   @ApiResponse({
     status: 200,
     description: '내 업무일지 목록',
@@ -123,7 +172,11 @@ export class WorkLogsController {
     );
 
     return {
-      ...createPaginationMeta(totalCount, pagination.pageNum, pagination.pageSize),
+      ...createPaginationMeta(
+        totalCount,
+        pagination.pageNum,
+        pagination.pageSize,
+      ),
       list: list.map((log) => this.transformWorkLog(log)),
     };
   }
@@ -142,8 +195,16 @@ export class WorkLogsController {
   @Get('projects/:projectId/work-logs')
   @ApiOperation({ summary: '프로젝트 팀 업무일지 조회' })
   @ApiParam({ name: 'projectId', description: '프로젝트 ID' })
-  @ApiQuery({ name: 'startDate', required: false, description: '시작일 (YYYY-MM-DD)' })
-  @ApiQuery({ name: 'endDate', required: false, description: '종료일 (YYYY-MM-DD)' })
+  @ApiQuery({
+    name: 'startDate',
+    required: false,
+    description: '시작일 (YYYY-MM-DD)',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: false,
+    description: '종료일 (YYYY-MM-DD)',
+  })
   @ApiResponse({
     status: 200,
     description: '프로젝트 팀 업무일지 목록',
@@ -217,11 +278,24 @@ export class WorkLogsController {
   @SkipResponseWrapper()
   @ApiOperation({ summary: '주간 업무일지 엑셀 다운로드' })
   @ApiParam({ name: 'projectId', description: '프로젝트 ID' })
-  @ApiQuery({ name: 'startDate', description: '시작일 (YYYY-MM-DD)', required: true })
-  @ApiQuery({ name: 'endDate', description: '종료일 (YYYY-MM-DD)', required: true })
+  @ApiQuery({
+    name: 'startDate',
+    description: '시작일 (YYYY-MM-DD)',
+    required: true,
+  })
+  @ApiQuery({
+    name: 'endDate',
+    description: '종료일 (YYYY-MM-DD)',
+    required: true,
+  })
   @ApiQuery({ name: 'year', description: '연도', required: true, type: Number })
   @ApiQuery({ name: 'month', description: '월', required: true, type: Number })
-  @ApiQuery({ name: 'weekNumber', description: '주차', required: true, type: Number })
+  @ApiQuery({
+    name: 'weekNumber',
+    description: '주차',
+    required: true,
+    type: Number,
+  })
   @ApiResponse({
     status: 200,
     description: '주간 업무일지 엑셀 파일',
@@ -246,7 +320,6 @@ export class WorkLogsController {
       BigInt(projectId),
       startDate,
       endDate,
-      weekInfo,
     );
 
     // 파일명: Weekly_Report_2026_01_Week2.xlsx

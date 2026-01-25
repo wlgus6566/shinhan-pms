@@ -51,7 +51,6 @@ export function TeamWorkLogFilters({
   setDifficultyFilter,
   resetFilters,
 }: TeamWorkLogFiltersProps) {
-
   const toggleStatus = (status: TaskStatus) => {
     if (statusFilter.includes(status)) {
       setStatusFilter(statusFilter.filter((s) => s !== status));
@@ -83,7 +82,7 @@ export function TeamWorkLogFilters({
   }, [selectedWorkArea]);
 
   return (
-    <Card className="p-4 shadow-none flex flex-col gap-4">
+    <Card className="p-4 shadow-none flex flex-col gap-4 hover:shadow-none  ">
       {/* 첫 번째 줄: 담당 분야, 담당자, 초기화 */}
       <div className="flex flex-col md:flex-row gap-4">
         {/* 담당 분야 필터 */}
