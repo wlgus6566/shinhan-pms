@@ -14,6 +14,7 @@ import {
 import { User, Clock, AlertCircle } from 'lucide-react';
 import { WorkLogCalendar } from './WorkLogCalendar';
 import { TeamWorkLogFilters } from './TeamWorkLogFilters';
+import { WeeklyReportExportButton } from './WeeklyReportExportButton';
 import type { WorkLog } from '@/types/work-log';
 import type { ProjectMember } from '@/types/project';
 import type { TaskStatus, TaskDifficulty } from '@/types/task';
@@ -175,6 +176,15 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
         setDifficultyFilter={setDifficultyFilter}
         resetFilters={resetFilters}
       />
+
+      {/* Export Button */}
+      <div className="flex justify-end">
+        <WeeklyReportExportButton
+          projectId={projectId}
+          defaultStartDate={format(startOfMonth(currentMonth), 'yyyy-MM-dd')}
+          defaultEndDate={format(endOfMonth(currentMonth), 'yyyy-MM-dd')}
+        />
+      </div>
 
       {/* 캘린더 */}
       {loading ? (

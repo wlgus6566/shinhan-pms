@@ -58,8 +58,16 @@ export class SchedulesController {
 
   @Get('schedules/my')
   @ApiOperation({ summary: '내 일정 목록 조회' })
-  @ApiQuery({ name: 'startDate', required: false, description: '시작일 (ISO 8601)' })
-  @ApiQuery({ name: 'endDate', required: false, description: '종료일 (ISO 8601)' })
+  @ApiQuery({
+    name: 'startDate',
+    required: false,
+    description: '시작일 (ISO 8601)',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: false,
+    description: '종료일 (ISO 8601)',
+  })
   @ApiResponse({
     status: 200,
     description: '내 일정 목록',
@@ -116,6 +124,30 @@ export class SchedulesController {
     return this.transformSchedule(schedule);
   }
 
+  // @Get('projects/:projectId/schedules')
+  // @ApiOperation({ summary: '프로젝트 일정 목록 조회' })
+  // @ApiParam({ name: 'projectId', description: '프로젝트 ID' })
+  // @ApiQuery({ name: 'startDate', required: false, description: '시작일 (ISO 8601)' })
+  // @ApiQuery({ name: 'endDate', required: false, description: '종료일 (ISO 8601)' })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: '프로젝트 일정 목록',
+  //   type: [ScheduleResponseDto],
+  // })
+  // async findProjectSchedules(
+  //   @Param('projectId') projectId: string,
+  //   @Query('startDate') startDate?: string,
+  //   @Query('endDate') endDate?: string,
+  // ) {
+  //   const schedules = await this.schedulesService.findByProject(
+  //     BigInt(projectId),
+  //     startDate,
+  //     endDate,
+  //   );
+
+  //   return schedules.map((schedule) => this.transformSchedule(schedule));
+  // }
+
   @Delete('schedules/:id')
   @HttpCode(HttpStatus.OK)
   @ResponseCode('SUC003')
@@ -149,7 +181,10 @@ export class SchedulesController {
     status: 200,
     description: '참가 상태가 업데이트되었습니다',
   })
-  @ApiResponse({ status: 404, description: '일정 또는 참가자를 찾을 수 없습니다' })
+  @ApiResponse({
+    status: 404,
+    description: '일정 또는 참가자를 찾을 수 없습니다',
+  })
   async updateParticipationStatus(
     @Param('id') id: string,
     @Body('status') status: 'ACCEPTED' | 'DECLINED',
@@ -165,13 +200,16 @@ export class SchedulesController {
 
   private transformSchedule(schedule: any): any {
     // 🔍 디버깅: Prisma 결과 확인
-    console.log('🔍 [SchedulesController] transformSchedule Schedule raw data:', {
-      id: schedule.id,
-      title: schedule.title,
-      teamScope: schedule.teamScope,
-      hasTeamScope: 'teamScope' in schedule,
-      allKeys: Object.keys(schedule),
-    });
+    console.log(
+      '🔍 [SchedulesController] transformSchedule Schedule raw data:',
+      {
+        id: schedule.id,
+        title: schedule.title,
+        teamScope: schedule.teamScope,
+        hasTeamScope: 'teamScope' in schedule,
+        allKeys: Object.keys(schedule),
+      },
+    );
 
     const result = {
       id: schedule.id.toString(),
@@ -187,12 +225,13 @@ export class SchedulesController {
       teamScope: schedule.teamScope,
       halfDayType: schedule.halfDayType,
       usageDate: schedule.usageDate?.toISOString().split('T')[0],
-      participants: schedule.participants?.map((p: any) => ({
-        id: p.user.id.toString(),
-        name: p.user.name,
-        email: p.user.email,
-        status: p.status,
-      })) || [],
+      participants:
+        schedule.participants?.map((p: any) => ({
+          id: p.user.id.toString(),
+          name: p.user.name,
+          email: p.user.email,
+          status: p.status,
+        })) || [],
       createdBy: schedule.createdBy.toString(),
       creatorName: schedule.creator?.name || '',
       createdAt: schedule.createdAt.toISOString(),

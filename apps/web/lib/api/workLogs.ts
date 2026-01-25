@@ -7,6 +7,7 @@ import type {
   UpdateWorkLogRequest,
   MyTask,
 } from '@/types/work-log';
+import type { WeekInfo } from '@/lib/utils/week';
 import {
   extractPagination,
   appendPaginationParams,
@@ -72,6 +73,54 @@ export async function deleteWorkLog(id: string): Promise<void> {
   });
 }
 
+/**
+ * 주간 업무일지 엑셀 다운로드
+ */
+export async function exportWeeklyReport(
+  projectId: string,
+  startDate: string,
+  endDate: string,
+  weekInfo: WeekInfo,
+): Promise<void> {
+  const params = new URLSearchParams();
+  params.append('startDate', startDate);
+  params.append('endDate', endDate);
+  params.append('year', weekInfo.year.toString());
+  params.append('month', weekInfo.month.toString());
+  params.append('weekNumber', weekInfo.weekNumber.toString());
+
+  const url = `/api/projects/${projectId}/work-logs/export?${params.toString()}`;
+  const token = localStorage.getItem('accessToken');
+
+  const response = await fetch(process.env.NEXT_PUBLIC_API_URL + url, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('다운로드에 실패했습니다');
+  }
+
+  // Blob으로 변환
+  const blob = await response.blob();
+
+  console.log('Blob received:', blob.size, 'bytes, type:', blob.type);
+
+  // 파일 다운로드 트리거
+  const downloadUrl = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = downloadUrl;
+  // 파일명: Weekly_Report_2026_01_Week2.xlsx
+  const filename = `Weekly_Report_${weekInfo.year}_${String(weekInfo.month).padStart(2, '0')}_Week${weekInfo.weekNumber}.xlsx`;
+  link.setAttribute('download', filename);
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(downloadUrl);
+}
+
 // ============================================================================
 // SWR Hooks
 // ============================================================================
@@ -80,17 +129,23 @@ export async function deleteWorkLog(id: string): Promise<void> {
  * SWR hook for fetching my work logs with pagination
  * @param startDate - Start date (required)
  * @param endDate - End date (required)
- * @param params - Pagination params
+ * @param params - Pagination params (pageSize: 0 = fetch all)
  */
 export function useMyWorkLogs(
   startDate: string,
   endDate: string,
-  params: PaginationParams = {},
+  params: PaginationParams & { all?: boolean } = {},
 ) {
   const query = new URLSearchParams();
   if (startDate) query.append('startDate', startDate);
   if (endDate) query.append('endDate', endDate);
-  appendPaginationParams(query, params);
+
+  // all: true이면 pageSize=0으로 전체 조회
+  if (params.all) {
+    query.append('pageSize', '0');
+  } else {
+    appendPaginationParams(query, params);
+  }
 
   const url = startDate && endDate ? `/api/work-logs/my${buildQueryString(query)}` : null;
   const { data, error, isLoading, mutate } = useSWR<PaginatedData<WorkLog>>(url);

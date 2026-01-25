@@ -10,6 +10,8 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  StreamableFile,
+  Header,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -26,7 +28,7 @@ import { UpdateWorkLogDto } from './dto/update-work-log.dto';
 import { WorkLogResponseDto } from './dto/work-log-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { ResponseCode } from '../common/decorators/response.decorator';
+import { ResponseCode, SkipResponseWrapper } from '../common/decorators/response.decorator';
 import { parsePaginationParams, createPaginationMeta } from '../common/helpers/pagination.helper';
 
 @ApiTags('WorkLogs')
@@ -47,7 +49,7 @@ export class WorkLogsController {
     type: WorkLogResponseDto,
   })
   @ApiResponse({ status: 400, description: '잘못된 요청' })
-  @ApiResponse({ status: 403, description: '담당자만 작성 가능합니다' })
+  @ApiResponse({ status: 403, description: '담당자만 작성 가능 (PM 제외)' })
   @ApiResponse({ status: 404, description: '업무를 찾을 수 없습니다' })
   @ApiResponse({ status: 409, description: '해당 날짜에 이미 일지가 존재합니다' })
   async create(
@@ -209,6 +211,52 @@ export class WorkLogsController {
   async remove(@Param('id') id: string, @CurrentUser() user: any) {
     await this.workLogsService.remove(BigInt(id), BigInt(user.id));
     return null;
+  }
+
+  @Get('projects/:projectId/work-logs/export')
+  @SkipResponseWrapper()
+  @ApiOperation({ summary: '주간 업무일지 엑셀 다운로드' })
+  @ApiParam({ name: 'projectId', description: '프로젝트 ID' })
+  @ApiQuery({ name: 'startDate', description: '시작일 (YYYY-MM-DD)', required: true })
+  @ApiQuery({ name: 'endDate', description: '종료일 (YYYY-MM-DD)', required: true })
+  @ApiQuery({ name: 'year', description: '연도', required: true, type: Number })
+  @ApiQuery({ name: 'month', description: '월', required: true, type: Number })
+  @ApiQuery({ name: 'weekNumber', description: '주차', required: true, type: Number })
+  @ApiResponse({
+    status: 200,
+    description: '주간 업무일지 엑셀 파일',
+  })
+  @ApiResponse({ status: 400, description: '잘못된 요청' })
+  @ApiResponse({ status: 404, description: '프로젝트를 찾을 수 없습니다' })
+  async exportWeeklyReport(
+    @Param('projectId') projectId: string,
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+    @Query('year') year: string,
+    @Query('month') month: string,
+    @Query('weekNumber') weekNumber: string,
+  ): Promise<StreamableFile> {
+    const weekInfo = {
+      year: parseInt(year, 10),
+      month: parseInt(month, 10),
+      weekNumber: parseInt(weekNumber, 10),
+    };
+
+    const buffer = await this.workLogsService.generateWeeklyReport(
+      BigInt(projectId),
+      startDate,
+      endDate,
+      weekInfo,
+    );
+
+    // 파일명: Weekly_Report_2026_01_Week2.xlsx
+    const filename = `Weekly_Report_${weekInfo.year}_${String(weekInfo.month).padStart(2, '0')}_Week${weekInfo.weekNumber}.xlsx`;
+    const encodedFilename = encodeURIComponent(filename);
+
+    return new StreamableFile(buffer, {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      disposition: `attachment; filename="${filename}"; filename*=UTF-8''${encodedFilename}`,
+    });
   }
 
   private transformWorkLog(workLog: any): any {

@@ -45,12 +45,12 @@ export default function WorkLogsPage() {
     };
   }, [currentMonth]);
 
-  // 데이터 조회
+  // 데이터 조회 (달력용이므로 전체 조회)
   const {
     workLogs = [],
     isLoading: workLogsLoading,
     mutate: mutateWorkLogs,
-  } = useMyWorkLogs(dateRange.startDate, dateRange.endDate);
+  } = useMyWorkLogs(dateRange.startDate, dateRange.endDate, { all: true });
 
   const { tasks: myTasks = [], isLoading: tasksLoading } = useMyTasks();
 
