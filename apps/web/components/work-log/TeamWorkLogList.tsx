@@ -17,7 +17,12 @@ import { TeamWorkLogFilters } from './TeamWorkLogFilters';
 import type { WorkLog } from '@/types/work-log';
 import type { ProjectMember } from '@/types/project';
 import type { TaskStatus, TaskDifficulty } from '@/types/task';
-import { STATUS_LABELS, STATUS_COLORS, DIFFICULTY_LABELS, DIFFICULTY_COLORS } from '@/types/task';
+import {
+  STATUS_LABELS,
+  STATUS_COLORS,
+  DIFFICULTY_LABELS,
+  DIFFICULTY_COLORS,
+} from '@/types/task';
 import { useProjectWorkLogs, getProjectWorkLogs } from '@/lib/api/workLogs';
 import { cn } from '@/lib/utils';
 
@@ -36,7 +41,9 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
 
   // Filter state
   const [statusFilter, setStatusFilter] = useState<TaskStatus[]>([]);
-  const [difficultyFilter, setDifficultyFilter] = useState<TaskDifficulty[]>([]);
+  const [difficultyFilter, setDifficultyFilter] = useState<TaskDifficulty[]>(
+    [],
+  );
   const [assigneeFilter, setAssigneeFilter] = useState<string>('all');
 
   useEffect(() => {
@@ -58,12 +65,14 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
     fetchWorkLogs();
   }, [projectId, currentMonth]);
 
-  const memberMap = new Map(members.map(m => [m.memberId.toString(), m.member]));
+  const memberMap = new Map(
+    members.map((m) => [m.memberId.toString(), m.member]),
+  );
 
   // Cascading filter helper: Filter assignees by work area
   const filteredAssignees = useMemo(() => {
     if (selectedWorkArea === 'all') return members;
-    return members.filter(m => m.workArea === selectedWorkArea);
+    return members.filter((m) => m.workArea === selectedWorkArea);
   }, [members, selectedWorkArea]);
 
   // Reset function
@@ -81,27 +90,29 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
     // 1. Filter by work area
     if (selectedWorkArea !== 'all') {
       const memberIds = members
-        .filter(m => m.workArea === selectedWorkArea)
-        .map(m => m.memberId.toString());
-      result = result.filter(log => memberIds.includes(log.userId));
+        .filter((m) => m.workArea === selectedWorkArea)
+        .map((m) => m.memberId.toString());
+      result = result.filter((log) => memberIds.includes(log.userId));
     }
 
     // 2. Filter by assignee
     if (assigneeFilter !== 'all') {
-      result = result.filter(log => log.userId === assigneeFilter);
+      result = result.filter((log) => log.userId === assigneeFilter);
     }
 
     // 3. Filter by status
     if (statusFilter.length > 0) {
-      result = result.filter(log =>
-        log.task?.status && statusFilter.includes(log.task.status)
+      result = result.filter(
+        (log) => log.task?.status && statusFilter.includes(log.task.status),
       );
     }
 
     // 4. Filter by difficulty
     if (difficultyFilter.length > 0) {
-      result = result.filter(log =>
-        log.task?.difficulty && difficultyFilter.includes(log.task.difficulty)
+      result = result.filter(
+        (log) =>
+          log.task?.difficulty &&
+          difficultyFilter.includes(log.task.difficulty),
       );
     }
 
@@ -121,13 +132,15 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
   // 선택한 날짜의 업무일지들
   const selectedDateLogs = useMemo(() => {
     const dateStr = format(selectedDate, 'yyyy-MM-dd');
-    return filteredAndSortedWorkLogs.filter(log => log.workDate === dateStr);
+    return filteredAndSortedWorkLogs.filter((log) => log.workDate === dateStr);
   }, [selectedDate, filteredAndSortedWorkLogs]);
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
     const dateStr = format(date, 'yyyy-MM-dd');
-    const logsForDate = filteredAndSortedWorkLogs.filter(log => log.workDate === dateStr);
+    const logsForDate = filteredAndSortedWorkLogs.filter(
+      (log) => log.workDate === dateStr,
+    );
 
     if (logsForDate.length > 0) {
       setDialogOpen(true);
@@ -142,7 +155,7 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
 
   // 프로젝트에 있는 담당 분야 목록 추출
   const availableWorkAreas = useMemo(() => {
-    const areas = new Set(members.map(m => m.workArea));
+    const areas = new Set(members.map((m) => m.workArea));
     return Array.from(areas).sort();
   }, [members]);
 
@@ -180,10 +193,11 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
 
       {/* 업무일지 상세 모달 */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-7xl max-h-[80vh] overflow-y-auto">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {format(selectedDate, 'yyyy년 MM월 dd일 (EEEE)', { locale: ko })} 팀 업무일지
+              {format(selectedDate, 'yyyy년 MM월 dd일 (EEEE)', { locale: ko })}{' '}
+              팀 업무일지
             </DialogTitle>
           </DialogHeader>
 
@@ -193,7 +207,7 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
                 오늘 작성된 업무일지가 없습니다
               </p>
             ) : (
-              selectedDateLogs.map(log => (
+              selectedDateLogs.map((log) => (
                 <Card key={log.id} className="border-slate-200">
                   <CardContent className="pt-4">
                     <div className="space-y-3">
@@ -203,10 +217,16 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
                           <div className="flex items-center gap-2 mb-1">
                             <User className="h-4 w-4 text-muted-foreground" />
                             <span className="font-medium text-sm">
-                              {log.user?.name || memberMap.get(log.userId)?.name || '알 수 없음'}
+                              {log.user?.name ||
+                                memberMap.get(log.userId)?.name ||
+                                '알 수 없음'}
                             </span>
                             <span className="text-xs text-muted-foreground">
-                              ({log.user?.email || memberMap.get(log.userId)?.email || ''})
+                              (
+                              {log.user?.email ||
+                                memberMap.get(log.userId)?.email ||
+                                ''}
+                              )
                             </span>
                           </div>
                           <p className="text-sm font-semibold text-slate-800">
@@ -217,12 +237,22 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
                         {/* Status and Difficulty Badges */}
                         <div className="flex items-center gap-2">
                           {log.task?.status && (
-                            <Badge className={cn('text-xs', STATUS_COLORS[log.task.status])}>
+                            <Badge
+                              className={cn(
+                                'text-xs',
+                                STATUS_COLORS[log.task.status],
+                              )}
+                            >
                               {STATUS_LABELS[log.task.status]}
                             </Badge>
                           )}
                           {log.task?.difficulty && (
-                            <Badge className={cn('text-xs', DIFFICULTY_COLORS[log.task.difficulty])}>
+                            <Badge
+                              className={cn(
+                                'text-xs',
+                                DIFFICULTY_COLORS[log.task.difficulty],
+                              )}
+                            >
                               {DIFFICULTY_LABELS[log.task.difficulty]}
                             </Badge>
                           )}
@@ -238,26 +268,32 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
 
                       {/* 통계 */}
                       <div className="flex flex-wrap gap-3">
-                        {log.workHours !== null && log.workHours !== undefined && (
-                          <div className="flex items-center gap-1 text-xs">
-                            <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                            <span className="font-medium">{log.workHours}시간</span>
-                          </div>
-                        )}
+                        {log.workHours !== null &&
+                          log.workHours !== undefined && (
+                            <div className="flex items-center gap-1 text-xs">
+                              <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                              <span className="font-medium">
+                                {log.workHours}시간
+                              </span>
+                            </div>
+                          )}
 
-                        {log.progress !== null && log.progress !== undefined && (
-                          <div className="flex items-center gap-2">
-                          <div className="w-20 h-2 bg-slate-100 rounded-full overflow-hidden">
-                            <div
-                              className={'h-full rounded-full transition-all bg-primary'}
-                              style={{ width: `${log.progress}%` }}
-                            />
-                          </div>
-                          <span className="text-sm font-medium text-slate-600">
-                            {log.progress}% 진행
-                          </span>
-                        </div>
-                        )}
+                        {log.progress !== null &&
+                          log.progress !== undefined && (
+                            <div className="flex items-center gap-2">
+                              <div className="w-20 h-2 bg-slate-100 rounded-full overflow-hidden">
+                                <div
+                                  className={
+                                    'h-full rounded-full transition-all bg-primary'
+                                  }
+                                  style={{ width: `${log.progress}%` }}
+                                />
+                              </div>
+                              <span className="text-sm font-medium text-slate-600">
+                                {log.progress}% 진행
+                              </span>
+                            </div>
+                          )}
 
                         {log.issues && (
                           <div className="flex items-center gap-1 text-xs text-orange-700 bg-orange-50 px-2 py-1 rounded">
@@ -270,8 +306,12 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
                       {/* 이슈 내용 */}
                       {log.issues && (
                         <div className="bg-orange-50 p-3 rounded border border-orange-200">
-                          <p className="text-xs font-medium text-orange-700 mb-1">이슈:</p>
-                          <p className="text-xs text-orange-700">{log.issues}</p>
+                          <p className="text-xs font-medium text-orange-700 mb-1">
+                            이슈:
+                          </p>
+                          <p className="text-xs text-orange-700">
+                            {log.issues}
+                          </p>
                         </div>
                       )}
                     </div>

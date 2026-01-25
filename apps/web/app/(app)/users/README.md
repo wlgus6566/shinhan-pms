@@ -7,6 +7,7 @@
 ## 역할(Role) 체계
 
 ### 1. 슈퍼 관리자 (SUPER_ADMIN)
+
 - **권한**: 전체 권한
 - **가능 작업**:
   - 멤버 등록, 수정, 비활성화
@@ -15,6 +16,7 @@
   - 업무일지 작성
 
 ### 2. 프로젝트 관리자 (PM)
+
 - **권한**: 프로젝트 관리 권한
 - **가능 작업**:
   - 멤버 등록, 수정, 비활성화
@@ -23,6 +25,7 @@
   - 업무일지 작성
 
 ### 3. 일반 (MEMBER)
+
 - **권한**: 기본 권한
 - **가능 작업**:
   - 업무일지 작성만 가능
@@ -30,6 +33,7 @@
 ## 페이지 구조
 
 ### 1. 멤버 목록 (/users)
+
 - 전체 멤버 목록 조회
 - 검색 기능 (이름, 이메일)
 - 필터 기능 (권한별)
@@ -37,6 +41,7 @@
 - 새 멤버 등록 버튼 (SUPER_ADMIN, PM만 표시)
 
 ### 2. 멤버 등록 (/users/new)
+
 멤버 등록 시 입력 필드:
 
 1. **프로필 사진** (선택)
@@ -76,6 +81,7 @@
    - 일반: 업무일지 작성만 가능
 
 ### 3. 멤버 상세/수정 (/users/[id])
+
 - 기본 정보 조회 (이름, 이메일)
 - 본부 변경
 - 권한 변경
@@ -85,6 +91,7 @@
 ## API 엔드포인트
 
 ### 멤버 생성
+
 ```
 POST /api/users
 Authorization: Bearer {token}
@@ -102,6 +109,7 @@ Body:
 ```
 
 ### 멤버 목록 조회
+
 ```
 GET /api/users?search={검색어}&role={권한}
 Authorization: Bearer {token}
@@ -109,6 +117,7 @@ Roles: SUPER_ADMIN, PM
 ```
 
 ### 멤버 상세 조회
+
 ```
 GET /api/users/{id}
 Authorization: Bearer {token}
@@ -116,6 +125,7 @@ Roles: SUPER_ADMIN, PM
 ```
 
 ### 멤버 수정
+
 ```
 PATCH /api/users/{id}
 Authorization: Bearer {token}
@@ -130,6 +140,7 @@ Body:
 ```
 
 ### 멤버 비활성화
+
 ```
 DELETE /api/users/{id}
 Authorization: Bearer {token}
@@ -139,16 +150,19 @@ Roles: SUPER_ADMIN
 ## 테스트 계정
 
 ### 슈퍼 관리자
+
 - 이메일: admin@emotion.co.kr
-- 비밀번호: 2motion!
+- 비밀번호: password123
 - 역할: SUPER_ADMIN
 
 ### 프로젝트 관리자
+
 - 이메일: kim@emotion.co.kr
 - 비밀번호: password123
 - 역할: PM
 
 ### 일반 사용자
+
 - 이메일: lee@emotion.co.kr
 - 비밀번호: password123
 - 역할: MEMBER

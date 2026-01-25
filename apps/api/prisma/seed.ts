@@ -7,7 +7,7 @@ async function main() {
   console.log('🌱 시드 데이터 생성 시작...');
 
   // 1. 슈퍼 관리자 계정 생성
-  const adminPasswordHash = await bcrypt.hash('2motion!', 10);
+  const adminPasswordHash = await bcrypt.hash('password123', 10);
   const admin = await prisma.user.upsert({
     where: { email: 'admin@emotion.co.kr' },
     update: { role: 'SUPER_ADMIN', department: '경영전략본부', position: 'GENERAL_MANAGER' },

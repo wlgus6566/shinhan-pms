@@ -82,7 +82,7 @@ export default function LoginPage() {
                     admin@emotion.co.kr
                   </p>
                   <p className="text-slate-600">
-                    <span className="text-slate-400">비밀번호:</span> 2motion!
+                    <span className="text-slate-400">비밀번호:</span> password123
                   </p>
                 </div>
               </div>

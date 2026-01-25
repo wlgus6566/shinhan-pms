@@ -152,7 +152,7 @@ Roles: SUPER_ADMIN
 ### 슈퍼 관리자
 
 - 이메일: admin@emotion.co.kr
-- 비밀번호: 2motion!
+- 비밀번호: password123
 - 역할: SUPER_ADMIN
 
 ### 프로젝트 관리자
