@@ -29,7 +29,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen min-w-[1600px] bg-emotion-lightgray">
+    <div className="min-h-screen min-w-[1280px] bg-emotion-lightgray">
       {/* 고정 사이드바 */}
       <Sidebar />
 

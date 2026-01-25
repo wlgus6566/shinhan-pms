@@ -8,28 +8,38 @@ export const ProjectTypeEnum = z.enum(['OPERATION', 'BUILD'], {
 export type ProjectType = z.infer<typeof ProjectTypeEnum>;
 
 export const ProjectStatusEnum = z.enum(['ACTIVE', 'COMPLETED', 'SUSPENDED'], {
-  errorMap: () => ({ message: '상태는 ACTIVE, COMPLETED, SUSPENDED 중 하나여야 합니다' }),
+  errorMap: () => ({
+    message: '상태는 ACTIVE, COMPLETED, SUSPENDED 중 하나여야 합니다',
+  }),
 });
 
 export type ProjectStatus = z.infer<typeof ProjectStatusEnum>;
 
 // Task Related Enums
 export const TaskDifficultyEnum = z.enum(['HIGH', 'MEDIUM', 'LOW'], {
-  errorMap: () => ({ message: '중요도는 HIGH, MEDIUM, LOW 중 하나여야 합니다' }),
+  errorMap: () => ({
+    message: '난이도는 HIGH, MEDIUM, LOW 중 하나여야 합니다',
+  }),
 });
 
 export type TaskDifficulty = z.infer<typeof TaskDifficultyEnum>;
 
-export const TaskStatusEnum = z.enum([
-  'WAITING',
-  'IN_PROGRESS',
-  'WORK_COMPLETED',
-  'OPEN_WAITING',
-  'OPEN_RESPONDING',
-  'COMPLETED',
-], {
-  errorMap: () => ({ message: '상태는 WAITING, IN_PROGRESS, WORK_COMPLETED, OPEN_WAITING, OPEN_RESPONDING, COMPLETED 중 하나여야 합니다' }),
-});
+export const TaskStatusEnum = z.enum(
+  [
+    'WAITING',
+    'IN_PROGRESS',
+    'WORK_COMPLETED',
+    'OPEN_WAITING',
+    'OPEN_RESPONDING',
+    'COMPLETED',
+  ],
+  {
+    errorMap: () => ({
+      message:
+        '상태는 WAITING, IN_PROGRESS, WORK_COMPLETED, OPEN_WAITING, OPEN_RESPONDING, COMPLETED 중 하나여야 합니다',
+    }),
+  },
+);
 
 export type TaskStatus = z.infer<typeof TaskStatusEnum>;
 
@@ -40,63 +50,68 @@ export const MemberRoleEnum = z.enum(['PM', 'PL', 'PA'], {
 
 export type MemberRole = z.infer<typeof MemberRoleEnum>;
 
-export const WorkAreaEnum = z.enum([
-  'PROJECT_MANAGEMENT',
-  'PLANNING',
-  'DESIGN',
-  'FRONTEND',
-  'BACKEND',
-], {
-  errorMap: () => ({ message: '담당 분야는 PROJECT_MANAGEMENT, PLANNING, DESIGN, FRONTEND, BACKEND 중 하나여야 합니다' }),
-});
+export const WorkAreaEnum = z.enum(
+  ['PROJECT_MANAGEMENT', 'PLANNING', 'DESIGN', 'FRONTEND', 'BACKEND'],
+  {
+    errorMap: () => ({
+      message:
+        '담당 분야는 PROJECT_MANAGEMENT, PLANNING, DESIGN, FRONTEND, BACKEND 중 하나여야 합니다',
+    }),
+  },
+);
 
 export type WorkArea = z.infer<typeof WorkAreaEnum>;
 
 // User Related Enums
-export const DepartmentEnum = z.enum([
-  'PLANNING',
-  'DESIGN',
-  'FRONTEND',
-  'DEVELOPMENT',
-], {
-  errorMap: () => ({ message: '올바른 파트를 선택해주세요' }),
-});
+export const DepartmentEnum = z.enum(
+  ['PLANNING', 'DESIGN', 'FRONTEND', 'DEVELOPMENT'],
+  {
+    errorMap: () => ({ message: '올바른 파트를 선택해주세요' }),
+  },
+);
 
 export type Department = z.infer<typeof DepartmentEnum>;
 
 // Schedule Related Enums
-export const ScheduleTypeEnum = z.enum([
-  'MEETING',
-  'SCRUM',
-  'VACATION',
-  'HALF_DAY',
-  'OTHER',
-], {
-  errorMap: () => ({ message: '일정 유형은 MEETING, SCRUM, VACATION, HALF_DAY, OTHER 중 하나여야 합니다' }),
-});
+export const ScheduleTypeEnum = z.enum(
+  ['MEETING', 'SCRUM', 'VACATION', 'HALF_DAY', 'OTHER'],
+  {
+    errorMap: () => ({
+      message:
+        '일정 유형은 MEETING, SCRUM, VACATION, HALF_DAY, OTHER 중 하나여야 합니다',
+    }),
+  },
+);
 
 export type ScheduleType = z.infer<typeof ScheduleTypeEnum>;
 
-export const TeamScopeEnum = z.enum([
-  'ALL',
-  'PLANNING',
-  'DESIGN',
-  'FRONTEND',
-  'BACKEND',
-], {
-  errorMap: () => ({ message: '팀 범위는 ALL, PLANNING, DESIGN, FRONTEND, BACKEND 중 하나여야 합니다' }),
-});
+export const TeamScopeEnum = z.enum(
+  ['ALL', 'PLANNING', 'DESIGN', 'FRONTEND', 'BACKEND'],
+  {
+    errorMap: () => ({
+      message:
+        '팀 범위는 ALL, PLANNING, DESIGN, FRONTEND, BACKEND 중 하나여야 합니다',
+    }),
+  },
+);
 
 export type TeamScope = z.infer<typeof TeamScopeEnum>;
 
 export const HalfDayTypeEnum = z.enum(['AM', 'PM'], {
-  errorMap: () => ({ message: '반차 유형은 오전(AM) 또는 오후(PM)여야 합니다' }),
+  errorMap: () => ({
+    message: '반차 유형은 오전(AM) 또는 오후(PM)여야 합니다',
+  }),
 });
 
 export type HalfDayType = z.infer<typeof HalfDayTypeEnum>;
 
-export const ParticipantStatusEnum = z.enum(['PENDING', 'ACCEPTED', 'DECLINED'], {
-  errorMap: () => ({ message: '참가 상태는 PENDING, ACCEPTED, DECLINED 중 하나여야 합니다' }),
-});
+export const ParticipantStatusEnum = z.enum(
+  ['PENDING', 'ACCEPTED', 'DECLINED'],
+  {
+    errorMap: () => ({
+      message: '참가 상태는 PENDING, ACCEPTED, DECLINED 중 하나여야 합니다',
+    }),
+  },
+);
 
 export type ParticipantStatus = z.infer<typeof ParticipantStatusEnum>;

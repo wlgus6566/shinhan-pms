@@ -119,7 +119,7 @@ export function TaskDetailSheet({
 
           <div className="flex gap-2">
             <Badge className={DIFFICULTY_COLORS[task.difficulty]}>
-              중요도: {DIFFICULTY_LABELS[task.difficulty]}
+              난이도: {DIFFICULTY_LABELS[task.difficulty]}
             </Badge>
             <Badge className={STATUS_COLORS[task.status]}>
               {STATUS_LABELS[task.status]}
@@ -163,15 +163,16 @@ export function TaskDetailSheet({
 
                 <div className="space-y-3">
                   {assignees.map(({ label, assignees: assigneeList }) => (
-                    <div
-                      key={label}
-                      className="rounded-lg border bg-background p-3"
-                    >
+                    <div key={label} className="rounded-lg border bg-white p-3">
                       {/* 그룹 헤더 */}
                       <div className="mb-2 flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           {/* 팀 컬러 포인트 (원하면 label별 색 매핑해서 className 바꾸면 됨) */}
-                          <span className={cn("h-4 w-1.5 rounded-full bg-slate-400")} />
+                          <span
+                            className={cn(
+                              'h-4 w-1.5 rounded-full bg-slate-400',
+                            )}
+                          />
                           <span className="text-sm font-semibold">{label}</span>
                         </div>
                         <span className="text-xs text-muted-foreground">
@@ -217,6 +218,15 @@ export function TaskDetailSheet({
                     <span className="text-muted-foreground">~</span>
                   )}
                   {task.endDate && <span>{task.endDate}</span>}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  오픈일
+                </h3>
+                <div className="pl-6 flex items-center gap-2 text-base">
+                  {task.openDate && <span>{task.openDate}</span>}
                 </div>
               </div>
             </>

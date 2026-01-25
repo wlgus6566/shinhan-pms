@@ -162,8 +162,8 @@ export function AddTaskDialog({ projectId, projectMembers, open, onOpenChange, o
             <FormSelect
               control={form.control}
               name="difficulty"
-              label="중요도 *"
-              placeholder="중요도 선택"
+              label="난이도 *"
+              placeholder="난이도 선택"
               options={difficultyOptions}
             />
 

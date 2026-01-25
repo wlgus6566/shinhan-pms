@@ -21,7 +21,8 @@ import type {
 import { TEAM_SCOPE_LABELS, TEAM_SCOPE_FILTER_COLORS } from '@/types/schedule';
 import type { ProjectMember } from '@/types/project';
 import {
-  useProjectSchedules, getProjectSchedules,
+  useProjectSchedules,
+  getProjectSchedules,
   createProjectSchedule,
   updateSchedule,
   deleteSchedule,
@@ -191,9 +192,9 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
   return (
     <div className="relative">
       {/* Two-column layout: Sidebar (filters + selected date list) and Calendar */}
-      <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
+      <div className="flex gap-6">
         {/* Left Sidebar */}
-        <div className="space-y-6">
+        <div className="flex flex-col gap-6 w-[30%]">
           {/* Team Filter */}
           <div className="bg-white rounded-lg border p-4">
             <div className="space-y-2">
@@ -235,7 +236,7 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
         </div>
 
         {/* Right Content - Calendar */}
-        <div>
+        <div className="flex-1">
           {loading ? (
             <div className="text-center py-12">
               <p className="text-muted-foreground">로드 중...</p>

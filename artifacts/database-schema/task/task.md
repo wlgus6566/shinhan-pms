@@ -56,7 +56,7 @@ CREATE INDEX idx_tasks_is_active ON tasks(is_active);
 | project_id | BIGINT | NO | - | 프로젝트 ID (Foreign Key: projects.id) |
 | task_name | VARCHAR(100) | NO | - | 작업명 (2-100자) |
 | description | TEXT | YES | NULL | 작업 상세 내용 (최대 1000자) |
-| difficulty | VARCHAR(10) | NO | - | 중요도: HIGH(상), MEDIUM(중), LOW(하) |
+| difficulty | VARCHAR(10) | NO | - | 난이도: HIGH(상), MEDIUM(중), LOW(하) |
 | client_name | VARCHAR(100) | YES | NULL | 담당 RM (고객사 이름) |
 
 ### 파트별 담당자
@@ -89,7 +89,7 @@ CREATE INDEX idx_tasks_is_active ON tasks(is_active);
 | 인덱스명 | 컬럼 | 목적 |
 |----------|------|------|
 | idx_tasks_project_id | project_id | 프로젝트별 업무 목록 조회 최적화 |
-| idx_tasks_difficulty | difficulty | 중요도별 필터링 |
+| idx_tasks_difficulty | difficulty | 난이도별 필터링 |
 | idx_tasks_status | status | 상태별 필터링 |
 | idx_tasks_is_active | is_active | 활성/비활성 필터링 (soft delete) |
 
@@ -108,7 +108,7 @@ CREATE INDEX idx_tasks_is_active ON tasks(is_active);
 
 ### 비즈니스 규칙
 1. **작업명**: 2자 이상, 100자 이하 필수
-2. **중요도**: HIGH, MEDIUM, LOW 중 하나 필수
+2. **난이도**: HIGH, MEDIUM, LOW 중 하나 필수
 3. **날짜 유효성**: endDate >= startDate
 4. **담당자 검증**:
    - 담당자는 프로젝트 멤버여야 함
@@ -120,7 +120,7 @@ CREATE INDEX idx_tasks_is_active ON tasks(is_active);
 
 ## 상태 값 정의
 
-### difficulty (중요도)
+### difficulty (난이도)
 - `HIGH`: 상 - 복잡하거나 시간이 많이 소요되는 작업
 - `MEDIUM`: 중 - 일반적인 작업
 - `LOW`: 하 - 간단하거나 빠르게 처리 가능한 작업

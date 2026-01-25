@@ -8,11 +8,10 @@ import { Plus } from 'lucide-react';
 
 export default function ProjectsPage() {
   const { user } = useAuth();
-  const canCreateProject =
-    user?.role === 'SUPER_ADMIN' || user?.role === 'PM';
+  const canCreateProject = user?.role === 'SUPER_ADMIN' || user?.role === 'PM';
 
   return (
-    <div className="max-w-7xl">
+    <div className="">
       <div className="mb-8 flex justify-between items-start">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">

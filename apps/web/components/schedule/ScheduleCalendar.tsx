@@ -174,7 +174,7 @@ export function ScheduleCalendar({
   }, [schedules]);
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden max-w-[1200px] min-w-[900px]">
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
         <div className="flex items-center gap-3">

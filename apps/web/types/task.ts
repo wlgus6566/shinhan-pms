@@ -30,14 +30,14 @@ export const STATUS_COLORS: Record<TaskStatus, string> = {
   COMPLETED: 'bg-green-50 text-green-700 border-green-300',
 };
 
-// 중요도 라벨 매핑
+// 난이도 라벨 매핑
 export const DIFFICULTY_LABELS: Record<TaskDifficulty, string> = {
   HIGH: '높음',
   MEDIUM: '보통',
   LOW: '낮음',
 };
 
-// 중요도별 색상
+// 난이도별 색상
 export const DIFFICULTY_COLORS: Record<TaskDifficulty, string> = {
   HIGH: 'bg-rose-50 text-rose-700 border-rose-300',
   MEDIUM: 'bg-amber-50 text-amber-700 border-amber-300',

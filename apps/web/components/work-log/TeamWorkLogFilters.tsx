@@ -138,7 +138,7 @@ export function TeamWorkLogFilters({
         </Button>
       </div>
 
-      {/* 두 번째 줄: 상태 및 중요도 필터 */}
+      {/* 두 번째 줄: 상태 및 난이도 필터 */}
       <div className="flex flex-col md:flex-row gap-4">
         {/* 상태 필터 */}
         <div className="w-[60%]">
@@ -168,9 +168,9 @@ export function TeamWorkLogFilters({
           </div>
         </div>
 
-        {/* 중요도 필터 */}
+        {/* 난이도 필터 */}
         <div className="w-[30%]">
-          <div className="text-sm font-medium mb-2">중요도</div>
+          <div className="text-sm font-medium mb-2">난이도</div>
           <div className="flex flex-wrap gap-2">
             {(Object.keys(DIFFICULTY_LABELS) as TaskDifficulty[]).map(
               (difficulty) => {

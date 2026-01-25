@@ -50,7 +50,7 @@ export function TaskTable({ tasks, onTaskClick }: TaskTableProps) {
         <TableHeader>
           <TableRow>
             <TableHead className="w-[250px]">업무명</TableHead>
-            <TableHead className="w-[100px]">중요도</TableHead>
+            <TableHead className="w-[100px]">난이도</TableHead>
             <TableHead className="w-[120px]">진행상태</TableHead>
             <TableHead className="min-w-[200px]">담당자</TableHead>
             <TableHead className="w-[120px]">오픈일</TableHead>
