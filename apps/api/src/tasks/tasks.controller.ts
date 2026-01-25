@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   UseGuards,
   HttpCode,
   HttpStatus,
@@ -15,6 +16,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiParam,
+  ApiQuery,
   ApiBearerAuth,
   ApiBody,
 } from '@nestjs/swagger';
@@ -24,6 +26,8 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 import { TaskResponseDto } from './dto/task-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { ResponseCode } from '../common/decorators/response.decorator';
+import { parsePaginationParams, createPaginationMeta } from '../common/helpers/pagination.helper';
 
 @ApiTags('Tasks')
 @Controller()
@@ -33,6 +37,7 @@ export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @Post('projects/:projectId/tasks')
+  @ResponseCode('SUC002')
   @ApiOperation({ summary: '업무 생성' })
   @ApiParam({ name: 'projectId', description: '프로젝트 ID' })
   @ApiBody({ type: CreateTaskDto })
@@ -62,14 +67,29 @@ export class TasksController {
   @Get('projects/:projectId/tasks')
   @ApiOperation({ summary: '프로젝트별 업무 목록 조회' })
   @ApiParam({ name: 'projectId', description: '프로젝트 ID' })
+  @ApiQuery({ name: 'pageNum', required: false, description: '페이지 번호', type: Number })
+  @ApiQuery({ name: 'pageSize', required: false, description: '페이지당 개수', type: Number })
   @ApiResponse({
     status: 200,
     description: '업무 목록',
     type: [TaskResponseDto],
   })
-  async findAll(@Param('projectId') projectId: string) {
-    const tasks = await this.tasksService.findAllByProject(BigInt(projectId));
-    return tasks.map((task) => this.transformTask(task));
+  async findAll(
+    @Param('projectId') projectId: string,
+    @Query('pageNum') pageNum?: string,
+    @Query('pageSize') pageSize?: string,
+  ) {
+    const pagination = parsePaginationParams({ pageNum, pageSize });
+
+    const { list, totalCount } = await this.tasksService.findAllByProject(
+      BigInt(projectId),
+      pagination,
+    );
+
+    return {
+      ...createPaginationMeta(totalCount, pagination.pageNum, pagination.pageSize),
+      list: list.map((task) => this.transformTask(task)),
+    };
   }
 
   @Get('tasks/:id')
@@ -112,17 +132,19 @@ export class TasksController {
   }
 
   @Delete('tasks/:id')
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(HttpStatus.OK)
+  @ResponseCode('SUC003')
   @ApiOperation({ summary: '업무 삭제 (소프트 삭제)' })
   @ApiParam({ name: 'id', description: '업무 ID' })
   @ApiResponse({
-    status: 204,
+    status: 200,
     description: '업무가 삭제되었습니다',
   })
   @ApiResponse({ status: 403, description: 'PM 권한이 필요합니다' })
   @ApiResponse({ status: 404, description: '업무를 찾을 수 없습니다' })
   async remove(@Param('id') id: string, @CurrentUser() user: any) {
     await this.tasksService.remove(BigInt(id), BigInt(user.id));
+    return null;
   }
 
   private transformTask(task: any): any {

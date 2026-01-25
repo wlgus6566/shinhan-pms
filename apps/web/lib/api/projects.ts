@@ -1,11 +1,18 @@
 import useSWR from 'swr';
 import { fetcher } from './fetcher';
+import type { PaginatedData } from '@repo/schema';
 import type {
   Project,
   GetProjectsParams,
   CreateProjectRequest,
   UpdateProjectRequest,
 } from '../../types/project';
+import {
+  extractPagination,
+  appendPaginationParams,
+  buildQueryString,
+  type PaginationParams,
+} from './pagination';
 
 /**
  * 내가 속한 프로젝트 타입
@@ -62,26 +69,20 @@ export async function deleteProject(id: string | number): Promise<void> {
 // ============================================================================
 
 /**
- * SWR hook for fetching projects list with optional filters
+ * SWR hook for fetching projects list with optional filters and pagination
  */
-export function useProjects(params: GetProjectsParams = {}) {
+export function useProjects(params: GetProjectsParams & PaginationParams = {}) {
   const query = new URLSearchParams();
+  if (params.search) query.append('search', params.search);
+  if (params.status) query.append('status', params.status);
+  appendPaginationParams(query, params);
 
-  if (params.search) {
-    query.append('search', params.search);
-  }
-
-  if (params.status) {
-    query.append('status', params.status);
-  }
-
-  const queryString = query.toString();
-  const url = `/api/projects${queryString ? `?${queryString}` : ''}`;
-
-  const { data, error, isLoading, mutate } = useSWR<Project[]>(url);
+  const url = `/api/projects${buildQueryString(query)}`;
+  const { data, error, isLoading, mutate } = useSWR<PaginatedData<Project>>(url);
 
   return {
-    projects: data,
+    projects: data?.list,
+    pagination: extractPagination(data),
     isLoading,
     error,
     mutate,
@@ -106,15 +107,18 @@ export function useProject(id: string | number | null) {
 }
 
 /**
- * SWR hook for fetching my projects
+ * SWR hook for fetching my projects with pagination
  */
-export function useMyProjects() {
-  const { data, error, isLoading, mutate } = useSWR<MyProject[]>(
-    '/api/projects/my'
-  );
+export function useMyProjects(params: PaginationParams = {}) {
+  const query = new URLSearchParams();
+  appendPaginationParams(query, params);
+
+  const url = `/api/projects/my${buildQueryString(query)}`;
+  const { data, error, isLoading, mutate } = useSWR<PaginatedData<MyProject>>(url);
 
   return {
-    projects: data,
+    projects: data?.list,
+    pagination: extractPagination(data),
     isLoading,
     error,
     mutate,

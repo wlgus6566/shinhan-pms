@@ -26,6 +26,8 @@ import { UpdateWorkLogDto } from './dto/update-work-log.dto';
 import { WorkLogResponseDto } from './dto/work-log-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { ResponseCode } from '../common/decorators/response.decorator';
+import { parsePaginationParams, createPaginationMeta } from '../common/helpers/pagination.helper';
 
 @ApiTags('WorkLogs')
 @Controller()
@@ -35,6 +37,7 @@ export class WorkLogsController {
   constructor(private readonly workLogsService: WorkLogsService) {}
 
   @Post('tasks/:taskId/work-logs')
+  @ResponseCode('SUC002')
   @ApiOperation({ summary: '업무일지 작성' })
   @ApiParam({ name: 'taskId', description: '업무 ID' })
   @ApiBody({ type: CreateWorkLogDto })
@@ -65,6 +68,8 @@ export class WorkLogsController {
   @ApiParam({ name: 'taskId', description: '업무 ID' })
   @ApiQuery({ name: 'startDate', required: false, description: '시작일 (YYYY-MM-DD)' })
   @ApiQuery({ name: 'endDate', required: false, description: '종료일 (YYYY-MM-DD)' })
+  @ApiQuery({ name: 'pageNum', required: false, description: '페이지 번호', type: Number })
+  @ApiQuery({ name: 'pageSize', required: false, description: '페이지당 개수', type: Number })
   @ApiResponse({
     status: 200,
     description: '업무일지 목록',
@@ -74,19 +79,28 @@ export class WorkLogsController {
     @Param('taskId') taskId: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
+    @Query('pageNum') pageNum?: string,
+    @Query('pageSize') pageSize?: string,
   ) {
-    const workLogs = await this.workLogsService.findByTask(
+    const pagination = parsePaginationParams({ pageNum, pageSize });
+
+    const { list, totalCount } = await this.workLogsService.findByTask(
       BigInt(taskId),
-      startDate,
-      endDate,
+      { startDate, endDate, ...pagination },
     );
-    return workLogs.map((log) => this.transformWorkLog(log));
+
+    return {
+      ...createPaginationMeta(totalCount, pagination.pageNum, pagination.pageSize),
+      list: list.map((log) => this.transformWorkLog(log)),
+    };
   }
 
   @Get('work-logs/my')
   @ApiOperation({ summary: '내 업무일지 목록 조회' })
   @ApiQuery({ name: 'startDate', required: false, description: '시작일 (YYYY-MM-DD)' })
   @ApiQuery({ name: 'endDate', required: false, description: '종료일 (YYYY-MM-DD)' })
+  @ApiQuery({ name: 'pageNum', required: false, description: '페이지 번호', type: Number })
+  @ApiQuery({ name: 'pageSize', required: false, description: '페이지당 개수', type: Number })
   @ApiResponse({
     status: 200,
     description: '내 업무일지 목록',
@@ -95,14 +109,21 @@ export class WorkLogsController {
   async findMyWorkLogs(
     @Query('startDate') startDate: string,
     @Query('endDate') endDate: string,
+    @Query('pageNum') pageNum: string,
+    @Query('pageSize') pageSize: string,
     @CurrentUser() user: any,
   ) {
-    const workLogs = await this.workLogsService.findByUser(
+    const pagination = parsePaginationParams({ pageNum, pageSize });
+
+    const { list, totalCount } = await this.workLogsService.findByUser(
       BigInt(user.id),
-      startDate,
-      endDate,
+      { startDate, endDate, ...pagination },
     );
-    return workLogs.map((log) => this.transformWorkLog(log));
+
+    return {
+      ...createPaginationMeta(totalCount, pagination.pageNum, pagination.pageSize),
+      list: list.map((log) => this.transformWorkLog(log)),
+    };
   }
 
   @Get('work-logs/my-tasks')
@@ -178,14 +199,16 @@ export class WorkLogsController {
   }
 
   @Delete('work-logs/:id')
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(HttpStatus.OK)
+  @ResponseCode('SUC003')
   @ApiOperation({ summary: '업무일지 삭제' })
   @ApiParam({ name: 'id', description: '업무일지 ID' })
-  @ApiResponse({ status: 204, description: '업무일지가 삭제되었습니다' })
+  @ApiResponse({ status: 200, description: '업무일지가 삭제되었습니다' })
   @ApiResponse({ status: 403, description: '본인만 삭제 가능합니다' })
   @ApiResponse({ status: 404, description: '업무일지를 찾을 수 없습니다' })
   async remove(@Param('id') id: string, @CurrentUser() user: any) {
     await this.workLogsService.remove(BigInt(id), BigInt(user.id));
+    return null;
   }
 
   private transformWorkLog(workLog: any): any {

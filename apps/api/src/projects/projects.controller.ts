@@ -31,6 +31,8 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { SchedulesService } from '../schedules/schedules.service';
 import { CreateScheduleDto } from '../schedules/dto/create-schedule.dto';
+import { ResponseCode } from '../common/decorators/response.decorator';
+import { parsePaginationParams, createPaginationMeta } from '../common/helpers/pagination.helper';
 
 @ApiTags('Projects')
 @Controller('projects')
@@ -41,6 +43,7 @@ export class ProjectsController {
   ) {}
 
   @Post()
+  @ResponseCode('SUC002')
   @ApiOperation({ summary: '프로젝트 생성' })
   @ApiResponse({
     status: 201,
@@ -79,6 +82,8 @@ export class ProjectsController {
     description: '상태 필터',
     enum: ['ACTIVE', 'COMPLETED', 'SUSPENDED'],
   })
+  @ApiQuery({ name: 'pageNum', required: false, description: '페이지 번호', type: Number })
+  @ApiQuery({ name: 'pageSize', required: false, description: '페이지당 개수', type: Number })
   @ApiResponse({
     status: 200,
     description: '프로젝트 목록',
@@ -87,23 +92,50 @@ export class ProjectsController {
   async findAll(
     @Query('search') search?: string,
     @Query('status') status?: string,
+    @Query('pageNum') pageNum?: string,
+    @Query('pageSize') pageSize?: string,
   ) {
-    const projects = await this.projectsService.findAll({ search, status });
-    return projects.map((project) => this.transformProject(project));
+    const pagination = parsePaginationParams({ pageNum, pageSize });
+
+    const { list, totalCount } = await this.projectsService.findAll({
+      search,
+      status,
+      ...pagination,
+    });
+
+    return {
+      ...createPaginationMeta(totalCount, pagination.pageNum, pagination.pageSize),
+      list: list.map((project) => this.transformProject(project)),
+    };
   }
 
   @Get('my')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: '내가 속한 프로젝트 목록 조회' })
+  @ApiQuery({ name: 'pageNum', required: false, description: '페이지 번호', type: Number })
+  @ApiQuery({ name: 'pageSize', required: false, description: '페이지당 개수', type: Number })
   @ApiResponse({
     status: 200,
     description: '내가 멤버로 속한 프로젝트 목록',
     type: [ProjectResponseDto],
   })
-  async findMyProjects(@CurrentUser() user: any) {
-    const projects = await this.projectsService.findMyProjects(BigInt(user.id));
-    return projects.map((project) => this.transformMyProject(project));
+  async findMyProjects(
+    @CurrentUser() user: any,
+    @Query('pageNum') pageNum?: string,
+    @Query('pageSize') pageSize?: string,
+  ) {
+    const pagination = parsePaginationParams({ pageNum, pageSize });
+
+    const { list, totalCount } = await this.projectsService.findMyProjects(
+      BigInt(user.id),
+      pagination,
+    );
+
+    return {
+      ...createPaginationMeta(totalCount, pagination.pageNum, pagination.pageSize),
+      list: list.map((project) => this.transformMyProject(project)),
+    };
   }
 
   @Get(':id')
@@ -148,6 +180,7 @@ export class ProjectsController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
+  @ResponseCode('SUC003')
   @ApiOperation({ summary: '프로젝트 삭제' })
   @ApiParam({ name: 'id', description: '프로젝트 ID' })
   @ApiResponse({
@@ -157,7 +190,7 @@ export class ProjectsController {
   @ApiResponse({ status: 404, description: '프로젝트를 찾을 수 없습니다' })
   async remove(@Param('id') id: string) {
     await this.projectsService.remove(BigInt(id));
-    return { message: '프로젝트가 삭제되었습니다' };
+    return null;
   }
 
   /**
@@ -213,18 +246,34 @@ export class ProjectsController {
   @Get(':id/members')
   @ApiOperation({ summary: '프로젝트 멤버 목록 조회' })
   @ApiParam({ name: 'id', description: '프로젝트 ID' })
+  @ApiQuery({ name: 'pageNum', required: false, description: '페이지 번호', type: Number })
+  @ApiQuery({ name: 'pageSize', required: false, description: '페이지당 개수', type: Number })
   @ApiResponse({
     status: 200,
     description: '프로젝트 멤버 목록',
     type: [ProjectMemberResponseDto],
   })
   @ApiResponse({ status: 404, description: '프로젝트를 찾을 수 없습니다' })
-  async getProjectMembers(@Param('id') id: string) {
-    const members = await this.projectsService.getProjectMembers(BigInt(id));
-    return members.map((member) => this.transformProjectMember(member));
+  async getProjectMembers(
+    @Param('id') id: string,
+    @Query('pageNum') pageNum?: string,
+    @Query('pageSize') pageSize?: string,
+  ) {
+    const pagination = parsePaginationParams({ pageNum, pageSize });
+
+    const { list, totalCount } = await this.projectsService.getProjectMembers(
+      BigInt(id),
+      pagination,
+    );
+
+    return {
+      ...createPaginationMeta(totalCount, pagination.pageNum, pagination.pageSize),
+      list: list.map((member) => this.transformProjectMember(member)),
+    };
   }
 
   @Post(':id/members')
+  @ResponseCode('SUC002')
   @ApiOperation({ summary: '프로젝트 멤버 추가' })
   @ApiParam({ name: 'id', description: '프로젝트 ID' })
   @ApiResponse({
@@ -276,11 +325,12 @@ export class ProjectsController {
   }
 
   @Delete(':id/members/:memberId')
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(HttpStatus.OK)
+  @ResponseCode('SUC003')
   @ApiOperation({ summary: '프로젝트 멤버 제거' })
   @ApiParam({ name: 'id', description: '프로젝트 ID' })
   @ApiParam({ name: 'memberId', description: '멤버 ID' })
-  @ApiResponse({ status: 204, description: '멤버가 제거되었습니다' })
+  @ApiResponse({ status: 200, description: '멤버가 제거되었습니다' })
   @ApiResponse({ status: 404, description: '프로젝트 멤버를 찾을 수 없습니다' })
   async removeProjectMember(
     @Param('id') id: string,
@@ -290,6 +340,7 @@ export class ProjectsController {
       BigInt(id),
       BigInt(memberId),
     );
+    return null;
   }
 
   /**

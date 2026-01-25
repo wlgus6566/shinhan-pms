@@ -26,6 +26,8 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { ResponseCode } from '../common/decorators/response.decorator';
+import { parsePaginationParams, createPaginationMeta } from '../common/helpers/pagination.helper';
 
 @ApiTags('사용자 관리')
 @Controller('users')
@@ -36,6 +38,7 @@ export class UsersController {
 
   @Post()
   @Roles('SUPER_ADMIN', 'PM')
+  @ResponseCode('SUC002')
   @ApiOperation({ summary: '사용자 생성 (슈퍼관리자/PM 전용)' })
   @ApiResponse({
     status: 201,
@@ -67,13 +70,13 @@ export class UsersController {
     description: '활성 상태 필터',
   })
   @ApiQuery({
-    name: 'page',
+    name: 'pageNum',
     required: false,
     type: Number,
     description: '페이지 번호',
   })
   @ApiQuery({
-    name: 'limit',
+    name: 'pageSize',
     required: false,
     type: Number,
     description: '페이지당 개수',
@@ -91,20 +94,26 @@ export class UsersController {
     @Query('department') department?: string,
     @Query('role') role?: string,
     @Query('isActive') isActive?: string,
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
+    @Query('pageNum') pageNum?: string,
+    @Query('pageSize') pageSize?: string,
     @Query('excludeProject') excludeProject?: string,
   ) {
-    return this.usersService.findAll({
+    const pagination = parsePaginationParams({ pageNum, pageSize });
+
+    const { list, totalCount } = await this.usersService.findAll({
       search,
       department,
       role,
       isActive:
         isActive === 'true' ? true : isActive === 'false' ? false : undefined,
-      page: page ? parseInt(page) : undefined,
-      limit: limit ? parseInt(limit) : undefined,
+      ...pagination,
       excludeProject,
     });
+
+    return {
+      ...createPaginationMeta(totalCount, pagination.pageNum, pagination.pageSize),
+      list,
+    };
   }
 
   @Get(':id')
@@ -136,16 +145,18 @@ export class UsersController {
 
   @Delete(':id')
   @Roles('SUPER_ADMIN')
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(HttpStatus.OK)
+  @ResponseCode('SUC003')
   @ApiOperation({ summary: '사용자 비활성화 (슈퍼관리자 전용)' })
-  @ApiResponse({ status: 204, description: '비활성화 성공' })
+  @ApiResponse({ status: 200, description: '비활성화 성공' })
   @ApiResponse({ status: 400, description: '본인 계정 비활성화 불가' })
   @ApiResponse({ status: 403, description: '권한 없음' })
   @ApiResponse({ status: 404, description: '사용자 없음' })
   async deactivate(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() currentUser: UserResponseDto,
-  ): Promise<void> {
-    return this.usersService.deactivate(BigInt(id), currentUser.id);
+  ) {
+    await this.usersService.deactivate(BigInt(id), currentUser.id);
+    return null;
   }
 }

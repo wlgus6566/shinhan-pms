@@ -9,6 +9,7 @@ import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { AddProjectMemberDto } from './dto/add-member.dto';
 import { UpdateProjectMemberRoleDto } from './dto/update-member-role.dto';
+import { parsePaginationParams } from '../common/helpers/pagination.helper';
 
 @Injectable()
 export class ProjectsService {
@@ -67,47 +68,77 @@ export class ProjectsService {
     });
   }
 
-  async findAll(filters?: { search?: string; status?: string }) {
-    return await this.prisma.project.findMany({
-      where: {
-        isActive: true,
-        ...(filters?.search && {
-          projectName: { contains: filters.search },
-        }),
-        ...(filters?.status && {
-          status: filters.status,
-        }),
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+  async findAll(filters?: {
+    search?: string;
+    status?: string;
+    pageNum?: number;
+    pageSize?: number;
+  }) {
+    const { pageSize, skip } = parsePaginationParams(filters ?? {});
+
+    const where = {
+      isActive: true,
+      ...(filters?.search && {
+        projectName: { contains: filters.search },
+      }),
+      ...(filters?.status && {
+        status: filters.status,
+      }),
+    };
+
+    const [items, totalCount] = await Promise.all([
+      this.prisma.project.findMany({
+        where,
+        skip,
+        take: pageSize,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.project.count({ where }),
+    ]);
+
+    return { list: items, totalCount };
   }
 
   /**
    * 내가 속한 프로젝트 목록 조회
    */
-  async findMyProjects(userId: bigint) {
-    const projectMembers = await this.prisma.projectMember.findMany({
-      where: {
-        memberId: userId,
-        project: {
-          isActive: true,
-        },
-      },
-      include: {
-        project: true,
-      },
-      orderBy: {
-        project: {
-          projectName: 'asc',
-        },
-      },
-    });
+  async findMyProjects(
+    userId: bigint,
+    params?: { pageNum?: number; pageSize?: number },
+  ) {
+    const { pageSize, skip } = parsePaginationParams(params ?? {});
 
-    return projectMembers.map((pm) => ({
+    const where = {
+      memberId: userId,
+      project: {
+        isActive: true,
+      },
+    };
+
+    const [projectMembers, totalCount] = await Promise.all([
+      this.prisma.projectMember.findMany({
+        where,
+        skip,
+        take: pageSize,
+        include: {
+          project: true,
+        },
+        orderBy: {
+          project: {
+            projectName: 'asc',
+          },
+        },
+      }),
+      this.prisma.projectMember.count({ where }),
+    ]);
+
+    const list = projectMembers.map((pm) => ({
       ...pm.project,
       myRole: pm.role,
       myWorkArea: pm.workArea,
     }));
+
+    return { list, totalCount };
   }
 
   async findOne(id: bigint) {
@@ -207,25 +238,35 @@ export class ProjectsService {
   /**
    * 프로젝트 멤버 목록 조회
    */
-  async getProjectMembers(projectId: bigint) {
+  async getProjectMembers(
+    projectId: bigint,
+    params?: { pageNum?: number; pageSize?: number },
+  ) {
+    const { pageNum, pageSize } = parsePaginationParams(params ?? {});
+
     // 프로젝트 존재 확인
     await this.findOne(projectId);
 
-    const members = await this.prisma.projectMember.findMany({
-      where: { projectId },
-      include: {
-        member: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            department: true,
-            position: true,
-            role: true,
+    const where = { projectId };
+
+    const [members, totalCount] = await Promise.all([
+      this.prisma.projectMember.findMany({
+        where,
+        include: {
+          member: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              department: true,
+              position: true,
+              role: true,
+            },
           },
         },
-      },
-    });
+      }),
+      this.prisma.projectMember.count({ where }),
+    ]);
 
     // 정렬 로직
     const workAreaOrder = {
@@ -242,7 +283,7 @@ export class ProjectsService {
       PA: 2,
     };
 
-    return members.sort((a, b) => {
+    const sortedMembers = members.sort((a, b) => {
       // 1. PM이 가장 먼저
       if (a.role === 'PM' && b.role !== 'PM') return -1;
       if (a.role !== 'PM' && b.role === 'PM') return 1;
@@ -255,6 +296,12 @@ export class ProjectsService {
       // 3. 각 담당 분야 내에서 PL > PA
       return (roleOrder[a.role] ?? 999) - (roleOrder[b.role] ?? 999);
     });
+
+    // 페이지네이션 적용 (정렬 후)
+    const skip = (pageNum - 1) * pageSize;
+    const list = sortedMembers.slice(skip, skip + pageSize);
+
+    return { list, totalCount };
   }
 
   /**

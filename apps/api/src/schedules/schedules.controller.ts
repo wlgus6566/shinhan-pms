@@ -26,6 +26,7 @@ import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { ScheduleResponseDto } from './dto/schedule-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { ResponseCode } from '../common/decorators/response.decorator';
 
 @ApiTags('Schedules')
 @Controller()
@@ -35,6 +36,7 @@ export class SchedulesController {
   constructor(private readonly schedulesService: SchedulesService) {}
 
   @Post('schedules')
+  @ResponseCode('SUC002')
   @ApiOperation({ summary: '개인 일정 생성' })
   @ApiBody({ type: CreateScheduleDto })
   @ApiResponse({
@@ -115,14 +117,16 @@ export class SchedulesController {
   }
 
   @Delete('schedules/:id')
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(HttpStatus.OK)
+  @ResponseCode('SUC003')
   @ApiOperation({ summary: '일정 삭제' })
   @ApiParam({ name: 'id', description: '일정 ID' })
-  @ApiResponse({ status: 204, description: '일정이 삭제되었습니다' })
+  @ApiResponse({ status: 200, description: '일정이 삭제되었습니다' })
   @ApiResponse({ status: 403, description: '본인만 삭제 가능합니다' })
   @ApiResponse({ status: 404, description: '일정을 찾을 수 없습니다' })
   async remove(@Param('id') id: string, @CurrentUser() user: any) {
     await this.schedulesService.remove(BigInt(id), BigInt(user.id));
+    return null;
   }
 
   @Patch('schedules/:id/participate')

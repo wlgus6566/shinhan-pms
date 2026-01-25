@@ -8,6 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
+import { parsePaginationParams } from '../common/helpers/pagination.helper';
 
 interface CreateUserDto {
   email: string;
@@ -61,18 +62,14 @@ export class UsersService {
     department?: string;
     role?: string;
     isActive?: boolean;
-    page?: number;
-    limit?: number;
+    pageNum?: number;
+    pageSize?: number;
     excludeProject?: string;
   }): Promise<{
-    users: UserResponseDto[];
-    total: number;
-    page: number;
-    limit: number;
+    list: UserResponseDto[];
+    totalCount: number;
   }> {
-    const page = filters?.page || 1;
-    const limit = filters?.limit || 20;
-    const skip = (page - 1) * limit;
+    const { pageSize, skip } = parsePaginationParams(filters ?? {});
 
     const where: any = {};
 
@@ -109,21 +106,19 @@ export class UsersService {
       }
     }
 
-    const [users, total] = await Promise.all([
+    const [users, totalCount] = await Promise.all([
       this.prisma.user.findMany({
         where,
         skip,
-        take: limit,
+        take: pageSize,
         orderBy: { createdAt: 'desc' },
       }),
       this.prisma.user.count({ where }),
     ]);
 
     return {
-      users: users.map((user) => new UserResponseDto(user)),
-      total,
-      page,
-      limit,
+      list: users.map((user) => new UserResponseDto(user)),
+      totalCount,
     };
   }
 

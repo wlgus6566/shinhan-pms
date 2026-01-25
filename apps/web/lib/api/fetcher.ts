@@ -51,7 +51,15 @@ apiClient.interceptors.request.use(
 
 // Response Interceptor
 apiClient.interceptors.response.use(
-  (response) => response.data,
+  (response) => {
+    const apiResponse = response.data;
+    // 새 응답 구조: { code, message, data }
+    if (apiResponse && typeof apiResponse === 'object' && 'code' in apiResponse && 'data' in apiResponse) {
+      return apiResponse.data;
+    }
+    // 하위 호환
+    return apiResponse;
+  },
   async (error: AxiosError<any>) => {
     // 로그인 요청은 401 처리 건너뜀
     const isLoginRequest = error.config?.url?.includes('/auth/login');

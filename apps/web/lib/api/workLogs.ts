@@ -1,11 +1,18 @@
 import useSWR from 'swr';
 import { fetcher } from './fetcher';
+import type { PaginatedData } from '@repo/schema';
 import type {
   WorkLog,
   CreateWorkLogRequest,
   UpdateWorkLogRequest,
   MyTask,
 } from '@/types/work-log';
+import {
+  extractPagination,
+  appendPaginationParams,
+  buildQueryString,
+  type PaginationParams,
+} from './pagination';
 
 // ============================================================================
 // Legacy GET Functions (for components not yet migrated to SWR)
@@ -70,20 +77,27 @@ export async function deleteWorkLog(id: string): Promise<void> {
 // ============================================================================
 
 /**
- * SWR hook for fetching my work logs
+ * SWR hook for fetching my work logs with pagination
  * @param startDate - Start date (required)
  * @param endDate - End date (required)
+ * @param params - Pagination params
  */
-export function useMyWorkLogs(startDate: string, endDate: string) {
-  const url =
-    startDate && endDate
-      ? `/api/work-logs/my?startDate=${startDate}&endDate=${endDate}`
-      : null;
+export function useMyWorkLogs(
+  startDate: string,
+  endDate: string,
+  params: PaginationParams = {},
+) {
+  const query = new URLSearchParams();
+  if (startDate) query.append('startDate', startDate);
+  if (endDate) query.append('endDate', endDate);
+  appendPaginationParams(query, params);
 
-  const { data, error, isLoading, mutate } = useSWR<WorkLog[]>(url);
+  const url = startDate && endDate ? `/api/work-logs/my${buildQueryString(query)}` : null;
+  const { data, error, isLoading, mutate } = useSWR<PaginatedData<WorkLog>>(url);
 
   return {
-    workLogs: data,
+    workLogs: data?.list,
+    pagination: extractPagination(data),
     isLoading,
     error,
     mutate,
@@ -107,29 +121,32 @@ export function useMyTasks() {
 }
 
 /**
- * SWR hook for fetching work logs by task ID
+ * SWR hook for fetching work logs by task ID with pagination
  * @param taskId - Task ID (null to skip fetching)
  * @param startDate - Optional start date filter
  * @param endDate - Optional end date filter
+ * @param params - Pagination params
  */
 export function useTaskWorkLogs(
   taskId: string | null,
   startDate?: string,
   endDate?: string,
+  params: PaginationParams = {},
 ) {
   let url: string | null = null;
   if (taskId) {
-    const params = new URLSearchParams();
-    if (startDate) params.append('startDate', startDate);
-    if (endDate) params.append('endDate', endDate);
-    const query = params.toString();
-    url = `/api/tasks/${taskId}/work-logs${query ? `?${query}` : ''}`;
+    const query = new URLSearchParams();
+    if (startDate) query.append('startDate', startDate);
+    if (endDate) query.append('endDate', endDate);
+    appendPaginationParams(query, params);
+    url = `/api/tasks/${taskId}/work-logs${buildQueryString(query)}`;
   }
 
-  const { data, error, isLoading, mutate } = useSWR<WorkLog[]>(url);
+  const { data, error, isLoading, mutate } = useSWR<PaginatedData<WorkLog>>(url);
 
   return {
-    workLogs: data,
+    workLogs: data?.list,
+    pagination: extractPagination(data),
     isLoading,
     error,
     mutate,

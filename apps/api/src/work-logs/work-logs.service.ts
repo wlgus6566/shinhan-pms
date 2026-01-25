@@ -9,6 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateWorkLogDto } from './dto/create-work-log.dto';
 import { UpdateWorkLogDto } from './dto/update-work-log.dto';
 import { Decimal } from '@prisma/client/runtime/library';
+import { parsePaginationParams } from '../common/helpers/pagination.helper';
 
 @Injectable()
 export class WorkLogsService {
@@ -69,51 +70,85 @@ export class WorkLogsService {
   /**
    * 특정 업무의 일지 목록 조회
    */
-  async findByTask(taskId: bigint, startDate?: string, endDate?: string) {
+  async findByTask(
+    taskId: bigint,
+    params?: {
+      startDate?: string;
+      endDate?: string;
+      pageNum?: number;
+      pageSize?: number;
+    },
+  ) {
+    const { pageSize, skip } = parsePaginationParams(params ?? {});
+
     const where: any = {
       taskId,
       isActive: true,
     };
 
-    if (startDate || endDate) {
+    if (params?.startDate || params?.endDate) {
       where.workDate = {};
-      if (startDate) where.workDate.gte = new Date(startDate);
-      if (endDate) where.workDate.lte = new Date(endDate);
+      if (params?.startDate) where.workDate.gte = new Date(params.startDate);
+      if (params?.endDate) where.workDate.lte = new Date(params.endDate);
     }
 
-    return await this.prisma.workLog.findMany({
-      where,
-      include: {
-        task: { select: { id: true, taskName: true, projectId: true, status: true, difficulty: true } },
-        user: { select: { id: true, name: true, email: true } },
-      },
-      orderBy: { workDate: 'desc' },
-    });
+    const [items, totalCount] = await Promise.all([
+      this.prisma.workLog.findMany({
+        where,
+        skip,
+        take: pageSize,
+        include: {
+          task: { select: { id: true, taskName: true, projectId: true, status: true, difficulty: true } },
+          user: { select: { id: true, name: true, email: true } },
+        },
+        orderBy: { workDate: 'desc' },
+      }),
+      this.prisma.workLog.count({ where }),
+    ]);
+
+    return { list: items, totalCount };
   }
 
   /**
    * 내 일지 목록 조회
    */
-  async findByUser(userId: bigint, startDate?: string, endDate?: string) {
+  async findByUser(
+    userId: bigint,
+    params?: {
+      startDate?: string;
+      endDate?: string;
+      pageNum?: number;
+      pageSize?: number;
+    },
+  ) {
+    const { pageSize, skip } = parsePaginationParams(params ?? {});
+
     const where: any = {
       userId,
       isActive: true,
     };
 
-    if (startDate || endDate) {
+    if (params?.startDate || params?.endDate) {
       where.workDate = {};
-      if (startDate) where.workDate.gte = new Date(startDate);
-      if (endDate) where.workDate.lte = new Date(endDate);
+      if (params?.startDate) where.workDate.gte = new Date(params.startDate);
+      if (params?.endDate) where.workDate.lte = new Date(params.endDate);
     }
 
-    return await this.prisma.workLog.findMany({
-      where,
-      include: {
-        task: { select: { id: true, taskName: true, projectId: true, status: true, difficulty: true } },
-        user: { select: { id: true, name: true, email: true } },
-      },
-      orderBy: { workDate: 'desc' },
-    });
+    const [items, totalCount] = await Promise.all([
+      this.prisma.workLog.findMany({
+        where,
+        skip,
+        take: pageSize,
+        include: {
+          task: { select: { id: true, taskName: true, projectId: true, status: true, difficulty: true } },
+          user: { select: { id: true, name: true, email: true } },
+        },
+        orderBy: { workDate: 'desc' },
+      }),
+      this.prisma.workLog.count({ where }),
+    ]);
+
+    return { list: items, totalCount };
   }
 
   /**

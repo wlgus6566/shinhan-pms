@@ -1,6 +1,13 @@
 import useSWR from 'swr';
 import { fetcher } from './fetcher';
+import type { PaginatedData } from '@repo/schema';
 import type { Task, CreateTaskRequest, UpdateTaskRequest } from '@/types/task';
+import {
+  extractPagination,
+  appendPaginationParams,
+  buildQueryString,
+  type PaginationParams,
+} from './pagination';
 
 // ============================================================================
 // Mutation Functions (POST/PATCH/DELETE)
@@ -31,16 +38,23 @@ export async function deleteTask(taskId: string): Promise<void> {
 // ============================================================================
 
 /**
- * SWR hook for fetching tasks by project ID
+ * SWR hook for fetching tasks by project ID with pagination
  * @param projectId - Project ID (null to skip fetching)
+ * @param params - Pagination params
  */
-export function useTasks(projectId: string | null) {
-  const { data, error, isLoading, mutate } = useSWR<Task[]>(
-    projectId ? `/api/projects/${projectId}/tasks` : null
-  );
+export function useTasks(projectId: string | null, params: PaginationParams = {}) {
+  const query = new URLSearchParams();
+  appendPaginationParams(query, params);
+
+  const url = projectId
+    ? `/api/projects/${projectId}/tasks${buildQueryString(query)}`
+    : null;
+
+  const { data, error, isLoading, mutate } = useSWR<PaginatedData<Task>>(url);
 
   return {
-    tasks: data,
+    tasks: data?.list,
+    pagination: extractPagination(data),
     isLoading,
     error,
     mutate,

@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException, ForbiddenException 
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { parsePaginationParams } from '../common/helpers/pagination.helper';
 
 @Injectable()
 export class TasksService {
@@ -92,21 +93,35 @@ export class TasksService {
     });
   }
 
-  async findAllByProject(projectId: bigint) {
-    return await this.prisma.task.findMany({
-      where: {
-        projectId,
-        isActive: true,
-      },
-      include: {
-        assignees: {
-          include: {
-            user: { select: { id: true, name: true, email: true } },
+  async findAllByProject(
+    projectId: bigint,
+    params?: { pageNum?: number; pageSize?: number },
+  ) {
+    const { pageSize, skip } = parsePaginationParams(params ?? {});
+
+    const where = {
+      projectId,
+      isActive: true,
+    };
+
+    const [items, totalCount] = await Promise.all([
+      this.prisma.task.findMany({
+        where,
+        skip,
+        take: pageSize,
+        include: {
+          assignees: {
+            include: {
+              user: { select: { id: true, name: true, email: true } },
+            },
           },
         },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.task.count({ where }),
+    ]);
+
+    return { list: items, totalCount };
   }
 
   async findOne(taskId: bigint) {
