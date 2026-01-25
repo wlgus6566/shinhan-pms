@@ -8,15 +8,8 @@ import { LoginSchema } from '@repo/schema';
 import { login as loginApi } from '@/lib/api/auth';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+import { Form } from '@/components/ui/form';
+import { FormInput } from '@/components/form';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { z } from 'zod';
@@ -66,31 +59,18 @@ export function LoginForm() {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          <FormField
+          <FormInput
             control={form.control}
             name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>이메일</FormLabel>
-                <FormControl>
-                  <Input placeholder="name@emotion.co.kr" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="이메일"
+            placeholder="name@emotion.co.kr"
           />
-          <FormField
+          <FormInput
             control={form.control}
             name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>비밀번호</FormLabel>
-                <FormControl>
-                  <Input type="password" placeholder="••••••••" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="비밀번호"
+            type="password"
+            placeholder="••••••••"
           />
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

@@ -12,14 +12,8 @@ import {
   FormTextarea,
   FormSelect,
   FormRadioGroup,
+  FormCheckboxGroup,
 } from '@/components/form';
-import { Checkbox } from '@/components/ui/checkbox';
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
 import type { Schedule, TeamScope } from '@/types/schedule';
 import { SCHEDULE_TYPE_LABELS, TEAM_SCOPE_LABELS } from '@/types/schedule';
 import type { ProjectMember, WorkArea } from '@/types/project';
@@ -174,8 +168,12 @@ export function ScheduleForm({
       const usageDateTime = new Date(data.usageDate + 'T00:00:00Z');
 
       // 제목 자동 설정
-      const autoTitle = data.scheduleType === 'VACATION' ? '연차' :
-                        data.halfDayType === 'AM' ? '반차 (오전)' : '반차 (오후)';
+      const autoTitle =
+        data.scheduleType === 'VACATION'
+          ? '연차'
+          : data.halfDayType === 'AM'
+            ? '반차 (오전)'
+            : '반차 (오후)';
 
       const { halfDayType, teamScope, ...restData } = data;
       submitData = {
@@ -219,6 +217,29 @@ export function ScheduleForm({
     if (workAreas.has('BACKEND')) scopes.push('BACKEND');
 
     return scopes;
+  }, [projectMembers]);
+
+  // 참가자 그룹 데이터 생성
+  const participantGroups = useMemo(() => {
+    const teamLabels: Record<string, string> = {
+      PROJECT_MANAGEMENT: 'PM',
+      PLANNING: '기획팀',
+      DESIGN: '디자인팀',
+      FRONTEND: '프론트엔드팀',
+      BACKEND: '백엔드팀',
+    };
+
+    return Object.entries(teamLabels).map(([key, label]) => ({
+      key,
+      label,
+      options: projectMembers
+        .filter((m) => m.workArea === key)
+        .map((m) => ({
+          id: String(m.memberId),
+          label: m.member?.name || '알 수 없음',
+          description: m.role,
+        })),
+    }));
   }, [projectMembers]);
 
   // 팀 범위에 따라 참가자 자동 선택
@@ -390,98 +411,16 @@ export function ScheduleForm({
           />
         )}
         {showParticipants && (
-          <FormField
+          <FormCheckboxGroup
             control={form.control}
             name="participantIds"
-            render={({ field }) => {
-              // 팀별로 멤버 그룹핑
-              const membersByTeam = {
-                PROJECT_MANAGEMENT: projectMembers.filter(
-                  (m) => m.workArea === 'PROJECT_MANAGEMENT',
-                ),
-                PLANNING: projectMembers.filter(
-                  (m) => m.workArea === 'PLANNING',
-                ),
-                DESIGN: projectMembers.filter((m) => m.workArea === 'DESIGN'),
-                FRONTEND: projectMembers.filter(
-                  (m) => m.workArea === 'FRONTEND',
-                ),
-                BACKEND: projectMembers.filter((m) => m.workArea === 'BACKEND'),
-              };
-
-              const teamLabels = {
-                PROJECT_MANAGEMENT: 'PM',
-                PLANNING: '기획팀',
-                DESIGN: '디자인팀',
-                FRONTEND: '프론트엔드팀',
-                BACKEND: '백엔드팀',
-              };
-
-              return (
-                <FormItem>
-                  <FormLabel>참가자</FormLabel>
-                  <div className="space-y-4 max-h-96 overflow-y-auto border rounded-md p-4">
-                    {loadingMembers ? (
-                      <p className="text-sm text-muted-foreground">
-                        참가자 목록을 불러오는 중...
-                      </p>
-                    ) : projectMembers.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">
-                        프로젝트 멤버가 없습니다
-                      </p>
-                    ) : (
-                      Object.entries(membersByTeam).map(([team, members]) => {
-                        if (members.length === 0) return null;
-
-                        return (
-                          <div key={team} className="space-y-2">
-                            <h4 className="text-sm font-semibold text-slate-700 border-b pb-1">
-                              {teamLabels[team as keyof typeof teamLabels]}
-                            </h4>
-                            <div className="space-y-2 pl-2">
-                              {members.map((member) => (
-                                <div
-                                  key={member.memberId}
-                                  className="flex items-center space-x-2"
-                                >
-                                  <Checkbox
-                                    checked={field.value?.includes(
-                                      String(member.memberId),
-                                    )}
-                                    onCheckedChange={(checked) => {
-                                      const currentValue = field.value || [];
-                                      const memberId = String(member.memberId);
-                                      if (checked) {
-                                        field.onChange([
-                                          ...currentValue,
-                                          memberId,
-                                        ]);
-                                      } else {
-                                        field.onChange(
-                                          currentValue.filter(
-                                            (id) => id !== memberId,
-                                          ),
-                                        );
-                                      }
-                                    }}
-                                    disabled={viewMode}
-                                  />
-                                  <label className="text-sm cursor-pointer">
-                                    {member.member?.name || '알 수 없음'} (
-                                    {member.role})
-                                  </label>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              );
-            }}
+            label="참가자"
+            groups={participantGroups}
+            loading={loadingMembers}
+            loadingMessage="참가자 목록을 불러오는 중..."
+            emptyMessage="프로젝트 멤버가 없습니다"
+            disabled={viewMode}
+            maxHeight="max-h-96"
           />
         )}
 
@@ -498,18 +437,18 @@ export function ScheduleForm({
         {viewMode ? (
           <div className="flex justify-end gap-2">
             {onDelete && (
-              <Button type="button" variant="outline" onClick={onDelete}>
+              <Button type="button" variant="destructive" onClick={onDelete}>
                 삭제
               </Button>
             )}
-            <Button type="button" variant="outline" onClick={onCancel}>
-              닫기
-            </Button>
             {onEdit && (
               <Button type="button" onClick={onEdit}>
                 수정
               </Button>
             )}
+            <Button type="button" variant="outline" onClick={onCancel}>
+              닫기
+            </Button>
           </div>
         ) : (
           <div className="space-y-2">

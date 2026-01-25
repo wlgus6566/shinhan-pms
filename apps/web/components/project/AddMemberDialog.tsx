@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import { FormTextarea } from '@/components/form';
 import {
   Command,
   CommandEmpty,
@@ -31,7 +32,6 @@ import {
 import { Loader2, Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import FormSelect from '@/components/form/FormSelect';
 import type { AvailableMember } from '@/types/project';
 import { DEPARTMENTS } from '@/lib/constants/roles';
@@ -255,23 +255,13 @@ export function AddMemberDialog({ projectId, open, onOpenChange, onSuccess }: Ad
                 options={projectRoleOptions}
               />
 
-              <FormField
+              <FormTextarea
                 control={form.control}
                 name="notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>비고</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="비고 사항을 입력하세요 (선택)"
-                        className="resize-none"
-                        rows={3}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label="비고"
+                placeholder="비고 사항을 입력하세요 (선택)"
+                rows={3}
+                className="resize-none"
               />
 
               <DialogFooter>

@@ -52,7 +52,7 @@ describe('AuthService', () => {
       email: 'test@emotion.co.kr',
       password: 'Test1234!',
       name: '테스트',
-      department: Department.DEVELOPMENT,
+      department: 'DEVELOPMENT',
     };
 
     it('should create a new user successfully', async () => {

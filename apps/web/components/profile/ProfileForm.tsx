@@ -6,24 +6,17 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { getMe, updateMe } from '@/lib/api/auth';
 import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Form } from '@/components/ui/form';
+import { FormInput, FormSelect } from '@/components/form';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle2, Loader2 } from 'lucide-react';
+
+const departmentOptions = [
+  { value: 'PLANNING', label: '기획' },
+  { value: 'DESIGN', label: '디자인' },
+  { value: 'FRONTEND', label: '프론트엔드' },
+  { value: 'DEVELOPMENT', label: '개발' },
+];
 
 const profileSchema = z.object({
   name: z.string().min(2, '이름은 최소 2자 이상이어야 합니다').max(50),
@@ -92,41 +85,17 @@ export function ProfileForm() {
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
-        <FormField
+        <FormInput
           control={form.control}
           name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>이름</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="이름"
         />
-        <FormField
+        <FormSelect
           control={form.control}
           name="department"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>파트</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="파트를 선택하세요" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="PLANNING">기획</SelectItem>
-                  <SelectItem value="DESIGN">디자인</SelectItem>
-                  <SelectItem value="FRONTEND">프론트엔드</SelectItem>
-                  <SelectItem value="DEVELOPMENT">개발</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="파트"
+          placeholder="파트를 선택하세요"
+          options={departmentOptions}
         />
         <Button type="submit" disabled={isSaving}>
           {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

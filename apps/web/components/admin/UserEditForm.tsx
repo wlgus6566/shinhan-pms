@@ -7,23 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useUser, updateUser, deactivateUser } from '@/lib/api/users';
 import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
+import { Form } from '@/components/ui/form';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Dialog,
@@ -35,7 +19,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { CheckCircle2, Loader2 } from 'lucide-react';
-import { FormInput, FormSelect } from '@/components/form';
+import { FormSelect, FormSwitch } from '@/components/form';
 import { DEPARTMENT_OPTIONS, ROLE_OPTIONS } from '@/lib/constants/roles';
 
 const userUpdateSchema = z.object({
@@ -158,25 +142,11 @@ export function UserEditForm({ userId }: { userId: string }) {
             description="슈퍼 관리자는 전체 권한, 프로젝트 관리자는 프로젝트 관리 권한, 일반은 업무일지 작성 권한을 가집니다"
           />
 
-          <FormField
+          <FormSwitch
             control={form.control}
             name="isActive"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                  <FormLabel className="text-base">계정 활성화</FormLabel>
-                  <FormDescription>
-                    비활성화된 사용자는 로그인할 수 없습니다.
-                  </FormDescription>
-                </div>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
+            label="계정 활성화"
+            description="비활성화된 사용자는 로그인할 수 없습니다."
           />
 
           <div className="flex gap-4">

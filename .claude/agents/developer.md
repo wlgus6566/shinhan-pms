@@ -47,21 +47,33 @@ NestJS 백엔드 API와 Next.js 프론트엔드 UI를 TDD 방식으로 개발하
 
 ### 표준 폼(Form) 구현 패턴
 
-`react-hook-form` + `zod` + `shadcn/ui`를 사용하여 일관된 검증 로직을 구현합니다.
+`react-hook-form` + `zod` + `@/components/form` 재사용 컴포넌트를 사용하여 일관된 검증 로직을 구현합니다.
+
+**IMPORTANT**: FormField를 직접 사용하지 말고 `@/components/form`의 재사용 컴포넌트를 사용합니다.
 
 ```typescript
 // components/feature/FeatureForm.tsx 예시
 'use client';
 
+import { Form } from '@/components/ui/form';
+import { FormInput, FormSelect, FormTextarea, FormSwitch } from '@/components/form';
+
 const formSchema = z.object({
   name: z.string().min(2, '최소 2자 이상'),
   type: z.enum(['A', 'B']),
+  description: z.string().optional(),
+  isActive: z.boolean(),
 });
+
+const typeOptions = [
+  { value: 'A', label: '타입 A' },
+  { value: 'B', label: '타입 B' },
+];
 
 export function FeatureForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { name: '' },
+    defaultValues: { name: '', isActive: true },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -71,16 +83,30 @@ export function FeatureForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
+        <FormInput
           control={form.control}
           name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>이름</FormLabel>
-              <FormControl><Input {...field} /></FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="이름 *"
+          placeholder="이름을 입력하세요"
+        />
+        <FormSelect
+          control={form.control}
+          name="type"
+          label="타입 *"
+          options={typeOptions}
+        />
+        <FormTextarea
+          control={form.control}
+          name="description"
+          label="설명"
+          placeholder="설명을 입력하세요"
+          rows={3}
+        />
+        <FormSwitch
+          control={form.control}
+          name="isActive"
+          label="활성화"
+          description="활성 상태를 설정합니다"
         />
         <Button type="submit">저장</Button>
       </form>
@@ -88,6 +114,17 @@ export function FeatureForm() {
   );
 }
 ```
+
+**사용 가능한 컴포넌트**:
+- `FormInput`: 텍스트/숫자/날짜/비밀번호 입력
+- `FormTextarea`: 여러 줄 텍스트 입력
+- `FormSelect`: 단일 선택 드롭다운
+- `FormSwitch`: 토글 스위치
+- `FormCheckbox`: 단일 체크박스
+- `FormCheckboxGroup`: 다중 체크박스
+- `FormRadioGroup`: 라디오 버튼 그룹
+
+**예외**: 커스텀 UI가 필요한 경우(예: Combobox, 버튼 그룹)만 FormField 직접 사용
 
 ### shadcn/ui 컴포넌트 추가
 
