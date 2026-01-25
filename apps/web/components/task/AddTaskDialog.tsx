@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { TaskDifficultyEnum } from '@repo/schema';
+import { TaskDifficultyEnum, TASK_DIFFICULTY_OPTIONS } from '@repo/schema';
 import type { CreateTaskRequest } from '@repo/schema';
 import { createTask } from '@/lib/api/tasks';
 import { Button } from '@/components/ui/button';
@@ -57,12 +57,6 @@ interface AddTaskDialogProps {
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
 }
-
-const difficultyOptions = [
-  { value: 'HIGH', label: '상 (High)' },
-  { value: 'MEDIUM', label: '중 (Medium)' },
-  { value: 'LOW', label: '하 (Low)' },
-];
 
 export function AddTaskDialog({ projectId, projectMembers, open, onOpenChange, onSuccess }: AddTaskDialogProps) {
   const [submitting, setSubmitting] = useState(false);
@@ -164,7 +158,7 @@ export function AddTaskDialog({ projectId, projectMembers, open, onOpenChange, o
               name="difficulty"
               label="난이도 *"
               placeholder="난이도 선택"
-              options={difficultyOptions}
+              options={TASK_DIFFICULTY_OPTIONS}
             />
 
             <FormInput

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { TaskDifficultyEnum, TaskStatusEnum } from '@repo/schema';
+import { TaskDifficultyEnum, TaskStatusEnum, TASK_DIFFICULTY_OPTIONS, TASK_STATUS_OPTIONS } from '@repo/schema';
 import type { UpdateTaskRequest } from '@repo/schema';
 import { updateTask } from '@/lib/api/tasks';
 import { Button } from '@/components/ui/button';
@@ -59,21 +59,6 @@ interface EditTaskDialogProps {
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
 }
-
-const difficultyOptions = [
-  { value: 'HIGH', label: '상 (High)' },
-  { value: 'MEDIUM', label: '중 (Medium)' },
-  { value: 'LOW', label: '하 (Low)' },
-];
-
-const statusOptions = [
-  { value: 'WAITING', label: '작업 대기' },
-  { value: 'IN_PROGRESS', label: '작업 중' },
-  { value: 'WORK_COMPLETED', label: '작업 완료' },
-  { value: 'OPEN_WAITING', label: '오픈 대기' },
-  { value: 'OPEN_RESPONDING', label: '오픈 대응' },
-  { value: 'COMPLETED', label: '완료' },
-];
 
 export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuccess }: EditTaskDialogProps) {
   const [submitting, setSubmitting] = useState(false);
@@ -193,7 +178,7 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
                 name="difficulty"
                 label="난이도 *"
                 placeholder="난이도 선택"
-                options={difficultyOptions}
+                options={TASK_DIFFICULTY_OPTIONS}
               />
 
               <FormSelect
@@ -201,7 +186,7 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
                 name="status"
                 label="상태 *"
                 placeholder="상태 선택"
-                options={statusOptions}
+                options={TASK_STATUS_OPTIONS}
               />
             </div>
 

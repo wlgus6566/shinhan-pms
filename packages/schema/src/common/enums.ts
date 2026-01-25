@@ -29,19 +29,74 @@ export const TaskStatusEnum = z.enum(
     'WAITING',
     'IN_PROGRESS',
     'WORK_COMPLETED',
+    'TESTING',
     'OPEN_WAITING',
     'OPEN_RESPONDING',
     'COMPLETED',
+    'SUSPENDED',
   ],
   {
     errorMap: () => ({
       message:
-        '상태는 WAITING, IN_PROGRESS, WORK_COMPLETED, OPEN_WAITING, OPEN_RESPONDING, COMPLETED 중 하나여야 합니다',
+        '상태는 WAITING, IN_PROGRESS, WORK_COMPLETED, TESTING, OPEN_WAITING, OPEN_RESPONDING, COMPLETED, SUSPENDED 중 하나여야 합니다',
     }),
   },
 );
 
 export type TaskStatus = z.infer<typeof TaskStatusEnum>;
+
+// Task Status UI Metadata
+export const TASK_STATUS_METADATA = {
+  WAITING: {
+    label: '작업 대기',
+    color: 'bg-gray-100 text-gray-700 border-gray-300',
+  },
+  IN_PROGRESS: {
+    label: '작업 중',
+    color: 'bg-blue-100 text-blue-700 border-blue-300',
+  },
+  WORK_COMPLETED: {
+    label: '작업 완료',
+    color: 'bg-green-100 text-green-700 border-green-300',
+  },
+  TESTING: {
+    label: '테스트',
+    color: 'bg-purple-100 text-purple-700 border-purple-300',
+  },
+  OPEN_WAITING: {
+    label: '오픈 대기',
+    color: 'bg-amber-100 text-amber-800 border-amber-300',
+  },
+  OPEN_RESPONDING: {
+    label: '오픈 대응',
+    color: 'bg-orange-100 text-orange-800 border-orange-300',
+  },
+  COMPLETED: {
+    label: '완료',
+    color: 'bg-green-50 text-green-700 border-green-300',
+  },
+  SUSPENDED: {
+    label: '업무 중단',
+    color: 'bg-red-100 text-red-700 border-red-300',
+  },
+} as const satisfies Record<TaskStatus, { label: string; color: string }>;
+
+// Helper for FormSelect components
+export const TASK_STATUS_OPTIONS = Object.entries(TASK_STATUS_METADATA).map(
+  ([value, { label }]) => ({ value, label }),
+);
+
+// Task Difficulty UI Metadata
+export const TASK_DIFFICULTY_METADATA = {
+  HIGH: { label: '상', color: 'bg-rose-50 text-rose-700 border-rose-300' },
+  MEDIUM: { label: '중', color: 'bg-amber-50 text-amber-700 border-amber-300' },
+  LOW: { label: '하', color: 'bg-green-100 text-green-700 border-green-300' },
+} as const satisfies Record<TaskDifficulty, { label: string; color: string }>;
+
+// Helper for FormSelect components
+export const TASK_DIFFICULTY_OPTIONS = Object.entries(
+  TASK_DIFFICULTY_METADATA,
+).map(([value, { label }]) => ({ value, label }));
 
 // Member Related Enums
 export const MemberRoleEnum = z.enum(['PM', 'PL', 'PA'], {

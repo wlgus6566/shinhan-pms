@@ -23,9 +23,11 @@ const STATUS_ORDER = {
   WAITING: 1,
   IN_PROGRESS: 2,
   WORK_COMPLETED: 3,
-  OPEN_WAITING: 4,
-  OPEN_RESPONDING: 5,
-  COMPLETED: 6,
+  TESTING: 4,
+  OPEN_WAITING: 5,
+  OPEN_RESPONDING: 6,
+  COMPLETED: 7,
+  SUSPENDED: 8,
 } as const;
 
 // Extract loading state as separate component to avoid re-renders
