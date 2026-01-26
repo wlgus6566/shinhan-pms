@@ -226,7 +226,17 @@ export function TaskDetailSheet({
                   오픈일
                 </h3>
                 <div className="pl-6 flex items-center gap-2 text-base">
-                  {task.openDate && <span>{task.openDate}</span>}
+                  {task.openDate && (
+                    <span>
+                      {new Date(task.openDate).toLocaleString('ko-KR', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </span>
+                  )}
                 </div>
               </div>
             </>

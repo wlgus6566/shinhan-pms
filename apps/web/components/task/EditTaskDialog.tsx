@@ -8,14 +8,7 @@ import { TaskDifficultyEnum, TaskStatusEnum, TASK_DIFFICULTY_OPTIONS, TASK_STATU
 import type { UpdateTaskRequest } from '@repo/schema';
 import { updateTask } from '@/lib/api/tasks';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { BaseDialog } from '@/components/ui/base-dialog';
 import { Form } from '@/components/ui/form';
 import { FormInput, FormTextarea, FormSelect, FormCheckboxGroup } from '@/components/form';
 import { Loader2 } from 'lucide-react';
@@ -78,7 +71,7 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
       backendAssigneeIds: task.backendAssignees?.map(a => a.id.toString()) || [],
       startDate: task.startDate || '',
       endDate: task.endDate || '',
-      openDate: task.openDate || '',
+      openDate: task.openDate ? task.openDate.slice(0, 16) : '',
       notes: task.notes || '',
     },
   });
@@ -97,7 +90,7 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
       backendAssigneeIds: task.backendAssignees?.map(a => a.id.toString()) || [],
       startDate: task.startDate || '',
       endDate: task.endDate || '',
-      openDate: task.openDate || '',
+      openDate: task.openDate ? task.openDate.slice(0, 16) : '',
       notes: task.notes || '',
     });
   }, [task, form]);
@@ -141,20 +134,40 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>업무 수정</DialogTitle>
-          <DialogDescription>업무 정보를 수정합니다</DialogDescription>
-        </DialogHeader>
-
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {error && (
-              <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md">
-                {error}
-              </div>
+    <BaseDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      size="lg"
+      title="업무 수정"
+      description="업무 정보를 수정합니다"
+      error={error}
+      footer={
+        <div className="flex gap-2 justify-end">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={submitting}
+          >
+            취소
+          </Button>
+          <Button
+            onClick={form.handleSubmit(onSubmit)}
+            disabled={submitting}
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                수정 중...
+              </>
+            ) : (
+              '수정'
             )}
+          </Button>
+        </div>
+      }
+    >
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 
             <FormInput
               control={form.control}
@@ -268,7 +281,7 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
               control={form.control}
               name="openDate"
               label="오픈일 (상용배포일)"
-              type="date"
+              type="datetime-local"
             />
 
             <FormTextarea
@@ -279,30 +292,8 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
               className="resize-none"
               rows={2}
             />
-
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                disabled={submitting}
-              >
-                취소
-              </Button>
-              <Button type="submit" disabled={submitting}>
-                {submitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    수정 중...
-                  </>
-                ) : (
-                  '수정'
-                )}
-              </Button>
-            </DialogFooter>
           </form>
         </Form>
-      </DialogContent>
-    </Dialog>
+    </BaseDialog>
   );
 }

@@ -157,7 +157,7 @@ export class TasksController {
       updatedBy: rest.updatedBy?.toString(),
       startDate: rest.startDate ? rest.startDate.toISOString().split('T')[0] : null,
       endDate: rest.endDate ? rest.endDate.toISOString().split('T')[0] : null,
-      openDate: rest.openDate ? rest.openDate.toISOString().split('T')[0] : null,
+      openDate: rest.openDate ? rest.openDate.toISOString() : null,
       planningAssignees: assignees
         ?.filter((a: any) => a.workArea === 'PLANNING')
         .map((a: any) => ({

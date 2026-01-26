@@ -238,7 +238,7 @@ export function AddTaskDialog({ projectId, projectMembers, open, onOpenChange, o
               control={form.control}
               name="openDate"
               label="오픈일 (상용배포일)"
-              type="date"
+              type="datetime-local"
             />
 
             <FormTextarea
