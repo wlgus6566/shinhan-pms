@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { UserEditForm } from '@/components/admin/UserEditForm';
+import { UserForm } from '@/components/admin/UserForm';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -44,7 +44,7 @@ export default function UserEditPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
-          <UserEditForm userId={id as string} />
+          <UserForm mode="edit" userId={id as string} />
         </CardContent>
       </Card>
     </div>

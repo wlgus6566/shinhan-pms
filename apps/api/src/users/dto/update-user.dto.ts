@@ -18,6 +18,13 @@ export enum Position {
   TEAM_MEMBER = 'TEAM_MEMBER',
 }
 
+export enum Grade {
+  EXPERT = 'EXPERT',
+  ADVANCED = 'ADVANCED',
+  INTERMEDIATE = 'INTERMEDIATE',
+  BEGINNER = 'BEGINNER',
+}
+
 export class UpdateUserDto {
   @ApiProperty({
     example: 'DEVELOPMENT',
@@ -48,6 +55,16 @@ export class UpdateUserDto {
   @IsOptional()
   @IsEnum(Role, { message: '올바른 등급을 선택해주세요' })
   role?: Role;
+
+  @ApiProperty({
+    example: 'BEGINNER',
+    description: '등급',
+    enum: Grade,
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(Grade, { message: '올바른 등급을 선택해주세요' })
+  grade?: Grade;
 
   @ApiProperty({
     example: true,

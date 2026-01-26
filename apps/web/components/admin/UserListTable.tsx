@@ -28,8 +28,11 @@ import {
   TableEmpty,
 } from '@/components/common/table';
 import { Search, MoreHorizontal, ArrowUpDown } from 'lucide-react';
-import { ROLE_LABELS, ROLE_VARIANTS } from '@/lib/constants/roles';
-
+import {
+  ROLE_LABELS,
+  ROLE_VARIANTS,
+  GRADE_OPTIONS,
+} from '@/lib/constants/roles';
 export function UserListTable() {
   const [search, setSearch] = useState('');
   const [role, setRole] = useState('ALL');
@@ -56,7 +59,6 @@ export function UserListTable() {
     );
     return { totalPages: total, paginatedUsers: paginated };
   }, [userList, currentPage, itemsPerPage]);
-
 
   return (
     <div className="space-y-6">
@@ -86,8 +88,10 @@ export function UserListTable() {
         </div>
         <p className="text-sm text-slate-500">
           총{' '}
-          <span className="font-semibold text-slate-900">{userList.length}</span>명
-          멤버
+          <span className="font-semibold text-slate-900">
+            {userList.length}
+          </span>
+          명 멤버
         </p>
       </div>
 
@@ -105,6 +109,7 @@ export function UserListTable() {
               <TableHead>이메일</TableHead>
               <TableHead>본부</TableHead>
               <TableHead>권한</TableHead>
+              <TableHead>등급</TableHead>
               <TableHead>상태</TableHead>
               <TableHead className="w-[60px]"></TableHead>
             </TableRow>
@@ -148,9 +153,20 @@ export function UserListTable() {
                     </span>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={ROLE_VARIANTS[user.role as keyof typeof ROLE_VARIANTS] || 'outline'}>
-                      {ROLE_LABELS[user.role as keyof typeof ROLE_LABELS] || user.role}
+                    <Badge
+                      variant={
+                        ROLE_VARIANTS[
+                          user.role as keyof typeof ROLE_VARIANTS
+                        ] || 'outline'
+                      }
+                    >
+                      {ROLE_LABELS[user.role as keyof typeof ROLE_LABELS] ||
+                        user.role}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {GRADE_OPTIONS.find((option) => option.value === user.grade)
+                      ?.label || user.grade}
                   </TableCell>
                   <TableCell>
                     <Badge variant={user.isActive ? 'outline' : 'destructive'}>

@@ -18,6 +18,7 @@ interface CreateUserDto {
   department: string;
   position: string;
   role: string;
+  grade: string;
 }
 
 @Injectable()
@@ -50,6 +51,7 @@ export class UsersService {
         department: createUserDto.department,
         position: createUserDto.position,
         role: createUserDto.role,
+        grade: createUserDto.grade,
         createdBy,
       },
     });
@@ -139,11 +141,6 @@ export class UsersService {
     updateUserDto: UpdateUserDto,
     currentUserId: bigint,
   ): Promise<UserResponseDto> {
-    // 본인 등급 변경 방지
-    if (id === currentUserId && updateUserDto.role) {
-      throw new BadRequestException('본인의 등급은 변경할 수 없습니다');
-    }
-
     const user = await this.prisma.user.update({
       where: { id },
       data: {

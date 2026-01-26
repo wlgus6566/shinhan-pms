@@ -127,6 +127,15 @@ export const DepartmentEnum = z.enum(
 
 export type Department = z.infer<typeof DepartmentEnum>;
 
+export const GradeEnum = z.enum(
+  ['EXPERT', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
+  {
+    errorMap: () => ({ message: '등급은 EXPERT, ADVANCED, INTERMEDIATE, BEGINNER 중 하나여야 합니다' }),
+  },
+);
+
+export type Grade = z.infer<typeof GradeEnum>;
+
 // Schedule Related Enums
 export const ScheduleTypeEnum = z.enum(
   ['MEETING', 'SCRUM', 'VACATION', 'HALF_DAY', 'OTHER'],

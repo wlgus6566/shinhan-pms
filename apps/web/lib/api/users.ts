@@ -14,7 +14,9 @@ export interface CreateUserRequest {
   name: string;
   profileImage?: string;
   department: string;
+  position: string;
   role: string;
+  grade: string;
 }
 
 export interface User {
@@ -23,7 +25,9 @@ export interface User {
   name: string;
   profileImage?: string;
   department: string;
+  position: string;
   role: string;
+  grade: string;
   isActive: boolean;
   createdAt: string;
   updatedAt?: string;

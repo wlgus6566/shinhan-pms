@@ -13,11 +13,12 @@ export const ROLE_LABELS: Record<Role, string> = {
   MEMBER: '일반',
 };
 
-export const ROLE_VARIANTS: Record<Role, 'default' | 'secondary' | 'outline'> = {
-  SUPER_ADMIN: 'default',
-  PM: 'secondary',
-  MEMBER: 'outline',
-};
+export const ROLE_VARIANTS: Record<Role, 'default' | 'secondary' | 'outline'> =
+  {
+    SUPER_ADMIN: 'default',
+    PM: 'secondary',
+    MEMBER: 'outline',
+  };
 
 export const ROLE_DESCRIPTIONS: Record<Role, string> = {
   SUPER_ADMIN: '전체 권한 (멤버 등록, 프로젝트 등록)',
@@ -77,7 +78,31 @@ export const POSITION_LABELS: Record<Position, string> = {
   TEAM_MEMBER: '팀원',
 };
 
-export const POSITION_OPTIONS = Object.entries(POSITIONS).map(([key, value]) => ({
+export const POSITION_OPTIONS = Object.entries(POSITIONS).map(
+  ([key, value]) => ({
+    value,
+    label: POSITION_LABELS[value as Position],
+  }),
+);
+
+// 등급
+export const GRADES = {
+  EXPERT: 'EXPERT', // 특급
+  ADVANCED: 'ADVANCED', // 고급
+  INTERMEDIATE: 'INTERMEDIATE', // 중급
+  BEGINNER: 'BEGINNER', // 초급
+} as const;
+
+export type Grade = (typeof GRADES)[keyof typeof GRADES];
+
+export const GRADE_LABELS: Record<Grade, string> = {
+  EXPERT: '특급',
+  ADVANCED: '고급',
+  INTERMEDIATE: '중급',
+  BEGINNER: '초급',
+};
+
+export const GRADE_OPTIONS = Object.entries(GRADES).map(([key, value]) => ({
   value,
-  label: POSITION_LABELS[value as Position],
+  label: GRADE_LABELS[value as Grade],
 }));

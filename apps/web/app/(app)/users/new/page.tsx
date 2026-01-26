@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { UserCreateForm } from '@/components/admin/UserCreateForm';
+import { UserForm } from '@/components/admin/UserForm';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -59,7 +59,7 @@ export default function UserCreatePage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
-          <UserCreateForm />
+          <UserForm mode="create" />
         </CardContent>
       </Card>
     </div>
