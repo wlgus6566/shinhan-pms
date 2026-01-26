@@ -332,6 +332,53 @@ export class WorkLogsController {
     });
   }
 
+  @Get('projects/:projectId/work-logs/export-monthly')
+  @SkipResponseWrapper()
+  @ApiOperation({ summary: '월간 투입인력별 상세업무현황 엑셀 다운로드' })
+  @ApiParam({ name: 'projectId', description: '프로젝트 ID' })
+  @ApiQuery({ name: 'year', description: '연도', required: true, type: Number })
+  @ApiQuery({ name: 'month', description: '월', required: true, type: Number })
+  @ApiResponse({
+    status: 200,
+    description: '월간 투입인력별 상세업무현황 엑셀 파일',
+  })
+  @ApiResponse({ status: 400, description: '잘못된 요청' })
+  @ApiResponse({ status: 404, description: '프로젝트를 찾을 수 없습니다' })
+  async exportMonthlyStaffReport(
+    @Param('projectId') projectId: string,
+    @Query('year') year: string,
+    @Query('month') month: string,
+  ): Promise<StreamableFile> {
+    console.log('[Controller] exportMonthlyStaffReport called:', { projectId, year, month });
+
+    const yearNum = parseInt(year, 10);
+    const monthNum = parseInt(month, 10);
+
+    const buffer = await this.workLogsService.generateMonthlyStaffReport(
+      BigInt(projectId),
+      yearNum,
+      monthNum,
+    );
+
+    console.log('[Controller] Buffer received, size:', buffer.length);
+
+    // 파일명: 1월_투입인력별상세업무현황.xlsx
+    // HTTP 헤더에 한글 직접 사용 불가 - ASCII 폴백 필요
+    const filename = `${monthNum}월_투입인력별상세업무현황.xlsx`;
+    const asciiFilename = `monthly_staff_report_${yearNum}_${String(monthNum).padStart(2, '0')}.xlsx`;
+    const encodedFilename = encodeURIComponent(filename);
+
+    console.log('[Controller] Creating StreamableFile with filename:', filename);
+
+    const streamableFile = new StreamableFile(buffer, {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      disposition: `attachment; filename="${asciiFilename}"; filename*=UTF-8''${encodedFilename}`,
+    });
+
+    console.log('[Controller] Returning StreamableFile');
+    return streamableFile;
+  }
+
   private transformWorkLog(workLog: any): any {
     return {
       id: workLog.id.toString(),

@@ -5,6 +5,7 @@ import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { WorkLogCalendar } from './WorkLogCalendar';
 import { TeamWorkLogFilters } from './TeamWorkLogFilters';
 import { WeeklyReportExportButton } from './WeeklyReportExportButton';
+import { MonthlyStaffReportExportButton } from './MonthlyStaffReportExportButton';
 import { TeamWorkLogDetailDialog } from './TeamWorkLogDetailDialog';
 import type { WorkLog } from '@/types/work-log';
 import type { ProjectMember } from '@/types/project';
@@ -146,14 +147,16 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
 
   return (
     <div className="space-y-6">
-      {/* Export Button */}
-      <div className="flex justify-end">
-        <WeeklyReportExportButton
-          projectId={projectId}
-          defaultStartDate={format(startOfMonth(currentMonth), 'yyyy-MM-dd')}
-          defaultEndDate={format(endOfMonth(currentMonth), 'yyyy-MM-dd')}
-        />
-      </div>
+      {/* Export Buttons */}
+      <WeeklyReportExportButton
+        projectId={projectId}
+        defaultStartDate={format(startOfMonth(currentMonth), 'yyyy-MM-dd')}
+        defaultEndDate={format(endOfMonth(currentMonth), 'yyyy-MM-dd')}
+      />
+      <MonthlyStaffReportExportButton
+        projectId={projectId}
+        defaultDate={currentMonth}
+      />
       {/* Filters */}
       <TeamWorkLogFilters
         selectedWorkArea={selectedWorkArea}

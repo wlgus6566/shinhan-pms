@@ -11,6 +11,8 @@ import { ERROR_MESSAGES } from '@repo/schema';
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {
+    console.error('[HttpExceptionFilter] Caught exception:', exception);
+
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
 
