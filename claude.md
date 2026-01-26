@@ -273,7 +273,78 @@ import { FormInput, FormTextarea, FormSelect } from '@/components/form';
 - 커스텀 UI가 필요한 경우 (예: progress 버튼 그룹)
 - 기존 재사용 컴포넌트로 구현 불가능한 특수한 경우
 
-### 6. 타입 시스템 및 검증 규칙
+### 6. Dialog 컴포넌트 패턴
+
+**핵심 원칙**: 모든 Dialog는 `BaseDialog`를 사용하여 일관된 UI/UX를 제공합니다.
+
+#### BaseDialog 사용법
+
+```typescript
+import { BaseDialog } from '@/components/ui/base-dialog';
+
+<BaseDialog
+  open={open}
+  onOpenChange={onOpenChange}
+  size="lg"                    // "sm" | "md" | "lg"
+  title="다이얼로그 제목"
+  description="설명 (선택)"    // 선택사항
+  error={error}                // 에러 메시지 (선택)
+  footer={<>버튼들</>}         // Footer 영역 (선택)
+>
+  {/* Dialog 내용 */}
+</BaseDialog>
+```
+
+#### Size 옵션
+
+| Size | 최대 너비 | 용도 |
+|------|----------|------|
+| `sm` | `500px` | 간단한 입력 폼 (멤버 추가, 업무일지 등) |
+| `md` | `600px` | 중간 크기 폼 (기본값) |
+| `lg` | `768px` | 복잡한 폼 (업무 등록, 일정 관리 등) |
+
+#### Form과 함께 사용하기
+
+Form의 footer는 `<form>` 밖으로 분리하여 BaseDialog의 footer prop으로 전달:
+
+```typescript
+<BaseDialog
+  footer={
+    <div className="flex gap-2 justify-end">
+      <Button variant="outline" onClick={() => onOpenChange(false)}>
+        취소
+      </Button>
+      <Button onClick={form.handleSubmit(onSubmit)}>
+        {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        등록
+      </Button>
+    </div>
+  }
+>
+  <Form {...form}>
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      {/* 폼 필드들 (footer 없음) */}
+    </form>
+  </Form>
+</BaseDialog>
+```
+
+**주의사항**:
+- form의 `onSubmit`은 유지 (Enter 키 지원)
+- footer 버튼은 `onClick={form.handleSubmit(onSubmit)}` 사용
+- error는 BaseDialog의 `error` prop으로 전달 (수동 표시 제거)
+
+#### 금지 패턴
+
+```typescript
+// ❌ Dialog 직접 사용 금지
+import { Dialog, DialogContent, DialogHeader, DialogFooter } from '@/components/ui/dialog';
+
+// ✅ BaseDialog 사용
+import { BaseDialog } from '@/components/ui/base-dialog';
+```
+
+### 7. 타입 시스템 및 검증 규칙
 
 **핵심 원칙**: `@repo/schema` 패키지를 단일 소스로 사용하여 모든 검증 로직과 타입을 통합 관리합니다.
 
@@ -408,7 +479,7 @@ workHours: workLog.workHours ?? undefined  // number | undefined
 - `apps/web/types/` 내의 중복 Request 타입 정의
 - Backend DTO 클래스 내부의 검증 데코레이터 (`@IsString()`, `@MinLength()` 등)
 
-### 7. 산출물 저장 경로
+### 8. 산출물 저장 경로
 
 | 산출물 | 경로 |
 |-------|------|
@@ -417,7 +488,7 @@ workHours: workLog.workHours ?? undefined  // number | undefined
 | DB 스키마 명세 | `artifacts/database-schema/{domain}/{domain}.md` |
 | DDL/DML | `artifacts/database-schema/{domain}/{domain}.sql` |
 
-### 8. SWR 기반 API 호출 패턴
+### 9. SWR 기반 API 호출 패턴
 
 **핵심 원칙**: 모든 API 호출 로직은 `lib/api/` 디렉토리에 통합 관리합니다.
 
@@ -510,7 +581,7 @@ const { data, isLoading } = useData();
 - 직접 useSWR 호출 → lib/api/ 훅으로 마이그레이션
 - Promise.all → 개별 SWR 훅으로 분리 (SWR이 자동 병렬 처리)
 
-### 9. API 응답 구조 표준화
+### 10. API 응답 구조 표준화
 
 **핵심 원칙**: 모든 API 응답은 `ResponseInterceptor`에 의해 표준 래퍼 형식으로 감싸집니다.
 
@@ -776,4 +847,4 @@ pnpm format
 
 ---
 
-**마지막 업데이트**: 2026-01-25 (API 응답 구조 표준화 패턴 추가)
+**마지막 업데이트**: 2026-01-26 (Dialog 컴포넌트 BaseDialog 패턴 추가)
