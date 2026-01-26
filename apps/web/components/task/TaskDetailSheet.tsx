@@ -141,6 +141,24 @@ export function TaskDetailSheet({
             </div>
           )}
 
+          {/* 설명 */}
+          {task.description && (
+            <>
+              <Separator />
+              <div className="space-y-2">
+                <h3 className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  업무 설명
+                </h3>
+                <div className="pl-6">
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                    {task.description}
+                  </p>
+                </div>
+              </div>
+            </>
+          )}
+
           {/* 담당자 정보 */}
           {assignees.length > 0 && (
             <>
@@ -237,24 +255,6 @@ export function TaskDetailSheet({
                       })}
                     </span>
                   )}
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* 설명 */}
-          {task.description && (
-            <>
-              <Separator />
-              <div className="space-y-2">
-                <h3 className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
-                  <FileText className="h-4 w-4" />
-                  업무 설명
-                </h3>
-                <div className="pl-6">
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                    {task.description}
-                  </p>
                 </div>
               </div>
             </>

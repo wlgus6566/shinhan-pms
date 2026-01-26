@@ -62,7 +62,7 @@ export function MyTaskList({ tasks }: MyTaskListProps) {
             <div
               key={task.id}
               className={cn(
-                'w-full px-6 py-2 text-left border-b border-slate-100 last:border-b-0 transition-colors hover:bg-slate-50 ',
+                'w-full px-6 pt-2 py-3 text-left border-b border-slate-100 last:border-b-0 transition-colors hover:bg-slate-50 ',
               )}
             >
               <div className="flex items-start gap-3">

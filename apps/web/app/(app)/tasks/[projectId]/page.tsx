@@ -93,7 +93,7 @@ export default function TaskManagementPage() {
       </div>
 
       {/* 프로젝트 정보 카드 */}
-      <div className="flex flex-col gap-4 p-3 bg-transparent border-none">
+      <div className="flex flex-col gap-4 p-3 pt-0 bg-transparent border-none">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-blue-100 rounded-xl">
