@@ -146,17 +146,18 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
   }, [members]);
 
   return (
-    <div className="space-y-6">
-      {/* Export Buttons */}
-      <WeeklyReportExportButton
-        projectId={projectId}
-        defaultStartDate={format(startOfMonth(currentMonth), 'yyyy-MM-dd')}
-        defaultEndDate={format(endOfMonth(currentMonth), 'yyyy-MM-dd')}
-      />
-      <MonthlyStaffReportExportButton
-        projectId={projectId}
-        defaultDate={currentMonth}
-      />
+    <div className="space-y-4">
+      <div className="flex flex-col gap-2 items-end">
+        <MonthlyStaffReportExportButton
+          projectId={projectId}
+          defaultDate={currentMonth}
+        />
+        <WeeklyReportExportButton
+          projectId={projectId}
+          defaultStartDate={format(startOfMonth(currentMonth), 'yyyy-MM-dd')}
+          defaultEndDate={format(endOfMonth(currentMonth), 'yyyy-MM-dd')}
+        />
+      </div>
       {/* Filters */}
       <TeamWorkLogFilters
         selectedWorkArea={selectedWorkArea}
@@ -178,13 +179,15 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
           <p className="text-muted-foreground">로드 중...</p>
         </div>
       ) : (
-        <WorkLogCalendar
-          workLogs={filteredAndSortedWorkLogs}
-          selectedDate={selectedDate}
-          onDateSelect={handleDateSelect}
-          onMonthChange={handleMonthChange}
-          showUserName={true}
-        />
+        <>
+          <WorkLogCalendar
+            workLogs={filteredAndSortedWorkLogs}
+            selectedDate={selectedDate}
+            onDateSelect={handleDateSelect}
+            onMonthChange={handleMonthChange}
+            showUserName={true}
+          />
+        </>
       )}
 
       {/* 업무일지 상세 모달 */}

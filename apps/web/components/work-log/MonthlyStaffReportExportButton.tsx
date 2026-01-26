@@ -76,7 +76,7 @@ export function MonthlyStaffReportExportButton({
         onClick={handleExport}
         disabled={isExporting}
         variant="default"
-        className="whitespace-nowrap"
+        className="whitespace-nowrap min-w-[225px]"
       >
         {isExporting ? (
           <>
@@ -86,7 +86,7 @@ export function MonthlyStaffReportExportButton({
         ) : (
           <>
             <Download className="w-4 h-4 mr-2" />
-            {month}월 월간보고 다운로드
+            {month}월 월간보고 엑셀 다운로드
           </>
         )}
       </Button>

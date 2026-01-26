@@ -665,354 +665,405 @@ export class WorkLogsService {
     month: number,
   ): Promise<Buffer> {
     try {
-    // 1. 해당 월의 첫날과 마지막날 계산
-    const firstDay = new Date(year, month - 1, 1);
-    const lastDay = new Date(year, month, 0); // 해당 월의 마지막 날
-    console.log('[generateMonthlyStaffReport] Start:', { projectId: projectId.toString(), year, month, firstDay, lastDay });
+      // 1. 해당 월의 첫날과 마지막날 계산
+      const firstDay = new Date(year, month - 1, 1);
+      const lastDay = new Date(year, month, 0); // 해당 월의 마지막 날
+      console.log('[generateMonthlyStaffReport] Start:', {
+        projectId: projectId.toString(),
+        year,
+        month,
+        firstDay,
+        lastDay,
+      });
 
-    // 2. 해당 월의 work_logs 조회
-    console.log('[generateMonthlyStaffReport] Fetching work logs...');
-    const workLogs = await this.prisma.workLog.findMany({
-      where: {
-        task: { projectId, isActive: true },
-        workDate: { gte: firstDay, lte: lastDay },
-        isActive: true,
-      },
-      include: {
-        task: true,
-        user: true,
-      },
-    });
-    console.log('[generateMonthlyStaffReport] Work logs count:', workLogs.length);
-
-    // 3. 프로젝트 멤버 조회
-    console.log('[generateMonthlyStaffReport] Fetching project members...');
-    const projectMembers = await this.prisma.projectMember.findMany({
-      where: { projectId },
-      include: { member: true },
-    });
-    console.log('[generateMonthlyStaffReport] Project members count:', projectMembers.length);
-
-    // 4. 해당 월의 휴가 데이터 조회 (VACATION, HALF_DAY)
-    // usageDate 필드를 사용해야 함 (휴가/반차 전용 날짜 필드)
-    const memberIds = projectMembers.map((m) => m.memberId);
-    const memberIdSet = new Set(memberIds.map((id) => id.toString()));
-    console.log('[generateMonthlyStaffReport] Member IDs:', memberIds.map(id => id.toString()));
-
-    let vacations: any[] = [];
-    if (memberIds.length > 0) {
-      console.log('[generateMonthlyStaffReport] Fetching vacations...');
-      vacations = await this.prisma.schedule.findMany({
+      // 2. 해당 월의 work_logs 조회
+      console.log('[generateMonthlyStaffReport] Fetching work logs...');
+      const workLogs = await this.prisma.workLog.findMany({
         where: {
-          scheduleType: { in: ['VACATION', 'HALF_DAY'] },
+          task: { projectId, isActive: true },
+          workDate: { gte: firstDay, lte: lastDay },
           isActive: true,
-          participants: {
-            some: { userId: { in: memberIds } },
-          },
-          usageDate: { gte: firstDay, lte: lastDay },
         },
         include: {
-          participants: true,
+          task: true,
+          user: true,
         },
       });
-      console.log('[generateMonthlyStaffReport] Vacations count:', vacations.length);
-    }
+      console.log(
+        '[generateMonthlyStaffReport] Work logs count:',
+        workLogs.length,
+      );
 
-    // 5. 한글 변환 맵
-    const gradeMap: Record<string, string> = {
-      EXPERT: '특급',
-      ADVANCED: '고급',
-      INTERMEDIATE: '중급',
-      BEGINNER: '초급',
-    };
+      // 3. 프로젝트 멤버 조회
+      console.log('[generateMonthlyStaffReport] Fetching project members...');
+      const projectMembers = await this.prisma.projectMember.findMany({
+        where: { projectId },
+        include: { member: true },
+      });
+      console.log(
+        '[generateMonthlyStaffReport] Project members count:',
+        projectMembers.length,
+      );
 
-    const difficultyMap: Record<string, string> = {
-      HIGH: '상',
-      MEDIUM: '중',
-      LOW: '하',
-    };
+      // 4. 해당 월의 휴가 데이터 조회 (VACATION, HALF_DAY)
+      // usageDate 필드를 사용해야 함 (휴가/반차 전용 날짜 필드)
+      const memberIds = projectMembers.map((m) => m.memberId);
+      const memberIdSet = new Set(memberIds.map((id) => id.toString()));
+      console.log(
+        '[generateMonthlyStaffReport] Member IDs:',
+        memberIds.map((id) => id.toString()),
+      );
 
-    const workAreaMap: Record<string, string> = {
-      PLANNING: '기획',
-      DESIGN: '디자인',
-      PUBLISHING: '퍼블리싱',
-      FRONTEND: '프론트엔드',
-      BACKEND: '백엔드',
-      QA: 'QA',
-    };
-
-    // 6. 주차 계산 함수
-    const getWeekOfMonth = (date: Date): number => {
-      const day = date.getDate();
-      if (day <= 7) return 1;
-      if (day <= 14) return 2;
-      if (day <= 21) return 3;
-      return 4;
-    };
-
-    // 7. 직원별 데이터 집계
-    interface EmployeeTask {
-      taskName: string;
-      difficulty: string;
-      details: string[];
-      weeklyHours: { week1: number; week2: number; week3: number; week4: number };
-      totalHours: number;
-    }
-
-    interface EmployeeData {
-      department: string;
-      role: string;
-      name: string;
-      grade: string;
-      tasks: EmployeeTask[];
-      totalMonthlyHours: number;
-    }
-
-    const employeeMap = new Map<string, EmployeeData>();
-
-    // 멤버 정보 초기화
-    for (const pm of projectMembers) {
-      const userId = pm.memberId.toString();
-      if (!employeeMap.has(userId)) {
-        employeeMap.set(userId, {
-          department: workAreaMap[pm.workArea] || pm.workArea,
-          role: pm.role,
-          name: pm.member.name,
-          grade: gradeMap[pm.member.grade] || pm.member.grade,
-          tasks: [],
-          totalMonthlyHours: 0,
+      let vacations: any[] = [];
+      if (memberIds.length > 0) {
+        console.log('[generateMonthlyStaffReport] Fetching vacations...');
+        vacations = await this.prisma.schedule.findMany({
+          where: {
+            scheduleType: { in: ['VACATION', 'HALF_DAY'] },
+            isActive: true,
+            participants: {
+              some: { userId: { in: memberIds } },
+            },
+            usageDate: { gte: firstDay, lte: lastDay },
+          },
+          include: {
+            participants: true,
+          },
         });
-      }
-    }
-
-    // work_logs를 직원 × 업무별로 집계
-    const taskMapByEmployee = new Map<string, Map<string, EmployeeTask>>();
-
-    for (const log of workLogs) {
-      const userId = log.userId.toString();
-      const taskId = log.taskId.toString();
-      const weekNum = getWeekOfMonth(new Date(log.workDate));
-      const hours = Number(log.workHours || 0);
-
-      if (!taskMapByEmployee.has(userId)) {
-        taskMapByEmployee.set(userId, new Map());
-      }
-      const userTaskMap = taskMapByEmployee.get(userId)!;
-
-      if (!userTaskMap.has(taskId)) {
-        userTaskMap.set(taskId, {
-          taskName: log.task.taskName,
-          difficulty: difficultyMap[log.task.difficulty] || '-',
-          details: [],
-          weeklyHours: { week1: 0, week2: 0, week3: 0, week4: 0 },
-          totalHours: 0,
-        });
+        console.log(
+          '[generateMonthlyStaffReport] Vacations count:',
+          vacations.length,
+        );
       }
 
-      const taskData = userTaskMap.get(taskId)!;
-      if (log.content) taskData.details.push(log.content);
-      taskData.weeklyHours[`week${weekNum}` as keyof typeof taskData.weeklyHours] += hours;
-      taskData.totalHours += hours;
-    }
+      // 5. 한글 변환 맵
+      const gradeMap: Record<string, string> = {
+        EXPERT: '특급',
+        ADVANCED: '고급',
+        INTERMEDIATE: '중급',
+        BEGINNER: '초급',
+      };
 
-    // 휴가 데이터 집계 (프로젝트 멤버만)
-    for (const vacation of vacations) {
-      // usageDate가 없으면 건너뛰기
-      if (!vacation.usageDate) continue;
+      const difficultyMap: Record<string, string> = {
+        HIGH: '상',
+        MEDIUM: '중',
+        LOW: '하',
+      };
 
-      for (const participant of vacation.participants) {
-        const userId = participant.userId.toString();
+      const workAreaMap: Record<string, string> = {
+        PLANNING: '기획',
+        DESIGN: '디자인',
+        FRONTEND: '프론트엔드',
+        BACKEND: '백엔드',
+      };
 
-        // 프로젝트 멤버가 아니면 건너뛰기
-        if (!memberIdSet.has(userId)) continue;
+      // 6. 주차 계산 함수
+      const getWeekOfMonth = (date: Date): number => {
+        const day = date.getDate();
+        if (day <= 7) return 1;
+        if (day <= 14) return 2;
+        if (day <= 21) return 3;
+        return 4;
+      };
+
+      // 7. 직원별 데이터 집계
+      interface EmployeeTask {
+        taskName: string;
+        difficulty: string;
+        details: string[];
+        weeklyHours: {
+          week1: number;
+          week2: number;
+          week3: number;
+          week4: number;
+        };
+        totalHours: number;
+      }
+
+      interface EmployeeData {
+        department: string;
+        role: string;
+        name: string;
+        grade: string;
+        tasks: EmployeeTask[];
+        totalMonthlyHours: number;
+      }
+
+      const employeeMap = new Map<string, EmployeeData>();
+
+      // 멤버 정보 초기화
+      for (const pm of projectMembers) {
+        const userId = pm.memberId.toString();
+        if (!employeeMap.has(userId)) {
+          employeeMap.set(userId, {
+            department: workAreaMap[pm.workArea] || pm.workArea,
+            role: pm.role,
+            name: pm.member.name,
+            grade: gradeMap[pm.member.grade] || pm.member.grade,
+            tasks: [],
+            totalMonthlyHours: 0,
+          });
+        }
+      }
+
+      // work_logs를 직원 × 업무별로 집계
+      const taskMapByEmployee = new Map<string, Map<string, EmployeeTask>>();
+
+      for (const log of workLogs) {
+        const userId = log.userId.toString();
+        const taskId = log.taskId.toString();
+        const weekNum = getWeekOfMonth(new Date(log.workDate));
+        const hours = Number(log.workHours || 0);
 
         if (!taskMapByEmployee.has(userId)) {
           taskMapByEmployee.set(userId, new Map());
         }
         const userTaskMap = taskMapByEmployee.get(userId)!;
 
-        const vacationKey = 'vacation';
-        if (!userTaskMap.has(vacationKey)) {
-          userTaskMap.set(vacationKey, {
-            taskName: '휴가',
-            difficulty: '-',
-            details: ['연차'],
+        if (!userTaskMap.has(taskId)) {
+          userTaskMap.set(taskId, {
+            taskName: log.task.taskName,
+            difficulty: difficultyMap[log.task.difficulty] || '-',
+            details: [],
             weeklyHours: { week1: 0, week2: 0, week3: 0, week4: 0 },
             totalHours: 0,
           });
         }
 
-        const weekNum = getWeekOfMonth(new Date(vacation.usageDate));
-        const hours = vacation.scheduleType === 'HALF_DAY' ? 4 : 8;
-        const vacationData = userTaskMap.get(vacationKey)!;
-        vacationData.weeklyHours[`week${weekNum}` as keyof typeof vacationData.weeklyHours] += hours;
-        vacationData.totalHours += hours;
+        const taskData = userTaskMap.get(taskId)!;
+        if (log.content) taskData.details.push(log.content);
+        taskData.weeklyHours[
+          `week${weekNum}` as keyof typeof taskData.weeklyHours
+        ] += hours;
+        taskData.totalHours += hours;
       }
-    }
 
-    // employeeMap에 tasks 추가 및 totalMonthlyHours 계산
-    for (const [userId, taskMap] of taskMapByEmployee) {
-      const employee = employeeMap.get(userId);
-      if (employee) {
-        employee.tasks = Array.from(taskMap.values());
-        employee.totalMonthlyHours = employee.tasks.reduce((sum, t) => sum + t.totalHours, 0);
+      // 휴가 데이터 집계 (프로젝트 멤버만)
+      for (const vacation of vacations) {
+        // usageDate가 없으면 건너뛰기
+        if (!vacation.usageDate) continue;
+
+        for (const participant of vacation.participants) {
+          const userId = participant.userId.toString();
+
+          // 프로젝트 멤버가 아니면 건너뛰기
+          if (!memberIdSet.has(userId)) continue;
+
+          if (!taskMapByEmployee.has(userId)) {
+            taskMapByEmployee.set(userId, new Map());
+          }
+          const userTaskMap = taskMapByEmployee.get(userId)!;
+
+          const vacationKey = 'vacation';
+          if (!userTaskMap.has(vacationKey)) {
+            userTaskMap.set(vacationKey, {
+              taskName: '휴가',
+              difficulty: '-',
+              details: ['연차'],
+              weeklyHours: { week1: 0, week2: 0, week3: 0, week4: 0 },
+              totalHours: 0,
+            });
+          }
+
+          const weekNum = getWeekOfMonth(new Date(vacation.usageDate));
+          const hours = vacation.scheduleType === 'HALF_DAY' ? 4 : 8;
+          const vacationData = userTaskMap.get(vacationKey)!;
+          vacationData.weeklyHours[
+            `week${weekNum}` as keyof typeof vacationData.weeklyHours
+          ] += hours;
+          vacationData.totalHours += hours;
+        }
       }
-    }
 
-    // 업무가 없는 멤버 제외
-    const employees = Array.from(employeeMap.values()).filter((e) => e.tasks.length > 0);
+      // employeeMap에 tasks 추가 및 totalMonthlyHours 계산
+      for (const [userId, taskMap] of taskMapByEmployee) {
+        const employee = employeeMap.get(userId);
+        if (employee) {
+          employee.tasks = Array.from(taskMap.values());
+          employee.totalMonthlyHours = employee.tasks.reduce(
+            (sum, t) => sum + t.totalHours,
+            0,
+          );
+        }
+      }
 
-    // 역할 순서에 따라 정렬 (PM → PL → PA)
-    const roleOrder = ['PM', 'PL', 'PA'];
-    employees.sort((a, b) => {
-      const aOrder = roleOrder.indexOf(a.role);
-      const bOrder = roleOrder.indexOf(b.role);
-      return aOrder - bOrder;
-    });
+      // 업무가 없는 멤버 제외
+      const employees = Array.from(employeeMap.values()).filter(
+        (e) => e.tasks.length > 0,
+      );
 
-    // 8. ExcelJS로 파일 생성
-    console.log('[generateMonthlyStaffReport] Creating Excel with', employees.length, 'employees');
-    const workbook = new ExcelJS.Workbook();
-    workbook.creator = 'Emotion PMS';
-    workbook.created = new Date();
+      // 역할 순서에 따라 정렬 (PM → PL → PA)
+      const roleOrder = ['PM', 'PL', 'PA'];
+      employees.sort((a, b) => {
+        const aOrder = roleOrder.indexOf(a.role);
+        const bOrder = roleOrder.indexOf(b.role);
+        return aOrder - bOrder;
+      });
 
-    const worksheet = workbook.addWorksheet('Sheet1');
+      // 8. ExcelJS로 파일 생성
+      console.log(
+        '[generateMonthlyStaffReport] Creating Excel with',
+        employees.length,
+        'employees',
+      );
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'Emotion PMS';
+      workbook.created = new Date();
 
-    // 열 너비 설정
-    worksheet.columns = [
-      { width: 12 },  // A: 담당업무
-      { width: 8 },   // B: 역할
-      { width: 10 },  // C: 이름
-      { width: 8 },   // D: 등급
-      { width: 35 },  // E: 진행 업무
-      { width: 8 },   // F: 난이도
-      { width: 40 },  // G: 비고
-      { width: 8 },   // H: 1주차
-      { width: 8 },   // I: 2주차
-      { width: 8 },   // J: 3주차
-      { width: 8 },   // K: 4주차
-      { width: 12 },  // L: 업무별 투입시간
-      { width: 15 },  // M: 월 공수
-      { width: 12 },  // N: 일평균
-    ];
+      const worksheet = workbook.addWorksheet('Sheet1');
 
-    // 헤더 영역
-    // 1행: 빈 행
-    worksheet.addRow([]);
+      // 열 너비 설정
+      worksheet.columns = [
+        { width: 12 }, // A: 담당업무
+        { width: 8 }, // B: 역할
+        { width: 10 }, // C: 이름
+        { width: 8 }, // D: 등급
+        { width: 35 }, // E: 진행 업무
+        { width: 8 }, // F: 난이도
+        { width: 40 }, // G: 비고
+        { width: 8 }, // H: 1주차
+        { width: 8 }, // I: 2주차
+        { width: 8 }, // J: 3주차
+        { width: 8 }, // K: 4주차
+        { width: 12 }, // L: 업무별 투입시간
+        { width: 15 }, // M: 월 공수
+        { width: 12 }, // N: 일평균
+      ];
 
-    // 2행: 제목
-    const titleRow = worksheet.addRow(['투입인력별 상세 업무현황']);
-    worksheet.mergeCells(2, 1, 2, 14);
-    titleRow.getCell(1).font = { name: 'Arial', size: 14, bold: true };
-    titleRow.getCell(1).alignment = { horizontal: 'left', vertical: 'middle' };
+      // 헤더 영역
+      // 1행: 빈 행
+      worksheet.addRow([]);
 
-    // 3행: 정상근무 시간
-    const normalHoursRow = worksheet.addRow([]);
-    normalHoursRow.getCell(13).value = '정상근무 160시간';
-    normalHoursRow.getCell(13).font = { name: 'Arial', size: 11, bold: true };
-
-    // 4행: 컬럼 헤더
-    const headers = [
-      '담당업무',
-      '역할',
-      '이름',
-      '등급',
-      '진행 업무',
-      '난이도',
-      '비고(작업상세 이력)',
-      '1주차',
-      '2주차',
-      '3주차',
-      '4주차',
-      '업무별 투입시간',
-      `${month}월 공수\n(m/h)`,
-      '일평균 근무시간',
-    ];
-
-    const headerRow = worksheet.addRow(headers);
-    headerRow.eachCell((cell) => {
-      cell.font = { name: 'Arial', size: 11, bold: true };
-      cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
-      cell.border = {
-        top: { style: 'thin' },
-        left: { style: 'thin' },
-        bottom: { style: 'thin' },
-        right: { style: 'thin' },
+      // 2행: 제목
+      const titleRow = worksheet.addRow(['투입인력별 상세 업무현황']);
+      worksheet.mergeCells(2, 1, 2, 14);
+      titleRow.getCell(1).font = { name: 'Arial', size: 16, bold: true };
+      titleRow.getCell(1).alignment = {
+        horizontal: 'left',
+        vertical: 'middle',
       };
-    });
 
-    // 데이터 행 생성
-    let currentRow = 5;
+      // 3행: 정상근무 시간
+      const normalHoursRow = worksheet.addRow([]);
+      normalHoursRow.getCell(13).value = '정상근무 160시간';
+      normalHoursRow.getCell(13).font = { name: 'Arial', size: 11, bold: true };
 
-    for (const employee of employees) {
-      const startRow = currentRow;
-      const taskCount = employee.tasks.length;
+      // 4행: 컬럼 헤더
+      const headers = [
+        '담당업무',
+        '역할',
+        '이름',
+        '등급',
+        '진행 업무',
+        '난이도',
+        '비고(작업상세 이력)',
+        '1주차',
+        '2주차',
+        '3주차',
+        '4주차',
+        '업무별 투입시간',
+        `${month}월 공수\n(m/h)`,
+        '일평균 근무시간',
+      ];
 
-      for (let i = 0; i < taskCount; i++) {
-        const task = employee.tasks[i];
-        const isFirstRow = i === 0;
+      const headerRow = worksheet.addRow(headers);
+      headerRow.eachCell((cell) => {
+        cell.font = {
+          name: 'Arial',
+          size: 12,
+          bold: true,
+          color: { argb: 'FFFFFFFF' },
+        };
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FF000000' }, // 검은 배경
+        };
+        cell.alignment = {
+          vertical: 'middle',
+          horizontal: 'center',
+          wrapText: true,
+        };
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' },
+        };
+      });
 
-        const row = worksheet.addRow([
-          isFirstRow ? employee.department : '',
-          isFirstRow ? employee.role : '',
-          isFirstRow ? employee.name : '',
-          isFirstRow ? employee.grade : '',
-          task.taskName,
-          task.difficulty,
-          task.details.join('\n'),
-          task.weeklyHours.week1 || '',
-          task.weeklyHours.week2 || '',
-          task.weeklyHours.week3 || '',
-          task.weeklyHours.week4 || '',
-          { formula: `SUM(H${currentRow}:K${currentRow})` },
-          isFirstRow
-            ? taskCount === 1
-              ? { formula: `L${currentRow}` }
-              : { formula: `SUM(L${startRow}:L${startRow + taskCount - 1})` }
-            : '',
-          isFirstRow ? { formula: `M${currentRow}/20` } : '',
-        ]);
+      // 데이터 행 생성
+      let currentRow = 5;
 
-        // 스타일 적용
-        row.eachCell((cell, colNumber) => {
-          cell.font = { name: 'Arial', size: 10 };
-          cell.alignment = {
-            vertical: 'middle',
-            horizontal: colNumber === 7 ? 'left' : 'center',
-            wrapText: true,
-          };
-          cell.border = {
-            top: { style: 'thin' },
-            left: { style: 'thin' },
-            bottom: { style: 'thin' },
-            right: { style: 'thin' },
-          };
-        });
+      for (const employee of employees) {
+        const startRow = currentRow;
+        const taskCount = employee.tasks.length;
 
-        currentRow++;
+        for (let i = 0; i < taskCount; i++) {
+          const task = employee.tasks[i];
+          const isFirstRow = i === 0;
+
+          const row = worksheet.addRow([
+            isFirstRow ? employee.department : '',
+            isFirstRow ? employee.role : '',
+            isFirstRow ? employee.name : '',
+            isFirstRow ? employee.grade : '',
+            task.taskName,
+            task.difficulty,
+            task.details.join('\n'),
+            task.weeklyHours.week1 || '',
+            task.weeklyHours.week2 || '',
+            task.weeklyHours.week3 || '',
+            task.weeklyHours.week4 || '',
+            { formula: `SUM(H${currentRow}:K${currentRow})` },
+            isFirstRow
+              ? taskCount === 1
+                ? { formula: `L${currentRow}` }
+                : { formula: `SUM(L${startRow}:L${startRow + taskCount - 1})` }
+              : '',
+            isFirstRow ? { formula: `M${currentRow}/20` } : '',
+          ]);
+
+          // 스타일 적용
+          row.eachCell((cell, colNumber) => {
+            cell.font = { name: 'Arial', size: 10 };
+            cell.alignment = {
+              vertical: 'middle',
+              horizontal: colNumber === 7 ? 'left' : 'center',
+              wrapText: true,
+            };
+            cell.border = {
+              top: { style: 'thin' },
+              left: { style: 'thin' },
+              bottom: { style: 'thin' },
+              right: { style: 'thin' },
+            };
+          });
+
+          currentRow++;
+        }
+
+        // 셀 병합 (직원이 여러 업무를 수행한 경우)
+        if (taskCount > 1) {
+          worksheet.mergeCells(startRow, 1, startRow + taskCount - 1, 1); // 담당업무
+          worksheet.mergeCells(startRow, 2, startRow + taskCount - 1, 2); // 역할
+          worksheet.mergeCells(startRow, 3, startRow + taskCount - 1, 3); // 이름
+          worksheet.mergeCells(startRow, 4, startRow + taskCount - 1, 4); // 등급
+          worksheet.mergeCells(startRow, 13, startRow + taskCount - 1, 13); // 월 공수
+          worksheet.mergeCells(startRow, 14, startRow + taskCount - 1, 14); // 일평균
+
+          // 병합된 셀 정렬
+          [1, 2, 3, 4, 13, 14].forEach((col) => {
+            const cell = worksheet.getCell(startRow, col);
+            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+          });
+        }
       }
 
-      // 셀 병합 (직원이 여러 업무를 수행한 경우)
-      if (taskCount > 1) {
-        worksheet.mergeCells(startRow, 1, startRow + taskCount - 1, 1);  // 담당업무
-        worksheet.mergeCells(startRow, 2, startRow + taskCount - 1, 2);  // 역할
-        worksheet.mergeCells(startRow, 3, startRow + taskCount - 1, 3);  // 이름
-        worksheet.mergeCells(startRow, 4, startRow + taskCount - 1, 4);  // 등급
-        worksheet.mergeCells(startRow, 13, startRow + taskCount - 1, 13); // 월 공수
-        worksheet.mergeCells(startRow, 14, startRow + taskCount - 1, 14); // 일평균
-
-        // 병합된 셀 정렬
-        [1, 2, 3, 4, 13, 14].forEach((col) => {
-          const cell = worksheet.getCell(startRow, col);
-          cell.alignment = { horizontal: 'center', vertical: 'middle' };
-        });
-      }
-    }
-
-    // Buffer 반환
-    const arrayBuffer = await workbook.xlsx.writeBuffer();
-    console.log('[generateMonthlyStaffReport] Success: Excel generated');
-    return Buffer.from(arrayBuffer);
+      // Buffer 반환
+      const arrayBuffer = await workbook.xlsx.writeBuffer();
+      console.log('[generateMonthlyStaffReport] Success: Excel generated');
+      return Buffer.from(arrayBuffer);
     } catch (error) {
       console.error('[generateMonthlyStaffReport] Error:', error);
       throw error;
