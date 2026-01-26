@@ -53,26 +53,50 @@ export function WorkLogCalendar({
 
   // Navigation handlers
   const handlePrevMonth = () => {
-    const calendarApi = calendarRef.current?.getApi();
-    if (calendarApi) {
-      calendarApi.prev();
+    if (viewMode === 'month') {
+      const calendarApi = calendarRef.current?.getApi();
+      if (calendarApi) {
+        calendarApi.prev();
+      }
+    } else {
+      // list 모드에서는 상태 직접 업데이트
+      const newMonth = new Date(currentMonth);
+      newMonth.setMonth(newMonth.getMonth() - 1);
+      setCurrentMonth(newMonth);
+      onMonthChange(newMonth);
     }
   };
 
   const handleNextMonth = () => {
-    const calendarApi = calendarRef.current?.getApi();
-    if (calendarApi) {
-      calendarApi.next();
+    if (viewMode === 'month') {
+      const calendarApi = calendarRef.current?.getApi();
+      if (calendarApi) {
+        calendarApi.next();
+      }
+    } else {
+      // list 모드에서는 상태 직접 업데이트
+      const newMonth = new Date(currentMonth);
+      newMonth.setMonth(newMonth.getMonth() + 1);
+      setCurrentMonth(newMonth);
+      onMonthChange(newMonth);
     }
   };
 
   const handleToday = () => {
-    const calendarApi = calendarRef.current?.getApi();
-    if (calendarApi) {
-      calendarApi.today();
-      const today = new Date();
-      onDateSelect(today);
+    const today = new Date();
+
+    if (viewMode === 'month') {
+      const calendarApi = calendarRef.current?.getApi();
+      if (calendarApi) {
+        calendarApi.today();
+      }
+    } else {
+      // list 모드에서는 상태 직접 업데이트
+      setCurrentMonth(today);
+      onMonthChange(today);
     }
+
+    onDateSelect(today);
   };
 
   // FullCalendar callbacks
