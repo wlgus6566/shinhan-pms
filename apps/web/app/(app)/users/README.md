@@ -4,6 +4,8 @@
 
 멤버(사용자) 관리 페이지는 슈퍼 관리자와 프로젝트 관리자가 팀원을 등록하고 권한을 관리할 수 있는 기능을 제공합니다.
 
+멤버 등록 및 수정은 통합된 `UserForm` 컴포넌트를 통해 처리되며, `mode` prop으로 생성/수정을 구분합니다.
+
 ## 역할(Role) 체계
 
 ### 1. 슈퍼 관리자 (SUPER_ADMIN)
@@ -75,18 +77,42 @@
    - 마케팅전략실
    - XC본부
 
-7. **관리자 유형** (필수)
+7. **직책** (필수)
+   - 본부장 (DIVISION_HEAD)
+   - 실장 (GENERAL_MANAGER)
+   - 수석팀장 (PRINCIPAL_LEADER)
+   - 선임팀장 (SENIOR_LEADER)
+   - 팀장 (LEADER)
+   - 팀원 (TEAM_MEMBER)
+
+8. **등급** (필수)
+   - 전문가 (EXPERT)
+   - 고급 (ADVANCED)
+   - 중급 (INTERMEDIATE)
+   - 초급 (BEGINNER)
+
+9. **관리자 유형** (필수)
    - 슈퍼 관리자: 전체 권한
    - 프로젝트 관리자: 프로젝트 관리 권한
    - 일반: 업무일지 작성만 가능
 
 ### 3. 멤버 상세/수정 (/users/[id])
 
-- 기본 정보 조회 (이름, 이메일)
+**읽기 전용 필드** (회색 배경 박스로 표시):
+- 이름 (변경 불가)
+- 이메일 (변경 불가)
+
+**SUPER_ADMIN 수정 가능 필드**:
+- 프로필 사진 변경
 - 본부 변경
+- 직책 변경
+- 등급 변경
 - 권한 변경
 - 계정 활성화/비활성화
-- 계정 비활성화 (삭제)
+
+**권한**:
+- SUPER_ADMIN만 모든 필드 수정 가능
+- 일반 사용자는 조회만 가능 (모든 필드 비활성화)
 
 ## API 엔드포인트
 
@@ -104,6 +130,8 @@ Body:
   "password": "Password123!",
   "profileImage": "data:image/...", // optional
   "department": "개발본부1",
+  "position": "TEAM_MEMBER",
+  "grade": "INTERMEDIATE",
   "role": "MEMBER"
 }
 ```
@@ -133,7 +161,10 @@ Roles: SUPER_ADMIN
 
 Body:
 {
+  "profileImage": "data:image/...", // optional
   "department": "기획본부1",
+  "position": "LEADER",
+  "grade": "ADVANCED",
   "role": "PM",
   "isActive": true
 }
@@ -167,6 +198,60 @@ Roles: SUPER_ADMIN
 - 비밀번호: password123
 - 역할: MEMBER
 
+## 컴포넌트 구조
+
+### UserForm 컴포넌트
+
+멤버 등록과 수정을 통합 처리하는 컴포넌트입니다.
+
+#### Props
+
+```typescript
+interface UserFormProps {
+  mode: 'create' | 'edit';  // 생성 또는 수정 모드
+  userId?: string;          // edit 모드에서 필수
+}
+```
+
+#### 사용 예시
+
+**멤버 등록 페이지** (`/users/new/page.tsx`):
+```tsx
+<UserForm mode="create" />
+```
+
+**멤버 수정 페이지** (`/users/[id]/page.tsx`):
+```tsx
+<UserForm mode="edit" userId={userId} />
+```
+
+#### 모드별 동작 차이
+
+**Create 모드**:
+- 모든 필드 입력 가능
+- 비밀번호 필드 표시
+- 제출 시 POST /api/users 호출
+
+**Edit 모드**:
+- 이름/이메일 필드는 readonly 표시 (회색 배경 박스)
+- 비밀번호 필드 숨김
+- SUPER_ADMIN이 아니면 모든 필드 disabled
+- 제출 시 PATCH /api/users/{id} 호출
+
+#### 권한별 접근 제어
+
+| 필드 | Create 모드 | Edit 모드 (SUPER_ADMIN) | Edit 모드 (일반) |
+|------|-------------|-------------------------|-----------------|
+| 프로필 사진 | 입력 가능 | 수정 가능 | 조회만 |
+| 이름 | 입력 가능 | 조회만 (readonly) | 조회만 (readonly) |
+| 이메일 | 입력 가능 | 조회만 (readonly) | 조회만 (readonly) |
+| 비밀번호 | 입력 가능 | 숨김 | 숨김 |
+| 본부 | 선택 가능 | 수정 가능 | 조회만 |
+| 직책 | 선택 가능 | 수정 가능 | 조회만 |
+| 등급 | 선택 가능 | 수정 가능 | 조회만 |
+| 관리자 유형 | 선택 가능 | 수정 가능 | 조회만 |
+| 활성 상태 | 기본값 true | 수정 가능 | 조회만 |
+
 ## 주의사항
 
 1. **프로필 사진**: 현재 Base64 인코딩으로 저장됩니다. 프로덕션 환경에서는 별도의 파일 스토리지(S3 등)를 사용하는 것을 권장합니다.
@@ -174,3 +259,5 @@ Roles: SUPER_ADMIN
 2. **권한 체크**: 프론트엔드와 백엔드 모두에서 권한을 체크합니다. 프론트엔드는 UI 표시용이며, 실제 보안은 백엔드에서 처리합니다.
 
 3. **본인 계정**: 사용자는 본인의 권한을 변경하거나 본인 계정을 비활성화할 수 없습니다.
+
+4. **이름/이메일 변경 제한**: Edit 모드에서 이름과 이메일은 변경할 수 없습니다. 데이터 무결성 유지를 위한 제한입니다.
