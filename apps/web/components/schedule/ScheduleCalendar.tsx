@@ -3,20 +3,24 @@
 import { useState, useMemo, useRef } from 'react';
 import { format, parseISO } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Calendar, List } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Calendar,
+  List,
+  CalendarDays,
+  Clock,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { Schedule } from '@/types/schedule';
-import {
-  SCHEDULE_TYPE_CALENDAR_COLORS,
-  SCHEDULE_TYPE_LABELS,
-  TEAM_SCOPE_FILTER_COLORS,
-  TeamScope,
-} from '@/types/schedule';
+import { TEAM_SCOPE_FILTER_COLORS, TeamScope } from '@/types/schedule';
 
 // FullCalendar imports
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import listPlugin from '@fullcalendar/list';
 import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction';
 import type {
   EventClickArg,
@@ -27,7 +31,7 @@ import type {
 import koLocale from '@fullcalendar/core/locales/ko';
 
 // Utilities
-import { transformSchedulesToEvents, getScheduleColor } from './calendarUtils';
+import { transformSchedulesToEvents } from './calendarUtils';
 
 interface ScheduleCalendarProps {
   schedules: Schedule[];
@@ -51,7 +55,9 @@ export function ScheduleCalendar({
   onScheduleClick,
 }: ScheduleCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date(selectedDate));
-  const [viewMode, setViewMode] = useState<'month' | 'list'>('month');
+  const [viewMode, setViewMode] = useState<'month' | 'week' | 'day' | 'list'>(
+    'month',
+  );
   const calendarRef = useRef<FullCalendar>(null);
 
   // Transform schedules to FullCalendar events
@@ -157,22 +163,6 @@ export function ScheduleCalendar({
     return classes;
   };
 
-  // List view grouped schedules (keep existing implementation)
-  const groupedSchedules = useMemo(() => {
-    const grouped: Record<string, Schedule[]> = {};
-    schedules.forEach((schedule) => {
-      // 연차/반차는 usageDate 기준, 일반 일정은 startDate 기준
-      const startDate = schedule.usageDate
-        ? schedule.usageDate
-        : format(parseUTCAsLocal(schedule.startDate), 'yyyy-MM-dd');
-      if (!grouped[startDate]) {
-        grouped[startDate] = [];
-      }
-      grouped[startDate]!.push(schedule);
-    });
-    return Object.entries(grouped).sort(([a], [b]) => b.localeCompare(a));
-  }, [schedules]);
-
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
       {/* Header */}
@@ -221,6 +211,28 @@ export function ScheduleCalendar({
             <Calendar className="h-4 w-4 mr-1" />월
           </Button>
           <Button
+            variant={viewMode === 'week' ? 'default' : 'ghost'}
+            size="sm"
+            className={cn(
+              'h-7 px-3',
+              viewMode === 'week' ? '' : 'text-slate-600',
+            )}
+            onClick={() => setViewMode('week')}
+          >
+            <CalendarDays className="h-4 w-4 mr-1" />주
+          </Button>
+          <Button
+            variant={viewMode === 'day' ? 'default' : 'ghost'}
+            size="sm"
+            className={cn(
+              'h-7 px-3',
+              viewMode === 'day' ? '' : 'text-slate-600',
+            )}
+            onClick={() => setViewMode('day')}
+          >
+            <Clock className="h-4 w-4 mr-1" />일
+          </Button>
+          <Button
             variant={viewMode === 'list' ? 'default' : 'ghost'}
             size="sm"
             className={cn(
@@ -238,8 +250,9 @@ export function ScheduleCalendar({
       {viewMode === 'month' ? (
         /* FullCalendar Month View */
         <FullCalendar
+          key="month"
           ref={calendarRef}
-          plugins={[dayGridPlugin, interactionPlugin]}
+          plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
           initialView="dayGridMonth"
           initialDate={currentMonth}
           locale={koLocale}
@@ -262,69 +275,91 @@ export function ScheduleCalendar({
             return isMultiDay ? 'fc-multiday-event' : 'fc-singleday-event';
           }}
         />
+      ) : viewMode === 'week' ? (
+        /* FullCalendar Week View */
+        <FullCalendar
+          key="week"
+          ref={calendarRef}
+          plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
+          initialView="timeGridWeek"
+          initialDate={currentMonth}
+          locale={koLocale}
+          headerToolbar={false} // Use custom header
+          height="auto"
+          events={events}
+          eventClick={handleEventClick}
+          dateClick={handleDateClick}
+          datesSet={handleDatesSet}
+          firstDay={1} // Monday
+          slotDuration="00:30:00"
+          slotMinTime="06:00:00"
+          slotMaxTime="22:00:00"
+          allDaySlot={true}
+          allDayText="종일"
+          slotLabelFormat={{
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+          }}
+          dayHeaderFormat={{ weekday: 'short', day: 'numeric' }}
+          nowIndicator={true}
+          eventContent={renderEventContent}
+          eventClassNames={(arg) => {
+            const isMultiDay = arg.event.extendedProps.isMultiDay as boolean;
+            return isMultiDay ? 'fc-multiday-event' : 'fc-singleday-event';
+          }}
+        />
+      ) : viewMode === 'day' ? (
+        /* FullCalendar Day View */
+        <FullCalendar
+          key="day"
+          ref={calendarRef}
+          plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
+          initialView="timeGridDay"
+          initialDate={currentMonth}
+          locale={koLocale}
+          headerToolbar={false} // Use custom header
+          height="auto"
+          events={events}
+          eventClick={handleEventClick}
+          dateClick={handleDateClick}
+          datesSet={handleDatesSet}
+          slotDuration="00:30:00"
+          slotMinTime="06:00:00"
+          slotMaxTime="22:00:00"
+          allDaySlot={true}
+          allDayText="종일"
+          slotLabelFormat={{
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+          }}
+          dayHeaderFormat={{ weekday: 'long', month: 'long', day: 'numeric' }}
+          nowIndicator={true}
+          eventContent={renderEventContent}
+          eventClassNames={(arg) => {
+            const isMultiDay = arg.event.extendedProps.isMultiDay as boolean;
+            return isMultiDay ? 'fc-multiday-event' : 'fc-singleday-event';
+          }}
+        />
       ) : (
-        /* List View - Keep existing implementation */
-        <div className="max-h-[1000px] overflow-y-auto">
-          {groupedSchedules.length === 0 ? (
-            <div className="py-16 text-center text-slate-500">
-              등록된 일정이 없습니다
-            </div>
-          ) : (
-            groupedSchedules.map(([date, schedules]) => (
-              <div
-                key={date}
-                className="border-b border-slate-100 last:border-b-0"
-              >
-                <div className="px-6 py-3 bg-slate-50 sticky top-0">
-                  <span className="font-semibold text-slate-700">
-                    {format(new Date(date), 'M월 d일 (EEEE)', { locale: ko })}
-                  </span>
-                  <span className="ml-2 text-sm text-slate-500">
-                    {schedules.length}건
-                  </span>
-                </div>
-                <div className="divide-y divide-slate-100">
-                  {schedules.map((schedule) => (
-                    <button
-                      key={schedule.id}
-                      onClick={() => onScheduleClick?.(schedule)}
-                      className="w-full px-6 py-3 text-left hover:bg-slate-50 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-2 h-2 rounded-full"
-                          style={{
-                            backgroundColor: getScheduleColor(schedule),
-                          }}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-slate-800 truncate">
-                            {schedule.title}
-                          </p>
-                          <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
-                              {SCHEDULE_TYPE_LABELS[schedule.scheduleType]}
-                            </span>
-                            <span className="text-sm text-slate-500">
-                              {schedule.isAllDay
-                                ? '하루 종일'
-                                : `${format(parseUTCAsLocal(schedule.startDate), 'HH:mm')} - ${format(parseUTCAsLocal(schedule.endDate), 'HH:mm')}`}
-                            </span>
-                          </div>
-                        </div>
-                        {schedule.location && (
-                          <span className="text-sm text-slate-500 truncate max-w-[150px]">
-                            📍 {schedule.location}
-                          </span>
-                        )}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
+        /* FullCalendar List View */
+        <FullCalendar
+          key="list"
+          ref={calendarRef}
+          plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
+          initialView="listWeek"
+          initialDate={currentMonth}
+          locale={koLocale}
+          headerToolbar={false} // Use custom header
+          height="auto"
+          events={events}
+          eventClick={handleEventClick}
+          datesSet={handleDatesSet}
+          listDayFormat={{ month: 'long', day: 'numeric', weekday: 'long' }}
+          listDaySideFormat={false}
+          noEventsText="등록된 일정이 없습니다"
+        />
       )}
     </div>
   );

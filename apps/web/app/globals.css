@@ -364,6 +364,9 @@
 .fc-theme-standard .fc-scrollgrid {
   border: 1px solid #e2e8f0;
 }
+.fc-listWeek-view td {
+  border: none !important;
+}
 
 /* View container */
 .fc-view-harness {
