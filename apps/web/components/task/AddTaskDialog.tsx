@@ -8,14 +8,7 @@ import { TaskDifficultyEnum, TASK_DIFFICULTY_OPTIONS } from '@repo/schema';
 import type { CreateTaskRequest } from '@repo/schema';
 import { createTask } from '@/lib/api/tasks';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { BaseDialog } from '@/components/ui/base-dialog';
 import { Form } from '@/components/ui/form';
 import { FormInput, FormTextarea, FormSelect, FormCheckboxGroup } from '@/components/form';
 import { Loader2 } from 'lucide-react';
@@ -122,157 +115,154 @@ export function AddTaskDialog({ projectId, projectMembers, open, onOpenChange, o
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>업무 등록</DialogTitle>
-          <DialogDescription>새로운 업무를 등록합니다</DialogDescription>
-        </DialogHeader>
-
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {error && (
-              <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md">
-                {error}
-              </div>
+    <BaseDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      size="lg"
+      title="업무 등록"
+      description="새로운 업무를 등록합니다"
+      error={error}
+      footer={
+        <div className="flex gap-2 justify-end">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={submitting}
+          >
+            취소
+          </Button>
+          <Button
+            onClick={form.handleSubmit(onSubmit)}
+            disabled={submitting}
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                등록 중...
+              </>
+            ) : (
+              '등록'
             )}
+          </Button>
+        </div>
+      }
+    >
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormInput
+            control={form.control}
+            name="taskName"
+            label="작업명 *"
+            placeholder="메인 페이지 개발"
+          />
+
+          <FormTextarea
+            control={form.control}
+            name="description"
+            label="작업내용"
+            placeholder="작업 상세 내용"
+            className="resize-none"
+            rows={3}
+          />
+
+          <FormSelect
+            control={form.control}
+            name="difficulty"
+            label="난이도 *"
+            placeholder="난이도 선택"
+            options={TASK_DIFFICULTY_OPTIONS}
+          />
+
+          <FormInput
+            control={form.control}
+            name="clientName"
+            label="담당 RM (고객사 이름)"
+            placeholder="신한카드"
+          />
+
+          <div className="grid grid-cols-2 gap-4">
+            <FormCheckboxGroup
+              control={form.control}
+              name="planningAssigneeIds"
+              label="기획 담당자"
+              options={planningMembers.map(m => ({
+                id: m.member!.id.toString(),
+                label: `${m.member!.name} (${m.member!.email})`
+              }))}
+              emptyMessage="기획팀 멤버가 없습니다"
+              maxHeight="max-h-48"
+            />
+
+            <FormCheckboxGroup
+              control={form.control}
+              name="designAssigneeIds"
+              label="디자인 담당자"
+              options={designMembers.map(m => ({
+                id: m.member!.id.toString(),
+                label: `${m.member!.name} (${m.member!.email})`
+              }))}
+              emptyMessage="디자인팀 멤버가 없습니다"
+              maxHeight="max-h-48"
+            />
+
+            <FormCheckboxGroup
+              control={form.control}
+              name="frontendAssigneeIds"
+              label="프론트엔드 담당자"
+              options={frontendMembers.map(m => ({
+                id: m.member!.id.toString(),
+                label: `${m.member!.name} (${m.member!.email})`
+              }))}
+              emptyMessage="프론트엔드팀 멤버가 없습니다"
+              maxHeight="max-h-48"
+            />
+
+            <FormCheckboxGroup
+              control={form.control}
+              name="backendAssigneeIds"
+              label="백엔드 담당자"
+              options={backendMembers.map(m => ({
+                id: m.member!.id.toString(),
+                label: `${m.member!.name} (${m.member!.email})`
+              }))}
+              emptyMessage="백엔드팀 멤버가 없습니다"
+              maxHeight="max-h-48"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <FormInput
+              control={form.control}
+              name="startDate"
+              label="시작일"
+              type="date"
+            />
 
             <FormInput
               control={form.control}
-              name="taskName"
-              label="작업명 *"
-              placeholder="메인 페이지 개발"
+              name="endDate"
+              label="종료일"
+              type="date"
             />
+          </div>
 
-            <FormTextarea
-              control={form.control}
-              name="description"
-              label="작업내용"
-              placeholder="작업 상세 내용"
-              className="resize-none"
-              rows={3}
-            />
+          <FormInput
+            control={form.control}
+            name="openDate"
+            label="오픈일 (상용배포일)"
+            type="datetime-local"
+          />
 
-            <FormSelect
-              control={form.control}
-              name="difficulty"
-              label="난이도 *"
-              placeholder="난이도 선택"
-              options={TASK_DIFFICULTY_OPTIONS}
-            />
-
-            <FormInput
-              control={form.control}
-              name="clientName"
-              label="담당 RM (고객사 이름)"
-              placeholder="신한카드"
-            />
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormCheckboxGroup
-                control={form.control}
-                name="planningAssigneeIds"
-                label="기획 담당자"
-                options={planningMembers.map(m => ({
-                  id: m.member!.id.toString(),
-                  label: `${m.member!.name} (${m.member!.email})`
-                }))}
-                emptyMessage="기획팀 멤버가 없습니다"
-                maxHeight="max-h-48"
-              />
-
-              <FormCheckboxGroup
-                control={form.control}
-                name="designAssigneeIds"
-                label="디자인 담당자"
-                options={designMembers.map(m => ({
-                  id: m.member!.id.toString(),
-                  label: `${m.member!.name} (${m.member!.email})`
-                }))}
-                emptyMessage="디자인팀 멤버가 없습니다"
-                maxHeight="max-h-48"
-              />
-
-              <FormCheckboxGroup
-                control={form.control}
-                name="frontendAssigneeIds"
-                label="프론트엔드 담당자"
-                options={frontendMembers.map(m => ({
-                  id: m.member!.id.toString(),
-                  label: `${m.member!.name} (${m.member!.email})`
-                }))}
-                emptyMessage="프론트엔드팀 멤버가 없습니다"
-                maxHeight="max-h-48"
-              />
-
-              <FormCheckboxGroup
-                control={form.control}
-                name="backendAssigneeIds"
-                label="백엔드 담당자"
-                options={backendMembers.map(m => ({
-                  id: m.member!.id.toString(),
-                  label: `${m.member!.name} (${m.member!.email})`
-                }))}
-                emptyMessage="백엔드팀 멤버가 없습니다"
-                maxHeight="max-h-48"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormInput
-                control={form.control}
-                name="startDate"
-                label="시작일"
-                type="date"
-              />
-
-              <FormInput
-                control={form.control}
-                name="endDate"
-                label="종료일"
-                type="date"
-              />
-            </div>
-
-            <FormInput
-              control={form.control}
-              name="openDate"
-              label="오픈일 (상용배포일)"
-              type="datetime-local"
-            />
-
-            <FormTextarea
-              control={form.control}
-              name="notes"
-              label="비고"
-              placeholder="추가 메모"
-              className="resize-none"
-              rows={2}
-            />
-
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                disabled={submitting}
-              >
-                취소
-              </Button>
-              <Button type="submit" disabled={submitting}>
-                {submitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    등록 중...
-                  </>
-                ) : (
-                  '등록'
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+          <FormTextarea
+            control={form.control}
+            name="notes"
+            label="비고"
+            placeholder="추가 메모"
+            className="resize-none"
+            rows={2}
+          />
+        </form>
+      </Form>
+    </BaseDialog>
   );
 }

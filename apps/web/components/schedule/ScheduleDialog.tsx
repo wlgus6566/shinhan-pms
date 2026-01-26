@@ -1,12 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { BaseDialog } from '@/components/ui/base-dialog';
 import { ScheduleForm } from './ScheduleForm';
 import type { Schedule, CreateScheduleRequest } from '@/types/schedule';
 import {
@@ -120,27 +115,26 @@ export function ScheduleDialog({
   const isCreator = schedule && user && schedule.createdBy === String(user.id);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{getDialogTitle()}</DialogTitle>
-        </DialogHeader>
-
-        <ScheduleForm
-          schedule={internalMode === 'create' ? null : schedule}
-          projectId={projectId}
-          onSubmit={handleFormSubmit}
-          onCancel={
-            internalMode === 'view'
-              ? () => onOpenChange(false)
-              : handleCancelEdit
-          }
-          isLoading={isSubmitting}
-          viewMode={internalMode === 'view'}
-          onEdit={internalMode === 'view' && isCreator ? handleEdit : undefined}
-          onDelete={internalMode === 'view' && isCreator ? handleDelete : undefined}
-        />
-      </DialogContent>
-    </Dialog>
+    <BaseDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      size="lg"
+      title={getDialogTitle()}
+    >
+      <ScheduleForm
+        schedule={internalMode === 'create' ? null : schedule}
+        projectId={projectId}
+        onSubmit={handleFormSubmit}
+        onCancel={
+          internalMode === 'view'
+            ? () => onOpenChange(false)
+            : handleCancelEdit
+        }
+        isLoading={isSubmitting}
+        viewMode={internalMode === 'view'}
+        onEdit={internalMode === 'view' && isCreator ? handleEdit : undefined}
+        onDelete={internalMode === 'view' && isCreator ? handleDelete : undefined}
+      />
+    </BaseDialog>
   );
 }
