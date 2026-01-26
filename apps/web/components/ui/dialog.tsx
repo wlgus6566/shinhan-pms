@@ -46,7 +46,7 @@ const DialogContent = React.forwardRef<
         data-slot="dialog-close"
         className={cn(
           "ring-offset-background data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute right-4 rounded-xs transition-opacity hover:opacity-100 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-6",
-          'focus-outline top-[calc(var(--safe-area-top)+0.875rem)] cursor-pointer',
+          'focus-outline top-[calc(var(--safe-area-top)+0.875rem)] cursor-pointer z-10',
         )}
       >
         <X />

@@ -111,8 +111,8 @@ export class UsersService {
     const [users, totalCount] = await Promise.all([
       this.prisma.user.findMany({
         where,
-        skip,
-        take: pageSize,
+        skip: pageSize === 0 ? undefined : skip,
+        take: pageSize === 0 ? undefined : pageSize,
         orderBy: { createdAt: 'desc' },
       }),
       this.prisma.user.count({ where }),

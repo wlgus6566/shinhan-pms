@@ -98,17 +98,21 @@ export function useAvailableMembers(
 ) {
   let url: string | null = null;
   if (projectId) {
-    const query = new URLSearchParams({ excludeProject: projectId.toString() });
+    const query = new URLSearchParams({
+      excludeProject: projectId.toString(),
+      pageSize: '0'  // Fetch all available members
+    });
     if (search) {
       query.append('search', search);
     }
     url = `/api/users?${query.toString()}`;
   }
 
-  const { data, error, isLoading, mutate } = useSWR<{ users: AvailableMember[] }>(url);
+  const { data, error, isLoading, mutate } = useSWR<PaginatedData<AvailableMember>>(url);
 
   return {
-    members: data?.users,
+    members: data?.list,
+    totalCount: data?.totalCount,
     isLoading,
     error,
     mutate,
