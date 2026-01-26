@@ -1,13 +1,11 @@
 import {
   Injectable,
-  ConflictException,
   UnauthorizedException,
   BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
-import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
@@ -19,34 +17,6 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
   ) {}
-
-  async signup(signupDto: SignupDto): Promise<UserResponseDto> {
-    // 이메일 중복 체크
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email: signupDto.email },
-    });
-
-    if (existingUser) {
-      throw new ConflictException('이미 사용 중인 이메일입니다');
-    }
-
-    // 비밀번호 해시
-    const passwordHash = await bcrypt.hash(signupDto.password, 10);
-
-    // 사용자 생성
-    const user = await this.prisma.user.create({
-      data: {
-        email: signupDto.email,
-        passwordHash,
-        name: signupDto.name,
-        department: signupDto.department,
-        role: 'MEMBER',
-        createdBy: BigInt(1), // 임시: 자가 가입 시 시스템 계정
-      },
-    });
-
-    return new UserResponseDto(user);
-  }
 
   async login(
     loginDto: LoginDto,

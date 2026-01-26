@@ -71,17 +71,12 @@ export function SelectedDateScheduleList({
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      {schedule.scheduleType === 'VACATION' ||
-                      schedule.scheduleType === 'HALF_DAY' ? (
-                        <h4 className="text-green-800 truncate">
-                          🌴 {schedule.creatorName}{' '}
-                          {SCHEDULE_TYPE_LABELS[schedule.scheduleType]}
-                        </h4>
-                      ) : (
-                        <h4 className="font-semibold text-slate-900 truncate">
-                          {schedule.title}
-                        </h4>
-                      )}
+                      <h4 className="font-semibold text-slate-900 truncate">
+                        {schedule.scheduleType === 'VACATION' ||
+                        schedule.scheduleType === 'HALF_DAY'
+                          ? `🌴 ${schedule.creatorName} ${SCHEDULE_TYPE_LABELS[schedule.scheduleType]}`
+                          : schedule.title}
+                      </h4>
                       {schedule.scheduleType !== 'VACATION' &&
                         schedule.scheduleType !== 'HALF_DAY' && (
                           <Badge

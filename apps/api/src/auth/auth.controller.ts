@@ -15,7 +15,6 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
@@ -27,18 +26,6 @@ import { CurrentUser } from './decorators/current-user.decorator';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-
-  @Post('signup')
-  @ApiOperation({ summary: '회원가입' })
-  @ApiResponse({
-    status: 201,
-    description: '회원가입 성공',
-    type: UserResponseDto,
-  })
-  @ApiResponse({ status: 409, description: '이미 사용 중인 이메일' })
-  async signup(@Body() signupDto: SignupDto): Promise<UserResponseDto> {
-    return this.authService.signup(signupDto);
-  }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
