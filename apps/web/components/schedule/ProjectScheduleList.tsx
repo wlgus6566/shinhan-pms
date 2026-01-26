@@ -3,48 +3,31 @@
 import { useState, useEffect, useMemo } from 'react';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { Plus } from 'lucide-react';
 import { ScheduleCalendar } from './ScheduleCalendar';
-import { ScheduleForm } from './ScheduleForm';
+import { ScheduleDialog } from './ScheduleDialog';
 import { SelectedDateScheduleList } from './SelectedDateScheduleList';
-import type {
-  Schedule,
-  CreateScheduleRequest,
-  TeamScope,
-} from '@/types/schedule';
+import type { Schedule, TeamScope } from '@/types/schedule';
 import { TEAM_SCOPE_LABELS, TEAM_SCOPE_FILTER_COLORS } from '@/types/schedule';
 import type { ProjectMember } from '@/types/project';
-import {
-  useProjectSchedules,
-  getProjectSchedules,
-  createProjectSchedule,
-  updateSchedule,
-  deleteSchedule,
-} from '@/lib/api/schedules';
-import { useProjectMembers, getProjectMembers } from '@/lib/api/projectMembers';
+import { getProjectSchedules } from '@/lib/api/schedules';
+import { getProjectMembers } from '@/lib/api/projectMembers';
 
 interface ProjectScheduleListProps {
   projectId: string;
 }
 
+type DialogState =
+  | { open: false }
+  | { open: true; mode: 'create' }
+  | { open: true; mode: 'view' | 'edit'; schedule: Schedule };
+
 export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(
-    null,
-  );
-  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
-  const [formDialogOpen, setFormDialogOpen] = useState(false);
-  const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null);
+  const [dialogState, setDialogState] = useState<DialogState>({ open: false });
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
   const [projectMembers, setProjectMembers] = useState<ProjectMember[]>([]);
 
   // Filter state
@@ -130,57 +113,19 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
   };
 
   const handleScheduleClick = (schedule: Schedule) => {
-    setSelectedSchedule(schedule);
-    setDetailDialogOpen(true);
+    setDialogState({ open: true, mode: 'view', schedule });
   };
 
   const handleCreateNew = () => {
-    setEditingSchedule(null);
-    setFormDialogOpen(true);
+    setDialogState({ open: true, mode: 'create' });
   };
 
-  const handleEdit = (schedule: Schedule) => {
-    setEditingSchedule(schedule);
-    setDetailDialogOpen(false);
-    setFormDialogOpen(true);
-  };
-
-  const handleDelete = async (scheduleId: string) => {
-    if (!confirm('정말 이 일정을 삭제하시겠습니까?')) {
-      return;
-    }
-
-    try {
-      await deleteSchedule(scheduleId);
-      setSchedules(schedules.filter((s) => s.id !== scheduleId));
-      setDetailDialogOpen(false);
-    } catch (error) {
-      console.error('Failed to delete schedule:', error);
-      alert('일정 삭제에 실패했습니다.');
-    }
-  };
-
-  const handleFormSubmit = async (data: CreateScheduleRequest) => {
-    setSubmitting(true);
-    try {
-      if (editingSchedule) {
-        // Update
-        const updated = await updateSchedule(editingSchedule.id, data);
-        setSchedules(schedules.map((s) => (s.id === updated.id ? updated : s)));
-      } else {
-        // Create
-        const created = await createProjectSchedule(projectId, data);
-        setSchedules([...schedules, created]);
-      }
-
-      setFormDialogOpen(false);
-      setEditingSchedule(null);
-    } catch (error) {
-      console.error('Failed to save schedule:', error);
-      alert('일정 저장에 실패했습니다.');
-    } finally {
-      setSubmitting(false);
-    }
+  const handleSuccess = async () => {
+    // Reload calendar data
+    const startDate = format(startOfMonth(currentMonth), 'yyyy-MM-dd');
+    const endDate = format(endOfMonth(currentMonth), 'yyyy-MM-dd');
+    const data = await getProjectSchedules(projectId, startDate, endDate);
+    setSchedules(data);
   };
 
   const toggleTeamFilter = (team: TeamScope) => {
@@ -253,48 +198,19 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
         </div>
       </div>
 
-      {/* 일정 상세 모달 */}
-      <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>일정 상세</DialogTitle>
-          </DialogHeader>
-
-          {selectedSchedule && (
-            <ScheduleForm
-              schedule={selectedSchedule}
-              projectId={projectId}
-              onSubmit={() => {}}
-              onCancel={() => setDetailDialogOpen(false)}
-              viewMode={true}
-              onEdit={() => handleEdit(selectedSchedule)}
-              onDelete={() => handleDelete(selectedSchedule.id)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* 일정 생성/수정 폼 모달 */}
-      <Dialog open={formDialogOpen} onOpenChange={setFormDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {editingSchedule ? '일정 수정' : '새 일정 추가'}
-            </DialogTitle>
-          </DialogHeader>
-
-          <ScheduleForm
-            schedule={editingSchedule}
-            projectId={projectId}
-            onSubmit={handleFormSubmit}
-            onCancel={() => {
-              setFormDialogOpen(false);
-              setEditingSchedule(null);
-            }}
-            isLoading={submitting}
-          />
-        </DialogContent>
-      </Dialog>
+      {/* 일정 모달 (상세/생성/수정 통합) */}
+      <ScheduleDialog
+        open={dialogState.open}
+        onOpenChange={(open) => !open && setDialogState({ open: false })}
+        mode={dialogState.open ? dialogState.mode : 'create'}
+        schedule={
+          dialogState.open && 'schedule' in dialogState
+            ? dialogState.schedule
+            : null
+        }
+        projectId={projectId}
+        onSuccess={handleSuccess}
+      />
 
       {/* Floating Action Button */}
       <Button

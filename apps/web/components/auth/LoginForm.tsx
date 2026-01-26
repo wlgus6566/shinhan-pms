@@ -25,29 +25,35 @@ export function LoginForm() {
   const form = useForm<LoginValues>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
-      email: '',
-      password: '',
+      email: 'kim@emotion.co.kr',
+      password: 'password123',
     },
   });
 
   // Use useCallback for stable callback reference
-  const onSubmit = useCallback(async (values: LoginValues) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const result = await loginApi(values);
-      const user = {
-        ...result.user,
-        id: typeof result.user.id === 'string' ? parseInt(result.user.id) : result.user.id,
-      };
-      login(result.accessToken, user);
-      router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.message || '로그인 중 오류가 발생했습니다');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [login, router]);
+  const onSubmit = useCallback(
+    async (values: LoginValues) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const result = await loginApi(values);
+        const user = {
+          ...result.user,
+          id:
+            typeof result.user.id === 'string'
+              ? parseInt(result.user.id)
+              : result.user.id,
+        };
+        login(result.accessToken, user);
+        router.push('/dashboard');
+      } catch (err: any) {
+        setError(err.message || '로그인 중 오류가 발생했습니다');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [login, router],
+  );
 
   return (
     <div className="grid gap-6">

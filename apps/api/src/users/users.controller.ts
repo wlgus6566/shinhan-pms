@@ -37,9 +37,9 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  @Roles('SUPER_ADMIN', 'PM')
+  @Roles('SUPER_ADMIN')
   @ResponseCode('SUC002')
-  @ApiOperation({ summary: '사용자 생성 (슈퍼관리자/PM 전용)' })
+  @ApiOperation({ summary: '사용자 생성 (슈퍼관리자 전용)' })
   @ApiResponse({
     status: 201,
     description: '사용자가 생성되었습니다',

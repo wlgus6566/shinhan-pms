@@ -79,10 +79,18 @@ export default function LoginPage() {
                 <div className="space-y-1 text-sm">
                   <p className="text-slate-600">
                     <span className="text-slate-400">이메일:</span>{' '}
-                    admin@emotion.co.kr
+                    admin@emotion.co.kr <br />
+                    kim@emotion.co.kr <br />
+                    lee@emotion.co.kr <br />
+                    park@emotion.co.kr <br />
+                    choi@emotion.co.kr <br />
+                    jung@emotion.co.kr <br />
+                    yoon@emotion.co.kr <br />
+                    lim@emotion.co.kr <br />
                   </p>
                   <p className="text-slate-600">
-                    <span className="text-slate-400">비밀번호:</span> password123
+                    <span className="text-slate-400">비밀번호:</span>{' '}
+                    password123
                   </p>
                 </div>
               </div>

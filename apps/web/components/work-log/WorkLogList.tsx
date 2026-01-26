@@ -51,7 +51,7 @@ export function WorkLogList({
       </div>
 
       {/* 일지 목록 */}
-      <div className="max-h-[400px] overflow-y-auto p-4">
+      <div className="max-h-[500px] overflow-y-auto p-4">
         {logsForSelectedDate.length === 0 ? (
           <div className="py-4 text-center">
             <AlertCircle className="w-8 h-8 text-red-500 mx-auto mb-3" />

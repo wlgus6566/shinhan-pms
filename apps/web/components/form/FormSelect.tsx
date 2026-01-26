@@ -57,9 +57,9 @@ const FormSelect = ({
         <FormItem className={cn(wrapClassName)}>
           {label && <FormLabel>{label}</FormLabel>}
           <Select
+            key={field.value}
             disabled={disabled}
             onValueChange={field.onChange}
-            defaultValue={field.value}
             value={field.value}
             {...props}
           >

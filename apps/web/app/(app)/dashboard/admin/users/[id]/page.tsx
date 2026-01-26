@@ -20,7 +20,7 @@ export default function UserEditPage() {
     <div className="max-w-4xl">
       <Button
         variant="ghost"
-        className="mb-6 -ml-2 text-slate-500 hover:text-emotion-primary"
+        className="mb-6 -ml-2 text-slate-500 hover:text-blue-600"
         onClick={() => router.back()}
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
@@ -32,7 +32,7 @@ export default function UserEditPage() {
           사용자 상세 설정
         </h1>
         <p className="text-muted-foreground mt-1">
-          사용자의 파트, 등급 및 활성화 상태를 관리합니다
+          사용자의 본부, 권한 및 활성화 상태를 관리합니다
         </p>
       </div>
 

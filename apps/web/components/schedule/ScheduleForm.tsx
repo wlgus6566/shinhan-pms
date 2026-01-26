@@ -24,7 +24,7 @@ type ScheduleFormValues = CreateScheduleRequest;
 interface ScheduleFormProps {
   schedule?: Schedule | null;
   projectId: string;
-  onSubmit: (data: CreateScheduleRequest) => void;
+  onSubmit: (data: CreateScheduleRequest) => Promise<void>;
   onCancel: () => void;
   isLoading?: boolean;
   viewMode?: boolean;
@@ -157,7 +157,7 @@ export function ScheduleForm({
     return date.toISOString();
   };
 
-  const handleSubmit = (data: ScheduleFormValues) => {
+  const handleSubmit = async (data: ScheduleFormValues) => {
     console.log('🔵 [ScheduleForm] handleSubmit called', { data, isEditing });
 
     let submitData: CreateScheduleRequest;
@@ -196,7 +196,7 @@ export function ScheduleForm({
     }
 
     console.log('🔵 [ScheduleForm] submitData:', submitData);
-    onSubmit(submitData);
+    await onSubmit(submitData);
   };
 
   const scheduleType = form.watch('scheduleType');
@@ -471,12 +471,19 @@ export function ScheduleForm({
                 type="button"
                 variant="outline"
                 onClick={onCancel}
-                disabled={isLoading}
+                disabled={isLoading || form.formState.isSubmitting}
               >
                 취소
               </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? '저장 중...' : isEditing ? '수정' : '생성'}
+              <Button
+                type="submit"
+                disabled={isLoading || form.formState.isSubmitting}
+              >
+                {isLoading || form.formState.isSubmitting
+                  ? '저장 중...'
+                  : isEditing
+                    ? '수정'
+                    : '생성'}
               </Button>
             </div>
           </div>

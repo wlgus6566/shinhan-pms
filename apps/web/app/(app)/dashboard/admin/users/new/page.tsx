@@ -1,6 +1,8 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 import { UserCreateForm } from '@/components/admin/UserCreateForm';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,6 +16,20 @@ import { ArrowLeft } from 'lucide-react';
 
 export default function UserCreatePage() {
   const router = useRouter();
+  const { user } = useAuth();
+  const canCreate = user?.role === 'SUPER_ADMIN';
+
+  // 권한 체크 및 리다이렉트
+  useEffect(() => {
+    if (user && !canCreate) {
+      router.push('/users');
+    }
+  }, [user, canCreate, router]);
+
+  // 권한 없으면 아무것도 렌더링하지 않음
+  if (!canCreate) {
+    return null;
+  }
 
   return (
     <div className="max-w-7xl">

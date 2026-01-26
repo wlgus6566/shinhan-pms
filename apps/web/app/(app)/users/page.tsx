@@ -8,7 +8,8 @@ import { Plus } from 'lucide-react';
 
 export default function UsersAdminPage() {
   const { user } = useAuth();
-  const canCreateUser = user?.role === 'SUPER_ADMIN' || user?.role === 'PM';
+  console.log(user);
+  const canCreateUser = user?.role === 'SUPER_ADMIN';
 
   return (
     <div className="max-w-6xl">
@@ -23,7 +24,7 @@ export default function UsersAdminPage() {
         </div>
         {canCreateUser && (
           <Button asChild>
-            <Link href="/users/new">
+            <Link href="/dashboard/admin/users/new">
               <Plus className="h-4 w-4 mr-2" />새 멤버 등록
             </Link>
           </Button>
