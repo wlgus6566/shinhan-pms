@@ -368,6 +368,10 @@
   border: none !important;
 }
 
+.fc-listWeek-view .fc-list-event-time {
+  width: 150px;
+}
+
 /* View container */
 .fc-view-harness {
   position: relative;

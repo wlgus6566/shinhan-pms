@@ -22,8 +22,16 @@ export default function ProjectDetailPage() {
   const projectId = params.id as string;
 
   // Fetch data using SWR hooks
-  const { project, isLoading: projectLoading, error: projectError } = useProject(projectId);
-  const { members, isLoading: membersLoading, error: membersError } = useProjectMembers(projectId);
+  const {
+    project,
+    isLoading: projectLoading,
+    error: projectError,
+  } = useProject(projectId);
+  const {
+    members,
+    isLoading: membersLoading,
+    error: membersError,
+  } = useProjectMembers(projectId);
 
   const loading = projectLoading || membersLoading;
   const error = projectError || membersError;
@@ -81,7 +89,6 @@ export default function ProjectDetailPage() {
         <h1 className="text-3xl font-bold tracking-tight text-slate-900">
           {project.name}
         </h1>
-        <p className="text-muted-foreground mt-1">프로젝트 상세 정보입니다</p>
       </div>
 
       <Tabs defaultValue="info" className="space-y-4">

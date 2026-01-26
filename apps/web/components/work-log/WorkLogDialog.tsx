@@ -17,10 +17,14 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { FormTextarea } from '@/components/form';
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { FormInput, FormTextarea } from '@/components/form';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import type { WorkLog, MyTask } from '@/types/work-log';
@@ -41,7 +45,10 @@ interface WorkLogDialogProps {
   selectedTaskId?: string;
   myTasks: MyTask[];
   previousLog?: WorkLog | null;
-  onSubmit: (data: CreateWorkLogRequest | UpdateWorkLogRequest, taskId?: string) => Promise<void>;
+  onSubmit: (
+    data: CreateWorkLogRequest | UpdateWorkLogRequest,
+    taskId?: string,
+  ) => Promise<void>;
   onDelete?: () => Promise<void>;
 }
 
@@ -108,7 +115,9 @@ export function WorkLogDialog({
     }
   };
 
-  const handleFormSubmit = async (data: CreateWorkLogRequest | UpdateWorkLogRequest) => {
+  const handleFormSubmit = async (
+    data: CreateWorkLogRequest | UpdateWorkLogRequest,
+  ) => {
     setIsSubmitting(true);
     try {
       await onSubmit(data, mode === 'create' ? taskId : undefined);
@@ -146,7 +155,10 @@ export function WorkLogDialog({
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-5">
+          <form
+            onSubmit={form.handleSubmit(handleFormSubmit)}
+            className="space-y-5"
+          >
             {/* 업무 선택 */}
             {mode === 'create' && (
               <div className="space-y-2">
@@ -182,83 +194,75 @@ export function WorkLogDialog({
             )}
 
             {/* 작업 내용 */}
-            <FormField
-              control={form.control}
-              name="content"
-              render={({ field }) => (
-                <FormItem>
-                  <div className="flex items-center justify-between">
-                    <FormLabel>작업 내용 *</FormLabel>
-                    {mode === 'create' && previousLog && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleCopyPrevious}
-                        className="h-7 text-xs text-slate-500 hover:text-slate-700"
-                      >
-                        <Copy className="h-3 w-3 mr-1" />
-                        어제 일지 복사
-                      </Button>
-                    )}
-                  </div>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      placeholder="오늘 진행한 작업 내용을 입력하세요"
-                      className="min-h-[120px] resize-none"
-                      maxLength={2000}
-                    />
-                  </FormControl>
-                  <div className="flex justify-between">
-                    <FormMessage />
-                    <p className="text-xs text-slate-500">
-                      {field.value?.length || 0}/2000
-                    </p>
-                  </div>
-                </FormItem>
-              )}
-            />
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-medium text-slate-900">
+                  작업 내용 *
+                </label>
+                {mode === 'create' && previousLog && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleCopyPrevious}
+                    className="h-7 text-xs text-slate-500 hover:text-slate-700"
+                  >
+                    <Copy className="h-3 w-3 mr-1" />
+                    어제 일지 복사
+                  </Button>
+                )}
+              </div>
+              <FormTextarea
+                control={form.control}
+                name="content"
+                placeholder="오늘 진행한 작업 내용을 입력하세요"
+                className="min-h-[120px] resize-none"
+                rows={5}
+                wrapClassName="relative"
+                errorMessage={true}
+              />
+              <div className="flex justify-end mt-1">
+                <p className="text-xs text-slate-500">
+                  {form.watch('content')?.length || 0}/2000
+                </p>
+              </div>
+            </div>
 
             {/* 작업 시간 */}
-            <FormField
-              control={form.control}
-              name="workHours"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>작업 시간</FormLabel>
-                  <div className="flex gap-2">
-                    <FormControl>
-                      <Input
-                        type="number"
-                        {...field}
-                        value={field.value ?? ''}
-                        onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
-                        placeholder="시간"
-                        step={0.5}
-                        className="w-24"
-                      />
-                    </FormControl>
-                    <span className="flex items-center text-sm text-slate-500">시간</span>
-                    <div className="flex gap-1 ml-auto">
-                      {WORK_HOURS_PRESETS.map((hours) => (
-                        <Button
-                          key={hours}
-                          type="button"
-                          variant={field.value === hours ? 'default' : 'outline'}
-                          size="sm"
-                          className="h-8 px-2 text-xs"
-                          onClick={() => field.onChange(hours)}
-                        >
-                          {hours}h
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="flex justify-between items-end space-y-2">
+              <div className="flex gap-2 items-end">
+                <div className="flex-1">
+                  <FormInput
+                    control={form.control}
+                    name="workHours"
+                    label="작업 시간"
+                    placeholder="시간"
+                    type="number"
+                    step={0.5}
+                    min={0}
+                    max={24}
+                    errorMessage={true}
+                    wrapClassName="mb-0"
+                  />
+                </div>
+                <span className="text-sm text-slate-500 pb-2">시간</span>
+              </div>
+              <div className="flex gap-1">
+                {WORK_HOURS_PRESETS.map((hours) => (
+                  <Button
+                    key={hours}
+                    type="button"
+                    variant={
+                      form.watch('workHours') === hours ? 'default' : 'outline'
+                    }
+                    size="sm"
+                    onClick={() => form.setValue('workHours', hours)}
+                  >
+                    {hours}h
+                  </Button>
+                ))}
+              </div>
+            </div>
 
             {/* 진행률 */}
             <FormField
@@ -266,8 +270,60 @@ export function WorkLogDialog({
               name="progress"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>진행률</FormLabel>
-                  <div className="flex gap-2">
+                  <div className="flex items-center justify-between mb-2">
+                    <FormLabel>진행률</FormLabel>
+                    <span className="text-sm font-semibold text-slate-700">
+                      {field.value ?? 0}%
+                    </span>
+                  </div>
+
+                  {/* 슬라이더 + 프로그레스 바 통합 */}
+                  <div className="relative py-2">
+                    {/* 배경 트랙 */}
+                    <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-2 bg-slate-200 rounded-full">
+                      {/* 진행률 바 */}
+                      <div
+                        className={cn(
+                          'h-full rounded-full transition-all duration-200',
+                          field.value === 100
+                            ? 'bg-emerald-500'
+                            : 'bg-indigo-500',
+                        )}
+                        style={{ width: `${field.value ?? 0}%` }}
+                      />
+                    </div>
+
+                    {/* 슬라이더 */}
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="1"
+                      value={field.value ?? 0}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      className="relative w-full h-2 bg-transparent appearance-none cursor-pointer z-10
+                        [&::-webkit-slider-thumb]:appearance-none
+                        [&::-webkit-slider-thumb]:w-4
+                        [&::-webkit-slider-thumb]:h-4
+                        [&::-webkit-slider-thumb]:rounded-full
+                        [&::-webkit-slider-thumb]:bg-white
+                        [&::-webkit-slider-thumb]:border-2
+                        [&::-webkit-slider-thumb]:border-indigo-500
+                        [&::-webkit-slider-thumb]:shadow-md
+                        [&::-webkit-slider-thumb]:cursor-pointer
+                        [&::-moz-range-thumb]:w-4
+                        [&::-moz-range-thumb]:h-4
+                        [&::-moz-range-thumb]:rounded-full
+                        [&::-moz-range-thumb]:bg-white
+                        [&::-moz-range-thumb]:border-2
+                        [&::-moz-range-thumb]:border-indigo-500
+                        [&::-moz-range-thumb]:shadow-md
+                        [&::-moz-range-thumb]:cursor-pointer"
+                    />
+                  </div>
+
+                  {/* 프리셋 버튼 */}
+                  <div className="flex gap-2 mt-3">
                     {PROGRESS_PRESETS.map((p) => (
                       <Button
                         key={p}
@@ -275,8 +331,10 @@ export function WorkLogDialog({
                         variant={field.value === p ? 'default' : 'outline'}
                         size="sm"
                         className={cn(
-                          'flex-1 h-9',
-                          field.value === p && p === 100 && 'bg-emerald-500 hover:bg-emerald-600'
+                          'flex-1 h-8 text-xs',
+                          field.value === p &&
+                            p === 100 &&
+                            'bg-emerald-500 hover:bg-emerald-600',
                         )}
                         onClick={() => field.onChange(p)}
                       >
@@ -284,6 +342,7 @@ export function WorkLogDialog({
                       </Button>
                     ))}
                   </div>
+
                   <FormMessage />
                 </FormItem>
               )}
@@ -308,7 +367,9 @@ export function WorkLogDialog({
                   disabled={isDeleting || isSubmitting}
                   className="mr-auto"
                 >
-                  {isDeleting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  {isDeleting && (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  )}
                   삭제
                 </Button>
               )}
@@ -323,12 +384,12 @@ export function WorkLogDialog({
               <Button
                 type="submit"
                 disabled={
-                  isSubmitting ||
-                  isDeleting ||
-                  (mode === 'create' && !taskId)
+                  isSubmitting || isDeleting || (mode === 'create' && !taskId)
                 }
               >
-                {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                {isSubmitting && (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                )}
                 {mode === 'create' ? '작성' : '수정'}
               </Button>
             </DialogFooter>
