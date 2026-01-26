@@ -103,7 +103,6 @@ export function UserListTable() {
               <TableHead>
                 <div className="flex items-center gap-1 cursor-pointer hover:text-slate-700">
                   이름
-                  <ArrowUpDown className="h-3 w-3" />
                 </div>
               </TableHead>
               <TableHead>이메일</TableHead>

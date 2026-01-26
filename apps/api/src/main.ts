@@ -34,6 +34,15 @@ async function bootstrap() {
     .setTitle('이모션 PMS API')
     .setDescription('이모션의 프로젝트 및 업무 관리를 위한 통합 프로젝트 관리 시스템 API')
     .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description: 'JWT access token (data.accessToken 필드에서 추출)',
+      },
+      'Bearer'
+    )
     .addTag('Projects', '프로젝트 관리')
     .addTag('Tasks', '작업 관리')
     .addTag('Issues', '이슈 관리')

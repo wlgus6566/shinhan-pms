@@ -98,7 +98,7 @@ export function TaskFilters({
       {/* 두 번째 줄: 상태 및 난이도 필터 */}
       <div className="flex flex-col md:flex-row gap-4">
         {/* 상태 필터 */}
-        <div className="flex-1">
+        <div className="w-[60%]">
           <div className="text-sm font-medium mb-2">상태</div>
           <div className="flex flex-wrap gap-2">
             {(Object.keys(STATUS_LABELS) as TaskStatus[]).map((status) => {
@@ -123,7 +123,7 @@ export function TaskFilters({
         </div>
 
         {/* 난이도 필터 */}
-        <div className="flex-1">
+        <div className="w-[30%]">
           <div className="text-sm font-medium mb-2">난이도</div>
           <div className="flex flex-wrap gap-2">
             {(Object.keys(DIFFICULTY_LABELS) as TaskDifficulty[]).map(

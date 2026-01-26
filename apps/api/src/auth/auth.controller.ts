@@ -13,6 +13,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiBody,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -30,7 +31,52 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: '로그인' })
-  @ApiResponse({ status: 200, description: '로그인 성공' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        email: {
+          type: 'string',
+          example: 'kim@emotion.co.kr',
+        },
+        password: {
+          type: 'string',
+          example: 'password123',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: '로그인 성공',
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'string', example: 'SUC001' },
+        message: { type: 'string', example: '처리가 완료되었습니다.' },
+        data: {
+          type: 'object',
+          properties: {
+            accessToken: {
+              type: 'string',
+              example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJraW1AZW1vdGlvbi5jby5rciIsInJvbGUiOiJQTSIsImlhdCI6MTcwNjI4MDAwMCwiZXhwIjoxNzA2MzY2NDAwfQ.signature',
+              description: '이 값을 복사하여 Authorize 버튼에 입력',
+            },
+            user: {
+              type: 'object',
+              properties: {
+                id: { type: 'number' },
+                name: { type: 'string' },
+                email: { type: 'string' },
+                role: { type: 'string' },
+                position: { type: 'string' },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
   @ApiResponse({ status: 401, description: '인증 실패' })
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);

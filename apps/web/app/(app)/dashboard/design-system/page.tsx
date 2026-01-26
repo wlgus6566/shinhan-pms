@@ -68,22 +68,22 @@ export default function DesignSystemPage() {
               <h3 className="text-sm font-semibold mb-3">브랜드 색상</h3>
               <div className="grid grid-cols-4 gap-4">
                 <div className="space-y-2">
-                  <div className="w-full h-20 bg-emotion-primary rounded-lg shadow-md" />
+                  <div className="w-full h-20 bg-[#6366F1] rounded-lg shadow-md" />
                   <p className="text-xs font-medium">Emotion Primary</p>
                   <p className="text-xs text-muted-foreground">#6366F1</p>
                 </div>
                 <div className="space-y-2">
-                  <div className="w-full h-20 bg-emotion-secondary rounded-lg shadow-md" />
+                  <div className="w-full h-20 bg-[#8B5CF6] rounded-lg shadow-md" />
                   <p className="text-xs font-medium">Emotion Secondary</p>
                   <p className="text-xs text-muted-foreground">#8B5CF6</p>
                 </div>
                 <div className="space-y-2">
-                  <div className="w-full h-20 bg-emotion-accent rounded-lg shadow-md" />
+                  <div className="w-full h-20 bg-[#EC4899] rounded-lg shadow-md" />
                   <p className="text-xs font-medium">Emotion Accent</p>
                   <p className="text-xs text-muted-foreground">#EC4899</p>
                 </div>
                 <div className="space-y-2">
-                  <div className="w-full h-20 bg-emotion-lightgray rounded-lg shadow-md" />
+                  <div className="w-full h-20 bg-[#F9FAFB] rounded-lg shadow-md" />
                   <p className="text-xs font-medium">Emotion Light Gray</p>
                   <p className="text-xs text-muted-foreground">#F9FAFB</p>
                 </div>
