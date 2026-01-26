@@ -14,6 +14,7 @@ import {
   updateSchedule,
   deleteSchedule,
 } from '@/lib/api/schedules';
+import { useAuth } from '@/context/AuthContext';
 
 interface ScheduleDialogProps {
   open: boolean;
@@ -32,6 +33,7 @@ export function ScheduleDialog({
   projectId,
   onSuccess,
 }: ScheduleDialogProps) {
+  const { user } = useAuth();
   const [internalMode, setInternalMode] = useState<typeof mode>(mode);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -97,6 +99,7 @@ export function ScheduleDialog({
     setIsSubmitting(true);
     try {
       await deleteSchedule(schedule.id);
+      
       onSuccess();
       onOpenChange(false);
     } catch (error) {
@@ -112,6 +115,9 @@ export function ScheduleDialog({
     if (internalMode === 'edit') return '일정 수정';
     return '새 일정 추가';
   };
+
+  // Check if current user is the creator of the schedule
+  const isCreator = schedule && user && schedule.createdBy === String(user.id);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -131,8 +137,8 @@ export function ScheduleDialog({
           }
           isLoading={isSubmitting}
           viewMode={internalMode === 'view'}
-          onEdit={internalMode === 'view' ? handleEdit : undefined}
-          onDelete={internalMode === 'view' ? handleDelete : undefined}
+          onEdit={internalMode === 'view' && isCreator ? handleEdit : undefined}
+          onDelete={internalMode === 'view' && isCreator ? handleDelete : undefined}
         />
       </DialogContent>
     </Dialog>
