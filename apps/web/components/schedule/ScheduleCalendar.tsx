@@ -252,7 +252,12 @@ export function ScheduleCalendar({
         <FullCalendar
           key="month"
           ref={calendarRef}
-          plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
+          plugins={[
+            dayGridPlugin,
+            timeGridPlugin,
+            listPlugin,
+            interactionPlugin,
+          ]}
           initialView="dayGridMonth"
           initialDate={currentMonth}
           locale={koLocale}
@@ -280,7 +285,12 @@ export function ScheduleCalendar({
         <FullCalendar
           key="week"
           ref={calendarRef}
-          plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
+          plugins={[
+            dayGridPlugin,
+            timeGridPlugin,
+            listPlugin,
+            interactionPlugin,
+          ]}
           initialView="timeGridWeek"
           initialDate={currentMonth}
           locale={koLocale}
@@ -314,7 +324,12 @@ export function ScheduleCalendar({
         <FullCalendar
           key="day"
           ref={calendarRef}
-          plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
+          plugins={[
+            dayGridPlugin,
+            timeGridPlugin,
+            listPlugin,
+            interactionPlugin,
+          ]}
           initialView="timeGridDay"
           initialDate={currentMonth}
           locale={koLocale}
@@ -347,7 +362,12 @@ export function ScheduleCalendar({
         <FullCalendar
           key="list"
           ref={calendarRef}
-          plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
+          plugins={[
+            dayGridPlugin,
+            timeGridPlugin,
+            listPlugin,
+            interactionPlugin,
+          ]}
           initialView="listWeek"
           initialDate={currentMonth}
           locale={koLocale}

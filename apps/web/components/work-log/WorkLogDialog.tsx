@@ -141,7 +141,9 @@ export function WorkLogDialog({
       onOpenChange={onOpenChange}
       size="sm"
       title={mode === 'create' ? '업무일지 작성' : '업무일지 수정'}
-      description={format(selectedDate, 'yyyy년 M월 d일 (EEEE)', { locale: ko })}
+      description={format(selectedDate, 'yyyy년 M월 d일 (EEEE)', {
+        locale: ko,
+      })}
       footer={
         <>
           {mode === 'edit' && onDelete && (
@@ -208,8 +210,9 @@ export function WorkLogDialog({
           )}
 
           {mode === 'edit' && workLog?.task && (
-            <div className="p-3 bg-slate-50 rounded-lg">
-              <p className="text-sm font-medium text-slate-700">
+            <div className="flex flex-col gap-2">
+              <p className="text-sm font-medium text-slate-700">업무명</p>
+              <p className="text-sm font-medium text-slate-700 bg-slate-50 border border-slate-200 p-2 rounded-lg">
                 {workLog.task.taskName}
               </p>
             </div>

@@ -371,6 +371,21 @@
 .fc-listWeek-view .fc-list-event-time {
   width: 150px;
 }
+.fc-list-table tr {
+  display: table-row;
+  border-top: 1px solid #e2e8f0;
+}
+.fc .fc-list-table .fc-list-event:hover td {
+  background-color: #fff;
+}
+.fc .fc-list-table .fc-list-event:hover td:nth-child(3) {
+  font-weight: 500;
+  color: blue;
+}
+
+.fc-listWeek-view .fc-list-event-graphic {
+  display: none;
+}
 
 /* View container */
 .fc-view-harness {
