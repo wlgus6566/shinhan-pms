@@ -89,7 +89,8 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
     // 3. Filter by status
     if (statusFilter.length > 0) {
       result = result.filter(
-        (log) => log.task?.status && statusFilter.includes(log.task.status as any),
+        (log) =>
+          log.task?.status && statusFilter.includes(log.task.status as any),
       );
     }
 
@@ -147,7 +148,7 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-2 items-end">
+      <div className="flex flex-row gap-2 items-end">
         <MonthlyStaffReportExportButton
           projectId={projectId}
           defaultDate={currentMonth}

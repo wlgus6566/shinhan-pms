@@ -130,7 +130,10 @@ export type Department = z.infer<typeof DepartmentEnum>;
 export const GradeEnum = z.enum(
   ['EXPERT', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
   {
-    errorMap: () => ({ message: '등급은 EXPERT, ADVANCED, INTERMEDIATE, BEGINNER 중 하나여야 합니다' }),
+    errorMap: () => ({
+      message:
+        '등급은 EXPERT, ADVANCED, INTERMEDIATE, BEGINNER 중 하나여야 합니다',
+    }),
   },
 );
 

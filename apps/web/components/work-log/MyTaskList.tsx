@@ -15,27 +15,6 @@ interface MyTaskListProps {
   tasks: MyTask[];
 }
 
-const statusConfig: Record<string, { label: string; color: string }> = {
-  WAITING: { label: '작업 대기', color: 'text-slate-500' },
-  IN_PROGRESS: {
-    label: '작업 중',
-    color: 'text-blue-500',
-  },
-  WORK_COMPLETED: {
-    label: '작업 완료',
-    color: 'text-green-500',
-  },
-  OPEN_WAITING: { label: '오픈 대기', color: 'text-yellow-500' },
-  OPEN_RESPONDING: {
-    label: '오픈 대응',
-    color: 'text-orange-500',
-  },
-  COMPLETED: {
-    label: '오픈 완료',
-    color: 'text-purple-500',
-  },
-};
-
 export function MyTaskList({ tasks }: MyTaskListProps) {
   if (tasks.length === 0) {
     return (

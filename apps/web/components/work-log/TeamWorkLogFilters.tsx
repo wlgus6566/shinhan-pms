@@ -172,15 +172,11 @@ export function TeamWorkLogFilters({
                     className={cn(
                       'cursor-pointer transition-all border-2 flex items-center gap-1.5',
                       DIFFICULTY_COLORS[difficulty],
-                      isSelected && 'opacity-100 font-semibold',
+                      isSelected &&
+                        'bg-primary border-primary text-primary-foreground',
                     )}
                     onClick={() => toggleDifficulty(difficulty)}
                   >
-                    {isSelected && (
-                      <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
-                        <Check className="h-3 w-3 text-white" strokeWidth={3} />
-                      </div>
-                    )}
                     {DIFFICULTY_LABELS[difficulty]}
                   </Badge>
                 );

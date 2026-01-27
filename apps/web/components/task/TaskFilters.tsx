@@ -3,7 +3,7 @@
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { X, Search } from 'lucide-react';
+import { X, Search, Check } from 'lucide-react';
 import {
   STATUS_LABELS,
   STATUS_COLORS,
@@ -86,11 +86,18 @@ export function TaskFilters({
                   key={status}
                   className={cn(
                     STATUS_COLORS[status],
-                    'cursor-pointer transition-opacity',
-                    statusFilter.includes(status) ? 'ring-2 ring-primary' : '',
+                    'cursor-pointer transition-all border-2 flex items-center gap-1.5',
+                    statusFilter.includes(status)
+                      ? 'opacity-100 font-semibold'
+                      : '',
                   )}
                   onClick={() => onStatusToggle(status)}
                 >
+                  {statusFilter.includes(status) && (
+                    <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
+                      <Check className="h-3 w-3 text-white" strokeWidth={3} />
+                    </div>
+                  )}
                   {STATUS_LABELS[status]} ({count})
                 </Badge>
               );
@@ -109,7 +116,7 @@ export function TaskFilters({
                     DIFFICULTY_COLORS[difficulty],
                     'cursor-pointer transition-opacity',
                     difficultyFilter.includes(difficulty)
-                      ? 'ring-2 ring-primary'
+                      ? 'bg-primary border-primary text-primary-foreground'
                       : '',
                   )}
                   onClick={() => onDifficultyToggle(difficulty)}
