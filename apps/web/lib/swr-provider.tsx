@@ -14,6 +14,7 @@ export function SWRProvider({ children }: { children: React.ReactNode }) {
         dedupingInterval: 2000,
         errorRetryCount: 3,
         errorRetryInterval: 5000,
+        keepPreviousData: true, // Keep previous data during refetch to prevent flickering
       }}
     >
       {children}

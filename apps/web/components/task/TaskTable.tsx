@@ -18,15 +18,17 @@ import {
   type TaskDifficulty,
   type TaskStatus,
 } from '@/types/task';
+import { Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 
 interface TaskTableProps {
   tasks: Task[];
   onTaskClick?: (task: Task) => void;
+  isValidating?: boolean;
 }
 
-export function TaskTable({ tasks, onTaskClick }: TaskTableProps) {
+export function TaskTable({ tasks, onTaskClick, isValidating }: TaskTableProps) {
   const formatDate = (dateString?: string) => {
     if (!dateString) return '-';
     try {
@@ -47,7 +49,13 @@ export function TaskTable({ tasks, onTaskClick }: TaskTableProps) {
   };
 
   return (
-    <div className="border rounded-lg">
+    <div className="border rounded-lg relative">
+      {/* Background refetch overlay */}
+      {isValidating && tasks.length > 0 && (
+        <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center rounded-lg">
+          <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+        </div>
+      )}
       <Table>
         <TableHeader>
           <TableRow>

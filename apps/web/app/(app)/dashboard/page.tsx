@@ -238,7 +238,7 @@ export default function DashboardPage() {
           isLoading={statsLoading}
         />
         <StatsCard
-          label="긴급 업무"
+          label="중요 업무"
           value={stats?.myTasks.high ?? 0}
           icon={AlertCircle}
           color="rose"
@@ -290,7 +290,10 @@ export default function DashboardPage() {
             ) : activities && activities.length > 0 ? (
               <div className="space-y-4">
                 {activities.slice(0, 5).map((activity) => (
-                  <div key={`${activity.type}-${activity.id}`} className="flex items-start gap-3">
+                  <div
+                    key={`${activity.type}-${activity.id}`}
+                    className="flex items-start gap-3"
+                  >
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
                       {activity.type === 'worklog' ? (
                         <FileText className="h-4 w-4" />
@@ -300,8 +303,13 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-slate-900 truncate">
-                        <span className="font-medium">{activity.user.name}</span>
-                        <span className="text-slate-500"> - {activity.title}</span>
+                        <span className="font-medium">
+                          {activity.user.name}
+                        </span>
+                        <span className="text-slate-500">
+                          {' '}
+                          - {activity.title}
+                        </span>
                       </p>
                       {activity.project && (
                         <p className="text-xs text-slate-400 truncate">
@@ -348,7 +356,8 @@ export default function DashboardPage() {
                   >
                     <div
                       className={`w-1.5 h-8 rounded-full ${
-                        scheduleTypeColors[schedule.scheduleType] || 'bg-slate-500'
+                        scheduleTypeColors[schedule.scheduleType] ||
+                        'bg-slate-500'
                       }`}
                     />
                     <div className="flex-1 min-w-0">
@@ -356,12 +365,16 @@ export default function DashboardPage() {
                         {schedule.title || '제목 없음'}
                       </p>
                       <p className="text-xs text-slate-400">
-                        {scheduleTypeLabels[schedule.scheduleType] || schedule.scheduleType}
+                        {scheduleTypeLabels[schedule.scheduleType] ||
+                          schedule.scheduleType}
                         {' · '}
-                        {new Date(schedule.startDate).toLocaleDateString('ko-KR', {
-                          month: 'short',
-                          day: 'numeric',
-                        })}
+                        {new Date(schedule.startDate).toLocaleDateString(
+                          'ko-KR',
+                          {
+                            month: 'short',
+                            day: 'numeric',
+                          },
+                        )}
                       </p>
                     </div>
                     <Calendar className="h-4 w-4 text-slate-400 flex-shrink-0" />

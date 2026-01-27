@@ -69,6 +69,9 @@ export class TasksController {
   @ApiParam({ name: 'projectId', description: '프로젝트 ID' })
   @ApiQuery({ name: 'pageNum', required: false, description: '페이지 번호', type: Number })
   @ApiQuery({ name: 'pageSize', required: false, description: '페이지당 개수', type: Number })
+  @ApiQuery({ name: 'search', required: false, description: '업무명 검색', type: String })
+  @ApiQuery({ name: 'status', required: false, description: '상태 필터', isArray: true })
+  @ApiQuery({ name: 'difficulty', required: false, description: '난이도 필터', isArray: true })
   @ApiResponse({
     status: 200,
     description: '업무 목록',
@@ -78,12 +81,24 @@ export class TasksController {
     @Param('projectId') projectId: string,
     @Query('pageNum') pageNum?: string,
     @Query('pageSize') pageSize?: string,
+    @Query('search') search?: string,
+    @Query('status') status?: string | string[],
+    @Query('difficulty') difficulty?: string | string[],
   ) {
     const pagination = parsePaginationParams({ pageNum, pageSize });
 
+    // Handle array params (can be string or string[])
+    const statusArray = status ? (Array.isArray(status) ? status : [status]) : undefined;
+    const difficultyArray = difficulty ? (Array.isArray(difficulty) ? difficulty : [difficulty]) : undefined;
+
     const { list, totalCount } = await this.tasksService.findAllByProject(
       BigInt(projectId),
-      pagination,
+      {
+        ...pagination,
+        search,
+        status: statusArray,
+        difficulty: difficultyArray,
+      },
     );
 
     return {

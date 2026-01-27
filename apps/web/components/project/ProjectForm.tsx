@@ -105,8 +105,8 @@ export function ProjectForm({ projectId, mode }: ProjectFormProps) {
           router.push('/projects');
         } else if (projectId) {
           await updateProject(projectId, values);
-          // setSuccess(true);
-          // setTimeout(() => setSuccess(false), 3000);
+          setSuccess(true);
+          setTimeout(() => setSuccess(false), 3000);
         }
       } catch (err: any) {
         setError(err.message);

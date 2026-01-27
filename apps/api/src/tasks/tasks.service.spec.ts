@@ -19,6 +19,7 @@ describe('TasksService', () => {
       findMany: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
+      count: jest.fn(),
     },
     taskAssignee: {
       deleteMany: jest.fn(),
@@ -276,6 +277,171 @@ describe('TasksService', () => {
         expect.objectContaining({
           data: expect.objectContaining({
             openDate: new Date('2026-03-01'),
+          }),
+        }),
+      );
+    });
+  });
+
+  describe('findAllByProject', () => {
+    it('should filter tasks by search query', async () => {
+      const projectId = BigInt(1);
+      const mockTasks = [
+        {
+          id: BigInt(1),
+          taskName: 'API Development',
+          projectId,
+          isActive: true,
+          assignees: [],
+        },
+        {
+          id: BigInt(2),
+          taskName: 'API Testing',
+          projectId,
+          isActive: true,
+          assignees: [],
+        },
+      ];
+
+      mockPrismaService.task.findMany.mockResolvedValue(mockTasks);
+      mockPrismaService.task.count.mockResolvedValue(2);
+
+      await service.findAllByProject(projectId, { search: 'API' });
+
+      expect(mockPrismaService.task.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            projectId,
+            isActive: true,
+            taskName: {
+              contains: 'API',
+              mode: 'insensitive',
+            },
+          }),
+        }),
+      );
+      expect(mockPrismaService.task.count).toHaveBeenCalledWith({
+        where: expect.objectContaining({
+          taskName: {
+            contains: 'API',
+            mode: 'insensitive',
+          },
+        }),
+      });
+    });
+
+    it('should filter tasks by multiple statuses', async () => {
+      const projectId = BigInt(1);
+      const mockTasks = [
+        {
+          id: BigInt(1),
+          taskName: 'Task 1',
+          status: 'IN_PROGRESS',
+          projectId,
+          isActive: true,
+          assignees: [],
+        },
+        {
+          id: BigInt(2),
+          taskName: 'Task 2',
+          status: 'COMPLETED',
+          projectId,
+          isActive: true,
+          assignees: [],
+        },
+      ];
+
+      mockPrismaService.task.findMany.mockResolvedValue(mockTasks);
+      mockPrismaService.task.count.mockResolvedValue(2);
+
+      await service.findAllByProject(projectId, {
+        status: ['IN_PROGRESS', 'COMPLETED'],
+      });
+
+      expect(mockPrismaService.task.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            projectId,
+            isActive: true,
+            status: {
+              in: ['IN_PROGRESS', 'COMPLETED'],
+            },
+          }),
+        }),
+      );
+    });
+
+    it('should filter tasks by difficulty levels', async () => {
+      const projectId = BigInt(1);
+      const mockTasks = [
+        {
+          id: BigInt(1),
+          taskName: 'Hard Task',
+          difficulty: 'HIGH',
+          projectId,
+          isActive: true,
+          assignees: [],
+        },
+      ];
+
+      mockPrismaService.task.findMany.mockResolvedValue(mockTasks);
+      mockPrismaService.task.count.mockResolvedValue(1);
+
+      await service.findAllByProject(projectId, {
+        difficulty: ['HIGH'],
+      });
+
+      expect(mockPrismaService.task.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            projectId,
+            isActive: true,
+            difficulty: {
+              in: ['HIGH'],
+            },
+          }),
+        }),
+      );
+    });
+
+    it('should apply multiple filters simultaneously', async () => {
+      const projectId = BigInt(1);
+      const mockTasks = [
+        {
+          id: BigInt(1),
+          taskName: 'API Development',
+          status: 'IN_PROGRESS',
+          difficulty: 'HIGH',
+          projectId,
+          isActive: true,
+          assignees: [],
+        },
+      ];
+
+      mockPrismaService.task.findMany.mockResolvedValue(mockTasks);
+      mockPrismaService.task.count.mockResolvedValue(1);
+
+      await service.findAllByProject(projectId, {
+        search: 'API',
+        status: ['IN_PROGRESS', 'COMPLETED'],
+        difficulty: ['HIGH'],
+      });
+
+      expect(mockPrismaService.task.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            projectId,
+            isActive: true,
+            taskName: {
+              contains: 'API',
+              mode: 'insensitive',
+            },
+            status: {
+              in: ['IN_PROGRESS', 'COMPLETED'],
+            },
+            difficulty: {
+              in: ['HIGH'],
+            },
           }),
         }),
       );

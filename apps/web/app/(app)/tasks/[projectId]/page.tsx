@@ -25,13 +25,11 @@ export default function TaskManagementPage() {
 
   const {
     project,
-    isLoading: projectLoading,
-    error: projectError,
+    isLoading,
+    error,
   } = useProject(projectId);
   const { members, isLoading: membersLoading } = useProjectMembers(projectId);
 
-  const loading = projectLoading || membersLoading;
-  const error = projectError;
 
   // Check if current user is PM of this project
   const isPM = useMemo(() => {
@@ -42,40 +40,40 @@ export default function TaskManagementPage() {
     );
   }, [user, members]);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-      </div>
-    );
-  }
+  // if (isInitialLoad) {
+  //   return (
+  //     <div className="flex justify-center items-center min-h-[400px]">
+  //       <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+  //     </div>
+  //   );
+  // }
 
-  if (error || !project) {
-    return (
-      <div className="max-w-7xl">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center py-8">
-              <p className="text-destructive">
-                {error?.message || '프로젝트를 찾을 수 없습니다'}
-              </p>
-              <Button
-                variant="outline"
-                className="mt-4"
-                onClick={() => router.back()}
-              >
-                돌아가기
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  // if (error || !project) {
+  //   return (
+  //     <div className="max-w-7xl">
+  //       <Card>
+  //         <CardContent className="pt-6">
+  //           <div className="text-center py-8">
+  //             <p className="text-destructive">
+  //               {error?.message || '프로젝트를 찾을 수 없습니다'}
+  //             </p>
+  //             <Button
+  //               variant="outline"
+  //               className="mt-4"
+  //               onClick={() => router.back()}
+  //             >
+  //               돌아가기
+  //             </Button>
+  //           </div>
+  //         </CardContent>
+  //       </Card>
+  //     </div>
+  //   );
+  // }
 
   const statusConfig = {
-    label: PROJECT_STATUS_LABELS[project.status as ProjectStatus] || '알 수 없음',
-    variant: PROJECT_STATUS_VARIANTS[project.status as ProjectStatus] || 'outline',
+    label: PROJECT_STATUS_LABELS[project?.status as ProjectStatus] || '알 수 없음',
+    variant: PROJECT_STATUS_VARIANTS[project?.status as ProjectStatus] || 'outline',
   };
 
   return (
@@ -100,17 +98,17 @@ export default function TaskManagementPage() {
               <FolderKanban className="h-6 w-6 text-blue-600" />
             </div>
             <CardTitle className="text-xl font-bold text-slate-800">
-              {project.name}
+              {project?.name}
             </CardTitle>
             <Badge variant={statusConfig.variant}>{statusConfig.label}</Badge>
           </div>
         </div>
         <div className="flex flex-col items-start gap-2 text-sm text-slate-600">
-          {(project.startDate || project.endDate) && (
+          {(project?.startDate || project?.endDate) && (
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-slate-400" />
               <span>
-                {project.startDate || '미정'} ~ {project.endDate || '미정'}
+                {project?.startDate || '미정'} ~ {project?.endDate || '미정'}
               </span>
             </div>
           )}
@@ -123,7 +121,7 @@ export default function TaskManagementPage() {
           <CardTitle className="text-lg font-semibold">업무 목록</CardTitle>
         </CardHeader>
         <CardContent>
-          <TaskList projectId={projectId} isPM={isPM} />
+          <TaskList error={error} isLoading={isLoading} projectId={projectId} isPM={isPM} projectMembers={members ?? []} />
         </CardContent>
       </Card>
     </div>

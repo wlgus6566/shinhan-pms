@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useMemo, useCallback, memo } from 'react';
+import { useMemo, useCallback, memo } from 'react';
 import Link from 'next/link';
 import { useProjects } from '@/lib/api/projects';
+import { useUrlQueryParams } from '@/hooks/useUrlQueryParams';
+import { useSearchButton } from '@/hooks/useSearchButton';
 import {
   Table,
   TableBody,
@@ -51,12 +53,26 @@ const formatDate = (dateString: string): string => {
 };
 
 export function ProjectListTable() {
-  const [search, setSearch] = useState('');
-  const [status, setStatus] = useState<string>('ALL');
-  const [currentPage, setCurrentPage] = useState(1);
+  // URL 쿼리 파라미터로 필터 상태 관리
+  const { params, setParam, setParams } = useUrlQueryParams({
+    defaults: {
+      status: 'ALL',
+      pageNum: 1,
+    },
+  });
+
+  const search = (params.search as string) || '';
+  const status = (params.status as string) || 'ALL';
+  const currentPage = (params.pageNum as number) || 1;
+
+  // Search button hook
+  const { searchInput, setSearchInput, handleSearch, handleKeyDown } = useSearchButton(
+    params,
+    setParams
+  );
 
   // SWR로 데이터 패칭 (서버 사이드 페이지네이션)
-  const params = useMemo(() => {
+  const apiParams = useMemo(() => {
     const p: any = {
       pageNum: currentPage,
       // pageSize는 생략 (백엔드 기본값 10 사용)
@@ -66,7 +82,7 @@ export function ProjectListTable() {
     return p;
   }, [search, status, currentPage]);
 
-  const { projects, pagination, isLoading, error } = useProjects(params);
+  const { projects, pagination, isLoading, error } = useProjects(apiParams);
   const projectList = projects || [];
 
   return (
@@ -79,11 +95,17 @@ export function ProjectListTable() {
             <Input
               placeholder="프로젝트명 검색..."
               className="pl-10 w-[280px]"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={handleKeyDown}
             />
           </div>
-          <Select value={status} onValueChange={setStatus}>
+          <Select
+            value={status}
+            onValueChange={(value) => {
+              setParams({ status: value, pageNum: 1 });
+            }}
+          >
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="상태 필터" />
             </SelectTrigger>
@@ -94,6 +116,15 @@ export function ProjectListTable() {
               <SelectItem value="COMPLETED">완료</SelectItem>
             </SelectContent>
           </Select>
+          <Button
+            variant="default"
+            size="default"
+            onClick={handleSearch}
+            className="flex items-center gap-2"
+          >
+            <Search className="h-4 w-4" />
+            검색
+          </Button>
         </div>
         <p className="text-sm text-slate-500">
           총{' '}
@@ -135,8 +166,7 @@ export function ProjectListTable() {
                   error.message || '프로젝트 목록을 불러오는데 실패했습니다'
                 }
                 onRetry={() => {
-                  setSearch('');
-                  setStatus('ALL');
+                  setParams({ search: '', status: 'ALL', pageNum: 1 });
                 }}
               />
             ) : projectList.length === 0 ? (
@@ -207,7 +237,7 @@ export function ProjectListTable() {
         <TablePagination
           currentPage={currentPage}
           totalPages={pagination.pages}
-          onPageChange={setCurrentPage}
+          onPageChange={(page) => setParam('pageNum', page)}
         />
       )}
     </div>

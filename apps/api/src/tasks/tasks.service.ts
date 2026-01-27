@@ -95,14 +95,38 @@ export class TasksService {
 
   async findAllByProject(
     projectId: bigint,
-    params?: { pageNum?: number; pageSize?: number },
+    params?: {
+      pageNum?: number;
+      pageSize?: number;
+      search?: string;
+      status?: string[];
+      difficulty?: string[];
+    },
   ) {
     const { pageSize, skip } = parsePaginationParams(params ?? {});
 
-    const where = {
+    const where: any = {
       projectId,
       isActive: true,
     };
+
+    // Add search filter (case-insensitive)
+    if (params?.search) {
+      where.taskName = {
+        contains: params.search,
+        mode: 'insensitive',
+      };
+    }
+
+    // Add status filter
+    if (params?.status && params.status.length > 0) {
+      where.status = { in: params.status };
+    }
+
+    // Add difficulty filter
+    if (params?.difficulty && params.difficulty.length > 0) {
+      where.difficulty = { in: params.difficulty };
+    }
 
     const [items, totalCount] = await Promise.all([
       this.prisma.task.findMany({

@@ -2,33 +2,33 @@
 
 import { useState, useMemo, useCallback, memo } from 'react';
 import { useTasks, deleteTask } from '@/lib/api/tasks';
-import { useProjectMembers } from '@/lib/api/projectMembers';
+import { useUrlQueryParams } from '@/hooks/useUrlQueryParams';
+import { useSearchButton } from '@/hooks/useSearchButton';
 import { TaskTable } from './TaskTable';
-import { TaskFilters, type SortBy, type SortOrder } from './TaskFilters';
+import { TaskFilters } from './TaskFilters';
 import { TaskDetailSheet } from './TaskDetailSheet';
 import { AddTaskDialog } from './AddTaskDialog';
 import { EditTaskDialog } from './EditTaskDialog';
+import { TablePagination } from '@/components/common/table/TablePagination';
 import { Button } from '@/components/ui/button';
 import { Plus, Loader2 } from 'lucide-react';
 import type { Task, TaskStatus, TaskDifficulty } from '@/types/task';
+import type { ProjectMember } from '@/types/project';
 
 interface TaskListProps {
+  error: Error | null;
+  isLoading: boolean;
   projectId: string;
   isPM: boolean;
+  projectMembers: ProjectMember[];
 }
 
-// Hoist static objects outside component to prevent recreating on every render
-const DIFFICULTY_ORDER = { HIGH: 3, MEDIUM: 2, LOW: 1 } as const;
-const STATUS_ORDER = {
-  WAITING: 1,
-  IN_PROGRESS: 2,
-  WORK_COMPLETED: 3,
-  TESTING: 4,
-  OPEN_WAITING: 5,
-  OPEN_RESPONDING: 6,
-  COMPLETED: 7,
-  SUSPENDED: 8,
-} as const;
+// Helper function to parse array params from URL
+function parseArrayParam(param: any): string[] {
+  if (!param) return [];
+  if (Array.isArray(param)) return param;
+  return [param];
+}
 
 // Extract loading state as separate component to avoid re-renders
 const LoadingState = memo(() => (
@@ -46,154 +46,82 @@ const ErrorState = memo(() => (
 ));
 ErrorState.displayName = 'ErrorState';
 
-export function TaskList({ projectId, isPM }: TaskListProps) {
+export function TaskList({
+  error: projectError,
+  isLoading,
+  projectId,
+  isPM,
+  projectMembers,
+}: TaskListProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
 
-  // Filter states
-  const [searchQuery, setSearchQuery] = useState('');
-  const [assigneeFilter, setAssigneeFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<TaskStatus[]>([]);
-  const [difficultyFilter, setDifficultyFilter] = useState<TaskDifficulty[]>(
-    [],
+  // URL query params
+  const { params, setParam, setParams } = useUrlQueryParams({
+    defaults: {
+      pageNum: 1,
+    },
+  });
+
+  const search = (params.search as string) || '';
+  const statusFilter = parseArrayParam(params.status);
+  const difficultyFilter = parseArrayParam(params.difficulty);
+  const currentPage = (params.pageNum as number) || 1;
+
+  // Search button hook
+  const { searchInput, setSearchInput, handleSearch, handleKeyDown } =
+    useSearchButton(params, setParams);
+
+  // API params for server-side filtering
+  const apiParams = useMemo(
+    () => ({
+      pageNum: currentPage,
+      search: search || undefined,
+      status: statusFilter.length > 0 ? statusFilter : undefined,
+      difficulty: difficultyFilter.length > 0 ? difficultyFilter : undefined,
+    }),
+    [currentPage, search, statusFilter, difficultyFilter],
   );
-  const [sortBy, setSortBy] = useState<SortBy>('createdAt');
-  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
   const {
     tasks,
+    pagination,
     error: tasksError,
     isLoading: tasksLoading,
+    isValidating,
     mutate: mutateTasks,
-  } = useTasks(projectId);
+  } = useTasks(projectId, apiParams);
 
-  const {
-    members: projectMembers,
-    error: membersError,
-    isLoading: membersLoading,
-  } = useProjectMembers(projectId);
+  const loading = tasksLoading;
+  const error = tasksError;
 
-  const loading = tasksLoading || membersLoading;
-  const error = tasksError || membersError;
-
-  // Calculate status counts based on all tasks
-  const statusCounts = useMemo(() => {
-    if (!tasks) return {} as Record<TaskStatus, number>;
-
-    const counts = {
-      WAITING: 0,
-      IN_PROGRESS: 0,
-      WORK_COMPLETED: 0,
-      OPEN_WAITING: 0,
-      OPEN_RESPONDING: 0,
-      COMPLETED: 0,
-    } as Record<TaskStatus, number>;
-
-    tasks.forEach((task) => {
-      counts[task.status as TaskStatus]++;
-    });
-
-    return counts;
-  }, [tasks]);
-
-  // Convert arrays to Sets for O(1) lookups (js-set-map-lookups)
-  const statusFilterSet = useMemo(() => new Set(statusFilter), [statusFilter]);
-  const difficultyFilterSet = useMemo(
-    () => new Set(difficultyFilter),
-    [difficultyFilter],
+  // Filter handlers
+  const handleStatusToggle = useCallback(
+    (status: TaskStatus) => {
+      const newStatuses = statusFilter.includes(status)
+        ? statusFilter.filter((s) => s !== status)
+        : [...statusFilter, status];
+      setParams({ status: newStatuses, pageNum: 1 });
+    },
+    [statusFilter, setParams],
   );
 
-  // Filtering logic
-  const filteredTasks = useMemo(() => {
-    if (!tasks) return [];
+  const handleDifficultyToggle = useCallback(
+    (difficulty: TaskDifficulty) => {
+      const newDifficulties = difficultyFilter.includes(difficulty)
+        ? difficultyFilter.filter((d) => d !== difficulty)
+        : [...difficultyFilter, difficulty];
+      setParams({ difficulty: newDifficulties, pageNum: 1 });
+    },
+    [difficultyFilter, setParams],
+  );
 
-    // Cache lowercase search query to avoid recalculating in loop
-    const lowerSearchQuery = searchQuery ? searchQuery.toLowerCase() : '';
-
-    return tasks.filter((task) => {
-      // Search query filter - early exit for better performance
-      if (
-        lowerSearchQuery &&
-        !task.taskName.toLowerCase().includes(lowerSearchQuery)
-      ) {
-        return false;
-      }
-
-      // Assignee filter
-      if (assigneeFilter !== 'all') {
-        const isAssignee =
-          task.planningAssignees?.some(a => a.id === assigneeFilter) ||
-          task.designAssignees?.some(a => a.id === assigneeFilter) ||
-          task.frontendAssignees?.some(a => a.id === assigneeFilter) ||
-          task.backendAssignees?.some(a => a.id === assigneeFilter);
-        if (!isAssignee) return false;
-      }
-
-      // Status filter - use Set for O(1) lookup
-      if (statusFilterSet.size > 0 && !statusFilterSet.has(task.status as TaskStatus)) {
-        return false;
-      }
-
-      // Difficulty filter - use Set for O(1) lookup
-      if (
-        difficultyFilterSet.size > 0 &&
-        !difficultyFilterSet.has(task.difficulty as TaskDifficulty)
-      ) {
-        return false;
-      }
-
-      return true;
-    });
-  }, [
-    tasks,
-    searchQuery,
-    assigneeFilter,
-    statusFilterSet,
-    difficultyFilterSet,
-  ]);
-
-  // Sorting logic - use hoisted constants
-  const sortedTasks = useMemo(() => {
-    const sorted = [...filteredTasks];
-
-    sorted.sort((a, b) => {
-      let comparison = 0;
-
-      switch (sortBy) {
-        case 'difficulty':
-          comparison =
-            DIFFICULTY_ORDER[b.difficulty as TaskDifficulty] - DIFFICULTY_ORDER[a.difficulty as TaskDifficulty];
-          break;
-        case 'endDate':
-          const aDate = a.endDate ? new Date(a.endDate).getTime() : Infinity;
-          const bDate = b.endDate ? new Date(b.endDate).getTime() : Infinity;
-          comparison = aDate - bDate;
-          break;
-        case 'status':
-          comparison = STATUS_ORDER[a.status as TaskStatus] - STATUS_ORDER[b.status as TaskStatus];
-          break;
-        case 'createdAt':
-          comparison =
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-          break;
-      }
-
-      return sortOrder === 'asc' ? comparison : -comparison;
-    });
-
-    return sorted;
-  }, [filteredTasks, sortBy, sortOrder]);
-
-  // Use useCallback for stable function references (rerender-functional-setstate)
   const resetFilters = useCallback(() => {
-    setSearchQuery('');
-    setAssigneeFilter('all');
-    setStatusFilter([]);
-    setDifficultyFilter([]);
-  }, []);
+    setParams({ search: '', status: [], difficulty: [], pageNum: 1 });
+  }, [setParams]);
 
   const handleSuccess = useCallback(() => {
     mutateTasks();
@@ -223,37 +151,21 @@ export function TaskList({ projectId, isPM }: TaskListProps) {
     [mutateTasks],
   );
 
-  if (loading) {
-    return <LoadingState />;
-  }
-
-  if (error) {
-    return <ErrorState />;
-  }
-
   return (
     <div className="space-y-4">
-      {/* Filters and Sorting */}
+      {/* Filters */}
       <TaskFilters
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        assigneeFilter={assigneeFilter}
-        setAssigneeFilter={setAssigneeFilter}
+        searchInput={searchInput}
+        setSearchInput={setSearchInput}
+        handleSearch={handleSearch}
+        handleKeyDown={handleKeyDown}
         statusFilter={statusFilter}
-        setStatusFilter={setStatusFilter}
+        onStatusToggle={handleStatusToggle}
         difficultyFilter={difficultyFilter}
-        setDifficultyFilter={setDifficultyFilter}
-        sortBy={sortBy}
-        setSortBy={setSortBy}
-        sortOrder={sortOrder}
-        setSortOrder={setSortOrder}
+        onDifficultyToggle={handleDifficultyToggle}
         projectMembers={projectMembers || []}
         resetFilters={resetFilters}
-        statusCounts={statusCounts}
       />
-
-      {/* Table */}
-      <TaskTable tasks={sortedTasks} onTaskClick={handleTaskClick} />
 
       {isPM && (
         <div className="flex justify-end">
@@ -262,6 +174,31 @@ export function TaskList({ projectId, isPM }: TaskListProps) {
             업무 추가
           </Button>
         </div>
+      )}
+
+      {projectError && <ErrorState />}
+
+      {!isLoading && tasks && tasks.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">업무가 없습니다</p>
+        </div>
+      )}
+
+      {!isLoading && tasks && tasks.length > 0 && (
+        <TaskTable
+          tasks={tasks || []}
+          onTaskClick={handleTaskClick}
+          isValidating={isValidating}
+        />
+      )}
+
+      {/* Pagination */}
+      {!tasksLoading && pagination && pagination.pages > 1 && (
+        <TablePagination
+          currentPage={currentPage}
+          totalPages={pagination.pages}
+          onPageChange={(page) => setParam('pageNum', page)}
+        />
       )}
 
       {isPM && projectMembers && (
