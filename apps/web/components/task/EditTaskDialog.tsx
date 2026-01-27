@@ -13,7 +13,7 @@ import { Form } from '@/components/ui/form';
 import { FormInput, FormTextarea, FormSelect, FormCheckboxGroup } from '@/components/form';
 import { Loader2 } from 'lucide-react';
 import type { ProjectMember } from '@/types/project';
-import type { Task, TaskStatus } from '@/types/task';
+import type { Task, TaskStatus, TaskDifficulty } from '@/types/task';
 
 // Form schema with string IDs for checkboxes (converted to numbers on submit)
 const EditTaskFormSchema = z.object({
@@ -62,13 +62,13 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
     defaultValues: {
       taskName: task.taskName,
       description: task.description || '',
-      difficulty: task.difficulty,
-      status: task.status,
+      difficulty: task.difficulty as TaskDifficulty,
+      status: task.status as TaskStatus,
       clientName: task.clientName || '',
-      planningAssigneeIds: task.planningAssignees?.map(a => a.id.toString()) || [],
-      designAssigneeIds: task.designAssignees?.map(a => a.id.toString()) || [],
-      frontendAssigneeIds: task.frontendAssignees?.map(a => a.id.toString()) || [],
-      backendAssigneeIds: task.backendAssignees?.map(a => a.id.toString()) || [],
+      planningAssigneeIds: task.planningAssignees?.map(a => a.id) || [],
+      designAssigneeIds: task.designAssignees?.map(a => a.id) || [],
+      frontendAssigneeIds: task.frontendAssignees?.map(a => a.id) || [],
+      backendAssigneeIds: task.backendAssignees?.map(a => a.id) || [],
       startDate: task.startDate || '',
       endDate: task.endDate || '',
       openDate: task.openDate ? task.openDate.slice(0, 16) : '',
@@ -81,13 +81,13 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
     form.reset({
       taskName: task.taskName,
       description: task.description || '',
-      difficulty: task.difficulty,
-      status: task.status,
+      difficulty: task.difficulty as TaskDifficulty,
+      status: task.status as TaskStatus,
       clientName: task.clientName || '',
-      planningAssigneeIds: task.planningAssignees?.map(a => a.id.toString()) || [],
-      designAssigneeIds: task.designAssignees?.map(a => a.id.toString()) || [],
-      frontendAssigneeIds: task.frontendAssignees?.map(a => a.id.toString()) || [],
-      backendAssigneeIds: task.backendAssignees?.map(a => a.id.toString()) || [],
+      planningAssigneeIds: task.planningAssignees?.map(a => a.id) || [],
+      designAssigneeIds: task.designAssignees?.map(a => a.id) || [],
+      frontendAssigneeIds: task.frontendAssignees?.map(a => a.id) || [],
+      backendAssigneeIds: task.backendAssignees?.map(a => a.id) || [],
       startDate: task.startDate || '',
       endDate: task.endDate || '',
       openDate: task.openDate ? task.openDate.slice(0, 16) : '',

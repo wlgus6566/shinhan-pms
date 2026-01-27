@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import type { WorkLog, WorkLogUser, WorkLogTask } from '@repo/schema';
 
-export class WorkLogUserDto {
+export class WorkLogUserDto implements WorkLogUser {
   @ApiProperty({ description: '사용자 ID' })
   id: string;
 
@@ -11,7 +12,7 @@ export class WorkLogUserDto {
   email: string;
 }
 
-export class WorkLogTaskDto {
+export class WorkLogTaskDto implements WorkLogTask {
   @ApiProperty({ description: '업무 ID' })
   id: string;
 
@@ -20,9 +21,15 @@ export class WorkLogTaskDto {
 
   @ApiProperty({ description: '프로젝트 ID' })
   projectId: string;
+
+  @ApiProperty({ description: '업무 상태', required: false })
+  status?: string;
+
+  @ApiProperty({ description: '업무 난이도', required: false })
+  difficulty?: string;
 }
 
-export class WorkLogResponseDto {
+export class WorkLogResponseDto implements WorkLog {
   @ApiProperty({ description: '업무일지 ID' })
   id: string;
 

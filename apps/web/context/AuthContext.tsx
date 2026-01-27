@@ -4,8 +4,9 @@ import React, { createContext, useContext, useEffect, useState, useCallback, use
 import { useRouter } from 'next/navigation';
 import { tokenManager } from '@/lib/api/fetcher';
 
+// AuthContext용 간소화된 User 타입 (인증에 필요한 최소 정보만)
 interface User {
-  id: number;
+  id: string;
   email: string;
   name: string;
   department: string;

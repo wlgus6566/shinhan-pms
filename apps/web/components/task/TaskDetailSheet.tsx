@@ -26,6 +26,8 @@ import {
   DIFFICULTY_LABELS,
   DIFFICULTY_COLORS,
   type Task,
+  type TaskDifficulty,
+  type TaskStatus,
 } from '@/types/task';
 import {
   Calendar,
@@ -118,11 +120,13 @@ export function TaskDetailSheet({
           </div>
 
           <div className="flex gap-2">
-            <Badge className={DIFFICULTY_COLORS[task.difficulty]}>
-              난이도: {DIFFICULTY_LABELS[task.difficulty]}
+            <Badge
+              className={DIFFICULTY_COLORS[task.difficulty as TaskDifficulty]}
+            >
+              난이도: {DIFFICULTY_LABELS[task.difficulty as TaskDifficulty]}
             </Badge>
-            <Badge className={STATUS_COLORS[task.status]}>
-              {STATUS_LABELS[task.status]}
+            <Badge className={STATUS_COLORS[task.status as TaskStatus]}>
+              {STATUS_LABELS[task.status as TaskStatus]}
             </Badge>
           </div>
         </SheetHeader>
@@ -148,7 +152,7 @@ export function TaskDetailSheet({
               <div className="space-y-2">
                 <h3 className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
                   <FileText className="h-4 w-4" />
-                  업무 설명
+                  작업내용
                 </h3>
                 <div className="pl-6">
                   <p className="text-sm leading-relaxed whitespace-pre-wrap">

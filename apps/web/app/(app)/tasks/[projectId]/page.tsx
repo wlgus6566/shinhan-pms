@@ -74,8 +74,8 @@ export default function TaskManagementPage() {
   }
 
   const statusConfig = {
-    label: PROJECT_STATUS_LABELS[project.status] || '알 수 없음',
-    variant: PROJECT_STATUS_VARIANTS[project.status] || 'outline',
+    label: PROJECT_STATUS_LABELS[project.status as ProjectStatus] || '알 수 없음',
+    variant: PROJECT_STATUS_VARIANTS[project.status as ProjectStatus] || 'outline',
   };
 
   return (

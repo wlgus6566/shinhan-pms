@@ -15,6 +15,8 @@ import {
   DIFFICULTY_LABELS,
   DIFFICULTY_COLORS,
   type Task,
+  type TaskDifficulty,
+  type TaskStatus,
 } from '@/types/task';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
@@ -79,13 +81,13 @@ export function TaskTable({ tasks, onTaskClick }: TaskTableProps) {
               >
                 <TableCell className="font-medium">{task.taskName}</TableCell>
                 <TableCell>
-                  <Badge className={DIFFICULTY_COLORS[task.difficulty]}>
-                    {DIFFICULTY_LABELS[task.difficulty]}
+                  <Badge className={DIFFICULTY_COLORS[task.difficulty as TaskDifficulty]}>
+                    {DIFFICULTY_LABELS[task.difficulty as TaskDifficulty]}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Badge className={STATUS_COLORS[task.status]}>
-                    {STATUS_LABELS[task.status]}
+                  <Badge className={STATUS_COLORS[task.status as TaskStatus]}>
+                    {STATUS_LABELS[task.status as TaskStatus]}
                   </Badge>
                 </TableCell>
                 <TableCell>

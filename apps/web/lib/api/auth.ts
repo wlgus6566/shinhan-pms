@@ -8,7 +8,7 @@ export interface LoginRequest {
 export interface LoginResponse {
   accessToken: string;
   user: {
-    id: string | number;
+    id: string;
     email: string;
     name: string;
     role: string;

@@ -13,6 +13,8 @@ import {
   STATUS_COLORS,
   DIFFICULTY_LABELS,
   DIFFICULTY_COLORS,
+  type TaskStatus,
+  type TaskDifficulty,
 } from '@/types/task';
 import { cn } from '@/lib/utils';
 
@@ -80,20 +82,20 @@ export function TeamWorkLogDetailDialog({
                         <Badge
                           className={cn(
                             'text-xs',
-                            STATUS_COLORS[log.task.status],
+                            STATUS_COLORS[log.task.status as TaskStatus],
                           )}
                         >
-                          {STATUS_LABELS[log.task.status]}
+                          {STATUS_LABELS[log.task.status as TaskStatus]}
                         </Badge>
                       )}
                       {log.task?.difficulty && (
                         <Badge
                           className={cn(
                             'text-xs',
-                            DIFFICULTY_COLORS[log.task.difficulty],
+                            DIFFICULTY_COLORS[log.task.difficulty as TaskDifficulty],
                           )}
                         >
-                          {DIFFICULTY_LABELS[log.task.difficulty]}
+                          {DIFFICULTY_LABELS[log.task.difficulty as TaskDifficulty]}
                         </Badge>
                       )}
                     </div>

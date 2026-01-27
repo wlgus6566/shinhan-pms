@@ -33,7 +33,7 @@ import {
 } from '@/lib/constants/project';
 
 const addMemberSchema = z.object({
-  memberId: z.coerce.number().min(1, '멤버를 선택하세요'),
+  memberId: z.string().min(1, '멤버를 선택하세요'),
   role: z.enum(['PM', 'PL', 'PA'] as const),
   workArea: z.enum(['PROJECT_MANAGEMENT', 'PLANNING', 'DESIGN', 'FRONTEND', 'BACKEND'] as const),
   notes: z.string().optional(),
@@ -67,7 +67,7 @@ export function AddMemberDialog({ projectId, open, onOpenChange, onSuccess }: Ad
   const form = useForm<AddMemberFormValues>({
     resolver: zodResolver(addMemberSchema),
     defaultValues: {
-      memberId: 0,
+      memberId: '',
       role: 'PA',
       workArea: 'PLANNING',
       notes: '',

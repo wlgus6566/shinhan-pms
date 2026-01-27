@@ -51,7 +51,7 @@ export class UsersController {
     @Body() createUserDto: CreateUserDto,
     @CurrentUser() currentUser: UserResponseDto,
   ): Promise<UserResponseDto> {
-    return this.usersService.create(createUserDto, currentUser.id);
+    return this.usersService.create(createUserDto, BigInt(currentUser.id));
   }
 
   @Get()
@@ -141,7 +141,7 @@ export class UsersController {
     @Body() updateUserDto: UpdateUserDto,
     @CurrentUser() currentUser: UserResponseDto,
   ): Promise<UserResponseDto> {
-    return this.usersService.update(BigInt(id), updateUserDto, currentUser.id);
+    return this.usersService.update(BigInt(id), updateUserDto, BigInt(currentUser.id));
   }
 
   @Delete(':id')
@@ -157,7 +157,7 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() currentUser: UserResponseDto,
   ) {
-    await this.usersService.deactivate(BigInt(id), currentUser.id);
+    await this.usersService.deactivate(BigInt(id), BigInt(currentUser.id));
     return null;
   }
 }

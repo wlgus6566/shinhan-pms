@@ -41,6 +41,9 @@ export class ProjectResponseDto {
   })
   status: string;
 
+  @ApiProperty({ description: '생성자 ID', example: '1', required: false })
+  creatorId?: string;
+
   @ApiProperty({ description: '생성일시', example: '2024-01-01T00:00:00Z' })
   createdAt: Date;
 

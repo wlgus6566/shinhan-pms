@@ -100,29 +100,6 @@ PM 검수 → 최종 승인
 기능 완료
 ```
 
-## 브랜딩 가이드
-
-### 색상 팔레트
-
-```typescript
-emotion: {
-  primary: '#6366F1',      // 인디고 (주색상)
-  secondary: '#8B5CF6',    // 보라 (보조색상)
-  accent: '#EC4899',       // 핑크 (강조색)
-  lightgray: '#F9FAFB',    // 연한 회색 (배경)
-}
-```
-
-### 디자인 원칙
-
-- **Border Radius**: `rounded-lg` (8px), `rounded-xl` (12px)
-- **Shadow**: `shadow-sm`, `shadow-md`, `shadow-lg`
-- **Typography**: font-bold (제목), font-normal (본문), font-semibold (강조)
-- **Spacing**: space-y-4, gap-4
-- **Animation**: transition-all, duration-300
-
-자세한 내용은 [BRANDING.md](./BRANDING.md) 참조.
-
 ## 명명 규칙
 
 ### 데이터베이스
@@ -253,20 +230,6 @@ const form = useForm<z.infer<typeof formSchema>>({
   label="제목"
 />
 ```
-
-#### Import 패턴
-
-```typescript
-// ❌ 나쁜 예
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-
-// ✅ 좋은 예
-import { Form } from '@/components/ui/form';
-import { FormInput, FormTextarea, FormSelect } from '@/components/form';
-```
-
 #### 예외 사항
 
 다음 경우에만 FormField 직접 사용 허용:
@@ -276,32 +239,6 @@ import { FormInput, FormTextarea, FormSelect } from '@/components/form';
 ### 6. Dialog 컴포넌트 패턴
 
 **핵심 원칙**: 모든 Dialog는 `BaseDialog`를 사용하여 일관된 UI/UX를 제공합니다.
-
-#### BaseDialog 사용법
-
-```typescript
-import { BaseDialog } from '@/components/ui/base-dialog';
-
-<BaseDialog
-  open={open}
-  onOpenChange={onOpenChange}
-  size="lg"                    // "sm" | "md" | "lg"
-  title="다이얼로그 제목"
-  description="설명 (선택)"    // 선택사항
-  error={error}                // 에러 메시지 (선택)
-  footer={<>버튼들</>}         // Footer 영역 (선택)
->
-  {/* Dialog 내용 */}
-</BaseDialog>
-```
-
-#### Size 옵션
-
-| Size | 최대 너비 | 용도 |
-|------|----------|------|
-| `sm` | `500px` | 간단한 입력 폼 (멤버 추가, 업무일지 등) |
-| `md` | `600px` | 중간 크기 폼 (기본값) |
-| `lg` | `768px` | 복잡한 폼 (업무 등록, 일정 관리 등) |
 
 #### Form과 함께 사용하기
 
@@ -424,34 +361,6 @@ export type UpdateProjectRequest = z.infer<typeof UpdateProjectSchema>;
 export { CreateProjectSchema, UpdateProjectSchema };
 export { ProjectTypeEnum } from '../common/enums';
 ```
-
-#### 날짜 검증 패턴
-
-HTML5 date input은 `YYYY-MM-DD` 형식을 자동 제공하므로 regex 검증 불필요:
-
-```typescript
-// ❌ 불필요한 regex
-startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional()
-
-// ✅ 간결한 검증
-startDate: z.string().optional()
-
-// 날짜 범위 검증은 .refine() 사용
-export const CreateProjectSchema = z.object({
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-})
-.refine(
-  (data) => {
-    if (data.startDate && data.endDate) {
-      return new Date(data.endDate) >= new Date(data.startDate);
-    }
-    return true;
-  },
-  { message: '종료일은 시작일 이후여야 합니다', path: ['endDate'] }
-);
-```
-
 #### Null vs Undefined 처리
 
 Prisma는 nullable 필드에 `null`을 반환하지만, Zod `.optional()`은 `undefined`를 기대:
@@ -801,49 +710,12 @@ pnpm format
 - [README](./README.md)
 - [PRD](./artifacts/prd.md)
 
-## 테스트 계정
-
-모든 계정의 비밀번호는 `password123`입니다.
-
-- PM: kim@emotion.co.kr
-- PL: lee@emotion.co.kr
-- PA: park@emotion.co.kr, jung@emotion.co.kr, choi@emotion.co.kr, kang@emotion.co.kr, yoon@emotion.co.kr, lim@emotion.co.kr
-
 ## 주의사항
 
 1. **타입 안전성**: `@repo/schema` 패키지를 통해 백엔드-프론트엔드 간 Zod 스키마 및 타입 공유
 2. **모노레포**: 공통 의존성은 루트 `package.json`에, 앱별 의존성은 각 앱의 `package.json`에
 3. **환경 변수**: `.env` 파일은 각 앱 디렉토리에 위치 (`apps/api/.env`, `apps/web/.env.local`)
 4. **포트**: API (3000), Web (3001), Adminer (8081), PostgreSQL (5432)
-
----
-
-## 에이전트 호출 방법
-
-각 에이전트는 `.claude/agents/` 디렉토리의 마크다운 파일로 정의되어 있습니다. 에이전트를 호출할 때는 역할과 작업 내용을 명확히 지시하세요.
-
-### 예시
-
-```
-@planner [프로젝트 관리] 기능을 기획해주세요.
-프로젝트 생성, 수정, 삭제, 목록 조회 기능이 필요합니다.
-```
-
-```
-@wireframe [프로젝트 관리] 기획서를 바탕으로 와이어프레임을 작성해주세요.
-```
-
-```
-@modeler [프로젝트 관리] 기획서를 바탕으로 DB 스키마를 설계해주세요.
-```
-
-```
-@developer [프로젝트 관리] 백엔드 API를 TDD 방식으로 개발해주세요.
-```
-
-```
-@developer [프로젝트 관리] 프론트엔드 UI를 개발해주세요.
-```
 
 ---
 

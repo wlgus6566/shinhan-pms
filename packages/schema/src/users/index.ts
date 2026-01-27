@@ -6,6 +6,9 @@ import { UpdateUserSchema } from './update-user.schema';
 export type CreateUserRequest = z.infer<typeof CreateUserSchema>;
 export type UpdateUserRequest = z.infer<typeof UpdateUserSchema>;
 
+// Response Types
+export * from './types';
+
 // Export Schemas
 export { CreateUserSchema, UpdateUserSchema };
 

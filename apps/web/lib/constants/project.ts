@@ -1,13 +1,10 @@
 import type { ProjectStatus, ProjectType, WorkArea, ProjectRole } from '@/types/project';
 
-// 프로젝트 상태 라벨
+// 프로젝트 상태 라벨 (ProjectStatus: 'ACTIVE' | 'COMPLETED' | 'SUSPENDED')
 export const PROJECT_STATUS_LABELS: Record<ProjectStatus, string> = {
-  PENDING: '대기',
   ACTIVE: '진행중',
-  IN_PROGRESS: '진행중',
   COMPLETED: '완료',
   SUSPENDED: '중단',
-  ON_HOLD: '보류',
 } as const;
 
 // 프로젝트 상태 배지 배리언트
@@ -15,12 +12,9 @@ export const PROJECT_STATUS_VARIANTS: Record<
   ProjectStatus,
   'default' | 'secondary' | 'outline' | 'destructive'
 > = {
-  PENDING: 'secondary',
   ACTIVE: 'default',
-  IN_PROGRESS: 'default',
   COMPLETED: 'outline',
   SUSPENDED: 'destructive',
-  ON_HOLD: 'destructive',
 } as const;
 
 // 프로젝트 상태 배지 상세 스타일
@@ -28,15 +22,7 @@ export const PROJECT_STATUS_BADGE_STYLES: Record<
   ProjectStatus,
   { label: string; className: string }
 > = {
-  PENDING: {
-    label: '대기',
-    className: 'bg-gray-100 text-gray-700 hover:bg-gray-100',
-  },
   ACTIVE: {
-    label: '진행중',
-    className: 'bg-blue-100 text-blue-700 hover:bg-blue-100',
-  },
-  IN_PROGRESS: {
     label: '진행중',
     className: 'bg-blue-100 text-blue-700 hover:bg-blue-100',
   },
@@ -47,10 +33,6 @@ export const PROJECT_STATUS_BADGE_STYLES: Record<
   SUSPENDED: {
     label: '중단',
     className: 'bg-red-100 text-red-700 hover:bg-red-100',
-  },
-  ON_HOLD: {
-    label: '보류',
-    className: 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100',
   },
 } as const;
 

@@ -92,7 +92,7 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
     if (selectedTeams.length > 0) {
       result = result.filter(
         (schedule) =>
-          schedule.teamScope && selectedTeams.includes(schedule.teamScope),
+          schedule.teamScope && selectedTeams.includes(schedule.teamScope as any),
       );
     }
 

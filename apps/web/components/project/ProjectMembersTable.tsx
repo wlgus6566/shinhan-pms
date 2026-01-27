@@ -33,13 +33,13 @@ import {
 } from '@/components/ui/tooltip';
 import { Loader2, UserPlus, Trash2 } from 'lucide-react';
 import { AddMemberDialog } from './AddMemberDialog';
-import type { ProjectMember, ProjectRole, Department } from '@/types/project';
+import type { ProjectMember, ProjectRole, Department, WorkArea } from '@/types/project';
 import { POSITION_LABELS, type Position } from '@/lib/constants/roles';
 import { WORK_AREA_LABELS_STRICT, PROJECT_ROLE_VARIANTS } from '@/lib/constants/project';
 
 interface ProjectMembersTableProps {
   projectId: string;
-  creatorId: number;
+  creatorId?: string;
 }
 
 export function ProjectMembersTable({ projectId, creatorId }: ProjectMembersTableProps) {
@@ -140,14 +140,14 @@ export function ProjectMembersTable({ projectId, creatorId }: ProjectMembersTabl
                   <TableCell>
                     {member.workArea ? (
                       <Badge variant="secondary">
-                        {WORK_AREA_LABELS_STRICT[member.workArea] || member.workArea}
+                        {WORK_AREA_LABELS_STRICT[member.workArea as WorkArea] || member.workArea}
                       </Badge>
                     ) : (
                       <span className="text-sm text-slate-500">-</span>
                     )}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={PROJECT_ROLE_VARIANTS[member.role]}>
+                    <Badge variant={PROJECT_ROLE_VARIANTS[member.role as ProjectRole]}>
                       {member.role}
                     </Badge>
                   </TableCell>

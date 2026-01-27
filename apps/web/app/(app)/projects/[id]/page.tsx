@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useProject } from '@/lib/api/projects';
 import { useProjectMembers } from '@/lib/api/projectMembers';
@@ -13,11 +13,9 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Edit, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import type { Project, ProjectMember } from '@/types/project';
 
 export default function ProjectDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const { user } = useAuth();
   const projectId = params.id as string;
 

@@ -211,6 +211,7 @@ export class ProjectsController {
         ? project.endDate.toISOString().split('T')[0]
         : undefined,
       status: project.status,
+      creatorId: project.createdBy?.toString(),
       createdAt: project.createdAt,
       updatedAt: project.updatedAt,
     };

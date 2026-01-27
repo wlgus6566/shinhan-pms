@@ -2,7 +2,7 @@
 
 import { memo, useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
-import type { Project } from '@/types/project';
+import type { Project, ProjectStatus, ProjectType } from '@/types/project';
 import {
   PROJECT_STATUS_BADGE_STYLES,
   PROJECT_TYPE_LABELS,
@@ -32,23 +32,23 @@ const formatDate = (dateString: string): string => {
 export const ProjectDetail = memo(function ProjectDetail({
   project,
 }: ProjectDetailProps) {
-  const status = PROJECT_STATUS_BADGE_STYLES[project.status] || fallbackStatus;
+  const status = PROJECT_STATUS_BADGE_STYLES[project.status as ProjectStatus] || fallbackStatus;
 
   // Memoize formatted dates
   const formattedStartDate = useMemo(
-    () => formatDate(project.startDate),
+    () => project.startDate ? formatDate(project.startDate) : '-',
     [project.startDate],
   );
   const formattedEndDate = useMemo(
-    () => formatDate(project.endDate),
+    () => project.endDate ? formatDate(project.endDate) : '-',
     [project.endDate],
   );
   const formattedCreatedAt = useMemo(
-    () => formatDate(project.createdAt),
+    () => formatDate(project.createdAt.toString()),
     [project.createdAt],
   );
   const formattedUpdatedAt = useMemo(
-    () => formatDate(project.updatedAt),
+    () => project.updatedAt ? formatDate(project.updatedAt.toString()) : '-',
     [project.updatedAt],
   );
 
@@ -75,7 +75,7 @@ export const ProjectDetail = memo(function ProjectDetail({
             타입
           </h3>
           <Badge variant="outline" className="font-normal">
-            {PROJECT_TYPE_LABELS[project.projectType] || project.projectType}
+            {PROJECT_TYPE_LABELS[project.projectType as ProjectType] || project.projectType}
           </Badge>
         </div>
         <div>

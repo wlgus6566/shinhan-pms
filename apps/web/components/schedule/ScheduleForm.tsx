@@ -14,7 +14,7 @@ import {
   FormRadioGroup,
   FormCheckboxGroup,
 } from '@/components/form';
-import type { Schedule, TeamScope } from '@/types/schedule';
+import type { Schedule, TeamScope, ScheduleType, HalfDayType } from '@/types/schedule';
 import { SCHEDULE_TYPE_LABELS, TEAM_SCOPE_LABELS } from '@/types/schedule';
 import type { ProjectMember, WorkArea } from '@/types/project';
 import { useProjectMembers, getProjectMembers } from '@/lib/api/projectMembers';
@@ -80,7 +80,7 @@ export function ScheduleForm({
       ? {
           title: schedule.title,
           description: schedule.description || '',
-          scheduleType: schedule.scheduleType,
+          scheduleType: schedule.scheduleType as ScheduleType,
           startDate: schedule.startDate
             ? formatDateTimeLocal(schedule.startDate)
             : '',
@@ -91,8 +91,8 @@ export function ScheduleForm({
           isAllDay: schedule.isAllDay,
           color: schedule.color || '',
           participantIds: schedule.participants?.map((p) => p.id) || [],
-          teamScope: schedule.teamScope || undefined,
-          halfDayType: schedule.halfDayType || undefined,
+          teamScope: (schedule.teamScope as TeamScope) || undefined,
+          halfDayType: (schedule.halfDayType as HalfDayType) || undefined,
           usageDate: schedule.usageDate?.slice(0, 10) || '', // Format for date
         }
       : {
@@ -117,7 +117,7 @@ export function ScheduleForm({
       form.reset({
         title: schedule.title,
         description: schedule.description || '',
-        scheduleType: schedule.scheduleType,
+        scheduleType: schedule.scheduleType as ScheduleType,
         startDate: schedule.startDate
           ? formatDateTimeLocal(schedule.startDate)
           : '',
@@ -126,8 +126,8 @@ export function ScheduleForm({
         isAllDay: schedule.isAllDay,
         color: schedule.color || '',
         participantIds: schedule.participants?.map((p) => p.id) || [],
-        teamScope: schedule.teamScope || undefined,
-        halfDayType: schedule.halfDayType || undefined,
+        teamScope: (schedule.teamScope as TeamScope) || undefined,
+        halfDayType: (schedule.halfDayType as HalfDayType) || undefined,
         usageDate: schedule.usageDate?.slice(0, 10) || '',
       });
     } else {
@@ -264,7 +264,7 @@ export function ScheduleForm({
       const targetAreas = workAreaMap[teamScope];
       selectedMembers.push(
         ...projectMembers
-          .filter((m) => targetAreas.includes(m.workArea))
+          .filter((m) => targetAreas.includes(m.workArea as WorkArea))
           .map((m) => String(m.memberId)),
       );
     }

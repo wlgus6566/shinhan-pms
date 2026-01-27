@@ -2,8 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 
 export class UserResponseDto {
-  @ApiProperty({ example: 1 })
-  id: bigint;
+  @ApiProperty({ example: '1' })
+  id: string;
 
   @ApiProperty({ example: 'hong.gildong@emotion.co.kr' })
   email: string;
@@ -41,7 +41,10 @@ export class UserResponseDto {
   @Exclude()
   updatedBy?: bigint;
 
-  constructor(partial: Partial<UserResponseDto>) {
+  constructor(partial: Partial<UserResponseDto> | any) {
+    if (partial.id && typeof partial.id === 'bigint') {
+      partial.id = partial.id.toString();
+    }
     Object.assign(this, partial);
   }
 }

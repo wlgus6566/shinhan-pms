@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { MemberRoleEnum, WorkAreaEnum } from '../common/enums';
 
 export const AddProjectMemberSchema = z.object({
-  memberId: z.number().int().positive('멤버 ID는 양수여야 합니다'),
+  memberId: z.string().min(1, '멤버 ID는 필수입니다'),
   role: MemberRoleEnum,
   workArea: WorkAreaEnum,
   notes: z

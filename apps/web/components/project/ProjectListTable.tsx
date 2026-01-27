@@ -28,7 +28,7 @@ import {
   TableEmpty,
 } from '@/components/common/table';
 import { Search, MoreHorizontal, ArrowUpDown } from 'lucide-react';
-import type { Project, ProjectStatus } from '@/types/project';
+import type { Project, ProjectStatus, ProjectType } from '@/types/project';
 import {
   PROJECT_STATUS_LABELS,
   PROJECT_STATUS_VARIANTS,
@@ -159,27 +159,27 @@ export function ProjectListTable() {
                   </TableCell>
                   <TableCell className="text-center">
                     <Badge variant="outline" className="font-normal">
-                      {PROJECT_TYPE_LABELS[project.projectType] ||
+                      {PROJECT_TYPE_LABELS[project.projectType as ProjectType] ||
                         project.projectType}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-center">
                     <Badge
                       variant={
-                        PROJECT_STATUS_VARIANTS[project.status] || 'outline'
+                        PROJECT_STATUS_VARIANTS[project.status as ProjectStatus] || 'outline'
                       }
                     >
-                      {PROJECT_STATUS_LABELS[project.status] || project.status}
+                      {PROJECT_STATUS_LABELS[project.status as ProjectStatus] || project.status}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <div className="text-sm whitespace-nowrap">
                       <span className="text-slate-600">
-                        {formatDate(project.startDate)}
+                        {project.startDate ? formatDate(project.startDate) : '-'}
                       </span>
                       <span className="text-slate-400 mx-1">~</span>
                       <span className="text-slate-600">
-                        {formatDate(project.endDate)}
+                        {project.endDate ? formatDate(project.endDate) : '-'}
                       </span>
                     </div>
                   </TableCell>

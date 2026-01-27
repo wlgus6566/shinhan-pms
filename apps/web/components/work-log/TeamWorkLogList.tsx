@@ -89,7 +89,7 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
     // 3. Filter by status
     if (statusFilter.length > 0) {
       result = result.filter(
-        (log) => log.task?.status && statusFilter.includes(log.task.status),
+        (log) => log.task?.status && statusFilter.includes(log.task.status as any),
       );
     }
 
@@ -98,7 +98,7 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
       result = result.filter(
         (log) =>
           log.task?.difficulty &&
-          difficultyFilter.includes(log.task.difficulty),
+          difficultyFilter.includes(log.task.difficulty as any),
       );
     }
 

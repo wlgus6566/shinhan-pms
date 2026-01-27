@@ -45,13 +45,15 @@ export function ProjectForm({ projectId, mode }: ProjectFormProps) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [success, setSuccess] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // Fetch project data using SWR hook
-  const { project, isLoading, error: fetchError } = useProject(
-    mode === 'edit' ? (projectId ?? null) : null
-  );
+  const {
+    project,
+    isLoading,
+    error: fetchError,
+  } = useProject(mode === 'edit' ? (projectId ?? null) : null);
 
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(CreateProjectSchema),
@@ -68,7 +70,9 @@ export function ProjectForm({ projectId, mode }: ProjectFormProps) {
   useEffect(() => {
     if (project && mode === 'edit') {
       // Convert ISO date strings to YYYY-MM-DD format
-      const startDate = project.startDate ? project.startDate.split('T')[0] : '';
+      const startDate = project.startDate
+        ? project.startDate.split('T')[0]
+        : '';
       const endDate = project.endDate ? project.endDate.split('T')[0] : '';
 
       form.reset({
@@ -101,8 +105,8 @@ export function ProjectForm({ projectId, mode }: ProjectFormProps) {
           router.push('/projects');
         } else if (projectId) {
           await updateProject(projectId, values);
-          setSuccess(true);
-          setTimeout(() => setSuccess(false), 3000);
+          // setSuccess(true);
+          // setTimeout(() => setSuccess(false), 3000);
         }
       } catch (err: any) {
         setError(err.message);
@@ -213,9 +217,6 @@ export function ProjectForm({ projectId, mode }: ProjectFormProps) {
                   </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
-                  <Button type="button" variant="outline" onClick={() => {}}>
-                    취소
-                  </Button>
                   <Button
                     type="button"
                     variant="destructive"
@@ -225,7 +226,7 @@ export function ProjectForm({ projectId, mode }: ProjectFormProps) {
                     {isDeleting && (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     )}
-                    확인
+                    삭제
                   </Button>
                 </DialogFooter>
               </DialogContent>

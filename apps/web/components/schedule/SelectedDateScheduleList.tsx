@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { Calendar as CalendarIcon } from 'lucide-react';
-import type { Schedule } from '@/types/schedule';
+import type { Schedule, ScheduleType } from '@/types/schedule';
 import { SCHEDULE_TYPE_LABELS, SCHEDULE_TYPE_COLORS } from '@/types/schedule';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -82,10 +82,10 @@ export function SelectedDateScheduleList({
                           <Badge
                             className={cn(
                               'text-xs',
-                              SCHEDULE_TYPE_COLORS[schedule.scheduleType],
+                              SCHEDULE_TYPE_COLORS[schedule.scheduleType as ScheduleType],
                             )}
                           >
-                            {SCHEDULE_TYPE_LABELS[schedule.scheduleType]}
+                            {SCHEDULE_TYPE_LABELS[schedule.scheduleType as ScheduleType]}
                           </Badge>
                         )}
                     </div>

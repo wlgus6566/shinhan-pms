@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import type { Task, UserBasicInfo } from '@repo/schema';
 
-class UserBasicInfo {
+class UserBasicInfoDto implements UserBasicInfo {
   @ApiProperty({ description: '사용자 ID', example: '1' })
   id: string;
 
@@ -11,7 +12,7 @@ class UserBasicInfo {
   email: string;
 }
 
-export class TaskResponseDto {
+export class TaskResponseDto implements Task {
   @ApiProperty({ description: '업무 ID', example: '1' })
   id: string;
 
@@ -30,36 +31,36 @@ export class TaskResponseDto {
   @ApiProperty({ description: '클라이언트명', required: false })
   clientName?: string;
 
-  @ApiProperty({ description: '기획 담당자 목록', type: [UserBasicInfo], required: false })
+  @ApiProperty({ description: '기획 담당자 목록', type: [UserBasicInfoDto], required: false })
   planningAssignees?: UserBasicInfo[];
 
-  @ApiProperty({ description: '디자인 담당자 목록', type: [UserBasicInfo], required: false })
+  @ApiProperty({ description: '디자인 담당자 목록', type: [UserBasicInfoDto], required: false })
   designAssignees?: UserBasicInfo[];
 
-  @ApiProperty({ description: '프론트엔드 담당자 목록', type: [UserBasicInfo], required: false })
+  @ApiProperty({ description: '프론트엔드 담당자 목록', type: [UserBasicInfoDto], required: false })
   frontendAssignees?: UserBasicInfo[];
 
-  @ApiProperty({ description: '백엔드 담당자 목록', type: [UserBasicInfo], required: false })
+  @ApiProperty({ description: '백엔드 담당자 목록', type: [UserBasicInfoDto], required: false })
   backendAssignees?: UserBasicInfo[];
 
   @ApiProperty({ description: '상태', enum: ['TODO', 'IN_PROGRESS', 'DONE'] })
   status: string;
 
   @ApiProperty({ description: '시작일', required: false })
-  startDate?: Date;
+  startDate?: string;
 
   @ApiProperty({ description: '종료일', required: false })
-  endDate?: Date;
+  endDate?: string;
 
   @ApiProperty({ description: '오픈일(상용배포일)', required: false })
-  openDate?: Date;
+  openDate?: string;
 
   @ApiProperty({ description: '비고', required: false })
   notes?: string;
 
   @ApiProperty({ description: '생성일시' })
-  createdAt: Date;
+  createdAt: string;
 
   @ApiProperty({ description: '수정일시', required: false })
-  updatedAt?: Date;
+  updatedAt?: string;
 }

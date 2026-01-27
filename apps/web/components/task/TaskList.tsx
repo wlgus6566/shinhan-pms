@@ -93,7 +93,7 @@ export function TaskList({ projectId, isPM }: TaskListProps) {
     } as Record<TaskStatus, number>;
 
     tasks.forEach((task) => {
-      counts[task.status]++;
+      counts[task.status as TaskStatus]++;
     });
 
     return counts;
@@ -133,14 +133,14 @@ export function TaskList({ projectId, isPM }: TaskListProps) {
       }
 
       // Status filter - use Set for O(1) lookup
-      if (statusFilterSet.size > 0 && !statusFilterSet.has(task.status)) {
+      if (statusFilterSet.size > 0 && !statusFilterSet.has(task.status as TaskStatus)) {
         return false;
       }
 
       // Difficulty filter - use Set for O(1) lookup
       if (
         difficultyFilterSet.size > 0 &&
-        !difficultyFilterSet.has(task.difficulty)
+        !difficultyFilterSet.has(task.difficulty as TaskDifficulty)
       ) {
         return false;
       }
@@ -165,7 +165,7 @@ export function TaskList({ projectId, isPM }: TaskListProps) {
       switch (sortBy) {
         case 'difficulty':
           comparison =
-            DIFFICULTY_ORDER[b.difficulty] - DIFFICULTY_ORDER[a.difficulty];
+            DIFFICULTY_ORDER[b.difficulty as TaskDifficulty] - DIFFICULTY_ORDER[a.difficulty as TaskDifficulty];
           break;
         case 'endDate':
           const aDate = a.endDate ? new Date(a.endDate).getTime() : Infinity;
@@ -173,7 +173,7 @@ export function TaskList({ projectId, isPM }: TaskListProps) {
           comparison = aDate - bDate;
           break;
         case 'status':
-          comparison = STATUS_ORDER[a.status] - STATUS_ORDER[b.status];
+          comparison = STATUS_ORDER[a.status as TaskStatus] - STATUS_ORDER[b.status as TaskStatus];
           break;
         case 'createdAt':
           comparison =

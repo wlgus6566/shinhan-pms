@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import type { Schedule, ScheduleParticipant } from '@repo/schema';
 
-export class ScheduleParticipantDto {
+export class ScheduleParticipantDto implements ScheduleParticipant {
   @ApiProperty({ description: 'User ID' })
   id: string;
 
@@ -20,7 +21,7 @@ export class ScheduleParticipantDto {
   workArea?: string;
 }
 
-export class ScheduleResponseDto {
+export class ScheduleResponseDto implements Schedule {
   @ApiProperty({ description: 'Schedule ID' })
   id: string;
 

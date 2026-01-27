@@ -91,7 +91,7 @@ export class AuthController {
   async getProfile(
     @CurrentUser() user: UserResponseDto,
   ): Promise<UserResponseDto> {
-    return this.authService.getProfile(user.id);
+    return this.authService.getProfile(BigInt(user.id));
   }
 
   @Patch('me')
@@ -104,7 +104,7 @@ export class AuthController {
     @CurrentUser() user: UserResponseDto,
     @Body() updateProfileDto: UpdateProfileDto,
   ): Promise<UserResponseDto> {
-    return this.authService.updateProfile(user.id, updateProfileDto);
+    return this.authService.updateProfile(BigInt(user.id), updateProfileDto);
   }
 
   @Patch('me/password')
@@ -119,6 +119,6 @@ export class AuthController {
     @CurrentUser() user: UserResponseDto,
     @Body() changePasswordDto: ChangePasswordDto,
   ): Promise<void> {
-    return this.authService.changePassword(user.id, changePasswordDto);
+    return this.authService.changePassword(BigInt(user.id), changePasswordDto);
   }
 }

@@ -1,5 +1,5 @@
 import type { EventInput } from '@fullcalendar/core';
-import type { Schedule } from '@/types/schedule';
+import type { Schedule, TeamScope, ScheduleType } from '@/types/schedule';
 import { SCHEDULE_TYPE_CALENDAR_COLORS, TEAM_SCOPE_FILTER_COLORS } from '@/types/schedule';
 
 /**
@@ -14,10 +14,10 @@ export function getScheduleColor(schedule: Schedule): string {
   }
 
   if (schedule.teamScope) {
-    return TEAM_SCOPE_FILTER_COLORS[schedule.teamScope];
+    return TEAM_SCOPE_FILTER_COLORS[schedule.teamScope as TeamScope];
   }
 
-  return SCHEDULE_TYPE_CALENDAR_COLORS[schedule.scheduleType];
+  return SCHEDULE_TYPE_CALENDAR_COLORS[schedule.scheduleType as ScheduleType];
 }
 
 /**
