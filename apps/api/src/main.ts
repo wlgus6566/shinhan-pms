@@ -1,5 +1,5 @@
 import { NestFactory, Reflector } from '@nestjs/core';
-import { ValidationPipe, ClassSerializerInterceptor } from '@nestjs/common';
+import { ClassSerializerInterceptor } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ZodValidationPipe, patchNestJsSwagger } from 'nestjs-zod';
 
@@ -32,7 +32,9 @@ async function bootstrap() {
   // Swagger 설정
   const config = new DocumentBuilder()
     .setTitle('이모션 PMS API')
-    .setDescription('이모션의 프로젝트 및 업무 관리를 위한 통합 프로젝트 관리 시스템 API')
+    .setDescription(
+      '이모션의 프로젝트 및 업무 관리를 위한 통합 프로젝트 관리 시스템 API',
+    )
     .setVersion('1.0')
     .addBearerAuth(
       {
@@ -41,13 +43,12 @@ async function bootstrap() {
         bearerFormat: 'JWT',
         description: 'JWT access token (data.accessToken 필드에서 추출)',
       },
-      'Bearer'
+      'Bearer',
     )
     .addTag('Projects', '프로젝트 관리')
     .addTag('Tasks', '작업 관리')
-    .addTag('Issues', '이슈 관리')
     .build();
-
+  // JSON 객체를 생성하는 함수
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
 

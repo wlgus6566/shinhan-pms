@@ -20,6 +20,7 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { UsersService } from './users.service';
+import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -47,7 +48,7 @@ export class UsersController {
   })
   @ApiResponse({ status: 409, description: '이미 사용 중인 이메일' })
   async create(
-    @Body() createUserDto: any,
+    @Body() createUserDto: CreateUserDto,
     @CurrentUser() currentUser: UserResponseDto,
   ): Promise<UserResponseDto> {
     return this.usersService.create(createUserDto, currentUser.id);

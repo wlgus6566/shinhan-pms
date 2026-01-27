@@ -20,10 +20,9 @@
 
 1. 프로젝트 관리 (Project Management)
 2. 작업 관리 (Task Management)
-3. 이슈 관리 (Issue Management)
-4. 일정 관리 (Schedule Management)
-5. 리소스 관리 (Resource Management)
-6. 리포트 (Report)
+3. 일정 관리 (Schedule Management)
+4. 리소스 관리 (Resource Management)
+5. 리포트 (Report)
 
 ## 메모
 

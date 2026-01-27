@@ -52,10 +52,17 @@ COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
 COPY --from=builder /app/apps/api/node_modules/.prisma ./apps/api/node_modules/.prisma
 
+# Copy entrypoint script
+COPY apps/api/docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
+
 WORKDIR /app/apps/api
 
 # Expose port
 EXPOSE 3000
+
+# Use entrypoint script for migrations
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
 
 # Start application
 CMD ["node", "dist/main.js"]

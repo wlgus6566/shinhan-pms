@@ -136,6 +136,33 @@ export const GradeEnum = z.enum(
 
 export type Grade = z.infer<typeof GradeEnum>;
 
+export const UserRoleEnum = z.enum(['PM', 'PL', 'PA', 'MEMBER'], {
+  errorMap: () => ({
+    message: '역할은 PM, PL, PA, MEMBER 중 하나여야 합니다',
+  }),
+});
+
+export type UserRole = z.infer<typeof UserRoleEnum>;
+
+export const PositionEnum = z.enum(
+  [
+    'DIVISION_HEAD',
+    'GENERAL_MANAGER',
+    'PRINCIPAL_LEADER',
+    'SENIOR_LEADER',
+    'LEADER',
+    'TEAM_MEMBER',
+  ],
+  {
+    errorMap: () => ({
+      message:
+        '직책은 DIVISION_HEAD, GENERAL_MANAGER, PRINCIPAL_LEADER, SENIOR_LEADER, LEADER, TEAM_MEMBER 중 하나여야 합니다',
+    }),
+  },
+);
+
+export type Position = z.infer<typeof PositionEnum>;
+
 // Schedule Related Enums
 export const ScheduleTypeEnum = z.enum(
   ['MEETING', 'SCRUM', 'VACATION', 'HALF_DAY', 'OTHER'],

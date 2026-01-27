@@ -9,24 +9,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { parsePaginationParams } from '../common/helpers/pagination.helper';
-
-interface CreateUserDto {
-  email: string;
-  password: string;
-  name: string;
-  profileImage?: string;
-  department: string;
-  position: string;
-  role: string;
-  grade: string;
-}
+import type { CreateUserRequest } from '@repo/schema';
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   async create(
-    createUserDto: CreateUserDto,
+    createUserDto: CreateUserRequest,
     createdBy: bigint,
   ): Promise<UserResponseDto> {
     // 이메일 중복 체크
