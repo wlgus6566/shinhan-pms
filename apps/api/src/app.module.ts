@@ -8,8 +8,9 @@ import { UsersModule } from './users/users.module';
 import { TasksModule } from './tasks/tasks.module';
 import { WorkLogsModule } from './work-logs/work-logs.module';
 import { SchedulesModule } from './schedules/schedules.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
-  imports: [CommonModule, PrismaModule, AuthModule, UsersModule, ProjectsModule, TasksModule, WorkLogsModule, SchedulesModule],
+  imports: [CommonModule, PrismaModule, AuthModule, UsersModule, ProjectsModule, TasksModule, WorkLogsModule, SchedulesModule, DashboardModule],
 })
 export class AppModule {}

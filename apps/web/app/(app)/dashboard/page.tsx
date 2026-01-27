@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { memo, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -14,7 +13,6 @@ import {
 import {
   FolderKanban,
   ClipboardList,
-  Users,
   TrendingUp,
   TrendingDown,
   ArrowRight,
@@ -22,7 +20,16 @@ import {
   CheckCircle2,
   Clock,
   AlertCircle,
+  Loader2,
+  FileText,
 } from 'lucide-react';
+import {
+  useDashboardStats,
+  useRecentActivities,
+  useUpcomingSchedules,
+} from '@/lib/api/dashboard';
+import { formatDistanceToNow } from 'date-fns';
+import { ko } from 'date-fns/locale';
 
 // Hoist static data outside component (rendering-hoist-jsx)
 const colorClassesMap = {
@@ -64,6 +71,7 @@ const StatsCard = memo(function StatsCard({
   trendValue,
   icon: Icon,
   color = 'blue',
+  isLoading,
 }: {
   label: string;
   value: string | number;
@@ -71,29 +79,38 @@ const StatsCard = memo(function StatsCard({
   trendValue?: string;
   icon: React.ElementType;
   color?: 'blue' | 'emerald' | 'amber' | 'rose' | 'sky';
+  isLoading?: boolean;
 }) {
   return (
     <div className="bg-white rounded-2xl border border-slate-100 p-5 hover:shadow-md transition-all duration-200">
       <div className="flex items-start justify-between">
-        <div>
+        <div className="flex-1">
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
             {label}
           </p>
-          <p className="text-2xl font-bold text-slate-900 mt-1">{value}</p>
-          {trend && trendValue && (
-            <div
-              className={`flex items-center gap-1 mt-2 text-xs font-medium ${
-                trend === 'up' ? 'text-emerald-600' : 'text-rose-600'
-              }`}
-            >
-              {trend === 'up' ? (
-                <TrendingUp className="h-3 w-3" />
-              ) : (
-                <TrendingDown className="h-3 w-3" />
-              )}
-              <span>{trendValue}</span>
-              <span className="text-slate-400 ml-1">이번 주</span>
+          {isLoading ? (
+            <div className="mt-1">
+              <Loader2 className="h-6 w-6 animate-spin text-slate-300" />
             </div>
+          ) : (
+            <>
+              <p className="text-2xl font-bold text-slate-900 mt-1">{value}</p>
+              {trend && trendValue && (
+                <div
+                  className={`flex items-center gap-1 mt-2 text-xs font-medium ${
+                    trend === 'up' ? 'text-emerald-600' : 'text-rose-600'
+                  }`}
+                >
+                  {trend === 'up' ? (
+                    <TrendingUp className="h-3 w-3" />
+                  ) : (
+                    <TrendingDown className="h-3 w-3" />
+                  )}
+                  <span>{trendValue}</span>
+                  <span className="text-slate-400 ml-1">이번 주</span>
+                </div>
+              )}
+            </>
           )}
         </div>
         <div
@@ -148,26 +165,27 @@ const QuickActionCard = memo(function QuickActionCard({
   );
 });
 
-// Hoist static activity data (rendering-hoist-jsx)
-const recentActivities = [
-  {
-    user: '김철수',
-    action: '프로젝트 A 업무 완료',
-    time: '10분 전',
-    avatar: '김',
-  },
-  { user: '이영희', action: '새 업무 생성', time: '30분 전', avatar: '이' },
-  { user: '박민수', action: '댓글 추가', time: '1시간 전', avatar: '박' },
-] as const;
+const scheduleTypeLabels: Record<string, string> = {
+  MEETING: '회의',
+  SCRUM: '스크럼',
+  VACATION: '휴가',
+  HALF_DAY: '반차',
+  OTHER: '기타',
+};
 
-const upcomingEvents = [
-  { title: '프로젝트 A 킥오프', date: '월', color: 'bg-blue-500' },
-  { title: '주간 팀 미팅', date: '화', color: 'bg-emerald-500' },
-  { title: '클라이언트 리뷰', date: '목', color: 'bg-amber-500' },
-] as const;
+const scheduleTypeColors: Record<string, string> = {
+  MEETING: 'bg-blue-500',
+  SCRUM: 'bg-emerald-500',
+  VACATION: 'bg-amber-500',
+  HALF_DAY: 'bg-rose-500',
+  OTHER: 'bg-slate-500',
+};
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const { stats, isLoading: statsLoading } = useDashboardStats();
+  const { activities, isLoading: activitiesLoading } = useRecentActivities();
+  const { schedules, isLoading: schedulesLoading } = useUpcomingSchedules();
 
   // Memoize formatted date (js-cache-function-results)
   const formattedDate = useMemo(
@@ -200,33 +218,31 @@ export default function DashboardPage() {
       <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 stagger-children">
         <StatsCard
           label="진행중 프로젝트"
-          value="12"
-          trend="up"
-          trendValue="+3"
+          value={stats?.projects.active ?? 0}
           icon={FolderKanban}
           color="blue"
+          isLoading={statsLoading}
         />
         <StatsCard
-          label="완료된 업무"
-          value="48"
-          trend="up"
-          trendValue="+12"
-          icon={CheckCircle2}
-          color="emerald"
-        />
-        <StatsCard
-          label="대기중 업무"
-          value="8"
-          trend="down"
-          trendValue="-2"
+          label="내 업무 (진행중)"
+          value={stats?.myTasks.inProgress ?? 0}
           icon={Clock}
-          color="amber"
+          color="emerald"
+          isLoading={statsLoading}
         />
         <StatsCard
-          label="긴급 이슈"
-          value="2"
+          label="이번 주 작업시간"
+          value={`${stats?.thisWeekWorkHours.toFixed(1) ?? 0}h`}
+          icon={CheckCircle2}
+          color="amber"
+          isLoading={statsLoading}
+        />
+        <StatsCard
+          label="긴급 업무"
+          value={stats?.myTasks.high ?? 0}
           icon={AlertCircle}
           color="rose"
+          isLoading={statsLoading}
         />
       </section>
 
@@ -242,79 +258,121 @@ export default function DashboardPage() {
             color="blue"
           />
           <QuickActionCard
-            title="업무 관리"
-            description="할당된 업무를 확인하고 업데이트합니다"
-            href="/tasks"
+            title="업무일지 작성"
+            description="오늘의 업무 내용을 기록합니다"
+            href="/work-logs"
             icon={ClipboardList}
             color="emerald"
           />
-          {(user?.role === 'PM' || user?.role === 'PL') && (
-            <QuickActionCard
-              title="회원 관리"
-              description="팀원의 권한과 상태를 관리합니다"
-              href="/admin/users"
-              icon={Users}
-              color="amber"
-            />
-          )}
+          <QuickActionCard
+            title="일정 확인"
+            description="팀 캘린더와 일정을 확인합니다"
+            href="/schedule"
+            icon={Calendar}
+            color="amber"
+          />
         </div>
       </section>
 
-      {/* Recent Activity - Placeholder */}
+      {/* Recent Activity & Upcoming Schedules */}
       <section className="grid gap-6 lg:grid-cols-2">
+        {/* Recent Activity */}
         <Card className="border-slate-100">
           <CardHeader>
-            <CardTitle className="text-base font-semibold">최근 활동</CardTitle>
-            <CardDescription>팀의 최근 활동 내역입니다</CardDescription>
+            <CardTitle className="text-base font-semibold">팀 활동</CardTitle>
+            <CardDescription>최근 업무일지 및 업무 생성 내역</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {recentActivities.map((activity, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xs font-semibold">
-                    {activity.avatar}
+            {activitiesLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-slate-300" />
+              </div>
+            ) : activities && activities.length > 0 ? (
+              <div className="space-y-4">
+                {activities.slice(0, 5).map((activity) => (
+                  <div key={`${activity.type}-${activity.id}`} className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
+                      {activity.type === 'worklog' ? (
+                        <FileText className="h-4 w-4" />
+                      ) : (
+                        <ClipboardList className="h-4 w-4" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-slate-900 truncate">
+                        <span className="font-medium">{activity.user.name}</span>
+                        <span className="text-slate-500"> - {activity.title}</span>
+                      </p>
+                      {activity.project && (
+                        <p className="text-xs text-slate-400 truncate">
+                          {activity.project.name}
+                        </p>
+                      )}
+                      <p className="text-xs text-slate-400">
+                        {formatDistanceToNow(new Date(activity.createdAt), {
+                          addSuffix: true,
+                          locale: ko,
+                        })}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-slate-900 truncate">
-                      <span className="font-medium">{activity.user}</span>
-                      <span className="text-slate-500">
-                        {' '}
-                        - {activity.action}
-                      </span>
-                    </p>
-                    <p className="text-xs text-slate-400">{activity.time}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-slate-400 text-center py-8">
+                최근 활동이 없습니다
+              </p>
+            )}
           </CardContent>
         </Card>
 
+        {/* Upcoming Schedules */}
         <Card className="border-slate-100">
           <CardHeader>
             <CardTitle className="text-base font-semibold">
-              이번 주 일정
+              다가오는 일정
             </CardTitle>
-            <CardDescription>다가오는 마일스톤과 일정입니다</CardDescription>
+            <CardDescription>예정된 일정과 마일스톤입니다</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {upcomingEvents.map((event, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors"
-                >
-                  <div className={`w-1.5 h-8 rounded-full ${event.color}`} />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-slate-900">
-                      {event.title}
-                    </p>
-                    <p className="text-xs text-slate-400">{event.date}요일</p>
+            {schedulesLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-slate-300" />
+              </div>
+            ) : schedules && schedules.length > 0 ? (
+              <div className="space-y-3">
+                {schedules.map((schedule) => (
+                  <div
+                    key={schedule.id}
+                    className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors"
+                  >
+                    <div
+                      className={`w-1.5 h-8 rounded-full ${
+                        scheduleTypeColors[schedule.scheduleType] || 'bg-slate-500'
+                      }`}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-900 truncate">
+                        {schedule.title || '제목 없음'}
+                      </p>
+                      <p className="text-xs text-slate-400">
+                        {scheduleTypeLabels[schedule.scheduleType] || schedule.scheduleType}
+                        {' · '}
+                        {new Date(schedule.startDate).toLocaleDateString('ko-KR', {
+                          month: 'short',
+                          day: 'numeric',
+                        })}
+                      </p>
+                    </div>
+                    <Calendar className="h-4 w-4 text-slate-400 flex-shrink-0" />
                   </div>
-                  <Calendar className="h-4 w-4 text-slate-400" />
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-slate-400 text-center py-8">
+                예정된 일정이 없습니다
+              </p>
+            )}
           </CardContent>
         </Card>
       </section>
