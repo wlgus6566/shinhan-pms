@@ -4,3 +4,4 @@ export * from './update-work-log.schema';
 
 // Response Types
 export * from './types';
+export * from './suggestions';

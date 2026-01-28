@@ -26,6 +26,7 @@ import { WorkLogsService } from './work-logs.service';
 import { CreateWorkLogDto } from './dto/create-work-log.dto';
 import { UpdateWorkLogDto } from './dto/update-work-log.dto';
 import { WorkLogResponseDto } from './dto/work-log-response.dto';
+import { WorkLogSuggestionsResponseDto } from './dto/work-log-suggestions-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import {
@@ -72,6 +73,32 @@ export class WorkLogsController {
       createWorkLogDto,
     );
     return this.transformWorkLog(workLog);
+  }
+
+  @Get('tasks/:taskId/work-logs/suggestions')
+  @ApiOperation({ summary: '업무별 작업 내용 추천 조회' })
+  @ApiParam({ name: 'taskId', description: '업무 ID' })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: '최대 개수 (기본값: 10)',
+    type: Number,
+  })
+  @ApiResponse({
+    status: 200,
+    description: '작업 내용 추천 목록',
+    type: WorkLogSuggestionsResponseDto,
+  })
+  async getSuggestions(
+    @Param('taskId') taskId: string,
+    @Query('limit') limit?: string,
+  ) {
+    const limitNum = limit ? parseInt(limit, 10) : 10;
+    const suggestions = await this.workLogsService.findContentSuggestions(
+      BigInt(taskId),
+      limitNum,
+    );
+    return { suggestions };
   }
 
   @Get('tasks/:taskId/work-logs')

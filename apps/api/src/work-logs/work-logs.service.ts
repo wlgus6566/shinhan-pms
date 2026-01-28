@@ -353,6 +353,41 @@ export class WorkLogsService {
   }
 
   /**
+   * 업무별 작업 내용 추천 조회
+   * 해당 업무의 과거 작업 내용을 중복 제거하여 최근 사용순으로 반환
+   */
+  async findContentSuggestions(taskId: bigint, limit: number = 10) {
+    // Prisma는 groupBy에서 직접 max(workDate)를 지원하지 않으므로,
+    // raw query를 사용하여 content별 최신 날짜와 사용 횟수를 조회
+    const suggestions = await this.prisma.$queryRaw<
+      Array<{
+        content: string;
+        last_used_date: Date;
+        usage_count: bigint;
+      }>
+    >`
+      SELECT
+        content,
+        MAX(work_date) as last_used_date,
+        COUNT(*) as usage_count
+      FROM work_logs
+      WHERE task_id = ${taskId}
+        AND is_active = true
+        AND content IS NOT NULL
+        AND content != ''
+      GROUP BY content
+      ORDER BY last_used_date DESC
+      LIMIT ${limit}
+    `;
+
+    return suggestions.map((s) => ({
+      content: s.content,
+      lastUsedDate: s.last_used_date.toISOString(),
+      usageCount: Number(s.usage_count),
+    }));
+  }
+
+  /**
    * 담당자 여부 확인
    */
   private async checkIsAssignee(

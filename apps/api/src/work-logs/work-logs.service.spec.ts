@@ -30,6 +30,7 @@ describe('WorkLogsService', () => {
       update: jest.fn(),
       count: jest.fn(),
     },
+    $queryRaw: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -395,6 +396,94 @@ describe('WorkLogsService', () => {
       // Then: 빈 Excel 파일 생성
       expect(buffer).toBeInstanceOf(Buffer);
       expect(buffer.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('findContentSuggestions', () => {
+    const taskId = BigInt(1);
+
+    it('정상 조회 - 중복 제거, 최신순 정렬, limit 적용', async () => {
+      // Given: 과거 작업 내용이 있음
+      const mockResults = [
+        {
+          content: 'API 엔드포인트 개발',
+          last_used_date: new Date('2024-01-28'),
+          usage_count: BigInt(3),
+        },
+        {
+          content: 'DB 스키마 설계',
+          last_used_date: new Date('2024-01-27'),
+          usage_count: BigInt(2),
+        },
+        {
+          content: '테스트 코드 작성',
+          last_used_date: new Date('2024-01-26'),
+          usage_count: BigInt(1),
+        },
+      ];
+      mockPrismaService.$queryRaw.mockResolvedValue(mockResults);
+
+      // When: 추천 조회 (limit 10)
+      const result = await service.findContentSuggestions(taskId, 10);
+
+      // Then: 변환된 결과 반환
+      expect(result).toHaveLength(3);
+      expect(result[0]).toEqual({
+        content: 'API 엔드포인트 개발',
+        lastUsedDate: new Date('2024-01-28').toISOString(),
+        usageCount: 3,
+      });
+      expect(result[1].content).toBe('DB 스키마 설계');
+      expect(result[2].content).toBe('테스트 코드 작성');
+
+      // queryRaw 호출 확인
+      expect(mockPrismaService.$queryRaw).toHaveBeenCalledTimes(1);
+    });
+
+    it('빈 content 제외', async () => {
+      // Given: $queryRaw가 빈 content를 이미 필터링함 (SQL WHERE 조건)
+      mockPrismaService.$queryRaw.mockResolvedValue([]);
+
+      // When: 추천 조회
+      const result = await service.findContentSuggestions(taskId, 10);
+
+      // Then: 빈 배열 반환
+      expect(result).toEqual([]);
+    });
+
+    it('taskId에 일지 없을 때 빈 배열 반환', async () => {
+      // Given: 해당 업무에 일지가 없음
+      mockPrismaService.$queryRaw.mockResolvedValue([]);
+
+      // When: 추천 조회
+      const result = await service.findContentSuggestions(taskId, 10);
+
+      // Then: 빈 배열
+      expect(result).toEqual([]);
+    });
+
+    it('limit 동작 확인', async () => {
+      // Given: limit=5로 조회
+      const mockResults = [
+        {
+          content: 'Content 1',
+          last_used_date: new Date('2024-01-28'),
+          usage_count: BigInt(1),
+        },
+        {
+          content: 'Content 2',
+          last_used_date: new Date('2024-01-27'),
+          usage_count: BigInt(1),
+        },
+      ];
+      mockPrismaService.$queryRaw.mockResolvedValue(mockResults);
+
+      // When: limit 5로 조회
+      const result = await service.findContentSuggestions(taskId, 5);
+
+      // Then: SQL에 LIMIT 5가 포함되어 호출됨
+      expect(mockPrismaService.$queryRaw).toHaveBeenCalledTimes(1);
+      expect(result).toHaveLength(2);
     });
   });
 });

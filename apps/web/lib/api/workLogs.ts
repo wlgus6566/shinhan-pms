@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 import { fetcher } from './fetcher';
-import type { PaginatedData } from '@repo/schema';
+import type { PaginatedData, WorkLogSuggestionsResponse } from '@repo/schema';
 import type {
   WorkLog,
   CreateWorkLogRequest,
@@ -291,6 +291,30 @@ export function useWorkLog(id: string | null) {
 
   return {
     workLog: data,
+    isLoading,
+    error,
+    mutate,
+  };
+}
+
+/**
+ * SWR hook for fetching work log content suggestions
+ * @param taskId - Task ID (null to skip fetching)
+ * @param limit - Maximum number of suggestions (default: 10)
+ */
+export function useWorkLogSuggestions(
+  taskId: string | null,
+  limit: number = 10,
+) {
+  const url = taskId
+    ? `/api/tasks/${taskId}/work-logs/suggestions?limit=${limit}`
+    : null;
+
+  const { data, error, isLoading, mutate } =
+    useSWR<WorkLogSuggestionsResponse>(url);
+
+  return {
+    suggestions: data?.suggestions || [],
     isLoading,
     error,
     mutate,

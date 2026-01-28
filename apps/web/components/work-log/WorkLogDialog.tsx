@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CreateWorkLogSchema } from '@repo/schema';
@@ -12,6 +12,7 @@ import { BaseDialog } from '@/components/ui/base-dialog';
 import { Button } from '@/components/ui/button';
 import {
   Form,
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
@@ -28,6 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { WorkLogSuggestions } from './WorkLogSuggestions';
 
 interface WorkLogDialogProps {
   open: boolean;
@@ -63,6 +65,8 @@ export function WorkLogDialog({
   const [taskId, setTaskId] = useState<string>(selectedTaskId || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const form = useForm<CreateWorkLogRequest | UpdateWorkLogRequest>({
     resolver: zodResolver(CreateWorkLogSchema),
@@ -106,6 +110,18 @@ export function WorkLogDialog({
       form.setValue('progress', previousLog.progress ?? undefined);
       form.setValue('issues', previousLog.issues || '');
     }
+  };
+
+  const handleContentFocus = () => {
+    if (mode === 'create' && taskId) {
+      setShowSuggestions(true);
+    }
+  };
+
+  const handleSuggestionSelect = (content: string) => {
+    form.setValue('content', content);
+    setShowSuggestions(false);
+    textareaRef.current?.focus();
   };
 
   const handleFormSubmit = async (
@@ -237,15 +253,39 @@ export function WorkLogDialog({
                 </Button>
               )}
             </div>
-            <FormTextarea
-              control={form.control}
-              name="content"
-              placeholder="오늘 진행한 작업 내용을 입력하세요"
-              className="min-h-[120px] resize-none"
-              rows={5}
-              wrapClassName="relative"
-              errorMessage={true}
-            />
+            <div className="relative">
+              <FormField
+                control={form.control}
+                name="content"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <textarea
+                        {...field}
+                        ref={(e) => {
+                          field.ref(e);
+                          (textareaRef as any).current = e;
+                        }}
+                        placeholder="오늘 진행한 작업 내용을 입력하세요"
+                        className="flex min-h-[120px] w-full rounded-md border border-input bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-80 resize-none"
+                        rows={5}
+                        onFocus={handleContentFocus}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {mode === 'create' && (
+                <WorkLogSuggestions
+                  taskId={taskId || null}
+                  open={showSuggestions}
+                  onOpenChange={setShowSuggestions}
+                  onSelect={handleSuggestionSelect}
+                  anchorRef={textareaRef}
+                />
+              )}
+            </div>
             <div className="flex justify-end mt-1">
               <p className="text-xs text-slate-500">
                 {form.watch('content')?.length || 0}/2000
@@ -256,7 +296,7 @@ export function WorkLogDialog({
           {/* 작업 시간 */}
           <div className="flex justify-between items-end space-y-2">
             <div className="flex gap-2 items-end">
-              <div className="flex-1">
+              <div className="w-[100px]">
                 <FormInput
                   control={form.control}
                   name="workHours"
@@ -272,7 +312,7 @@ export function WorkLogDialog({
               </div>
               <span className="text-sm text-slate-500 pb-2">시간</span>
             </div>
-            <div className="flex gap-1">
+            <div className="flex gap-1 flex-1 justify-end">
               {WORK_HOURS_PRESETS.map((hours) => (
                 <Button
                   key={hours}
