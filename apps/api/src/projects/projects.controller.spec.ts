@@ -57,9 +57,15 @@ describe('ProjectsController', () => {
 
       mockProjectsService.create.mockResolvedValue(mockProject);
 
-      const result = await controller.create(createDto);
+      const result = await controller.create({
+        name: createDto.projectName,
+        projectType: 'OPERATION',
+        client: '신한카드',
+        startDate: '2024-01-01',
+        endDate: '2024-12-31',
+      });
 
-      expect(result.projectName).toBe(createDto.projectName);
+      expect(result.name).toBe(createDto.projectName);
       expect(result.startDate).toBe('2024-01-01');
       expect(result.endDate).toBe('2024-12-31');
     });
@@ -127,7 +133,7 @@ describe('ProjectsController', () => {
       const result = await controller.findOne('1');
 
       expect(result.id).toBe('1');
-      expect(result.projectName).toBe('프로젝트1');
+      expect(result.name).toBe('프로젝트1');
     });
   });
 
@@ -153,9 +159,12 @@ describe('ProjectsController', () => {
 
       mockProjectsService.update.mockResolvedValue(mockProject);
 
-      const result = await controller.update('1', updateDto);
+      const result = await controller.update('1', {
+        name: updateDto.projectName,
+        status: 'COMPLETED',
+      });
 
-      expect(result.projectName).toBe(updateDto.projectName);
+      expect(result.name).toBe(updateDto.projectName);
       expect(result.status).toBe('COMPLETED');
     });
   });
