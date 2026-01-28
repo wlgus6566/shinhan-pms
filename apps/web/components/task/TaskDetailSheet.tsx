@@ -214,7 +214,12 @@ export function TaskDetailSheet({
                   "
                             title={assignee.name}
                           >
-                            {assignee.name}
+                            {assignee.name}{' '}
+                            {assignee.email && (
+                              <span className="text-xs text-muted-foreground">
+                                ({assignee.email})
+                              </span>
+                            )}
                           </span>
                         ))}
                       </div>

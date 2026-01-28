@@ -11,9 +11,8 @@ import { ScheduleDialog } from './ScheduleDialog';
 import { SelectedDateScheduleList } from './SelectedDateScheduleList';
 import type { Schedule, TeamScope } from '@/types/schedule';
 import { TEAM_SCOPE_LABELS, TEAM_SCOPE_FILTER_COLORS } from '@/types/schedule';
-import type { ProjectMember } from '@/types/project';
 import { getProjectSchedules } from '@/lib/api/schedules';
-import { getProjectMembers } from '@/lib/api/projectMembers';
+import { useProjectMembers } from '@/lib/api/projectMembers';
 
 interface ProjectScheduleListProps {
   projectId: string;
@@ -30,23 +29,12 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [dialogState, setDialogState] = useState<DialogState>({ open: false });
   const [loading, setLoading] = useState(true);
-  const [projectMembers, setProjectMembers] = useState<ProjectMember[]>([]);
 
   // Filter state
   const [selectedTeams, setSelectedTeams] = useState<TeamScope[]>([]);
 
-  // Fetch project members for dynamic team filtering
-  useEffect(() => {
-    const fetchMembers = async () => {
-      try {
-        const members = await getProjectMembers(projectId);
-        setProjectMembers(members);
-      } catch (error) {
-        console.error('Failed to fetch project members:', error);
-      }
-    };
-    fetchMembers();
-  }, [projectId]);
+  // Fetch project members using SWR hook
+  const { members: projectMembers = [] } = useProjectMembers(projectId);
 
   useEffect(() => {
     const fetchSchedules = async () => {

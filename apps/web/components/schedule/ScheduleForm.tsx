@@ -17,8 +17,8 @@ import {
 } from '@/components/form';
 import type { Schedule, TeamScope, ScheduleType, HalfDayType } from '@/types/schedule';
 import { SCHEDULE_TYPE_LABELS, TEAM_SCOPE_LABELS } from '@/types/schedule';
-import type { ProjectMember, WorkArea } from '@/types/project';
-import { useProjectMembers, getProjectMembers } from '@/lib/api/projectMembers';
+import type { WorkArea } from '@/types/project';
+import { useProjectMembers } from '@/lib/api/projectMembers';
 
 type ScheduleFormValues = CreateScheduleRequest;
 
@@ -44,26 +44,10 @@ export function ScheduleForm({
   onDelete,
 }: ScheduleFormProps) {
   const isEditing = !!schedule;
-  const [projectMembers, setProjectMembers] = useState<ProjectMember[]>([]);
-  const [loadingMembers, setLoadingMembers] = useState(true);
   const [endTime, setEndTime] = useState<string>('');
 
-  // Fetch project members
-  useEffect(() => {
-    const fetchMembers = async () => {
-      try {
-        setLoadingMembers(true);
-        const members = await getProjectMembers(projectId);
-        setProjectMembers(members);
-      } catch (error) {
-        console.error('Failed to fetch project members:', error);
-      } finally {
-        setLoadingMembers(false);
-      }
-    };
-
-    fetchMembers();
-  }, [projectId]);
+  // Fetch project members using SWR hook
+  const { members: projectMembers = [], isLoading: loadingMembers } = useProjectMembers(projectId);
 
   // UTC 시간을 로컬 시간으로 변환하여 datetime-local input에 표시
   const formatDateTimeLocal = (isoString: string) => {
@@ -481,9 +465,6 @@ export function ScheduleForm({
                 className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 required
               />
-              {!endTime && (
-                <p className="mt-1 text-sm text-red-600">종료 시간을 선택해주세요</p>
-              )}
             </div>
           </div>
         )}

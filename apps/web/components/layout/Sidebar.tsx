@@ -28,7 +28,7 @@ const menuItems = [
   { icon: FileText, label: '업무일지', href: '/work-logs' },
   { icon: CalendarIcon, label: '일정 관리', href: '/schedule' },
   { icon: BarChart3, label: '프로젝트 리포트', href: '/analytics' },
-  { icon: Palette, label: '디자인', href: '/dashboard/design-system' },
+  { icon: Palette, label: '디자인', href: '/dashboard/desiㅁㅁgn-system' },
 ];
 
 const adminMenuItems = [{ icon: Users, label: '멤버 관리', href: '/users' }];
