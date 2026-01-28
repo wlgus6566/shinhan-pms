@@ -1,12 +1,13 @@
 name: Deploy Web
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'apps/web/**'
-      - 'packages/**'
-      - 'pnpm-lock.yaml'
+  workflow_dispatch:
+  # push:
+  #   branches: [main]
+  #   paths:
+  #     - 'apps/web/**'
+  #     - 'packages/**'
+  #     - 'pnpm-lock.yaml'
 
 env:
   AWS_REGION: ap-northeast-2

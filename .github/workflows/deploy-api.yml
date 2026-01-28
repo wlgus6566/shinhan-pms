@@ -1,12 +1,13 @@
 name: Deploy API
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'apps/api/**'
-      - 'packages/**'
-      - 'pnpm-lock.yaml'
+  workflow_dispatch:
+  # push:
+  #   branches: [main]
+  #   paths:
+  #     - 'apps/api/**'
+  #     - 'packages/**'
+  #     - 'pnpm-lock.yaml'
 
 env:
   AWS_REGION: ap-northeast-2
