@@ -25,10 +25,10 @@ import {
 } from '@/components/ui/select';
 import {
   TablePagination,
-  TableLoading,
   TableError,
   TableEmpty,
 } from '@/components/common/table';
+import { ProjectListSkeleton } from '@/components/project/skeleton/ProjectListSkeleton';
 import { Search, MoreHorizontal, ArrowUpDown } from 'lucide-react';
 import type { Project, ProjectStatus, ProjectType } from '@/types/project';
 import {
@@ -66,10 +66,8 @@ export function ProjectListTable() {
   const currentPage = (params.pageNum as number) || 1;
 
   // Search button hook
-  const { searchInput, setSearchInput, handleSearch, handleKeyDown } = useSearchButton(
-    params,
-    setParams
-  );
+  const { searchInput, setSearchInput, handleSearch, handleKeyDown } =
+    useSearchButton(params, setParams);
 
   // SWR로 데이터 패칭 (서버 사이드 페이지네이션)
   const apiParams = useMemo(() => {
@@ -136,30 +134,30 @@ export function ProjectListTable() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="hover:bg-transparent border-b border-slate-100">
-              <TableHead>
-                <div className="flex items-center gap-1 cursor-pointer hover:text-slate-700">
-                  프로젝트명
-                </div>
-              </TableHead>
-              <TableHead>클라이언트</TableHead>
-              <TableHead className="text-center">타입</TableHead>
-              <TableHead className="text-center">상태</TableHead>
-              <TableHead>
-                <div className="flex items-center gap-1 cursor-pointer hover:text-slate-700">
-                  기간
-                </div>
-              </TableHead>
-              <TableHead className="w-[60px]"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TableLoading colSpan={8} message="프로젝트를 불러오는 중..." />
-            ) : error ? (
+      {isLoading ? (
+        <ProjectListSkeleton />
+      ) : error ? (
+        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent border-b border-slate-100">
+                <TableHead>
+                  <div className="flex items-center gap-1 cursor-pointer hover:text-slate-700">
+                    프로젝트명
+                  </div>
+                </TableHead>
+                <TableHead>클라이언트</TableHead>
+                <TableHead className="text-center">타입</TableHead>
+                <TableHead className="text-center">상태</TableHead>
+                <TableHead>
+                  <div className="flex items-center gap-1 cursor-pointer hover:text-slate-700">
+                    기간
+                  </div>
+                </TableHead>
+                <TableHead className="w-[60px]"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               <TableError
                 colSpan={8}
                 message={
@@ -169,10 +167,58 @@ export function ProjectListTable() {
                   setParams({ search: '', status: 'ALL', pageNum: 1 });
                 }}
               />
-            ) : projectList.length === 0 ? (
+            </TableBody>
+          </Table>
+        </div>
+      ) : projectList.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent border-b border-slate-100">
+                <TableHead>
+                  <div className="flex items-center gap-1 cursor-pointer hover:text-slate-700">
+                    프로젝트명
+                  </div>
+                </TableHead>
+                <TableHead>클라이언트</TableHead>
+                <TableHead className="text-center">타입</TableHead>
+                <TableHead className="text-center">상태</TableHead>
+                <TableHead>
+                  <div className="flex items-center gap-1 cursor-pointer hover:text-slate-700">
+                    기간
+                  </div>
+                </TableHead>
+                <TableHead className="w-[60px]"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               <TableEmpty colSpan={8} message="프로젝트가 없습니다" />
-            ) : (
-              projectList.map((project) => (
+            </TableBody>
+          </Table>
+        </div>
+      ) : (
+        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent border-b border-slate-100">
+                <TableHead>
+                  <div className="flex items-center gap-1 cursor-pointer hover:text-slate-700">
+                    프로젝트명
+                  </div>
+                </TableHead>
+                <TableHead>클라이언트</TableHead>
+                <TableHead className="text-center">타입</TableHead>
+                <TableHead className="text-center">상태</TableHead>
+                <TableHead>
+                  <div className="flex items-center gap-1 cursor-pointer hover:text-slate-700">
+                    기간
+                  </div>
+                </TableHead>
+                <TableHead className="w-[60px]"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {projectList.map((project) => (
                 <TableRow key={project.id} className="group">
                   <TableCell>
                     <Link
@@ -189,23 +235,29 @@ export function ProjectListTable() {
                   </TableCell>
                   <TableCell className="text-center">
                     <Badge variant="outline" className="font-normal">
-                      {PROJECT_TYPE_LABELS[project.projectType as ProjectType] ||
-                        project.projectType}
+                      {PROJECT_TYPE_LABELS[
+                        project.projectType as ProjectType
+                      ] || project.projectType}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-center">
                     <Badge
                       variant={
-                        PROJECT_STATUS_VARIANTS[project.status as ProjectStatus] || 'outline'
+                        PROJECT_STATUS_VARIANTS[
+                          project.status as ProjectStatus
+                        ] || 'outline'
                       }
                     >
-                      {PROJECT_STATUS_LABELS[project.status as ProjectStatus] || project.status}
+                      {PROJECT_STATUS_LABELS[project.status as ProjectStatus] ||
+                        project.status}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <div className="text-sm whitespace-nowrap">
                       <span className="text-slate-600">
-                        {project.startDate ? formatDate(project.startDate) : '-'}
+                        {project.startDate
+                          ? formatDate(project.startDate)
+                          : '-'}
                       </span>
                       <span className="text-slate-400 mx-1">~</span>
                       <span className="text-slate-600">
@@ -226,11 +278,11 @@ export function ProjectListTable() {
                     </Button>
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
 
       {/* Pagination */}
       {!isLoading && pagination && pagination.pages > 1 && (

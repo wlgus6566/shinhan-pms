@@ -4,7 +4,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useMyProjects } from '@/lib/api/projects';
 import { useTabNavigation } from '@/hooks/useTabNavigation';
 import { ProjectScheduleList } from '@/components/schedule/ProjectScheduleList';
-import { Loader2, Calendar } from 'lucide-react';
+import { SchedulePageSkeleton } from '@/components/schedule/skeleton/SchedulePageSkeleton';
+import { Calendar } from 'lucide-react';
 
 export default function TeamSchedulesPage() {
   const { projects, isLoading, error } = useMyProjects();
@@ -19,16 +20,7 @@ export default function TeamSchedulesPage() {
   });
 
   if (isLoading) {
-    return (
-      <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary mb-4" />
-            <p className="text-muted-foreground">프로젝트를 불러오는 중...</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <SchedulePageSkeleton />;
   }
 
   if (error) {
@@ -36,7 +28,9 @@ export default function TeamSchedulesPage() {
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
-            <p className="text-destructive mb-2">프로젝트를 불러오는데 실패했습니다</p>
+            <p className="text-destructive mb-2">
+              프로젝트를 불러오는데 실패했습니다
+            </p>
             <p className="text-sm text-muted-foreground">{error.message}</p>
           </div>
         </div>
@@ -103,7 +97,11 @@ export default function TeamSchedulesPage() {
           </TabsList>
 
           {projects.map((project) => (
-            <TabsContent key={project.id} value={String(project.id)} className="space-y-6">
+            <TabsContent
+              key={project.id}
+              value={String(project.id)}
+              className="space-y-6"
+            >
               <ProjectScheduleList projectId={String(project.id)} />
             </TabsContent>
           ))}
@@ -112,4 +110,3 @@ export default function TeamSchedulesPage() {
     </div>
   );
 }
-

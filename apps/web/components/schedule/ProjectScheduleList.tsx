@@ -5,6 +5,8 @@ import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { ScheduleCalendar } from './ScheduleCalendar';
+import { ScheduleCalendarSkeleton } from './skeleton/ScheduleCalendarSkeleton';
+import { ScheduleSidebarSkeleton } from './skeleton/ScheduleSidebarSkeleton';
 import { ScheduleDialog } from './ScheduleDialog';
 import { SelectedDateScheduleList } from './SelectedDateScheduleList';
 import type { Schedule, TeamScope } from '@/types/schedule';
@@ -92,7 +94,8 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
     if (selectedTeams.length > 0) {
       result = result.filter(
         (schedule) =>
-          schedule.teamScope && selectedTeams.includes(schedule.teamScope as any),
+          schedule.teamScope &&
+          selectedTeams.includes(schedule.teamScope as any),
       );
     }
 
@@ -138,64 +141,69 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
     <div className="relative">
       {/* Two-column layout: Sidebar (filters + selected date list) and Calendar */}
       <div className="flex gap-6">
-        {/* Left Sidebar */}
-        <div className="flex flex-col gap-6 w-[30%]">
-          {/* Team Filter */}
-          <div className="bg-white rounded-lg border p-4">
-            <div className="space-y-2">
-              {availableTeamScopes.map((teamScope) => (
-                <label
-                  key={teamScope}
-                  className="flex items-center justify-between gap-2 cursor-pointer hover:bg-slate-50 p-2 rounded transition-colors"
-                >
-                  <div className="flex items-center gap-2 flex-1">
-                    <input
-                      type="checkbox"
-                      checked={selectedTeams.includes(teamScope)}
-                      onChange={() => toggleTeamFilter(teamScope)}
-                      className="rounded border-slate-300 text-emotion-primary focus:ring-emotion-primary"
-                    />
-                    <span className="text-sm text-slate-700">
-                      {TEAM_SCOPE_LABELS[teamScope]}
-                    </span>
-                  </div>
-                  <span
-                    className="w-3 h-3 rounded-full"
-                    style={{
-                      backgroundColor: TEAM_SCOPE_FILTER_COLORS[
-                        teamScope
-                      ] as string,
-                    }}
-                  />
-                </label>
-              ))}
+        {loading ? (
+          <>
+            <ScheduleSidebarSkeleton />
+            <div className="flex-1">
+              <ScheduleCalendarSkeleton />
             </div>
-          </div>
+          </>
+        ) : (
+          <>
+            {/* Left Sidebar */}
+            <div className="flex flex-col gap-6 w-[30%]">
+              {/* Team Filter */}
+              <div className="bg-white rounded-lg border p-4">
+                <div className="space-y-2">
+                  {availableTeamScopes.map((teamScope) => (
+                    <label
+                      key={teamScope}
+                      className="flex items-center justify-between gap-2 cursor-pointer hover:bg-slate-50 p-2 rounded transition-colors"
+                    >
+                      <div className="flex items-center gap-2 flex-1">
+                        <input
+                          type="checkbox"
+                          checked={selectedTeams.includes(teamScope)}
+                          onChange={() => toggleTeamFilter(teamScope)}
+                          className="rounded border-slate-300 text-emotion-primary focus:ring-emotion-primary"
+                        />
+                        <span className="text-sm text-slate-700">
+                          {TEAM_SCOPE_LABELS[teamScope]}
+                        </span>
+                      </div>
+                      <span
+                        className="w-3 h-3 rounded-full"
+                        style={{
+                          backgroundColor: TEAM_SCOPE_FILTER_COLORS[
+                            teamScope
+                          ] as string,
+                        }}
+                      />
+                    </label>
+                  ))}
+                </div>
+              </div>
 
-          {/* Selected Date Schedule List */}
-          <SelectedDateScheduleList
-            schedules={filteredSchedules}
-            selectedDate={selectedDate}
-            onScheduleClick={handleScheduleClick}
-          />
-        </div>
-
-        {/* Right Content - Calendar */}
-        <div className="flex-1">
-          {loading ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">로드 중...</p>
+              {/* Selected Date Schedule List */}
+              <SelectedDateScheduleList
+                schedules={filteredSchedules}
+                selectedDate={selectedDate}
+                onScheduleClick={handleScheduleClick}
+              />
             </div>
-          ) : (
-            <ScheduleCalendar
-              schedules={filteredSchedules}
-              selectedDate={selectedDate}
-              onDateSelect={handleDateSelect}
-              onMonthChange={handleMonthChange}
-              onScheduleClick={handleScheduleClick}
-            />
-          )}
-        </div>
+
+            {/* Right Content - Calendar */}
+            <div className="flex-1">
+              <ScheduleCalendar
+                schedules={filteredSchedules}
+                selectedDate={selectedDate}
+                onDateSelect={handleDateSelect}
+                onMonthChange={handleMonthChange}
+                onScheduleClick={handleScheduleClick}
+              />
+            </div>
+          </>
+        )}
       </div>
 
       {/* 일정 모달 (상세/생성/수정 통합) */}

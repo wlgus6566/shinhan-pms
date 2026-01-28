@@ -8,11 +8,12 @@ import { useProjectMembers } from '@/lib/api/projectMembers';
 import { useTabNavigation } from '@/hooks/useTabNavigation';
 import { ProjectDetail } from '@/components/project/ProjectDetail';
 import { ProjectMembersTable } from '@/components/project/ProjectMembersTable';
+import { ProjectDetailSkeleton } from '@/components/project/skeleton/ProjectDetailSkeleton';
 import { TeamWorkLogList } from '@/components/work-log/TeamWorkLogList';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Edit, Loader2 } from 'lucide-react';
+import { ArrowLeft, Edit } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ProjectDetailPage() {
@@ -48,11 +49,7 @@ export default function ProjectDetailPage() {
   );
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
+    return <ProjectDetailSkeleton />;
   }
 
   if (error || (!loading && !project)) {
@@ -96,7 +93,11 @@ export default function ProjectDetailPage() {
         </h1>
       </div>
 
-      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
+      <Tabs
+        value={activeTab}
+        onValueChange={handleTabChange}
+        className="space-y-4"
+      >
         <TabsList>
           <TabsTrigger value="info">기본 정보</TabsTrigger>
           <TabsTrigger value="members">멤버 관리</TabsTrigger>
