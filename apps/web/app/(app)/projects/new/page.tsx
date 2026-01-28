@@ -4,7 +4,13 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { ProjectForm } from '@/components/project/ProjectForm';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -38,7 +44,6 @@ export default function NewProjectPage() {
       <Card>
         <CardHeader>
           <CardTitle>새 프로젝트 등록</CardTitle>
-          <CardDescription>새로운 프로젝트를 등록하면 자동으로 PM으로 배정됩니다</CardDescription>
         </CardHeader>
         <CardContent>
           <ProjectForm mode="create" />

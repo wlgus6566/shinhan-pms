@@ -1,4 +1,9 @@
-import type { ProjectStatus, ProjectType, WorkArea, ProjectRole } from '@/types/project';
+import type {
+  ProjectStatus,
+  ProjectType,
+  WorkArea,
+  ProjectRole,
+} from '@/types/project';
 
 // 프로젝트 상태 라벨 (ProjectStatus: 'ACTIVE' | 'COMPLETED' | 'SUSPENDED')
 export const PROJECT_STATUS_LABELS: Record<ProjectStatus, string> = {
@@ -40,10 +45,14 @@ export const PROJECT_STATUS_BADGE_STYLES: Record<
 export const PROJECT_TYPE_LABELS: Record<ProjectType, string> = {
   BUILD: '구축',
   OPERATION: '운영',
+  ADVANCEMENT: '고도화',
 } as const;
 
 // 프로젝트 역할 배리언트 (PM, PL, PA - 프로젝트 내 역할)
-export const PROJECT_ROLE_VARIANTS: Record<ProjectRole, 'default' | 'secondary' | 'outline'> = {
+export const PROJECT_ROLE_VARIANTS: Record<
+  ProjectRole,
+  'default' | 'secondary' | 'outline'
+> = {
   PM: 'default',
   PL: 'secondary',
   PA: 'outline',
@@ -57,10 +66,12 @@ export const PROJECT_ROLE_LABELS: Record<ProjectRole, string> = {
 } as const;
 
 // 프로젝트 역할 옵션
-export const PROJECT_ROLE_OPTIONS = Object.entries(PROJECT_ROLE_LABELS).map(([value, label]) => ({
-  value,
-  label,
-}));
+export const PROJECT_ROLE_OPTIONS = Object.entries(PROJECT_ROLE_LABELS).map(
+  ([value, label]) => ({
+    value,
+    label,
+  }),
+);
 
 // 작업 영역 라벨 (WorkArea enum용)
 export const WORK_AREA_LABELS_STRICT: Record<WorkArea, string> = {
@@ -72,10 +83,15 @@ export const WORK_AREA_LABELS_STRICT: Record<WorkArea, string> = {
 } as const;
 
 // 작업 영역 옵션
-export const WORK_AREA_OPTIONS = Object.entries(WORK_AREA_LABELS_STRICT).map(([value, label]) => ({
-  value,
-  label: `${label} (${value.split('_').map(word => word.charAt(0) + word.slice(1).toLowerCase()).join(' ')})`,
-}));
+export const WORK_AREA_OPTIONS = Object.entries(WORK_AREA_LABELS_STRICT).map(
+  ([value, label]) => ({
+    value,
+    label: `${label} (${value
+      .split('_')
+      .map((word) => word.charAt(0) + word.slice(1).toLowerCase())
+      .join(' ')})`,
+  }),
+);
 
 // 작업 영역 라벨 (필터링용 - 'all' 포함)
 export const WORK_AREA_LABELS: Record<string, string> = {
@@ -85,5 +101,4 @@ export const WORK_AREA_LABELS: Record<string, string> = {
   DESIGN: '디자인',
   FRONTEND: '프론트엔드',
   BACKEND: '백엔드',
-  OPERATION: '운영',
 } as const;

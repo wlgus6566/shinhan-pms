@@ -1,19 +1,22 @@
 'use client';
 
-import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useMyProjects } from '@/lib/api/projects';
+import { useTabNavigation } from '@/hooks/useTabNavigation';
 import { ProjectScheduleList } from '@/components/schedule/ProjectScheduleList';
 import { Loader2, Calendar } from 'lucide-react';
 
 export default function TeamSchedulesPage() {
   const { projects, isLoading, error } = useMyProjects();
-  const [activeTab, setActiveTab] = useState<string>('');
 
-  // Set initial active tab when projects load
-  if (projects && projects.length > 0 && !activeTab && projects[0]) {
-    setActiveTab(String(projects[0].id));
-  }
+  // 첫 번째 프로젝트 ID를 기본값으로 사용
+  const defaultProjectId =
+    projects && projects.length > 0 ? String(projects[0].id) : '';
+
+  const { activeTab, handleTabChange } = useTabNavigation('/schedule', {
+    defaultTab: defaultProjectId,
+    queryKey: 'project',
+  });
 
   if (isLoading) {
     return (
@@ -82,7 +85,11 @@ export default function TeamSchedulesPage() {
         </div>
 
         {/* Project Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs
+          value={activeTab}
+          onValueChange={handleTabChange}
+          className="space-y-6"
+        >
           <TabsList>
             {projects.map((project) => (
               <TabsTrigger

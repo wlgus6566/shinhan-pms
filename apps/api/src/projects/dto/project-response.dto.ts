@@ -10,7 +10,7 @@ export class ProjectResponseDto {
   @ApiProperty({ description: '클라이언트', example: '신한카드', required: false })
   client?: string;
 
-  @ApiProperty({ description: '프로젝트 타입', enum: ['OPERATION', 'BUILD'] })
+  @ApiProperty({ description: '프로젝트 타입', enum: ['OPERATION', 'BUILD', 'ADVANCEMENT'] })
   projectType: string;
 
   @ApiProperty({

@@ -13,13 +13,9 @@ import {
 const pathMap: Record<string, string> = {
   dashboard: '대시보드',
   projects: '프로젝트 관리',
-  tasks: '업무 관리',
-  calendar: '일정 관리',
-  status: '현황 관리',
-  profile: '프로필 설정',
-  admin: '관리자 전용',
-  users: '회원 관리',
-  'design-system': '디자인 시스템',
+  'work-logs': '업무일지',
+  schedule: '일정 관리',
+  users: '멤버 관리',
   new: '새 프로젝트',
   edit: '수정',
 };
@@ -33,7 +29,9 @@ export function Header() {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink href="/dashboard" className="text-slate-400">Home</BreadcrumbLink>
+            <BreadcrumbLink href="/dashboard" className="text-slate-400">
+              Home
+            </BreadcrumbLink>
           </BreadcrumbItem>
           {paths.map((path, index) => {
             const isLast = index === paths.length - 1;
@@ -47,7 +45,9 @@ export function Header() {
                 <BreadcrumbSeparator className="text-slate-300" />
                 <BreadcrumbItem>
                   {isLast ? (
-                    <BreadcrumbPage className="font-bold text-slate-900">{label}</BreadcrumbPage>
+                    <BreadcrumbPage className="font-bold text-slate-900">
+                      {label}
+                    </BreadcrumbPage>
                   ) : (
                     <BreadcrumbLink href={href} className="text-slate-400">
                       {label}

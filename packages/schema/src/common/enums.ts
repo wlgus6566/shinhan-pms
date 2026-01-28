@@ -1,8 +1,10 @@
 import { z } from 'zod';
 
 // Project Related Enums
-export const ProjectTypeEnum = z.enum(['OPERATION', 'BUILD'], {
-  errorMap: () => ({ message: '프로젝트 타입은 운영 또는 구축이어야 합니다' }),
+export const ProjectTypeEnum = z.enum(['OPERATION', 'BUILD', 'ADVANCEMENT'], {
+  errorMap: () => ({
+    message: '프로젝트 타입은 운영, 구축, 고도화 중 하나여야 합니다',
+  }),
 });
 
 export type ProjectType = z.infer<typeof ProjectTypeEnum>;

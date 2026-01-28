@@ -23,21 +23,26 @@ import { useState, useCallback } from 'react';
 
 const menuItems = [
   { icon: LayoutDashboard, label: '대시보드', href: '/dashboard' },
-  { icon: FolderKanban, label: '프로젝트', href: '/projects' },
+  { icon: FolderKanban, label: '프로젝트 관리', href: '/projects' },
   // "업무" 메뉴는 확장 드롭다운으로 별도 처리
   { icon: FileText, label: '업무일지', href: '/work-logs' },
-  { icon: CalendarIcon, label: '일정', href: '/schedule' },
+  { icon: CalendarIcon, label: '일정 관리', href: '/schedule' },
   // { icon: BarChart3, label: '현황', href: '/status' },
   { icon: Palette, label: '디자인', href: '/dashboard/design-system' },
 ];
 
 const adminMenuItems = [{ icon: Users, label: '멤버 관리', href: '/users' }];
 
-export function Sidebar() {
+export function Sidebar({
+  sidebarOpen,
+  setSidebarOpen,
+}: {
+  sidebarOpen: boolean;
+  setSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { projects: myProjects } = useMyProjects();
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [isTaskMenuOpen, setIsTaskMenuOpen] = useState(
     pathname?.startsWith('/tasks') || false,
   );
@@ -47,11 +52,6 @@ export function Sidebar() {
     (href: string) => pathname === href || pathname?.startsWith(`${href}/`),
     [pathname],
   );
-
-  // Stable toggle handler
-  const toggleCollapsed = useCallback(() => {
-    setIsCollapsed((prev) => !prev);
-  }, []);
 
   const toggleTaskMenu = useCallback(() => {
     setIsTaskMenuOpen((prev) => !prev);
@@ -63,14 +63,14 @@ export function Sidebar() {
     <aside
       className={cn(
         'fixed left-0 top-0 h-full bg-[#1e1f2e] transition-all duration-300 z-50 flex flex-col',
-        isCollapsed ? 'w-[72px]' : 'w-[240px]',
+        sidebarOpen ? 'w-[240px]' : 'w-[72px]',
       )}
     >
       {/* Logo Area */}
       <div
         className={cn(
           'h-16 flex items-center border-b border-white/5',
-          isCollapsed ? 'justify-center px-0' : 'px-5',
+          sidebarOpen ? 'justify-center px-0' : 'px-5',
         )}
       >
         <Link
@@ -80,7 +80,7 @@ export function Sidebar() {
           <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex-shrink-0 flex items-center justify-center shadow-lg shadow-blue-500/25">
             <span className="text-white font-bold text-base">E</span>
           </div>
-          {!isCollapsed && (
+          {sidebarOpen && (
             <div className="flex flex-col">
               <span className="text-white font-bold text-sm tracking-tight">
                 Emotion PMS
@@ -118,7 +118,7 @@ export function Sidebar() {
                       : 'text-slate-500 group-hover:text-white',
                   )}
                 />
-                {!isCollapsed && (
+                {sidebarOpen && (
                   <span
                     className={cn(
                       'text-sm font-medium truncate',
@@ -154,7 +154,7 @@ export function Sidebar() {
                     : 'text-slate-500 group-hover:text-white',
                 )}
               />
-              {!isCollapsed && (
+              {sidebarOpen && (
                 <>
                   <span
                     className={cn(
@@ -175,7 +175,7 @@ export function Sidebar() {
             </button>
 
             {/* 하위 프로젝트 목록 */}
-            {!isCollapsed && isTaskMenuOpen && (
+            {sidebarOpen && isTaskMenuOpen && (
               <div className="mt-1 ml-4 pl-4 border-l border-white/10 space-y-1">
                 {myProjects && myProjects.length > 0 ? (
                   myProjects.map((project) => {
@@ -235,7 +235,7 @@ export function Sidebar() {
                       : 'text-slate-500 group-hover:text-white',
                   )}
                 />
-                {!isCollapsed && (
+                {sidebarOpen && (
                   <span
                     className={cn(
                       'text-sm font-medium truncate',
@@ -253,7 +253,7 @@ export function Sidebar() {
         {/* Admin Section */}
         {(user?.role === 'SUPER_ADMIN' || user?.role === 'PM') && (
           <div className="mt-6 pt-6 border-t border-white/5">
-            {!isCollapsed && (
+            {sidebarOpen && (
               <p className="px-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-3">
                 관리자
               </p>
@@ -282,7 +282,7 @@ export function Sidebar() {
                         : 'text-slate-500 group-hover:text-white',
                     )}
                   />
-                  {!isCollapsed && (
+                  {sidebarOpen && (
                     <span
                       className={cn(
                         'text-sm font-medium truncate',
@@ -300,7 +300,7 @@ export function Sidebar() {
       </nav>
 
       {/* Stats Card - CRM Style */}
-      {!isCollapsed && (
+      {sidebarOpen && (
         <div className="mx-3 mb-4 p-4 bg-gradient-to-br from-blue-500/10 to-blue-600/5 rounded-2xl border border-blue-500/10">
           <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
             진행중 프로젝트
@@ -316,19 +316,19 @@ export function Sidebar() {
 
       {/* User Profile */}
       <div
-        className={cn('border-t border-white/5', isCollapsed ? 'p-2' : 'p-3')}
+        className={cn('border-t border-white/5', sidebarOpen ? 'p-2' : 'p-3')}
       >
         {user && (
           <div
             className={cn(
               'flex items-center gap-3 p-2 rounded-xl transition-colors',
-              !isCollapsed && 'hover:bg-white/5',
+              sidebarOpen && 'hover:bg-white/5',
             )}
           >
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
               {user.name.charAt(0)}
             </div>
-            {!isCollapsed && (
+            {sidebarOpen && (
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-white truncate">
                   {user.name}
@@ -342,7 +342,7 @@ export function Sidebar() {
               onClick={logout}
               className={cn(
                 'p-2 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors',
-                isCollapsed && 'w-full flex justify-center mt-2',
+                sidebarOpen && 'w-full flex justify-center mt-2',
               )}
               title="로그아웃"
             >
@@ -354,14 +354,14 @@ export function Sidebar() {
 
       {/* Collapse Toggle */}
       <button
-        onClick={toggleCollapsed}
+        onClick={() => setSidebarOpen((prev: boolean) => !prev)}
         className="absolute -right-3 top-20 w-6 h-6 bg-[#1e1f2e] border border-white/10 rounded-full flex items-center justify-center text-slate-500 hover:text-white transition-colors shadow-lg"
-        aria-label={isCollapsed ? '사이드바 펼치기' : '사이드바 접기'}
+        aria-label={sidebarOpen ? '사이드바 접기' : '사이드바 펼치기'}
       >
-        {isCollapsed ? (
-          <ChevronRight className="h-3 w-3" />
-        ) : (
+        {sidebarOpen ? (
           <ChevronLeft className="h-3 w-3" />
+        ) : (
+          <ChevronRight className="h-3 w-3" />
         )}
       </button>
     </aside>

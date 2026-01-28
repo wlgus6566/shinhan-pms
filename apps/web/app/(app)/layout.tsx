@@ -4,7 +4,8 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
 
 export default function DashboardLayout({
   children,
@@ -13,6 +14,7 @@ export default function DashboardLayout({
 }) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -31,15 +33,20 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen min-w-[1280px] bg-emotion-lightgray">
       {/* 고정 사이드바 */}
-      <Sidebar />
+      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
       {/* 메인 콘텐츠 영역 (사이드바 너비만큼 왼쪽 여백) */}
-      <div className="pl-[240px] transition-all duration-300">
+      <div
+        className={cn(
+          'pl-[240px] transition-all duration-300',
+          sidebarOpen ? 'pl-[240px]' : 'pl-[72px]',
+        )}
+      >
         {/* 상단 헤더 */}
         <Header />
 
         {/* 페이지 콘텐츠 */}
-        <main className="p-8">{children}</main>
+        <main className="max-w-[1600px] p-8">{children}</main>
       </div>
     </div>
   );

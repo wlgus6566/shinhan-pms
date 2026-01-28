@@ -28,6 +28,7 @@ import {
   useRecentActivities,
   useUpcomingSchedules,
 } from '@/lib/api/dashboard';
+import { useMyProjects } from '@/lib/api/projects';
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
 
@@ -186,6 +187,13 @@ export default function DashboardPage() {
   const { stats, isLoading: statsLoading } = useDashboardStats();
   const { activities, isLoading: activitiesLoading } = useRecentActivities();
   const { schedules, isLoading: schedulesLoading } = useUpcomingSchedules();
+  const { projects } = useMyProjects();
+
+  // PM 프로젝트 조회 및 필터링
+  const pmProjects = useMemo(
+    () => projects?.filter((p) => p.myRole === 'PM') || [],
+    [projects],
+  );
 
   // Memoize formatted date (js-cache-function-results)
   const formattedDate = useMemo(
@@ -245,24 +253,38 @@ export default function DashboardPage() {
           isLoading={statsLoading}
         />
       </section>
-
       {/* Quick Actions */}
       <section>
         <h2 className="text-lg font-semibold text-slate-900 mb-4">바로가기</h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {pmProjects.length > 0 ? (
+            <>
+              {pmProjects.slice(0, 3).map((project) => (
+                <QuickActionCard
+                  key={project.id}
+                  title={project.name + ' 업무 관리'}
+                  description="팀 업무일지를 확인하고 관리합니다"
+                  href={`/projects/${project.id}?tab=team-logs`}
+                  icon={FileText}
+                  color="emerald"
+                />
+              ))}
+            </>
+          ) : (
+            <QuickActionCard
+              title="업무일지 작성"
+              description="오늘의 업무 내용을 기록합니다"
+              href="/work-logs"
+              icon={ClipboardList}
+              color="emerald"
+            />
+          )}
           <QuickActionCard
             title="프로젝트 관리"
             description="진행 중인 프로젝트를 확인하고 관리합니다"
             href="/projects"
             icon={FolderKanban}
             color="blue"
-          />
-          <QuickActionCard
-            title="업무일지 작성"
-            description="오늘의 업무 내용을 기록합니다"
-            href="/work-logs"
-            icon={ClipboardList}
-            color="emerald"
           />
           <QuickActionCard
             title="일정 확인"

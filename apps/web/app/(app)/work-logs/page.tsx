@@ -6,6 +6,7 @@ import { FileText, Loader2 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/context/AuthContext';
 import { useMyWorkLogs, useMyTasks } from '@/lib/api/workLogs';
+import { useTabNavigation } from '@/hooks/useTabNavigation';
 import {
   WorkLogCalendar,
   WorkLogDialog,
@@ -33,7 +34,15 @@ export default function WorkLogsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
   const [editingWorkLog, setEditingWorkLog] = useState<WorkLog | null>(null);
-  const [selectedProjectId, setSelectedProjectId] = useState<string>('all');
+
+  // 프로젝트 필터 탭 (URL 동기화)
+  const {
+    activeTab: selectedProjectId,
+    handleTabChange: setSelectedProjectId,
+  } = useTabNavigation('/work-logs', {
+    defaultTab: 'all',
+    queryKey: 'project',
+  });
 
   // 날짜 범위 계산
   const dateRange = useMemo(() => {

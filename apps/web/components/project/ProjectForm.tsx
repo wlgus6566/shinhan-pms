@@ -32,6 +32,7 @@ import type { ProjectStatus } from '@/types/project';
 const projectTypeOptions = [
   { value: 'OPERATION', label: '운영' },
   { value: 'BUILD', label: '구축' },
+  { value: 'ADVANCEMENT', label: '고도화' },
 ];
 
 type ProjectFormValues = CreateProjectRequest;
@@ -45,7 +46,7 @@ export function ProjectForm({ projectId, mode }: ProjectFormProps) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [success, setSuccess] = useState(true);
+  const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Fetch project data using SWR hook

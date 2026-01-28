@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useProject } from '@/lib/api/projects';
 import { useProjectMembers } from '@/lib/api/projectMembers';
+import { useTabNavigation } from '@/hooks/useTabNavigation';
 import { ProjectDetail } from '@/components/project/ProjectDetail';
 import { ProjectMembersTable } from '@/components/project/ProjectMembersTable';
 import { TeamWorkLogList } from '@/components/work-log/TeamWorkLogList';
@@ -18,6 +19,12 @@ export default function ProjectDetailPage() {
   const params = useParams();
   const { user } = useAuth();
   const projectId = params.id as string;
+
+  // Tab state management with URL sync
+  const { activeTab, handleTabChange } = useTabNavigation(
+    `/projects/${projectId}`,
+    { defaultTab: 'info' },
+  );
 
   // Fetch data using SWR hooks
   const {
@@ -89,7 +96,7 @@ export default function ProjectDetailPage() {
         </h1>
       </div>
 
-      <Tabs defaultValue="info" className="space-y-4">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
         <TabsList>
           <TabsTrigger value="info">기본 정보</TabsTrigger>
           <TabsTrigger value="members">멤버 관리</TabsTrigger>

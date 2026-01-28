@@ -94,7 +94,7 @@ export function TaskFilters({
                   onClick={() => onStatusToggle(status)}
                 >
                   {statusFilter.includes(status) && (
-                    <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
+                    <div className="w-4 h-4 rounded-full bg-primary flex items-center justify-center">
                       <Check className="h-3 w-3 text-white" strokeWidth={3} />
                     </div>
                   )}
