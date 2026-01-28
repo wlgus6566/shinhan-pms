@@ -38,7 +38,7 @@ export class AnalyticsController {
   }
 
   /**
-   * 팀 생산성 통계 조회 (PM/SUPER_ADMIN)
+   * 팀 리포트 통계 조회 (PM/SUPER_ADMIN)
    * GET /analytics/team-productivity?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD&projectId=optional
    */
   @Get('team-productivity')
@@ -223,6 +223,28 @@ export class AnalyticsController {
     }
 
     const result = await this.analyticsService.getPartWorkHours(projectId, yearMonth);
+    return result;
+  }
+
+  /**
+   * 상태별 진행 건수 조회
+   * GET /analytics/task-status-count?projectId=X&yearMonth=YYYY-MM
+   */
+  @Get('task-status-count')
+  async getTaskStatusCount(
+    @Query('projectId') projectId: string,
+    @Query('yearMonth') yearMonth: string,
+  ) {
+    if (!projectId || !yearMonth) {
+      throw new BadRequestException('projectId와 yearMonth는 필수입니다');
+    }
+
+    const yearMonthRegex = /^\d{4}-(0[1-9]|1[0-2])$/;
+    if (!yearMonthRegex.test(yearMonth)) {
+      throw new BadRequestException('yearMonth는 YYYY-MM 형식이어야 합니다');
+    }
+
+    const result = await this.analyticsService.getTaskStatusCount(projectId, yearMonth);
     return result;
   }
 }

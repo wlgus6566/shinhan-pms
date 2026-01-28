@@ -11,6 +11,8 @@ import {
   PartWorkHoursResponse,
   PartTaskCount,
   PartWorkHours,
+  TaskStatusCountResponse,
+  TaskStatusCountItem,
 } from '@repo/schema';
 
 @Injectable()
@@ -470,5 +472,38 @@ export class AnalyticsService {
     });
 
     return { parts };
+  }
+
+  /**
+   * 상태별 진행 건수 조회
+   */
+  async getTaskStatusCount(
+    projectId: string,
+    _yearMonth: string,
+  ): Promise<TaskStatusCountResponse> {
+    // 프로젝트의 모든 활성 업무를 상태별로 집계
+    const rawData: Array<{
+      status: string;
+      task_count: bigint;
+    }> = await this.prisma.$queryRaw`
+      SELECT
+        t.status,
+        COUNT(t.id) as task_count
+      FROM tasks t
+      WHERE t.project_id = ${BigInt(projectId)}
+        AND t.is_active = true
+      GROUP BY t.status
+      ORDER BY task_count DESC
+    `;
+
+    const totalCount = rawData.reduce((sum, item) => sum + Number(item.task_count), 0);
+
+    const statusCounts: TaskStatusCountItem[] = rawData.map((item) => ({
+      status: item.status,
+      count: Number(item.task_count),
+      percentage: totalCount > 0 ? (Number(item.task_count) / totalCount) * 100 : 0,
+    }));
+
+    return { statusCounts };
   }
 }

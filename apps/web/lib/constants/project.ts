@@ -105,9 +105,9 @@ export const WORK_AREA_LABELS: Record<string, string> = {
 
 // 작업 영역별 차트 색상
 export const WORK_AREA_COLORS: Record<WorkArea, string> = {
-  PROJECT_MANAGEMENT: '#6366f1', // 인디고
-  PLANNING: '#3b82f6', // 파란색
-  DESIGN: '#10b981', // 초록색
-  FRONTEND: '#f59e0b', // 주황색
-  BACKEND: '#ef4444', // 빨간색
+  PROJECT_MANAGEMENT: '#64748B', // 인디고
+  PLANNING: '#6366F1', // 파란색
+  DESIGN: '#0EA5E9', // 초록색
+  FRONTEND: '#2563EB', // 주황색
+  BACKEND: '#EC4899', // 빨간색
 } as const;

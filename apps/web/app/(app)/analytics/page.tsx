@@ -8,6 +8,7 @@ import {
   useWorkAreaDistribution,
   usePartTaskCount,
   usePartWorkHours,
+  useTaskStatusCount,
 } from '@/lib/api/analytics';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -16,6 +17,7 @@ import { ProductivityStats } from '@/components/analytics/ProductivityStats';
 import { WorkAreaDistributionChart } from '@/components/analytics/WorkAreaDistributionChart';
 import { PartTaskCountChart } from '@/components/analytics/PartTaskCountChart';
 import { PartWorkHoursChart } from '@/components/analytics/PartWorkHoursChart';
+import { TaskStatusCountChart } from '@/components/analytics/TaskStatusCountChart';
 import type { PartTaskCount, PartWorkHours } from '@repo/schema';
 
 export default function AnalyticsPage() {
@@ -43,6 +45,9 @@ export default function AnalyticsPage() {
 
   const { data: partWorkHoursData, isLoading: workHoursLoading } =
     usePartWorkHours(selectedProjectId, selectedMonth);
+
+  const { data: taskStatusCountData, isLoading: statusCountLoading } =
+    useTaskStatusCount(selectedProjectId, selectedMonth);
 
   const handleProjectChange = (projectId: string) => {
     setSelectedProjectId(projectId);
@@ -80,7 +85,7 @@ export default function AnalyticsPage() {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">팀 생산성 대시보드</h1>
+        <h1 className="text-3xl font-bold">팀 리포트 대시보드</h1>
         <MonthPicker value={selectedMonth} onChange={setSelectedMonth} />
       </div>
 
@@ -106,18 +111,34 @@ export default function AnalyticsPage() {
             />
 
             <div className="flex flex-col gap-10">
-              {/* 분야별 작업 시간 분포 */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>분야별 작업 시간 분포</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <WorkAreaDistributionChart
-                    data={distribution}
-                    isLoading={distributionLoading}
-                  />
-                </CardContent>
-              </Card>
+              {/* 상태별 진행 건수 & 분야별 작업 시간 분포 */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* 상태별 진행 건수 */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>상태별 진행 건수</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <TaskStatusCountChart
+                      data={taskStatusCountData?.statusCounts || []}
+                      isLoading={statusCountLoading}
+                    />
+                  </CardContent>
+                </Card>
+
+                {/* 분야별 작업 시간 분포 */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>분야별 작업 시간 분포</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <WorkAreaDistributionChart
+                      data={distribution}
+                      isLoading={distributionLoading}
+                    />
+                  </CardContent>
+                </Card>
+              </div>
 
               {/* 파트별 담당 업무 건수 */}
               <div>

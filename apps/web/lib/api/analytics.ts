@@ -9,6 +9,7 @@ import type {
   PartTaskCountResponse,
   PartWorkHoursResponse,
   ProductivityStats,
+  TaskStatusCountResponse,
 } from '@repo/schema';
 import { buildQueryString } from './pagination';
 
@@ -55,19 +56,25 @@ export function useMyProductivity(
 }
 
 /**
- * 팀 생산성 조회 (PM/SUPER_ADMIN)
+ * 팀 리포트 조회 (PM/SUPER_ADMIN)
  */
-export function useTeamProductivity(startDate: string, endDate: string, projectId?: string) {
+export function useTeamProductivity(
+  startDate: string,
+  endDate: string,
+  projectId?: string,
+) {
   const params = new URLSearchParams();
   params.append('startDate', startDate);
   params.append('endDate', endDate);
   if (projectId) params.append('projectId', projectId);
 
-  const url = startDate && endDate
-    ? `/api/analytics/team-productivity${buildQueryString(params)}`
-    : null;
+  const url =
+    startDate && endDate
+      ? `/api/analytics/team-productivity${buildQueryString(params)}`
+      : null;
 
-  const { data, error, isLoading, mutate } = useSWR<TeamProductivityResponse>(url);
+  const { data, error, isLoading, mutate } =
+    useSWR<TeamProductivityResponse>(url);
 
   return {
     teamProductivity: data,
@@ -88,9 +95,10 @@ export function useWorkHoursTrend(params: AnalyticsParams) {
   if (params.userId) query.append('userId', params.userId);
   if (params.groupBy) query.append('groupBy', params.groupBy);
 
-  const url = params.startDate && params.endDate
-    ? `/api/analytics/work-hours-trend${buildQueryString(query)}`
-    : null;
+  const url =
+    params.startDate && params.endDate
+      ? `/api/analytics/work-hours-trend${buildQueryString(query)}`
+      : null;
 
   const { data, error, isLoading, mutate } = useSWR<WorkHoursTrendItem[]>(url);
 
@@ -126,7 +134,8 @@ export function useWorkAreaDistribution(
     url = `/api/analytics/work-area-distribution${buildQueryString(params)}`;
   }
 
-  const { data, error, isLoading, mutate } = useSWR<WorkAreaDistributionResponse>(url);
+  const { data, error, isLoading, mutate } =
+    useSWR<WorkAreaDistributionResponse>(url);
 
   return {
     distribution: data?.distribution || [],
@@ -139,15 +148,20 @@ export function useWorkAreaDistribution(
 /**
  * 팀원별 업무 부하
  */
-export function useMemberWorkload(startDate: string, endDate: string, projectId?: string) {
+export function useMemberWorkload(
+  startDate: string,
+  endDate: string,
+  projectId?: string,
+) {
   const params = new URLSearchParams();
   params.append('startDate', startDate);
   params.append('endDate', endDate);
   if (projectId) params.append('projectId', projectId);
 
-  const url = startDate && endDate
-    ? `/api/analytics/member-workload${buildQueryString(params)}`
-    : null;
+  const url =
+    startDate && endDate
+      ? `/api/analytics/member-workload${buildQueryString(params)}`
+      : null;
 
   const { data, error, isLoading, mutate } = useSWR<MemberWorkloadItem[]>(url);
 
@@ -181,15 +195,20 @@ export function useProjectProgress(projectId?: string) {
 /**
  * 이슈 발생 빈도
  */
-export function useIssueFrequency(startDate: string, endDate: string, projectId?: string) {
+export function useIssueFrequency(
+  startDate: string,
+  endDate: string,
+  projectId?: string,
+) {
   const params = new URLSearchParams();
   params.append('startDate', startDate);
   params.append('endDate', endDate);
   if (projectId) params.append('projectId', projectId);
 
-  const url = startDate && endDate
-    ? `/api/analytics/issue-frequency${buildQueryString(params)}`
-    : null;
+  const url =
+    startDate && endDate
+      ? `/api/analytics/issue-frequency${buildQueryString(params)}`
+      : null;
 
   const { data, error, isLoading, mutate } = useSWR<WorkHoursTrendItem[]>(url);
 
@@ -204,7 +223,10 @@ export function useIssueFrequency(startDate: string, endDate: string, projectId?
 /**
  * 파트별 담당 업무 건수
  */
-export function usePartTaskCount(projectId: string | undefined, yearMonth: string) {
+export function usePartTaskCount(
+  projectId: string | undefined,
+  yearMonth: string,
+) {
   let url = null;
 
   if (projectId && yearMonth) {
@@ -223,7 +245,10 @@ export function usePartTaskCount(projectId: string | undefined, yearMonth: strin
 /**
  * 파트별 일일 평균 근무 시간
  */
-export function usePartWorkHours(projectId: string | undefined, yearMonth: string) {
+export function usePartWorkHours(
+  projectId: string | undefined,
+  yearMonth: string,
+) {
   let url = null;
 
   if (projectId && yearMonth) {
@@ -235,6 +260,28 @@ export function usePartWorkHours(projectId: string | undefined, yearMonth: strin
   }
 
   const { data, error, isLoading, mutate } = useSWR<PartWorkHoursResponse>(url);
+
+  return { data, isLoading, error, mutate };
+}
+
+/**
+ * 상태별 진행 건수
+ */
+export function useTaskStatusCount(
+  projectId: string | undefined,
+  yearMonth: string,
+) {
+  let url = null;
+
+  if (projectId && yearMonth) {
+    const params = new URLSearchParams();
+    params.append('projectId', projectId);
+    params.append('yearMonth', yearMonth);
+
+    url = `/api/analytics/task-status-count${buildQueryString(params)}`;
+  }
+
+  const { data, error, isLoading, mutate } = useSWR<TaskStatusCountResponse>(url);
 
   return { data, isLoading, error, mutate };
 }

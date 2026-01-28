@@ -85,6 +85,13 @@ export const PartWorkHoursSchema = z.object({
   partAvgHours: z.number(),
 });
 
+// 상태별 진행 건수 아이템
+export const TaskStatusCountItemSchema = z.object({
+  status: z.string(),
+  count: z.number(),
+  percentage: z.number(),
+});
+
 // 응답 타입
 export const PartTaskCountResponseSchema = z.object({
   parts: z.array(PartTaskCountSchema),
@@ -92,6 +99,10 @@ export const PartTaskCountResponseSchema = z.object({
 
 export const PartWorkHoursResponseSchema = z.object({
   parts: z.array(PartWorkHoursSchema),
+});
+
+export const TaskStatusCountResponseSchema = z.object({
+  statusCounts: z.array(TaskStatusCountItemSchema),
 });
 
 // TypeScript 타입 추출
@@ -109,3 +120,5 @@ export type PartMemberWorkHours = z.infer<typeof PartMemberWorkHoursSchema>;
 export type PartWorkHours = z.infer<typeof PartWorkHoursSchema>;
 export type PartTaskCountResponse = z.infer<typeof PartTaskCountResponseSchema>;
 export type PartWorkHoursResponse = z.infer<typeof PartWorkHoursResponseSchema>;
+export type TaskStatusCountItem = z.infer<typeof TaskStatusCountItemSchema>;
+export type TaskStatusCountResponse = z.infer<typeof TaskStatusCountResponseSchema>;
