@@ -2,20 +2,15 @@
 
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import type { WorkAreaDistributionItem, WorkArea } from '@repo/schema';
-import { WORK_AREA_LABELS_STRICT } from '@/lib/constants/project';
+import {
+  WORK_AREA_LABELS_STRICT,
+  WORK_AREA_COLORS,
+} from '@/lib/constants/project';
 
 interface WorkAreaDistributionChartProps {
   data: WorkAreaDistributionItem[];
   isLoading: boolean;
 }
-
-const COLORS: Record<string, string> = {
-  PROJECT_MANAGEMENT: '#6366f1',
-  PLANNING: '#3b82f6',
-  DESIGN: '#10b981',
-  FRONTEND: '#f59e0b',
-  BACKEND: '#ef4444',
-};
 
 export function WorkAreaDistributionChart({ data, isLoading }: WorkAreaDistributionChartProps) {
   if (isLoading) {
@@ -46,7 +41,7 @@ export function WorkAreaDistributionChart({ data, isLoading }: WorkAreaDistribut
           dataKey="value"
         >
           {chartData.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={COLORS[entry.originalKey] || '#999'} />
+            <Cell key={`cell-${index}`} fill={WORK_AREA_COLORS[entry.originalKey as WorkArea] || '#999'} />
           ))}
         </Pie>
         <Tooltip formatter={(value: number | undefined) => value ? [`${value.toFixed(1)}시간`, '작업 시간'] : ['-', '작업 시간']} />

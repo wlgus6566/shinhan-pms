@@ -130,7 +130,7 @@ export default function AnalyticsPage() {
                   </div>
                 ) : partTaskCountData?.parts &&
                   partTaskCountData.parts.length > 0 ? (
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                     {partTaskCountData.parts.map((part: PartTaskCount) => (
                       <PartTaskCountChart key={part.workArea} part={part} />
                     ))}
@@ -155,7 +155,7 @@ export default function AnalyticsPage() {
                   </div>
                 ) : partWorkHoursData?.parts &&
                   partWorkHoursData.parts.length > 0 ? (
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                     {partWorkHoursData.parts.map((part: PartWorkHours) => (
                       <PartWorkHoursChart key={part.workArea} part={part} />
                     ))}

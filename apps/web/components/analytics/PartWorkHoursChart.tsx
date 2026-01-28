@@ -11,7 +11,10 @@ import {
 } from 'recharts';
 import type { PartWorkHours, WorkArea } from '@repo/schema';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { WORK_AREA_LABELS_STRICT } from '@/lib/constants/project';
+import {
+  WORK_AREA_LABELS_STRICT,
+  WORK_AREA_COLORS,
+} from '@/lib/constants/project';
 
 interface PartWorkHoursChartProps {
   part: PartWorkHours;
@@ -25,6 +28,7 @@ export function PartWorkHoursChart({ part }: PartWorkHoursChartProps) {
 
   const partLabel =
     WORK_AREA_LABELS_STRICT[part.workArea as WorkArea] || part.workArea;
+  const partColor = WORK_AREA_COLORS[part.workArea as WorkArea] || '#10b981';
   const title = `◆ ${partLabel} 파트_일일 평균 근무 시간 (평균 ${part.partAvgHours}시간)`;
 
   if (part.members.length === 0) {
@@ -60,7 +64,7 @@ export function PartWorkHoursChart({ part }: PartWorkHoursChartProps) {
                   : ['-', '평균 근무 시간']
               }
             />
-            <Bar dataKey="avgHours" fill="#10b981" maxBarSize={40} />
+            <Bar dataKey="avgHours" fill={partColor} maxBarSize={40} />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

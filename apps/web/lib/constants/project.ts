@@ -102,3 +102,12 @@ export const WORK_AREA_LABELS: Record<string, string> = {
   FRONTEND: '프론트엔드',
   BACKEND: '백엔드',
 } as const;
+
+// 작업 영역별 차트 색상
+export const WORK_AREA_COLORS: Record<WorkArea, string> = {
+  PROJECT_MANAGEMENT: '#6366f1', // 인디고
+  PLANNING: '#3b82f6', // 파란색
+  DESIGN: '#10b981', // 초록색
+  FRONTEND: '#f59e0b', // 주황색
+  BACKEND: '#ef4444', // 빨간색
+} as const;

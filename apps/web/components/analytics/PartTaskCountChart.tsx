@@ -11,8 +11,10 @@ import {
 } from 'recharts';
 import type { PartTaskCount, WorkArea } from '@repo/schema';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { WORK_AREA_LABELS_STRICT } from '@/lib/constants/project';
-
+import {
+  WORK_AREA_LABELS_STRICT,
+  WORK_AREA_COLORS,
+} from '@/lib/constants/project';
 interface PartTaskCountChartProps {
   part: PartTaskCount;
 }
@@ -25,6 +27,7 @@ export function PartTaskCountChart({ part }: PartTaskCountChartProps) {
 
   const partLabel =
     WORK_AREA_LABELS_STRICT[part.workArea as WorkArea] || part.workArea;
+  const partColor = WORK_AREA_COLORS[part.workArea as WorkArea] || '#3b82f6';
   const title = `◆ ${partLabel} 파트_담당 업무 건수 (${part.members.length}명 / 인당 평균 ${part.averageCount}건)`;
 
   if (part.members.length === 0) {
@@ -58,7 +61,7 @@ export function PartTaskCountChart({ part }: PartTaskCountChartProps) {
                 value ? [`${value}건`, '담당 업무'] : ['-', '담당 업무']
               }
             />
-            <Bar dataKey="taskCount" fill="#3b82f6" maxBarSize={40} />
+            <Bar dataKey="taskCount" fill={partColor} maxBarSize={40} />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>
