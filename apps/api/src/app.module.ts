@@ -9,8 +9,9 @@ import { TasksModule } from './tasks/tasks.module';
 import { WorkLogsModule } from './work-logs/work-logs.module';
 import { SchedulesModule } from './schedules/schedules.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
-  imports: [CommonModule, PrismaModule, AuthModule, UsersModule, ProjectsModule, TasksModule, WorkLogsModule, SchedulesModule, DashboardModule],
+  imports: [CommonModule, PrismaModule, AuthModule, UsersModule, ProjectsModule, TasksModule, WorkLogsModule, SchedulesModule, DashboardModule, AnalyticsModule],
 })
 export class AppModule {}
