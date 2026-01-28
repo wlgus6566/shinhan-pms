@@ -401,9 +401,10 @@ describe('WorkLogsService', () => {
 
   describe('findContentSuggestions', () => {
     const taskId = BigInt(1);
+    const userId = BigInt(1);
 
-    it('정상 조회 - 중복 제거, 최신순 정렬, limit 적용', async () => {
-      // Given: 과거 작업 내용이 있음
+    it('정상 조회 - 중복 제거, 최신순 정렬, limit 적용 (본인 작성 내용만)', async () => {
+      // Given: 과거 작업 내용이 있음 (본인 작성)
       const mockResults = [
         {
           content: 'API 엔드포인트 개발',
@@ -424,7 +425,7 @@ describe('WorkLogsService', () => {
       mockPrismaService.$queryRaw.mockResolvedValue(mockResults);
 
       // When: 추천 조회 (limit 10)
-      const result = await service.findContentSuggestions(taskId, 10);
+      const result = await service.findContentSuggestions(taskId, userId, 10);
 
       // Then: 변환된 결과 반환
       expect(result).toHaveLength(3);
@@ -445,7 +446,7 @@ describe('WorkLogsService', () => {
       mockPrismaService.$queryRaw.mockResolvedValue([]);
 
       // When: 추천 조회
-      const result = await service.findContentSuggestions(taskId, 10);
+      const result = await service.findContentSuggestions(taskId, userId, 10);
 
       // Then: 빈 배열 반환
       expect(result).toEqual([]);
@@ -456,7 +457,7 @@ describe('WorkLogsService', () => {
       mockPrismaService.$queryRaw.mockResolvedValue([]);
 
       // When: 추천 조회
-      const result = await service.findContentSuggestions(taskId, 10);
+      const result = await service.findContentSuggestions(taskId, userId, 10);
 
       // Then: 빈 배열
       expect(result).toEqual([]);
@@ -479,7 +480,7 @@ describe('WorkLogsService', () => {
       mockPrismaService.$queryRaw.mockResolvedValue(mockResults);
 
       // When: limit 5로 조회
-      const result = await service.findContentSuggestions(taskId, 5);
+      const result = await service.findContentSuggestions(taskId, userId, 5);
 
       // Then: SQL에 LIMIT 5가 포함되어 호출됨
       expect(mockPrismaService.$queryRaw).toHaveBeenCalledTimes(1);

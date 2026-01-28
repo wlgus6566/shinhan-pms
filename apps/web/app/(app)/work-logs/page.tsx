@@ -277,7 +277,7 @@ export default function WorkLogsPage() {
         workLog={editingWorkLog}
         selectedDate={selectedDate}
         selectedTaskId={selectedTaskId}
-        myTasks={myTasks}
+        myTasks={filteredTasks}
         previousLog={previousLog}
         onSubmit={handleSubmit}
         onDelete={dialogMode === 'edit' ? handleDelete : undefined}

@@ -76,7 +76,7 @@ export class WorkLogsController {
   }
 
   @Get('tasks/:taskId/work-logs/suggestions')
-  @ApiOperation({ summary: '업무별 작업 내용 추천 조회' })
+  @ApiOperation({ summary: '업무별 작업 내용 추천 조회 (본인 작성 내용만)' })
   @ApiParam({ name: 'taskId', description: '업무 ID' })
   @ApiQuery({
     name: 'limit',
@@ -91,11 +91,13 @@ export class WorkLogsController {
   })
   async getSuggestions(
     @Param('taskId') taskId: string,
+    @CurrentUser() user: any,
     @Query('limit') limit?: string,
   ) {
     const limitNum = limit ? parseInt(limit, 10) : 10;
     const suggestions = await this.workLogsService.findContentSuggestions(
       BigInt(taskId),
+      BigInt(user.id),
       limitNum,
     );
     return { suggestions };
