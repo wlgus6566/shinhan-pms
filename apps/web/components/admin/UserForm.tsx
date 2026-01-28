@@ -133,7 +133,7 @@ export function UserForm({ mode, userId }: UserFormProps) {
   // Fetch 에러 처리
   useEffect(() => {
     if (fetchError) {
-      setError(fetchError.message || '사용자 정보를 불러오는데 실패했습니다');
+      setError(fetchError.message || '멤버 정보를 불러오는데 실패했습니다');
     }
   }, [fetchError]);
 
@@ -225,7 +225,7 @@ export function UserForm({ mode, userId }: UserFormProps) {
       {mode === 'edit' && !canEdit && (
         <Alert className="bg-blue-50 border-blue-200">
           <AlertDescription className="text-blue-700">
-            사용자 정보를 조회할 수 있습니다. 수정은 슈퍼 관리자만 가능합니다.
+            멤버 정보를 조회할 수 있습니다. 수정은 슈퍼 관리자만 가능합니다.
           </AlertDescription>
         </Alert>
       )}
@@ -236,7 +236,7 @@ export function UserForm({ mode, userId }: UserFormProps) {
             <Alert className="bg-green-50 text-green-700 border-green-200">
               <CheckCircle2 className="h-4 w-4" />
               <AlertDescription>
-                사용자 정보가 업데이트되었습니다
+                멤버 정보가 업데이트되었습니다
               </AlertDescription>
             </Alert>
           )}

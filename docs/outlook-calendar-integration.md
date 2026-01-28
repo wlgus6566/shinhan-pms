@@ -39,7 +39,7 @@ Azure Portal → 앱 등록 → API 권한 → 권한 추가
 | 권한 | 유형 | 설명 |
 |-----|------|------|
 | `Calendars.ReadWrite` | Application | 모든 사용자 캘린더 읽기/쓰기 |
-| `User.Read.All` | Application | 사용자 정보 조회 |
+| `User.Read.All` | Application | 멤버 정보 조회 |
 
 
 Azure 보안 정책상 무조건 관리자만 가능(현재 로그인한 계정이 테넌트 관리자 권한이 없음)

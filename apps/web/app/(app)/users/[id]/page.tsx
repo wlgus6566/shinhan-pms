@@ -33,12 +33,12 @@ export default function UserEditPage() {
 
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-          {canEdit ? '사용자 상세 설정' : '사용자 정보'}
+          {canEdit ? '멤버 상세 설정' : '멤버 정보'}
         </h1>
         <p className="text-muted-foreground mt-1">
           {canEdit
-            ? '사용자의 본부, 권한 및 활성화 상태를 관리합니다'
-            : '사용자의 기본 정보 및 권한을 확인합니다'}
+            ? '멤버의 본부, 권한 및 활성화 상태를 관리합니다'
+            : '멤버의 기본 정보 및 권한을 확인합니다'}
         </p>
       </div>
 

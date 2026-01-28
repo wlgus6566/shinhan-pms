@@ -28,7 +28,10 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { ResponseCode } from '../common/decorators/response.decorator';
-import { parsePaginationParams, createPaginationMeta } from '../common/helpers/pagination.helper';
+import {
+  parsePaginationParams,
+  createPaginationMeta,
+} from '../common/helpers/pagination.helper';
 
 @ApiTags('사용자 관리')
 @Controller('users')
@@ -112,7 +115,11 @@ export class UsersController {
     });
 
     return {
-      ...createPaginationMeta(totalCount, pagination.pageNum, pagination.pageSize),
+      ...createPaginationMeta(
+        totalCount,
+        pagination.pageNum,
+        pagination.pageSize,
+      ),
       list,
     };
   }
@@ -131,7 +138,7 @@ export class UsersController {
 
   @Patch(':id')
   @Roles('SUPER_ADMIN')
-  @ApiOperation({ summary: '사용자 정보 수정 (슈퍼관리자 전용)' })
+  @ApiOperation({ summary: '멤버 정보 수정 (슈퍼관리자 전용)' })
   @ApiResponse({ status: 200, description: '수정 성공', type: UserResponseDto })
   @ApiResponse({ status: 400, description: '잘못된 요청' })
   @ApiResponse({ status: 403, description: '권한 없음' })
@@ -141,7 +148,11 @@ export class UsersController {
     @Body() updateUserDto: UpdateUserDto,
     @CurrentUser() currentUser: UserResponseDto,
   ): Promise<UserResponseDto> {
-    return this.usersService.update(BigInt(id), updateUserDto, BigInt(currentUser.id));
+    return this.usersService.update(
+      BigInt(id),
+      updateUserDto,
+      BigInt(currentUser.id),
+    );
   }
 
   @Delete(':id')

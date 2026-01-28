@@ -32,7 +32,7 @@
 1. 개발자 도구 > Application 탭 > Local Storage
 2. 다음 항목이 있는지 확인:
    - `accessToken`: 로그인 토큰
-   - `user`: 사용자 정보 (JSON)
+   - `user`: 멤버 정보 (JSON)
 
 ### 5. 캐시 지우기
 1. Cmd+Shift+R (Mac) 또는 Ctrl+Shift+R (Windows)로 강력 새로고침

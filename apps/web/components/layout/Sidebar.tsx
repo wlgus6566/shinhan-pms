@@ -303,14 +303,11 @@ export function Sidebar({
       {sidebarOpen && (
         <div className="mx-3 mb-4 p-4 bg-gradient-to-br from-blue-500/10 to-blue-600/5 rounded-2xl border border-blue-500/10">
           <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
-            진행중 프로젝트
+            진행중인 내 프로젝트
           </p>
           <p className="text-2xl font-bold text-white">
             {myProjects?.length || 0}
           </p>
-          <div className="flex items-center gap-1 mt-1">
-            <span className="text-slate-500 text-xs">내 프로젝트</span>
-          </div>
         </div>
       )}
 
@@ -329,7 +326,7 @@ export function Sidebar({
               {user.name.charAt(0)}
             </div>
             {sidebarOpen && (
-              <div className="flex-1 min-w-0">
+              <div className="flex-1">
                 <p className="text-sm font-semibold text-white truncate">
                   {user.name}
                 </p>
