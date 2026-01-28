@@ -1,6 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
+import type { Project, UserBasicInfo } from '@repo/schema';
 
-export class ProjectResponseDto {
+class UserBasicInfoDto implements UserBasicInfo {
+  @ApiProperty({ description: '사용자 ID', example: '1' })
+  id: string;
+
+  @ApiProperty({ description: '사용자 이름', example: '홍길동' })
+  name: string;
+
+  @ApiProperty({ description: '사용자 이메일', example: 'hong@example.com' })
+  email: string;
+}
+
+export class ProjectResponseDto implements Project {
   @ApiProperty({ description: '프로젝트 ID', example: '1' })
   id: string;
 
@@ -44,13 +56,20 @@ export class ProjectResponseDto {
   @ApiProperty({ description: '생성자 ID', example: '1', required: false })
   creatorId?: string;
 
+  @ApiProperty({
+    description: '생성자 정보',
+    type: UserBasicInfoDto,
+    required: false,
+  })
+  creator?: UserBasicInfo;
+
   @ApiProperty({ description: '생성일시', example: '2024-01-01T00:00:00Z' })
-  createdAt: Date;
+  createdAt: string;
 
   @ApiProperty({
     description: '수정일시',
     example: '2024-01-02T00:00:00Z',
     required: false,
   })
-  updatedAt?: Date;
+  updatedAt?: string;
 }

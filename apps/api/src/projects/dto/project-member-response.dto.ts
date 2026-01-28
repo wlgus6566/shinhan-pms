@@ -1,6 +1,27 @@
 import { ApiProperty } from '@nestjs/swagger';
+import type { ProjectMember, UserDetailInfo } from '@repo/schema';
 
-export class ProjectMemberResponseDto {
+class UserDetailInfoDto implements UserDetailInfo {
+  @ApiProperty({ description: '사용자 ID' })
+  id: string;
+
+  @ApiProperty({ description: '사용자 이름' })
+  name: string;
+
+  @ApiProperty({ description: '사용자 이메일' })
+  email: string;
+
+  @ApiProperty({ description: '부서' })
+  department: string;
+
+  @ApiProperty({ description: '직급', required: false })
+  position?: string;
+
+  @ApiProperty({ description: '역할' })
+  role: string;
+}
+
+export class ProjectMemberResponseDto implements ProjectMember {
   @ApiProperty({ description: '프로젝트 멤버 ID' })
   id: string;
 
@@ -22,19 +43,16 @@ export class ProjectMemberResponseDto {
   @ApiProperty({ description: '비고', required: false })
   notes?: string;
 
-  @ApiProperty({ description: '멤버 정보', required: false })
-  member?: {
-    id: string;
-    name: string;
-    email: string;
-    department: string;
-    position?: string;
-    role: string;
-  };
+  @ApiProperty({
+    description: '멤버 정보',
+    type: UserDetailInfoDto,
+    required: false,
+  })
+  member?: UserDetailInfo;
 
   @ApiProperty({ description: '생성일시' })
-  createdAt: Date;
+  createdAt: string;
 
   @ApiProperty({ description: '수정일시', required: false })
-  updatedAt?: Date;
+  updatedAt?: string;
 }

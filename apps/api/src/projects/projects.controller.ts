@@ -212,8 +212,15 @@ export class ProjectsController {
         : undefined,
       status: project.status,
       creatorId: project.createdBy?.toString(),
-      createdAt: project.createdAt,
-      updatedAt: project.updatedAt,
+      creator: project.creator
+        ? {
+            id: project.creator.id.toString(),
+            name: project.creator.name,
+            email: project.creator.email,
+          }
+        : undefined,
+      createdAt: project.createdAt.toISOString(),
+      updatedAt: project.updatedAt?.toISOString(),
     };
   }
 
@@ -366,8 +373,8 @@ export class ProjectsController {
             role: projectMember.member.role,
           }
         : undefined,
-      createdAt: projectMember.createdAt,
-      updatedAt: projectMember.updatedAt,
+      createdAt: projectMember.createdAt.toISOString(),
+      updatedAt: projectMember.updatedAt?.toISOString(),
     };
   }
 

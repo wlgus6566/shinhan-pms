@@ -12,7 +12,7 @@ export default function TeamSchedulesPage() {
 
   // 첫 번째 프로젝트 ID를 기본값으로 사용
   const defaultProjectId =
-    projects && projects.length > 0 ? String(projects[0].id) : '';
+    projects && projects.length > 0 ? String(projects[0]?.id) : '';
 
   const { activeTab, handleTabChange } = useTabNavigation('/schedule', {
     defaultTab: defaultProjectId,
