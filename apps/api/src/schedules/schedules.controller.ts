@@ -225,6 +225,11 @@ export class SchedulesController {
       teamScope: schedule.teamScope,
       halfDayType: schedule.halfDayType,
       usageDate: schedule.usageDate?.toISOString().split('T')[0],
+      isRecurring: schedule.isRecurring,
+      recurrenceType: schedule.recurrenceType,
+      recurrenceEndDate: schedule.recurrenceEndDate?.toISOString().split('T')[0],
+      originalScheduleId: schedule.originalScheduleId,
+      instanceDate: schedule.instanceDate,
       participants:
         schedule.participants?.map((p: any) => ({
           id: p.user.id.toString(),

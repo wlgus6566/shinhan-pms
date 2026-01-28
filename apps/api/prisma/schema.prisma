@@ -231,6 +231,9 @@ model Schedule {
   teamScope   String?   @map("team_scope") @db.VarChar(20) // ALL, PLANNING, DESIGN, FRONTEND, BACKEND (for MEETING/SCRUM)
   halfDayType String?   @map("half_day_type") @db.VarChar(2) // AM, PM (for HALF_DAY)
   usageDate   DateTime? @map("usage_date") @db.Date // for VACATION/HALF_DAY
+  isRecurring      Boolean   @default(false) @map("is_recurring")
+  recurrenceType   String?   @map("recurrence_type") @db.VarChar(10) // DAILY, WEEKLY, MONTHLY, YEARLY
+  recurrenceEndDate DateTime? @map("recurrence_end_date") @db.Timestamp(6)
   isActive    Boolean   @default(true) @map("is_active")
   createdBy   BigInt    @map("created_by")
   createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
@@ -250,6 +253,9 @@ model Schedule {
   @@index([createdBy], map: "idx_schedules_created_by")
   @@index([teamScope], map: "idx_schedules_team_scope")
   @@index([usageDate], map: "idx_schedules_usage_date")
+  @@index([isRecurring], map: "idx_schedules_is_recurring")
+  @@index([recurrenceType], map: "idx_schedules_recurrence_type")
+  @@index([isRecurring, recurrenceEndDate], map: "idx_schedules_recurring_end")
 
   @@map("schedules")
 }

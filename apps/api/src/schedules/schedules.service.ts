@@ -7,6 +7,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
+import { generateRecurrenceInstances } from './utils/recurrence.utils';
 
 @Injectable()
 export class SchedulesService {
@@ -50,7 +51,20 @@ export class SchedulesService {
       }
     }
     console.log('[DEBUG] scheduleData:', scheduleData);
-    
+
+    // 정기 일정 검증
+    if (scheduleData.isRecurring) {
+      if (!scheduleData.recurrenceType) {
+        throw new BadRequestException('반복 유형을 선택해주세요');
+      }
+      if (!scheduleData.recurrenceEndDate) {
+        throw new BadRequestException('반복 종료일을 선택해주세요');
+      }
+      const recurrenceEnd = new Date(scheduleData.recurrenceEndDate);
+      if (recurrenceEnd < startDate) {
+        throw new BadRequestException('반복 종료일은 시작 날짜보다 이후여야 합니다');
+      }
+    }
 
     // 일정 생성
     const schedule = await this.prisma.schedule.create({
@@ -67,6 +81,9 @@ export class SchedulesService {
         teamScope: scheduleData.teamScope,
         halfDayType: scheduleData.halfDayType,
         usageDate: scheduleData.usageDate ? new Date(scheduleData.usageDate) : null,
+        isRecurring: scheduleData.isRecurring ?? false,
+        recurrenceType: scheduleData.recurrenceType,
+        recurrenceEndDate: scheduleData.recurrenceEndDate ? new Date(scheduleData.recurrenceEndDate) : null,
         createdBy: userId,
       },
       include: {
@@ -99,6 +116,67 @@ export class SchedulesService {
     }
 
     return schedule;
+  }
+
+  /**
+   * 정기 일정 규칙을 인스턴스로 확장
+   * @param schedules 일정 목록
+   * @param queryStart 조회 시작 날짜 (선택)
+   * @param queryEnd 조회 종료 날짜 (선택)
+   * @returns 확장된 일정 인스턴스 목록
+   */
+  private expandRecurringSchedules(
+    schedules: any[],
+    queryStart?: string,
+    queryEnd?: string,
+  ): any[] {
+    const expandedSchedules: any[] = [];
+
+    for (const schedule of schedules) {
+      if (!schedule.isRecurring) {
+        // 일반 일정은 그대로 추가
+        expandedSchedules.push(schedule);
+        continue;
+      }
+
+      // 정기 일정 규칙에 따라 인스턴스 생성
+      const instances = generateRecurrenceInstances({
+        startDate: new Date(schedule.startDate),
+        endDate: new Date(schedule.endDate),
+        recurrenceType: schedule.recurrenceType as 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY',
+        recurrenceEndDate: new Date(schedule.recurrenceEndDate),
+      });
+
+      // 조회 기간 필터링 (기간이 지정된 경우)
+      const filteredInstances = queryStart && queryEnd
+        ? instances.filter(instance => {
+            const instStart = instance.startDate;
+            const instEnd = instance.endDate;
+            const qStart = new Date(queryStart);
+            const qEnd = new Date(queryEnd);
+
+            // 기간 내에 시작하거나 기간을 걸치는 인스턴스
+            return (
+              (instStart >= qStart && instStart <= qEnd) ||
+              (instStart <= qStart && instEnd >= qStart)
+            );
+          })
+        : instances;
+
+      // 각 인스턴스를 일정 객체로 변환
+      for (const instance of filteredInstances) {
+        expandedSchedules.push({
+          ...schedule,
+          id: schedule.id, // 원본 규칙 ID 유지
+          startDate: instance.startDate,
+          endDate: instance.endDate,
+          originalScheduleId: schedule.id.toString(),
+          instanceDate: instance.instanceDate,
+        });
+      }
+    }
+
+    return expandedSchedules;
   }
 
   /**
@@ -135,7 +213,7 @@ export class SchedulesService {
       }
     }
 
-    return await this.prisma.schedule.findMany({
+    const schedules = await this.prisma.schedule.findMany({
       where,
       include: {
         project: { select: { id: true, projectName: true } },
@@ -148,6 +226,9 @@ export class SchedulesService {
       },
       orderBy: { startDate: 'asc' },
     });
+
+    // 정기 일정 확장
+    return this.expandRecurringSchedules(schedules, startDate, endDate);
   }
 
   /**
@@ -169,8 +250,6 @@ export class SchedulesService {
     };
 
     if (startDate || endDate) {
-      const dateConditions: any = {};
-
       if (startDate && endDate) {
         where.AND = [
           {
@@ -197,7 +276,7 @@ export class SchedulesService {
       }
     }
 
-    return await this.prisma.schedule.findMany({
+    const schedules = await this.prisma.schedule.findMany({
       where,
       include: {
         project: { select: { id: true, projectName: true } },
@@ -210,6 +289,9 @@ export class SchedulesService {
       },
       orderBy: { startDate: 'asc' },
     });
+
+    // 정기 일정 확장
+    return this.expandRecurringSchedules(schedules, startDate, endDate);
   }
 
   /**
@@ -298,6 +380,9 @@ export class SchedulesService {
     if (scheduleData.teamScope !== undefined) updateData.teamScope = scheduleData.teamScope;
     if (scheduleData.halfDayType !== undefined) updateData.halfDayType = scheduleData.halfDayType;
     if (scheduleData.usageDate !== undefined) updateData.usageDate = scheduleData.usageDate ? new Date(scheduleData.usageDate) : null;
+    if (scheduleData.isRecurring !== undefined) updateData.isRecurring = scheduleData.isRecurring;
+    if (scheduleData.recurrenceType !== undefined) updateData.recurrenceType = scheduleData.recurrenceType;
+    if (scheduleData.recurrenceEndDate !== undefined) updateData.recurrenceEndDate = scheduleData.recurrenceEndDate ? new Date(scheduleData.recurrenceEndDate) : null;
 
     return await this.prisma.schedule.update({
       where: { id },

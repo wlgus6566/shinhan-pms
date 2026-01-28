@@ -2,7 +2,7 @@
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CreateScheduleSchema } from '@repo/schema';
+import { CreateScheduleSchema, RECURRENCE_TYPE_OPTIONS } from '@repo/schema';
 import type { CreateScheduleRequest } from '@repo/schema';
 import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import {
   FormSelect,
   FormRadioGroup,
   FormCheckboxGroup,
+  FormCheckbox,
 } from '@/components/form';
 import type { Schedule, TeamScope, ScheduleType, HalfDayType } from '@/types/schedule';
 import { SCHEDULE_TYPE_LABELS, TEAM_SCOPE_LABELS } from '@/types/schedule';
@@ -45,6 +46,7 @@ export function ScheduleForm({
   const isEditing = !!schedule;
   const [projectMembers, setProjectMembers] = useState<ProjectMember[]>([]);
   const [loadingMembers, setLoadingMembers] = useState(true);
+  const [endTime, setEndTime] = useState<string>('');
 
   // Fetch project members
   useEffect(() => {
@@ -94,6 +96,9 @@ export function ScheduleForm({
           teamScope: (schedule.teamScope as TeamScope) || undefined,
           halfDayType: (schedule.halfDayType as HalfDayType) || undefined,
           usageDate: schedule.usageDate?.slice(0, 10) || '', // Format for date
+          isRecurring: schedule.isRecurring || false,
+          recurrenceType: (schedule.recurrenceType as 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY') || undefined,
+          recurrenceEndDate: schedule.recurrenceEndDate?.slice(0, 10) || '',
         }
       : {
           title: '',
@@ -108,6 +113,9 @@ export function ScheduleForm({
           teamScope: undefined,
           halfDayType: undefined,
           usageDate: '',
+          isRecurring: false,
+          recurrenceType: undefined,
+          recurrenceEndDate: '',
         },
   });
 
@@ -129,6 +137,9 @@ export function ScheduleForm({
         teamScope: (schedule.teamScope as TeamScope) || undefined,
         halfDayType: (schedule.halfDayType as HalfDayType) || undefined,
         usageDate: schedule.usageDate?.slice(0, 10) || '',
+        isRecurring: schedule.isRecurring || false,
+        recurrenceType: (schedule.recurrenceType as 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY') || undefined,
+        recurrenceEndDate: schedule.recurrenceEndDate?.slice(0, 10) || '',
       });
     } else {
       form.reset({
@@ -144,10 +155,54 @@ export function ScheduleForm({
         teamScope: undefined,
         halfDayType: undefined,
         usageDate: '',
+        isRecurring: false,
+        recurrenceType: undefined,
+        recurrenceEndDate: '',
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [schedule, viewMode]);
+
+  // Initialize endTime when schedule is loaded
+  useEffect(() => {
+    if (schedule?.endDate) {
+      const date = new Date(schedule.endDate);
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      setEndTime(`${hours}:${minutes}`);
+    } else {
+      setEndTime('');
+    }
+  }, [schedule]);
+
+  // Watch startDate and endTime to auto-update endDate
+  const watchStartDate = form.watch('startDate');
+  useEffect(() => {
+    if (watchStartDate && endTime) {
+      const startDate = new Date(watchStartDate);
+      const timeParts = endTime.split(':');
+      const hours = Number(timeParts[0]) || 0;
+      const minutes = Number(timeParts[1]) || 0;
+
+      const endDate = new Date(startDate);
+      endDate.setHours(hours, minutes, 0, 0);
+
+      // 종료 시간이 시작 시간보다 이르면 다음날로 설정
+      if (endDate < startDate) {
+        endDate.setDate(endDate.getDate() + 1);
+      }
+
+      // datetime-local 형식으로 변환 (YYYY-MM-DDTHH:MM)
+      const year = endDate.getFullYear();
+      const month = String(endDate.getMonth() + 1).padStart(2, '0');
+      const day = String(endDate.getDate()).padStart(2, '0');
+      const hour = String(endDate.getHours()).padStart(2, '0');
+      const minute = String(endDate.getMinutes()).padStart(2, '0');
+      const endDateLocal = `${year}-${month}-${day}T${hour}:${minute}`;
+
+      form.setValue('endDate', endDateLocal, { shouldValidate: true });
+    }
+  }, [watchStartDate, endTime, form]);
 
   // datetime-local 값을 로컬 타임존 기준 ISO 문자열로 변환
   const convertLocalDateTimeToISO = (localDateTime: string) => {
@@ -187,10 +242,34 @@ export function ScheduleForm({
     } else {
       // 일반 일정: datetime-local 형식을 ISO 8601 형식으로 변환
       const { halfDayType, teamScope, ...restData } = data;
+
+      let endDateISO: string;
+
+      // endTime이 있으면 startDate + endTime으로 생성
+      if (endTime) {
+        const startDate = new Date(data.startDate!);
+        const timeParts = endTime.split(':');
+        const hours = Number(timeParts[0]) || 0;
+        const minutes = Number(timeParts[1]) || 0;
+
+        const endDate = new Date(startDate);
+        endDate.setHours(hours, minutes, 0, 0);
+
+        // 종료 시간이 시작 시간보다 이르면 다음날로 설정
+        if (endDate < startDate) {
+          endDate.setDate(endDate.getDate() + 1);
+        }
+
+        endDateISO = endDate.toISOString();
+      } else {
+        // endTime이 없으면 기존 endDate 사용 (하위 호환성)
+        endDateISO = convertLocalDateTimeToISO(data.endDate!);
+      }
+
       submitData = {
         ...restData,
         startDate: convertLocalDateTimeToISO(data.startDate!),
-        endDate: convertLocalDateTimeToISO(data.endDate!),
+        endDate: endDateISO,
         teamScope: teamScope ?? undefined,
       };
     }
@@ -201,6 +280,7 @@ export function ScheduleForm({
 
   const scheduleType = form.watch('scheduleType');
   const teamScope = form.watch('teamScope');
+  const isRecurring = form.watch('isRecurring');
   const showParticipants =
     scheduleType === 'MEETING' || scheduleType === 'SCRUM';
   const isVacation = scheduleType === 'VACATION' || scheduleType === 'HALF_DAY';
@@ -380,8 +460,8 @@ export function ScheduleForm({
               ))}
           </>
         ) : (
-          /* 일반 일정 시 시작일시/종료일시 */
-          <div className="grid grid-cols-2 gap-4">
+          /* 모든 일정: 시작 일시 + 종료 시간 */
+          <div className="space-y-4">
             <FormInput
               control={form.control}
               name="startDate"
@@ -390,17 +470,56 @@ export function ScheduleForm({
               step="1800"
               disabled={viewMode}
             />
-
-            <FormInput
-              control={form.control}
-              name="endDate"
-              label="종료 일시 *"
-              type="datetime-local"
-              step="1800"
-              disabled={viewMode}
-            />
+            <div>
+              <label className="text-sm font-medium">종료 시간 *</label>
+              <input
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                step="1800"
+                disabled={viewMode}
+                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                required
+              />
+              {!endTime && (
+                <p className="mt-1 text-sm text-red-600">종료 시간을 선택해주세요</p>
+              )}
+            </div>
           </div>
         )}
+
+        {scheduleType !== 'VACATION' && scheduleType !== 'HALF_DAY' && (
+          <>
+            <FormCheckbox
+              control={form.control}
+              name="isRecurring"
+              label="정기 일정으로 등록"
+              disabled={viewMode}
+            />
+
+            {isRecurring && (
+              <div className="ml-6 space-y-4 rounded-md border border-gray-200 p-4">
+                <FormSelect
+                  control={form.control}
+                  name="recurrenceType"
+                  label="반복 유형 *"
+                  options={RECURRENCE_TYPE_OPTIONS}
+                  placeholder="반복 유형을 선택하세요"
+                  disabled={viewMode}
+                />
+
+                <FormInput
+                  control={form.control}
+                  name="recurrenceEndDate"
+                  label="반복 종료일 *"
+                  type="date"
+                  disabled={viewMode}
+                />
+              </div>
+            )}
+          </>
+        )}
+
         {scheduleType !== 'VACATION' && scheduleType !== 'HALF_DAY' && (
           <FormInput
             control={form.control}

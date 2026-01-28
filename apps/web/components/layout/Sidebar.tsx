@@ -27,7 +27,7 @@ const menuItems = [
   // "업무" 메뉴는 확장 드롭다운으로 별도 처리
   { icon: FileText, label: '업무일지', href: '/work-logs' },
   { icon: CalendarIcon, label: '일정 관리', href: '/schedule' },
-  { icon: BarChart3, label: '팀 리포트', href: '/analytics' },
+  { icon: BarChart3, label: '프로젝트 리포트', href: '/analytics' },
   { icon: Palette, label: '디자인', href: '/dashboard/design-system' },
 ];
 

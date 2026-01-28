@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ScheduleTypeEnum, TeamScopeEnum, HalfDayTypeEnum } from '../common/enums';
+import { ScheduleTypeEnum, TeamScopeEnum, HalfDayTypeEnum, RecurrenceTypeEnum } from '../common/enums';
 
 export const UpdateScheduleSchema = z.object({
   projectId: z.string().optional(),
@@ -22,6 +22,9 @@ export const UpdateScheduleSchema = z.object({
   teamScope: TeamScopeEnum.nullable().optional(),
   halfDayType: HalfDayTypeEnum.nullable().optional(),
   usageDate: z.string().optional(),
+  isRecurring: z.boolean().optional(),
+  recurrenceType: RecurrenceTypeEnum.optional(),
+  recurrenceEndDate: z.string().optional(),
 });
 
 export type UpdateScheduleRequest = z.infer<typeof UpdateScheduleSchema>;

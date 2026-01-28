@@ -211,3 +211,24 @@ export const ParticipantStatusEnum = z.enum(
 );
 
 export type ParticipantStatus = z.infer<typeof ParticipantStatusEnum>;
+
+export const RecurrenceTypeEnum = z.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'], {
+  errorMap: () => ({
+    message: '반복 유형은 DAILY, WEEKLY, MONTHLY, YEARLY 중 하나여야 합니다',
+  }),
+});
+
+export type RecurrenceType = z.infer<typeof RecurrenceTypeEnum>;
+
+// Recurrence Type UI Metadata
+export const RECURRENCE_TYPE_LABELS = {
+  DAILY: '매일',
+  WEEKLY: '매주',
+  MONTHLY: '매월',
+  YEARLY: '매년',
+} as const satisfies Record<RecurrenceType, string>;
+
+// Helper for FormSelect components
+export const RECURRENCE_TYPE_OPTIONS = Object.entries(RECURRENCE_TYPE_LABELS).map(
+  ([value, label]) => ({ value, label }),
+);

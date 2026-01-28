@@ -56,7 +56,7 @@ export function useMyProductivity(
 }
 
 /**
- * 팀 리포트 조회 (PM/SUPER_ADMIN)
+ * 프로젝트 리포트 조회 (PM/SUPER_ADMIN)
  */
 export function useTeamProductivity(
   startDate: string,
@@ -281,7 +281,8 @@ export function useTaskStatusCount(
     url = `/api/analytics/task-status-count${buildQueryString(params)}`;
   }
 
-  const { data, error, isLoading, mutate } = useSWR<TaskStatusCountResponse>(url);
+  const { data, error, isLoading, mutate } =
+    useSWR<TaskStatusCountResponse>(url);
 
   return { data, isLoading, error, mutate };
 }

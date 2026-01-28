@@ -1,4 +1,11 @@
-import { Controller, Get, Query, UseGuards, Request, BadRequestException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  UseGuards,
+  Request,
+  BadRequestException,
+} from '@nestjs/common';
 import { AnalyticsService } from './analytics.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -38,7 +45,7 @@ export class AnalyticsController {
   }
 
   /**
-   * 팀 리포트 통계 조회 (PM/SUPER_ADMIN)
+   * 프로젝트 리포트 통계 조회 (PM/SUPER_ADMIN)
    * GET /analytics/team-productivity?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD&projectId=optional
    */
   @Get('team-productivity')
@@ -53,12 +60,15 @@ export class AnalyticsController {
       endDate,
       projectId,
     );
-    const totalWorkHours = memberWorkload.reduce((sum, item) => sum + item.workHours, 0);
+    const totalWorkHours = memberWorkload.reduce(
+      (sum, item) => sum + item.workHours,
+      0,
+    );
 
-    return({
+    return {
       totalWorkHours,
       memberWorkload,
-    });
+    };
   }
 
   /**
@@ -89,7 +99,7 @@ export class AnalyticsController {
       projectId,
       targetUserId,
     );
-    return(trend);
+    return trend;
   }
 
   /**
@@ -104,7 +114,7 @@ export class AnalyticsController {
     @Query('projectId') projectId?: string,
   ) {
     // TODO: Implement completion trend logic
-    return([]);
+    return [];
   }
 
   /**
@@ -132,7 +142,7 @@ export class AnalyticsController {
       projectId,
       targetUserId,
     );
-    return({ distribution });
+    return { distribution };
   }
 
   /**
@@ -151,17 +161,17 @@ export class AnalyticsController {
       endDate,
       projectId,
     );
-    return(workload);
+    return workload;
   }
 
   /**
-   * 프로젝트별 진행률 조회
+   * 프로젝트 진행률 조회
    * GET /analytics/project-progress?projectId=optional
    */
   @Get('project-progress')
   async getProjectProgress(@Query('projectId') projectId?: string) {
     const progress = await this.analyticsService.getProjectProgress(projectId);
-    return(progress);
+    return progress;
   }
 
   /**
@@ -179,7 +189,7 @@ export class AnalyticsController {
       endDate,
       projectId,
     );
-    return(frequency);
+    return frequency;
   }
 
   /**
@@ -200,7 +210,10 @@ export class AnalyticsController {
       throw new BadRequestException('yearMonth는 YYYY-MM 형식이어야 합니다');
     }
 
-    const result = await this.analyticsService.getPartTaskCount(projectId, yearMonth);
+    const result = await this.analyticsService.getPartTaskCount(
+      projectId,
+      yearMonth,
+    );
     return result;
   }
 
@@ -222,7 +235,10 @@ export class AnalyticsController {
       throw new BadRequestException('yearMonth는 YYYY-MM 형식이어야 합니다');
     }
 
-    const result = await this.analyticsService.getPartWorkHours(projectId, yearMonth);
+    const result = await this.analyticsService.getPartWorkHours(
+      projectId,
+      yearMonth,
+    );
     return result;
   }
 
@@ -244,7 +260,10 @@ export class AnalyticsController {
       throw new BadRequestException('yearMonth는 YYYY-MM 형식이어야 합니다');
     }
 
-    const result = await this.analyticsService.getTaskStatusCount(projectId, yearMonth);
+    const result = await this.analyticsService.getTaskStatusCount(
+      projectId,
+      yearMonth,
+    );
     return result;
   }
 }

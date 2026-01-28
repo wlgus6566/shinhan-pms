@@ -48,6 +48,11 @@ export interface Schedule {
   teamScope?: string;
   halfDayType?: string;
   usageDate?: string;
+  isRecurring?: boolean;
+  recurrenceType?: string;
+  recurrenceEndDate?: string;
+  originalScheduleId?: string;
+  instanceDate?: string;
 }
 
 export const ScheduleSchema = z
@@ -68,5 +73,10 @@ export const ScheduleSchema = z
     teamScope: z.string().optional(),
     halfDayType: z.string().optional(),
     usageDate: z.string().optional(),
+    isRecurring: z.boolean().optional(),
+    recurrenceType: z.string().optional(),
+    recurrenceEndDate: z.string().optional(),
+    originalScheduleId: z.string().optional(),
+    instanceDate: z.string().optional(),
   })
   .merge(AuditFieldsSchema);

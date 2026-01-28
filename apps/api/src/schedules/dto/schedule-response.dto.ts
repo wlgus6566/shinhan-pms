@@ -84,4 +84,22 @@ export class ScheduleResponseDto implements Schedule {
 
   @ApiPropertyOptional({ description: 'Usage date for vacation/half-day' })
   usageDate?: string;
+
+  @ApiPropertyOptional({ description: 'Is recurring schedule' })
+  isRecurring?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Recurrence type',
+    enum: ['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY']
+  })
+  recurrenceType?: string;
+
+  @ApiPropertyOptional({ description: 'Recurrence end date' })
+  recurrenceEndDate?: string;
+
+  @ApiPropertyOptional({ description: 'Original schedule ID for recurring instances' })
+  originalScheduleId?: string;
+
+  @ApiPropertyOptional({ description: 'Instance date for recurring schedules (YYYY-MM-DD)' })
+  instanceDate?: string;
 }

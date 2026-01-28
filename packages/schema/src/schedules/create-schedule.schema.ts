@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ScheduleTypeEnum, TeamScopeEnum, HalfDayTypeEnum } from '../common/enums';
+import { ScheduleTypeEnum, TeamScopeEnum, HalfDayTypeEnum, RecurrenceTypeEnum } from '../common/enums';
 
 export const CreateScheduleSchema = z
   .object({
@@ -23,6 +23,9 @@ export const CreateScheduleSchema = z
     teamScope: TeamScopeEnum.nullable().optional(),
     halfDayType: HalfDayTypeEnum.nullable().optional(),
     usageDate: z.string().optional(),
+    isRecurring: z.boolean().default(false).optional(),
+    recurrenceType: RecurrenceTypeEnum.optional(),
+    recurrenceEndDate: z.string().optional(),
   })
   // 조건부 검증 1: 연차/반차가 아닌 경우 startDate, endDate 필수
   .refine(
@@ -119,6 +122,45 @@ export const CreateScheduleSchema = z
     {
       message: '제목을 입력해주세요',
       path: ['title'],
+    }
+  )
+  // 조건부 검증 8: 정기 일정인 경우 recurrenceType 필수
+  .refine(
+    (data) => {
+      if (data.isRecurring === true) {
+        return data.recurrenceType !== undefined;
+      }
+      return true;
+    },
+    {
+      message: '반복 유형을 선택해주세요',
+      path: ['recurrenceType'],
+    }
+  )
+  // 조건부 검증 9: 정기 일정인 경우 recurrenceEndDate 필수
+  .refine(
+    (data) => {
+      if (data.isRecurring === true) {
+        return data.recurrenceEndDate !== undefined && data.recurrenceEndDate.trim().length > 0;
+      }
+      return true;
+    },
+    {
+      message: '반복 종료일을 선택해주세요',
+      path: ['recurrenceEndDate'],
+    }
+  )
+  // 조건부 검증 10: 반복 종료일 >= 시작 날짜
+  .refine(
+    (data) => {
+      if (data.isRecurring === true && data.startDate && data.recurrenceEndDate) {
+        return new Date(data.recurrenceEndDate) >= new Date(data.startDate);
+      }
+      return true;
+    },
+    {
+      message: '반복 종료일은 시작 날짜보다 이후여야 합니다',
+      path: ['recurrenceEndDate'],
     }
   );
 
