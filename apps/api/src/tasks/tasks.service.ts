@@ -86,7 +86,16 @@ export class TasksService {
       include: {
         assignees: {
           include: {
-            user: { select: { id: true, name: true, email: true } },
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                department: true,
+                position: true,
+                role: true,
+              },
+            },
           },
         },
       },
@@ -136,7 +145,16 @@ export class TasksService {
         include: {
           assignees: {
             include: {
-              user: { select: { id: true, name: true, email: true } },
+              user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                department: true,
+                position: true,
+                role: true,
+              },
+            },
             },
           },
         },
@@ -154,7 +172,16 @@ export class TasksService {
       include: {
         assignees: {
           include: {
-            user: { select: { id: true, name: true, email: true } },
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                department: true,
+                position: true,
+                role: true,
+              },
+            },
           },
         },
       },
@@ -250,7 +277,16 @@ export class TasksService {
       include: {
         assignees: {
           include: {
-            user: { select: { id: true, name: true, email: true } },
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                department: true,
+                position: true,
+                role: true,
+              },
+            },
           },
         },
       },

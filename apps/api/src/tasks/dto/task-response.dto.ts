@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import type { Task, UserBasicInfo } from '@repo/schema';
+import type { Task, UserBasicInfo, UserDetailInfo } from '@repo/schema';
 
 class UserBasicInfoDto implements UserBasicInfo {
   @ApiProperty({ description: '사용자 ID', example: '1' })
@@ -10,6 +10,26 @@ class UserBasicInfoDto implements UserBasicInfo {
 
   @ApiProperty({ description: '사용자 이메일', example: 'hong@example.com' })
   email: string;
+}
+
+class UserDetailInfoDto implements UserDetailInfo {
+  @ApiProperty({ description: '사용자 ID', example: '1' })
+  id: string;
+
+  @ApiProperty({ description: '사용자 이름', example: '홍길동' })
+  name: string;
+
+  @ApiProperty({ description: '사용자 이메일', example: 'hong@example.com' })
+  email: string;
+
+  @ApiProperty({ description: '본부', example: '개발본부1' })
+  department: string;
+
+  @ApiProperty({ description: '직책', example: 'LEADER', required: false })
+  position?: string;
+
+  @ApiProperty({ description: '역할', example: 'PM' })
+  role: string;
 }
 
 export class TaskResponseDto implements Task {
@@ -31,17 +51,17 @@ export class TaskResponseDto implements Task {
   @ApiProperty({ description: '클라이언트명', required: false })
   clientName?: string;
 
-  @ApiProperty({ description: '기획 담당자 목록', type: [UserBasicInfoDto], required: false })
-  planningAssignees?: UserBasicInfo[];
+  @ApiProperty({ description: '기획 담당자 목록', type: [UserDetailInfoDto], required: false })
+  planningAssignees?: UserDetailInfo[];
 
-  @ApiProperty({ description: '디자인 담당자 목록', type: [UserBasicInfoDto], required: false })
-  designAssignees?: UserBasicInfo[];
+  @ApiProperty({ description: '디자인 담당자 목록', type: [UserDetailInfoDto], required: false })
+  designAssignees?: UserDetailInfo[];
 
-  @ApiProperty({ description: '프론트엔드 담당자 목록', type: [UserBasicInfoDto], required: false })
-  frontendAssignees?: UserBasicInfo[];
+  @ApiProperty({ description: '프론트엔드 담당자 목록', type: [UserDetailInfoDto], required: false })
+  frontendAssignees?: UserDetailInfo[];
 
-  @ApiProperty({ description: '백엔드 담당자 목록', type: [UserBasicInfoDto], required: false })
-  backendAssignees?: UserBasicInfo[];
+  @ApiProperty({ description: '백엔드 담당자 목록', type: [UserDetailInfoDto], required: false })
+  backendAssignees?: UserDetailInfo[];
 
   @ApiProperty({ description: '상태', enum: ['TODO', 'IN_PROGRESS', 'DONE'] })
   status: string;

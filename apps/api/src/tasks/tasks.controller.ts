@@ -179,6 +179,9 @@ export class TasksController {
           id: a.user.id.toString(),
           name: a.user.name,
           email: a.user.email,
+          department: a.user.department,
+          position: a.user.position,
+          role: a.user.role,
         })) || [],
       designAssignees: assignees
         ?.filter((a: any) => a.workArea === 'DESIGN')
@@ -186,6 +189,9 @@ export class TasksController {
           id: a.user.id.toString(),
           name: a.user.name,
           email: a.user.email,
+          department: a.user.department,
+          position: a.user.position,
+          role: a.user.role,
         })) || [],
       frontendAssignees: assignees
         ?.filter((a: any) => a.workArea === 'FRONTEND')
@@ -193,6 +199,9 @@ export class TasksController {
           id: a.user.id.toString(),
           name: a.user.name,
           email: a.user.email,
+          department: a.user.department,
+          position: a.user.position,
+          role: a.user.role,
         })) || [],
       backendAssignees: assignees
         ?.filter((a: any) => a.workArea === 'BACKEND')
@@ -200,6 +209,9 @@ export class TasksController {
           id: a.user.id.toString(),
           name: a.user.name,
           email: a.user.email,
+          department: a.user.department,
+          position: a.user.position,
+          role: a.user.role,
         })) || [],
     };
   }

@@ -3,8 +3,8 @@
  */
 
 import { z } from 'zod';
-import type { UserBasicInfo } from '../common/types';
-import { UserBasicInfoSchema, AuditFieldsSchema } from '../common/types';
+import type { UserBasicInfo, UserDetailInfo } from '../common/types';
+import { UserBasicInfoSchema, UserDetailInfoSchema, AuditFieldsSchema } from '../common/types';
 
 // ============================================
 // Task Response
@@ -17,10 +17,10 @@ export interface Task {
   description?: string;
   difficulty: string;
   clientName?: string;
-  planningAssignees?: UserBasicInfo[];
-  designAssignees?: UserBasicInfo[];
-  frontendAssignees?: UserBasicInfo[];
-  backendAssignees?: UserBasicInfo[];
+  planningAssignees?: UserDetailInfo[];
+  designAssignees?: UserDetailInfo[];
+  frontendAssignees?: UserDetailInfo[];
+  backendAssignees?: UserDetailInfo[];
   status: string;
   startDate?: string;
   endDate?: string;
@@ -38,10 +38,10 @@ export const TaskSchema = z
     description: z.string().optional(),
     difficulty: z.string(),
     clientName: z.string().optional(),
-    planningAssignees: z.array(UserBasicInfoSchema).optional(),
-    designAssignees: z.array(UserBasicInfoSchema).optional(),
-    frontendAssignees: z.array(UserBasicInfoSchema).optional(),
-    backendAssignees: z.array(UserBasicInfoSchema).optional(),
+    planningAssignees: z.array(UserDetailInfoSchema).optional(),
+    designAssignees: z.array(UserDetailInfoSchema).optional(),
+    frontendAssignees: z.array(UserDetailInfoSchema).optional(),
+    backendAssignees: z.array(UserDetailInfoSchema).optional(),
     status: z.string(),
     startDate: z.string().optional(),
     endDate: z.string().optional(),

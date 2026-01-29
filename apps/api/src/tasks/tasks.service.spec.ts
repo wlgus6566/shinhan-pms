@@ -447,4 +447,163 @@ describe('TasksService', () => {
       );
     });
   });
+
+  describe('Position Display', () => {
+    it('should include position field when fetching task details', async () => {
+      const taskId = BigInt(1);
+      const mockTask = {
+        id: taskId,
+        projectId: BigInt(1),
+        taskName: 'Test Task',
+        difficulty: 'MEDIUM',
+        status: 'TODO',
+        isActive: true,
+        assignees: [
+          {
+            id: BigInt(1),
+            taskId,
+            userId: BigInt(1),
+            workArea: 'PLANNING',
+            user: {
+              id: BigInt(1),
+              name: 'User 1',
+              email: 'user1@test.com',
+              department: '개발본부1',
+              position: 'LEADER',
+              role: 'PM',
+            },
+          },
+        ],
+      };
+
+      mockPrismaService.task.findUnique.mockResolvedValue(mockTask);
+
+      const result = await service.findOne(taskId);
+
+      expect(result).toEqual(mockTask);
+      expect(result.assignees[0].user.position).toBe('LEADER');
+      expect(result.assignees[0].user.department).toBe('개발본부1');
+      expect(result.assignees[0].user.role).toBe('PM');
+    });
+
+    it('should handle null/undefined position gracefully', async () => {
+      const taskId = BigInt(2);
+      const mockTask = {
+        id: taskId,
+        projectId: BigInt(1),
+        taskName: 'Test Task',
+        difficulty: 'MEDIUM',
+        status: 'TODO',
+        isActive: true,
+        assignees: [
+          {
+            id: BigInt(2),
+            taskId,
+            userId: BigInt(2),
+            workArea: 'FRONTEND',
+            user: {
+              id: BigInt(2),
+              name: 'User 2',
+              email: 'user2@test.com',
+              department: '개발본부2',
+              position: null, // User without position
+              role: 'DEVELOPER',
+            },
+          },
+        ],
+      };
+
+      mockPrismaService.task.findUnique.mockResolvedValue(mockTask);
+
+      const result = await service.findOne(taskId);
+
+      expect(result).toEqual(mockTask);
+      expect(result.assignees[0].user.position).toBeNull();
+      expect(result.assignees[0].user.department).toBe('개발본부2');
+    });
+
+    it('should include position for all work area assignees', async () => {
+      const projectId = BigInt(1);
+      const mockTasks = [
+        {
+          id: BigInt(1),
+          projectId,
+          taskName: 'Multi-area Task',
+          difficulty: 'HIGH',
+          status: 'IN_PROGRESS',
+          isActive: true,
+          assignees: [
+            {
+              id: BigInt(1),
+              taskId: BigInt(1),
+              userId: BigInt(1),
+              workArea: 'PLANNING',
+              user: {
+                id: BigInt(1),
+                name: 'PM User',
+                email: 'pm@test.com',
+                department: '기획본부',
+                position: 'GENERAL_MANAGER',
+                role: 'PM',
+              },
+            },
+            {
+              id: BigInt(2),
+              taskId: BigInt(1),
+              userId: BigInt(2),
+              workArea: 'DESIGN',
+              user: {
+                id: BigInt(2),
+                name: 'Designer',
+                email: 'design@test.com',
+                department: '디자인본부',
+                position: 'SENIOR_LEADER',
+                role: 'DESIGNER',
+              },
+            },
+            {
+              id: BigInt(3),
+              taskId: BigInt(1),
+              userId: BigInt(3),
+              workArea: 'FRONTEND',
+              user: {
+                id: BigInt(3),
+                name: 'Frontend Dev',
+                email: 'fe@test.com',
+                department: '개발본부1',
+                position: 'LEADER',
+                role: 'DEVELOPER',
+              },
+            },
+            {
+              id: BigInt(4),
+              taskId: BigInt(1),
+              userId: BigInt(4),
+              workArea: 'BACKEND',
+              user: {
+                id: BigInt(4),
+                name: 'Backend Dev',
+                email: 'be@test.com',
+                department: '개발본부2',
+                position: 'TEAM_MEMBER',
+                role: 'DEVELOPER',
+              },
+            },
+          ],
+        },
+      ];
+
+      mockPrismaService.task.findMany.mockResolvedValue(mockTasks);
+      mockPrismaService.task.count.mockResolvedValue(1);
+
+      const result = await service.findAllByProject(projectId);
+
+      expect(result.list).toHaveLength(1);
+      expect(result.list[0].assignees).toHaveLength(4);
+      expect(result.list[0].assignees[0].user.position).toBe('GENERAL_MANAGER');
+      expect(result.list[0].assignees[1].user.position).toBe('SENIOR_LEADER');
+      expect(result.list[0].assignees[2].user.position).toBe('LEADER');
+      expect(result.list[0].assignees[3].user.position).toBe('TEAM_MEMBER');
+    });
+  });
 });

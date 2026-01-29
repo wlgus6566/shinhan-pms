@@ -29,6 +29,7 @@ import {
   type TaskDifficulty,
   type TaskStatus,
 } from '@/types/task';
+import { POSITION_LABELS, type Position } from '@/lib/constants/roles';
 import {
   Calendar,
   User,
@@ -214,10 +215,14 @@ export function TaskDetailSheet({
                   "
                             title={assignee.name}
                           >
-                            {assignee.name}{' '}
-                            {assignee.email && (
-                              <span className="text-xs text-muted-foreground">
-                                ({assignee.email})
+                            {assignee.name}
+                            {assignee.position && (
+                              <span className="text-xs text-muted-foreground ml-1">
+                                (
+                                {POSITION_LABELS[
+                                  assignee.position as Position
+                                ] || assignee.position}
+                                )
                               </span>
                             )}
                           </span>
