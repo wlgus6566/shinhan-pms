@@ -10,13 +10,13 @@ import { TaskDetailSheet } from './TaskDetailSheet';
 import { AddTaskDialog } from './AddTaskDialog';
 import { EditTaskDialog } from './EditTaskDialog';
 import { TablePagination } from '@/components/common/table/TablePagination';
-import { ViewToggle } from './ViewToggle';
 import { KanbanBoard } from './KanbanBoard';
 import { Button } from '@/components/ui/button';
 import { Plus, Loader2 } from 'lucide-react';
 import type { Task, TaskStatus, TaskDifficulty } from '@/types/task';
 import type { ProjectMember } from '@/types/project';
-
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table2, LayoutGrid } from 'lucide-react';
 interface TaskListProps {
   error: Error | null;
   isLoading: boolean;
@@ -158,10 +158,21 @@ export function TaskList({
       {/* Filters */}
 
       <div className="flex justify-between items-center">
-        <ViewToggle
+        <Tabs
           value={view}
           onValueChange={(newView) => setParam('view', newView)}
-        />
+        >
+          <TabsList>
+            <TabsTrigger value="kanban" className="flex items-center gap-2">
+              <LayoutGrid className="h-4 w-4" />
+              <span>칸반 보드</span>
+            </TabsTrigger>
+            <TabsTrigger value="table" className="flex items-center gap-2">
+              <Table2 className="h-4 w-4" />
+              <span>테이블 뷰</span>
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
 
         {isPM && (
           <Button onClick={() => setDialogOpen(true)}>
@@ -208,6 +219,7 @@ export function TaskList({
               isValidating={isValidating}
               onRefresh={handleSuccess}
               statusFilter={statusFilter}
+              isPM={isPM}
             />
           )}
         </>
