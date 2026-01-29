@@ -60,15 +60,53 @@ export function PartTaskCountChart({ part }: PartTaskCountChartProps) {
       <CardContent>
         <ResponsiveContainer width="100%" height={250}>
           <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
+            <CartesianGrid
+              stroke="#e5e7eb"
+              strokeDasharray="2 4"
+              vertical={false}
+            />
+            <XAxis
+              dataKey="name"
+              tick={{
+                fontSize: 12,
+                fill: '#64748b', // slate-500
+              }}
+              tickLine={false}
+              axisLine={{ stroke: '#e5e7eb' }} // gray-200
+            />
+            <YAxis
+              tick={{
+                fontSize: 12,
+                fill: '#64748b',
+              }}
+              tickLine={false}
+              axisLine={false}
+            />
             <Tooltip
+              cursor={{ fill: 'rgba(148,163,184,0.1)' }} // slate-400
+              contentStyle={{
+                backgroundColor: '#ffffff',
+                borderRadius: 8,
+                border: '1px solid #e5e7eb',
+                fontSize: 12,
+              }}
+              labelStyle={{
+                color: '#334155', // slate-700
+                fontWeight: 600,
+              }}
+              itemStyle={{
+                color: '#475569', // slate-600
+              }}
               formatter={(value: number | undefined) =>
                 value ? [`${value}건`, '담당 업무'] : ['-', '담당 업무']
               }
             />
-            <Bar dataKey="taskCount" fill={partColor} maxBarSize={40} />
+            <Bar
+              dataKey="taskCount"
+              fill={partColor}
+              radius={[6, 6, 0, 0]}
+              maxBarSize={36}
+            />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

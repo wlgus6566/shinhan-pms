@@ -47,18 +47,24 @@ export function WorkAreaDistributionChart({
 
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <PieChart>
+      <PieChart
+        style={{
+          fontFamily:
+            'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont',
+        }}
+      >
         <Pie
           data={chartData}
           cx="50%"
           cy="50%"
-          labelLine={false}
-          label={({ name, percent }) =>
-            `${name} ${((percent || 0) * 100).toFixed(0)}%`
-          }
+          innerRadius={60}
           outerRadius={120}
-          fill="#8884d8"
+          paddingAngle={2}
           dataKey="value"
+          labelLine={false}
+          label={({ percent }) =>
+            percent && percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : ''
+          }
         >
           {chartData.map((entry, index) => (
             <Cell
@@ -67,14 +73,36 @@ export function WorkAreaDistributionChart({
             />
           ))}
         </Pie>
+
         <Tooltip
+          contentStyle={{
+            backgroundColor: '#ffffff',
+            borderRadius: 8,
+            border: '1px solid #e5e7eb',
+            fontSize: 12,
+          }}
+          labelStyle={{
+            color: '#334155',
+            fontWeight: 600,
+          }}
+          itemStyle={{
+            color: '#475569',
+          }}
           formatter={(value: number | undefined) =>
             value
               ? [`${value.toFixed(1)}시간`, '작업 시간']
               : ['-', '작업 시간']
           }
         />
-        <Legend />
+
+        <Legend
+          verticalAlign="bottom"
+          iconType="circle"
+          iconSize={10}
+          formatter={(value) => (
+            <span style={{ color: '#475569', fontSize: 12 }}>{value}</span>
+          )}
+        />
       </PieChart>
     </ResponsiveContainer>
   );

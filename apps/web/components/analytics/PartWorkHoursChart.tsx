@@ -60,18 +60,66 @@ export function PartWorkHoursChart({ part }: PartWorkHoursChartProps) {
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={250}>
-          <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
+          <BarChart
+            data={chartData}
+            style={{
+              fontFamily:
+                'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont',
+            }}
+          >
+            <CartesianGrid
+              stroke="#e5e7eb"
+              strokeDasharray="2 4"
+              vertical={false}
+            />
+
+            <XAxis
+              dataKey="name"
+              tick={{
+                fontSize: 12,
+                fill: '#64748b', // slate-500
+              }}
+              tickLine={false}
+              axisLine={{ stroke: '#e5e7eb' }}
+            />
+
+            <YAxis
+              tick={{
+                fontSize: 12,
+                fill: '#64748b',
+              }}
+              tickLine={false}
+              axisLine={false}
+            />
+
             <Tooltip
+              cursor={{ fill: 'rgba(148,163,184,0.1)' }}
+              contentStyle={{
+                backgroundColor: '#ffffff',
+                borderRadius: 8,
+                border: '1px solid #e5e7eb',
+                fontSize: 12,
+              }}
+              labelStyle={{
+                color: '#334155',
+                fontWeight: 600,
+              }}
+              itemStyle={{
+                color: '#475569',
+              }}
               formatter={(value: number | undefined) =>
                 value
                   ? [`${value}시간`, '평균 근무 시간']
                   : ['-', '평균 근무 시간']
               }
             />
-            <Bar dataKey="avgHours" fill={partColor} maxBarSize={40} />
+
+            <Bar
+              dataKey="avgHours"
+              fill={partColor}
+              radius={[6, 6, 0, 0]}
+              maxBarSize={36}
+            />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>
