@@ -63,7 +63,7 @@ export function TaskTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[250px]">업무명</TableHead>
+            <TableHead className="">업무명</TableHead>
             <TableHead className="w-[120px]">업무 구분</TableHead>
             <TableHead className="w-[100px]">난이도</TableHead>
             <TableHead className="w-[120px]">진행상태</TableHead>

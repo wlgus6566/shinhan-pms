@@ -201,7 +201,7 @@ export function ProjectListTable() {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent border-b border-slate-100">
-                <TableHead>
+                <TableHead className="">
                   <div className="flex items-center gap-1 cursor-pointer hover:text-slate-700">
                     프로젝트명
                   </div>

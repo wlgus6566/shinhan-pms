@@ -40,37 +40,6 @@ export default function TaskManagementPage() {
     );
   }, [user, members]);
 
-  // if (isInitialLoad) {
-  //   return (
-  //     <div className="flex justify-center items-center min-h-[400px]">
-  //       <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-  //     </div>
-  //   );
-  // }
-
-  // if (error || !project) {
-  //   return (
-  //     <div className="max-w-7xl">
-  //       <Card>
-  //         <CardContent className="pt-6">
-  //           <div className="text-center py-8">
-  //             <p className="text-destructive">
-  //               {error?.message || '프로젝트를 찾을 수 없습니다'}
-  //             </p>
-  //             <Button
-  //               variant="outline"
-  //               className="mt-4"
-  //               onClick={() => router.back()}
-  //             >
-  //               돌아가기
-  //             </Button>
-  //           </div>
-  //         </CardContent>
-  //       </Card>
-  //     </div>
-  //   );
-  // }
-
   const statusConfig = {
     label: PROJECT_STATUS_LABELS[project?.status as ProjectStatus] || '알 수 없음',
     variant: PROJECT_STATUS_VARIANTS[project?.status as ProjectStatus] || 'outline',

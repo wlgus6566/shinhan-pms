@@ -8,9 +8,10 @@ import { Calendar, User } from 'lucide-react';
 interface TaskCardProps {
   task: Task;
   onClick?: () => void;
+  variant?: 'default' | 'kanban';
 }
 
-export function TaskCard({ task, onClick }: TaskCardProps) {
+export function TaskCard({ task, onClick, variant = 'default' }: TaskCardProps) {
   const assignees = [
     { label: '기획', assignee: task.planningAssignees?.[0] },
     { label: '디자인', assignee: task.designAssignees?.[0] },
@@ -27,13 +28,21 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
             <Badge className={DIFFICULTY_COLORS[task.difficulty as TaskDifficulty]}>
               {DIFFICULTY_LABELS[task.difficulty as TaskDifficulty]}
             </Badge>
-            <Badge className={STATUS_COLORS[task.status as TaskStatus]}>
-              {STATUS_LABELS[task.status as TaskStatus]}
-            </Badge>
+            {variant !== 'kanban' && (
+              <Badge className={STATUS_COLORS[task.status as TaskStatus]}>
+                {STATUS_LABELS[task.status as TaskStatus]}
+              </Badge>
+            )}
           </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
+        {task.taskType && (
+          <div className="text-sm text-muted-foreground">
+            <span className="font-medium">{task.taskType.name}</span>
+          </div>
+        )}
+
         {task.description && (
           <p className="text-sm text-muted-foreground line-clamp-2">{task.description}</p>
         )}

@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { Toaster } from '@/components/ui/toaster';
 
 export default function DashboardLayout({
   children,
@@ -46,8 +47,11 @@ export default function DashboardLayout({
         <Header />
 
         {/* 페이지 콘텐츠 */}
-        <main className="max-w-[1600px] p-8">{children}</main>
+        <main className=" p-8">{children}</main>
       </div>
+
+      {/* Toast 알림 */}
+      <Toaster />
     </div>
   );
 }

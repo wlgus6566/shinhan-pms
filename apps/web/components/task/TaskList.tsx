@@ -10,6 +10,8 @@ import { TaskDetailSheet } from './TaskDetailSheet';
 import { AddTaskDialog } from './AddTaskDialog';
 import { EditTaskDialog } from './EditTaskDialog';
 import { TablePagination } from '@/components/common/table/TablePagination';
+import { ViewToggle } from './ViewToggle';
+import { KanbanBoard } from './KanbanBoard';
 import { Button } from '@/components/ui/button';
 import { Plus, Loader2 } from 'lucide-react';
 import type { Task, TaskStatus, TaskDifficulty } from '@/types/task';
@@ -63,6 +65,7 @@ export function TaskList({
   const { params, setParam, setParams } = useUrlQueryParams({
     defaults: {
       pageNum: 1,
+      view: 'kanban',
     },
   });
 
@@ -70,6 +73,7 @@ export function TaskList({
   const statusFilter = parseArrayParam(params.status);
   const difficultyFilter = parseArrayParam(params.difficulty);
   const currentPage = (params.pageNum as number) || 1;
+  const view = (params.view as 'table' | 'kanban') || 'kanban';
 
   // Search button hook
   const { searchInput, setSearchInput, handleSearch, handleKeyDown } =
@@ -78,12 +82,13 @@ export function TaskList({
   // API params for server-side filtering
   const apiParams = useMemo(
     () => ({
-      pageNum: currentPage,
+      pageNum: view === 'kanban' ? 1 : currentPage,
+      pageSize: view === 'kanban' ? 0 : undefined, // 0 = fetch all tasks for kanban
       search: search || undefined,
       status: statusFilter.length > 0 ? statusFilter : undefined,
       difficulty: difficultyFilter.length > 0 ? difficultyFilter : undefined,
     }),
-    [currentPage, search, statusFilter, difficultyFilter],
+    [view, currentPage, search, statusFilter, difficultyFilter],
   );
 
   const {
@@ -94,9 +99,6 @@ export function TaskList({
     isValidating,
     mutate: mutateTasks,
   } = useTasks(projectId, apiParams);
-
-  const loading = tasksLoading;
-  const error = tasksError;
 
   // Filter handlers
   const handleStatusToggle = useCallback(
@@ -154,27 +156,20 @@ export function TaskList({
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <TaskFilters
-        searchInput={searchInput}
-        setSearchInput={setSearchInput}
-        handleSearch={handleSearch}
-        handleKeyDown={handleKeyDown}
-        statusFilter={statusFilter}
-        onStatusToggle={handleStatusToggle}
-        difficultyFilter={difficultyFilter}
-        onDifficultyToggle={handleDifficultyToggle}
-        projectMembers={projectMembers || []}
-        resetFilters={resetFilters}
-      />
 
-      {isPM && (
-        <div className="flex justify-end">
+      <div className="flex justify-between items-center">
+        <ViewToggle
+          value={view}
+          onValueChange={(newView) => setParam('view', newView)}
+        />
+
+        {isPM && (
           <Button onClick={() => setDialogOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
             업무 추가
           </Button>
-        </div>
-      )}
+        )}
+      </div>
 
       {projectError && <ErrorState />}
 
@@ -185,21 +180,50 @@ export function TaskList({
       )}
 
       {!isLoading && tasks && tasks.length > 0 && (
-        <TaskTable
-          tasks={tasks || []}
-          onTaskClick={handleTaskClick}
-          isValidating={isValidating}
-        />
+        <>
+          {view === 'table' ? (
+            <>
+              <TaskFilters
+                searchInput={searchInput}
+                setSearchInput={setSearchInput}
+                handleSearch={handleSearch}
+                handleKeyDown={handleKeyDown}
+                statusFilter={statusFilter}
+                onStatusToggle={handleStatusToggle}
+                difficultyFilter={difficultyFilter}
+                onDifficultyToggle={handleDifficultyToggle}
+                projectMembers={projectMembers || []}
+                resetFilters={resetFilters}
+              />
+              <TaskTable
+                tasks={tasks || []}
+                onTaskClick={handleTaskClick}
+                isValidating={isValidating}
+              />
+            </>
+          ) : (
+            <KanbanBoard
+              tasks={tasks || []}
+              onTaskClick={handleTaskClick}
+              isValidating={isValidating}
+              onRefresh={handleSuccess}
+              statusFilter={statusFilter}
+            />
+          )}
+        </>
       )}
 
-      {/* Pagination */}
-      {!tasksLoading && pagination && pagination.pages > 1 && (
-        <TablePagination
-          currentPage={currentPage}
-          totalPages={pagination.pages}
-          onPageChange={(page) => setParam('pageNum', page)}
-        />
-      )}
+      {/* Pagination - only show in table view */}
+      {view === 'table' &&
+        !tasksLoading &&
+        pagination &&
+        pagination.pages > 1 && (
+          <TablePagination
+            currentPage={currentPage}
+            totalPages={pagination.pages}
+            onPageChange={(page) => setParam('pageNum', page)}
+          />
+        )}
 
       {isPM && projectMembers && (
         <AddTaskDialog
