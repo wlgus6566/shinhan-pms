@@ -11,26 +11,19 @@ import { AddProjectMemberDto } from './dto/add-member.dto';
 import { UpdateProjectMemberRoleDto } from './dto/update-member-role.dto';
 import { parsePaginationParams } from '../common/helpers/pagination.helper';
 
+const DEFAULT_TASK_TYPES = [
+  { name: '프로젝트성 업무', description: '' },
+  { name: '신규 / 단건 제작', description: '' },
+  { name: '운영 / 수정 작업', description: '' },
+  { name: '관리 업무', description: '' },
+];
+
 @Injectable()
 export class ProjectsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createProjectDto: CreateProjectDto, userId: bigint) {
-    // 날짜 검증
-    if (createProjectDto.startDate && createProjectDto.endDate) {
-      const startDate = new Date(createProjectDto.startDate);
-      const endDate = new Date(createProjectDto.endDate);
-      if (endDate < startDate) {
-        throw new BadRequestException('종료일은 시작일 이후여야 합니다');
-      }
-    }
-
-    // 중복 검증 (활성 프로젝트만)
-    console.log('[DEBUG] 프로젝트 생성 시도:', {
-      projectName: createProjectDto.name,
-      userId: userId.toString(),
-    });
-
+    // 1. 프로젝트명 중복 체크
     const existingProject = await this.prisma.project.findFirst({
       where: {
         projectName: createProjectDto.name,
@@ -38,34 +31,53 @@ export class ProjectsService {
       },
     });
 
-    console.log('[DEBUG] 중복 검증 결과:', {
-      found: !!existingProject,
-      existingProject: existingProject ? {
-        id: existingProject.id.toString(),
-        projectName: existingProject.projectName,
-        isActive: existingProject.isActive,
-      } : null,
-    });
-
     if (existingProject) {
       throw new BadRequestException('이미 존재하는 프로젝트명입니다');
     }
 
-    // 생성
-    return await this.prisma.project.create({
-      data: {
-        projectName: createProjectDto.name,
-        client: createProjectDto.client,
-        projectType: createProjectDto.projectType,
-        startDate: createProjectDto.startDate
-          ? new Date(createProjectDto.startDate)
-          : null,
-        endDate: createProjectDto.endDate
-          ? new Date(createProjectDto.endDate)
-          : null,
-        createdBy: userId,
-      },
+    // 2. 날짜 검증
+    if (createProjectDto.startDate && createProjectDto.endDate) {
+      if (new Date(createProjectDto.endDate) < new Date(createProjectDto.startDate)) {
+        throw new BadRequestException('종료일은 시작일보다 이후여야 합니다');
+      }
+    }
+
+    // 3. 업무 구분 준비 (제공되지 않으면 기본값 사용)
+    const taskTypesToCreate = createProjectDto.taskTypes && createProjectDto.taskTypes.length > 0
+      ? createProjectDto.taskTypes
+      : DEFAULT_TASK_TYPES;
+
+    // 4. 트랜잭션으로 프로젝트 + 업무 구분 생성
+    const project = await this.prisma.$transaction(async (tx) => {
+      // 프로젝트 생성
+      const newProject = await tx.project.create({
+        data: {
+          projectName: createProjectDto.name,
+          client: createProjectDto.client,
+          projectType: createProjectDto.projectType,
+          description: createProjectDto.description,
+          startDate: createProjectDto.startDate ? new Date(createProjectDto.startDate) : null,
+          endDate: createProjectDto.endDate ? new Date(createProjectDto.endDate) : null,
+          createdBy: userId,
+          updatedBy: userId,
+        },
+      });
+
+      // 업무 구분 생성
+      await tx.projectTaskType.createMany({
+        data: taskTypesToCreate.map((tt) => ({
+          projectId: newProject.id,
+          name: tt.name,
+          createdBy: userId,
+          updatedBy: userId,
+        })),
+      });
+
+      return newProject;
     });
+
+    // 5. 업무 구분 포함하여 조회
+    return this.findOne(project.id);
   }
 
   async findAll(filters?: {
@@ -170,6 +182,12 @@ export class ProjectsService {
   async findOne(id: bigint) {
     const project = await this.prisma.project.findUnique({
       where: { id, isActive: true },
+      include: {
+        taskTypes: {
+          where: { isActive: true },
+          orderBy: { id: 'asc' },
+        },
+      },
     });
 
     if (!project) {
@@ -184,66 +202,105 @@ export class ProjectsService {
     updateProjectDto: UpdateProjectDto,
     userId: bigint,
   ) {
-    // 존재 확인
-    await this.findOne(id);
+    // 1. 프로젝트 존재 확인
+    const existingProject = await this.prisma.project.findUnique({
+      where: { id, isActive: true },
+      include: { taskTypes: { where: { isActive: true } } },
+    });
 
-    // 날짜 검증
-    if (updateProjectDto.startDate && updateProjectDto.endDate) {
-      const startDate = new Date(updateProjectDto.startDate);
-      const endDate = new Date(updateProjectDto.endDate);
-      if (endDate < startDate) {
-        throw new BadRequestException('종료일은 시작일 이후여야 합니다');
-      }
+    if (!existingProject) {
+      throw new NotFoundException('프로젝트를 찾을 수 없습니다');
     }
 
-    // 프로젝트명 중복 검증 (현재 프로젝트 제외, 활성 프로젝트만)
-    if (updateProjectDto.name) {
-      const existingProject = await this.prisma.project.findFirst({
+    // 2. 프로젝트명 중복 체크 (변경하는 경우)
+    if (updateProjectDto.name && updateProjectDto.name !== existingProject.projectName) {
+      const duplicate = await this.prisma.project.findFirst({
         where: {
           projectName: updateProjectDto.name,
-          id: { not: id },
           isActive: true,
+          id: { not: id },
         },
       });
 
-      if (existingProject) {
+      if (duplicate) {
         throw new BadRequestException('이미 존재하는 프로젝트명입니다');
       }
     }
 
-    // 수정
-    return await this.prisma.project.update({
-      where: { id },
-      data: {
-        ...(updateProjectDto.name && {
+    // 3. 날짜 검증
+    const startDate = updateProjectDto.startDate
+      ? new Date(updateProjectDto.startDate)
+      : existingProject.startDate;
+    const endDate = updateProjectDto.endDate
+      ? new Date(updateProjectDto.endDate)
+      : existingProject.endDate;
+
+    if (startDate && endDate && endDate < startDate) {
+      throw new BadRequestException('종료일은 시작일보다 이후여야 합니다');
+    }
+
+    // 4. 트랜잭션으로 프로젝트 + 업무 구분 업데이트
+    await this.prisma.$transaction(async (tx) => {
+      // 프로젝트 업데이트
+      await tx.project.update({
+        where: { id },
+        data: {
           projectName: updateProjectDto.name,
-        }),
-        ...(updateProjectDto.client !== undefined && {
           client: updateProjectDto.client,
-        }),
-        ...(updateProjectDto.projectType && {
           projectType: updateProjectDto.projectType,
-        }),
-        ...(updateProjectDto.description !== undefined && {
           description: updateProjectDto.description,
-        }),
-        ...(updateProjectDto.startDate !== undefined && {
-          startDate: updateProjectDto.startDate
-            ? new Date(updateProjectDto.startDate)
-            : null,
-        }),
-        ...(updateProjectDto.endDate !== undefined && {
-          endDate: updateProjectDto.endDate
-            ? new Date(updateProjectDto.endDate)
-            : null,
-        }),
-        ...(updateProjectDto.status && {
+          startDate: updateProjectDto.startDate ? new Date(updateProjectDto.startDate) : undefined,
+          endDate: updateProjectDto.endDate ? new Date(updateProjectDto.endDate) : undefined,
           status: updateProjectDto.status,
-        }),
-        updatedBy: userId,
-        updatedAt: new Date(),
-      },
+          updatedBy: userId,
+        },
+      });
+
+      // 업무 구분 업데이트 (제공된 경우만)
+      if (updateProjectDto.taskTypes) {
+        const providedIds = updateProjectDto.taskTypes
+          .filter((tt) => tt.id)
+          .map((tt) => BigInt(tt.id!));
+
+        // 요청에 없는 기존 업무 구분은 soft delete
+        const existingIds = existingProject.taskTypes.map((tt) => tt.id);
+        const idsToDelete = existingIds.filter((id) => !providedIds.includes(id));
+
+        if (idsToDelete.length > 0) {
+          await tx.projectTaskType.updateMany({
+            where: { id: { in: idsToDelete } },
+            data: { isActive: false, updatedBy: userId },
+          });
+        }
+
+        // 업무 구분 업데이트 및 생성
+        for (const tt of updateProjectDto.taskTypes) {
+          if (tt.id) {
+            // 기존 업무 구분 업데이트
+            await tx.projectTaskType.update({
+              where: { id: BigInt(tt.id) },
+              data: {
+                name: tt.name,
+                updatedBy: userId,
+              },
+            });
+          } else {
+            // 신규 업무 구분 생성
+            await tx.projectTaskType.create({
+              data: {
+                projectId: id,
+                name: tt.name,
+                createdBy: userId,
+                updatedBy: userId,
+              },
+            });
+          }
+        }
+      }
     });
+
+    // 5. 업무 구분 포함하여 조회
+    return this.findOne(id);
   }
 
   async remove(id: bigint) {

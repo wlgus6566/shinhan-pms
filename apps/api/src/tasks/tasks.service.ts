@@ -21,7 +21,10 @@ export class TasksService {
     // 2. PM 권한 확인
     await this.checkPMPermission(projectId, userId);
 
-    // 3. 날짜 유효성 검증
+    // 3. 업무 구분 유효성 검증
+    await this.validateTaskType(projectId, createTaskDto.taskTypeId);
+
+    // 4. 날짜 유효성 검증
     if (createTaskDto.startDate && createTaskDto.endDate) {
       const startDate = new Date(createTaskDto.startDate);
       const endDate = new Date(createTaskDto.endDate);
@@ -30,7 +33,7 @@ export class TasksService {
       }
     }
 
-    // 4. 담당자 유효성 검증
+    // 5. 담당자 유효성 검증
     console.log('Service received assignee IDs:', {
       planning: createTaskDto.planningAssigneeIds,
       design: createTaskDto.designAssigneeIds,
@@ -46,7 +49,7 @@ export class TasksService {
     );
     console.log('Assignee validation passed');
 
-    // 5. 업무 생성
+    // 6. 업무 생성
     const assigneesToCreate = [
       ...(createTaskDto.planningAssigneeIds?.map(id => ({
         userId: BigInt(id),
@@ -74,6 +77,7 @@ export class TasksService {
         description: createTaskDto.description,
         difficulty: createTaskDto.difficulty,
         clientName: createTaskDto.clientName,
+        taskTypeId: BigInt(createTaskDto.taskTypeId),
         startDate: createTaskDto.startDate ? new Date(createTaskDto.startDate) : null,
         endDate: createTaskDto.endDate ? new Date(createTaskDto.endDate) : null,
         openDate: createTaskDto.openDate ? new Date(createTaskDto.openDate) : null,
@@ -96,6 +100,12 @@ export class TasksService {
                 role: true,
               },
             },
+          },
+        },
+        taskType: {
+          select: {
+            id: true,
+            name: true,
           },
         },
       },
@@ -157,6 +167,12 @@ export class TasksService {
             },
             },
           },
+          taskType: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
         },
         orderBy: { createdAt: 'desc' },
       }),
@@ -184,6 +200,12 @@ export class TasksService {
             },
           },
         },
+        taskType: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
 
@@ -199,6 +221,11 @@ export class TasksService {
 
     // PM 권한 확인
     await this.checkPMPermission(task.projectId, userId);
+
+    // 업무 구분 유효성 검증
+    if (updateTaskDto.taskTypeId) {
+      await this.validateTaskType(task.projectId, updateTaskDto.taskTypeId);
+    }
 
     // 날짜 유효성 검증
     if (updateTaskDto.startDate || updateTaskDto.endDate) {
@@ -229,6 +256,7 @@ export class TasksService {
       description: updateTaskDto.description,
       difficulty: updateTaskDto.difficulty,
       clientName: updateTaskDto.clientName,
+      taskTypeId: updateTaskDto.taskTypeId ? BigInt(updateTaskDto.taskTypeId) : undefined,
       startDate: updateTaskDto.startDate ? new Date(updateTaskDto.startDate) : undefined,
       endDate: updateTaskDto.endDate ? new Date(updateTaskDto.endDate) : undefined,
       openDate: updateTaskDto.openDate ? new Date(updateTaskDto.openDate) : undefined,
@@ -362,6 +390,25 @@ export class TasksService {
           }
         }
       }
+    }
+  }
+
+  // 업무 구분 유효성 검증
+  private async validateTaskType(projectId: bigint, taskTypeId?: number): Promise<void> {
+    if (!taskTypeId) {
+      throw new BadRequestException('업무 구분을 선택해주세요');
+    }
+
+    const taskType = await this.prisma.projectTaskType.findFirst({
+      where: {
+        id: BigInt(taskTypeId),
+        projectId,
+        isActive: true,
+      },
+    });
+
+    if (!taskType) {
+      throw new BadRequestException('유효하지 않은 업무 구분입니다');
     }
   }
 }

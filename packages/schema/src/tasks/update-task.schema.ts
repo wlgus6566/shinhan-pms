@@ -16,6 +16,7 @@ export const UpdateTaskSchema = z.object({
     .string()
     .max(100, '담당 RM은 최대 100자까지 입력 가능합니다')
     .optional(),
+  taskTypeId: z.number().int().positive().optional(),
   planningAssigneeIds: z.array(z.number().int().positive()).optional(),
   designAssigneeIds: z.array(z.number().int().positive()).optional(),
   frontendAssigneeIds: z.array(z.number().int().positive()).optional(),

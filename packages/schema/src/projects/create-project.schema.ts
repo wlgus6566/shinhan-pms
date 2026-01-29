@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { ProjectTypeEnum } from '../common/enums';
+import { TaskTypeInputSchema } from './task-type-input.schema';
 
 export const CreateProjectSchema = z
   .object({
@@ -18,6 +19,7 @@ export const CreateProjectSchema = z
       .optional(),
     startDate: z.string().optional(),
     endDate: z.string().optional(),
+    taskTypes: z.array(TaskTypeInputSchema).optional(),
   })
   .refine(
     (data) => {

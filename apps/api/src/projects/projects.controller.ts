@@ -219,6 +219,10 @@ export class ProjectsController {
             email: project.creator.email,
           }
         : undefined,
+      taskTypes: project.taskTypes?.map((taskType: any) => ({
+        id: taskType.id.toString(),
+        name: taskType.name,
+      })),
       createdAt: project.createdAt.toISOString(),
       updatedAt: project.updatedAt?.toISOString(),
     };

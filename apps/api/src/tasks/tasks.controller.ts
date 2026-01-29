@@ -60,7 +60,7 @@ export class TasksController {
       BigInt(user.id),
       createTaskDto,
     );
-    console.log('Service returned task with assignees:', task.assignees?.length || 0);
+    // console.log('Service returned task with assignees:', task.assignees?.length || 0);
     return this.transformTask(task);
   }
 

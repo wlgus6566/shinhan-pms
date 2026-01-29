@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,31 +7,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// =============================================
-// 프로젝트 관리
-// =============================================
-
 model Project {
-  id          BigInt    @id @default(autoincrement())
-  projectName String    @unique @map("project_name") @db.VarChar(100)
-  client      String?   @db.VarChar(100)
-  projectType String    @default("BUILD") @map("project_type") @db.VarChar(20)
-  description String?   @db.Text
-  startDate   DateTime? @map("start_date") @db.Date
-  endDate     DateTime? @map("end_date") @db.Date
-  status      String    @default("ACTIVE") @db.VarChar(20)
-  isActive    Boolean   @default(true) @map("is_active")
-  createdBy   BigInt    @map("created_by")
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedBy   BigInt?   @map("updated_by")
-  updatedAt   DateTime? @updatedAt @map("updated_at") @db.Timestamp(6)
+  id          BigInt            @id @default(autoincrement())
+  projectName String            @unique @map("project_name") @db.VarChar(100)
+  description String?
+  startDate   DateTime?         @map("start_date") @db.Date
+  endDate     DateTime?         @map("end_date") @db.Date
+  status      String            @default("ACTIVE") @db.VarChar(20)
+  isActive    Boolean           @default(true) @map("is_active")
+  createdBy   BigInt            @map("created_by")
+  createdAt   DateTime          @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedBy   BigInt?           @map("updated_by")
+  updatedAt   DateTime?         @updatedAt @map("updated_at") @db.Timestamp(6)
+  client      String?           @db.VarChar(100)
+  projectType String            @default("BUILD") @map("project_type") @db.VarChar(20)
+  members     ProjectMember[]
+  taskTypes   ProjectTaskType[]
+  schedules   Schedule[]
+  tasks       Task[]
 
-  // 관계 설정
-  members ProjectMember[]
-  tasks   Task[]
-  schedules Schedule[]
-
-  // 인덱스
   @@index([projectName], map: "idx_projects_name")
   @@index([client], map: "idx_projects_client")
   @@index([projectType], map: "idx_projects_type")
@@ -43,40 +34,32 @@ model Project {
   @@index([createdAt(sort: Desc)], map: "idx_projects_created_at")
   @@index([isActive], map: "idx_projects_is_active")
   @@index([isActive, status], map: "idx_projects_active_status")
-
   @@map("projects")
 }
 
-// =============================================
-// 회원 관리
-// =============================================
-
 model User {
-  id           BigInt    @id @default(autoincrement())
-  email        String    @unique @db.VarChar(255)
-  passwordHash String    @map("password_hash") @db.VarChar(255)
-  name         String    @db.VarChar(50)
-  profileImage String?   @map("profile_image") @db.Text
-  department   String    @db.VarChar(50)
-  position     String    @default("TEAM_MEMBER") @db.VarChar(30)
-  role         String    @default("MEMBER") @db.VarChar(20)
-  grade        String    @default("BEGINNER") @db.VarChar(20)
-  lastLoginAt  DateTime? @map("last_login_at") @db.Timestamp(6)
-  isActive     Boolean   @default(true) @map("is_active")
-  createdBy    BigInt    @map("created_by")
-  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedBy    BigInt?   @map("updated_by")
-  updatedAt    DateTime? @updatedAt @map("updated_at") @db.Timestamp(6)
-
-  // 관계 설정
-  projectMemberships  ProjectMember[]
-  taskAssignments     TaskAssignee[]
-  createdTasks        Task[]          @relation("TaskCreator")
-  workLogs            WorkLog[]       @relation("WorkLogAuthor")
-  createdSchedules    Schedule[]      @relation("ScheduleCreator")
+  id                     BigInt                @id @default(autoincrement())
+  email                  String                @unique @db.VarChar(255)
+  passwordHash           String                @map("password_hash") @db.VarChar(255)
+  name                   String                @db.VarChar(50)
+  profileImage           String?               @map("profile_image")
+  department             String                @db.VarChar(50)
+  role                   String                @default("MEMBER") @db.VarChar(20)
+  lastLoginAt            DateTime?             @map("last_login_at") @db.Timestamp(6)
+  isActive               Boolean               @default(true) @map("is_active")
+  createdBy              BigInt                @map("created_by")
+  createdAt              DateTime              @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedBy              BigInt?               @map("updated_by")
+  updatedAt              DateTime?             @updatedAt @map("updated_at") @db.Timestamp(6)
+  position               String                @default("TEAM_MEMBER") @db.VarChar(30)
+  grade                  String                @default("BEGINNER") @db.VarChar(20)
+  projectMemberships     ProjectMember[]
   scheduleParticipations ScheduleParticipant[]
+  createdSchedules       Schedule[]            @relation("ScheduleCreator")
+  taskAssignments        TaskAssignee[]
+  createdTasks           Task[]                @relation("TaskCreator")
+  workLogs               WorkLog[]             @relation("WorkLogAuthor")
 
-  // 인덱스
   @@index([email], map: "idx_users_email")
   @@index([department], map: "idx_users_department")
   @@index([position], map: "idx_users_position")
@@ -85,167 +68,146 @@ model User {
   @@index([isActive], map: "idx_users_is_active")
   @@index([department, isActive], map: "idx_users_department_active")
   @@index([role, isActive], map: "idx_users_role_active")
-
   @@map("users")
 }
-
-// =============================================
-// 프로젝트 멤버 관리
-// =============================================
 
 model ProjectMember {
   id        BigInt    @id @default(autoincrement())
   projectId BigInt    @map("project_id")
   memberId  BigInt    @map("member_id")
   role      String    @default("PA") @db.VarChar(20)
-  workArea  String    @default("PLANNING") @map("work_area") @db.VarChar(30)
-  notes     String?   @db.Text
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
   createdBy BigInt    @map("created_by")
   updatedAt DateTime? @updatedAt @map("updated_at") @db.Timestamp(6)
   updatedBy BigInt?   @map("updated_by")
+  workArea  String    @default("PLANNING") @map("work_area") @db.VarChar(30)
+  notes     String?
+  member    User      @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  // 관계 설정
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  member  User    @relation(fields: [memberId], references: [id], onDelete: Cascade)
-
-  // 인덱스
   @@unique([projectId, memberId], map: "unique_project_member")
   @@index([projectId], map: "idx_project_members_project_id")
   @@index([memberId], map: "idx_project_members_member_id")
   @@index([role], map: "idx_project_members_role")
   @@index([workArea], map: "idx_project_members_work_area")
   @@index([projectId, workArea, role], map: "idx_project_work_area_role")
-
   @@map("project_members")
 }
 
-// =============================================
-// 업무 관리
-// =============================================
+model ProjectTaskType {
+  id        BigInt    @id @default(autoincrement())
+  projectId BigInt    @map("project_id")
+  name      String    @db.VarChar(50)
+  isActive  Boolean   @default(true) @map("is_active")
+  createdBy BigInt    @map("created_by")
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedBy BigInt?   @map("updated_by")
+  updatedAt DateTime? @updatedAt @map("updated_at") @db.Timestamp(6)
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tasks     Task[]
+
+  @@unique([projectId, name], map: "unique_project_task_type")
+  @@index([projectId], map: "idx_project_task_types_project_id")
+  @@index([projectId, isActive], map: "idx_project_task_types_project_active")
+  @@map("project_task_types")
+}
 
 model Task {
-  id                   BigInt    @id @default(autoincrement())
-  projectId            BigInt    @map("project_id")
-  taskName             String    @map("task_name") @db.VarChar(100)
-  description          String?   @db.Text
-  difficulty           String    @db.VarChar(10) // HIGH, MEDIUM, LOW
-  clientName           String?   @map("client_name") @db.VarChar(100)
+  id          BigInt           @id @default(autoincrement())
+  projectId   BigInt           @map("project_id")
+  taskName    String           @map("task_name") @db.VarChar(100)
+  description String?
+  difficulty  String           @db.VarChar(10)
+  clientName  String?          @map("client_name") @db.VarChar(100)
+  startDate   DateTime?        @map("start_date") @db.Date
+  endDate     DateTime?        @map("end_date") @db.Date
+  notes       String?
+  status      String           @default("WAITING") @db.VarChar(20)
+  isActive    Boolean          @default(true) @map("is_active")
+  createdBy   BigInt           @map("created_by")
+  createdAt   DateTime         @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedBy   BigInt?          @map("updated_by")
+  updatedAt   DateTime?        @updatedAt @map("updated_at") @db.Timestamp(6)
+  openDate    DateTime?        @map("open_date") @db.Timestamp(6)
+  taskTypeId  BigInt?          @map("task_type_id")
+  assignees   TaskAssignee[]
+  creator     User             @relation("TaskCreator", fields: [createdBy], references: [id])
+  project     Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  taskType    ProjectTaskType? @relation(fields: [taskTypeId], references: [id])
+  workLogs    WorkLog[]
 
-  startDate            DateTime? @map("start_date") @db.Date
-  endDate              DateTime? @map("end_date") @db.Date
-  openDate             DateTime? @map("open_date") @db.Timestamp(6)
-  notes                String?   @db.Text
-
-  status               String    @default("WAITING") @db.VarChar(20)
-  isActive             Boolean   @default(true) @map("is_active")
-  createdBy            BigInt    @map("created_by")
-  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedBy            BigInt?   @map("updated_by")
-  updatedAt            DateTime? @updatedAt @map("updated_at") @db.Timestamp(6)
-
-  // 관계
-  project              Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  assignees            TaskAssignee[]
-  creator              User      @relation("TaskCreator", fields: [createdBy], references: [id], onDelete: Restrict)
-  workLogs             WorkLog[]
-
-  // 인덱스
   @@index([projectId], map: "idx_tasks_project_id")
   @@index([difficulty], map: "idx_tasks_difficulty")
   @@index([status], map: "idx_tasks_status")
   @@index([isActive], map: "idx_tasks_is_active")
-
+  @@index([taskTypeId], map: "idx_tasks_task_type_id")
   @@map("tasks")
 }
-
-// =============================================
-// 업무 담당자 관리
-// =============================================
 
 model TaskAssignee {
   id        BigInt   @id @default(autoincrement())
   taskId    BigInt   @map("task_id")
   userId    BigInt   @map("user_id")
-  workArea  String   @map("work_area") @db.VarChar(30) // PLANNING, DESIGN, FRONTEND, BACKEND
+  workArea  String   @map("work_area") @db.VarChar(30)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // 관계
-  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // 제약조건 및 인덱스
   @@unique([taskId, userId, workArea], map: "unique_task_user_workarea")
   @@index([taskId], map: "idx_task_assignees_task_id")
   @@index([userId], map: "idx_task_assignees_user_id")
   @@index([workArea], map: "idx_task_assignees_work_area")
-
   @@map("task_assignees")
 }
-
-// =============================================
-// 업무일지 관리
-// =============================================
 
 model WorkLog {
   id        BigInt    @id @default(autoincrement())
   taskId    BigInt    @map("task_id")
   userId    BigInt    @map("user_id")
   workDate  DateTime  @map("work_date") @db.Date
-  content   String    @db.Text
+  content   String
   workHours Decimal?  @map("work_hours") @db.Decimal(4, 1)
   progress  Int?      @db.SmallInt
-  issues    String?   @db.Text
-  isActive  Boolean   @default(true) @map("is_active")
+  issues    String?
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt DateTime? @updatedAt @map("updated_at") @db.Timestamp(6)
+  isActive  Boolean   @default(true) @map("is_active")
+  task      Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user      User      @relation("WorkLogAuthor", fields: [userId], references: [id], onDelete: Cascade)
 
-  // 관계 설정
-  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  user User @relation("WorkLogAuthor", fields: [userId], references: [id], onDelete: Cascade)
-
-  // 인덱스 및 제약조건
   @@unique([taskId, userId, workDate], map: "unique_task_user_date")
   @@index([taskId, workDate], map: "idx_work_logs_task_date")
   @@index([userId, workDate], map: "idx_work_logs_user_date")
   @@index([isActive], map: "idx_work_logs_is_active")
-
   @@map("work_logs")
 }
 
-// =============================================
-// 일정 관리
-// =============================================
-
 model Schedule {
-  id          BigInt    @id @default(autoincrement())
-  projectId   BigInt?   @map("project_id")
-  title       String?   @db.VarChar(100)
-  description String?   @db.Text
-  scheduleType String   @map("schedule_type") @db.VarChar(20) // MEETING, SCRUM, VACATION, HALF_DAY, OTHER
-  startDate   DateTime  @map("start_date") @db.Timestamp(6)
-  endDate     DateTime  @map("end_date") @db.Timestamp(6)
-  location    String?   @db.VarChar(200)
-  isAllDay    Boolean   @default(false) @map("is_all_day")
-  color       String?   @db.VarChar(20)
-  teamScope   String?   @map("team_scope") @db.VarChar(20) // ALL, PLANNING, DESIGN, FRONTEND, BACKEND (for MEETING/SCRUM)
-  halfDayType String?   @map("half_day_type") @db.VarChar(2) // AM, PM (for HALF_DAY)
-  usageDate   DateTime? @map("usage_date") @db.Date // for VACATION/HALF_DAY
-  isRecurring      Boolean   @default(false) @map("is_recurring")
-  recurrenceType   String?   @map("recurrence_type") @db.VarChar(10) // DAILY, WEEKLY, MONTHLY, YEARLY
-  recurrenceEndDate DateTime? @map("recurrence_end_date") @db.Timestamp(6)
-  isActive    Boolean   @default(true) @map("is_active")
-  createdBy   BigInt    @map("created_by")
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedBy   BigInt?   @map("updated_by")
-  updatedAt   DateTime? @updatedAt @map("updated_at") @db.Timestamp(6)
+  id                BigInt                @id @default(autoincrement())
+  projectId         BigInt?               @map("project_id")
+  title             String?               @db.VarChar(100)
+  description       String?
+  scheduleType      String                @map("schedule_type") @db.VarChar(20)
+  startDate         DateTime              @map("start_date") @db.Timestamp(6)
+  endDate           DateTime              @map("end_date") @db.Timestamp(6)
+  location          String?               @db.VarChar(200)
+  isAllDay          Boolean               @default(false) @map("is_all_day")
+  color             String?               @db.VarChar(20)
+  isActive          Boolean               @default(true) @map("is_active")
+  createdBy         BigInt                @map("created_by")
+  createdAt         DateTime              @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedBy         BigInt?               @map("updated_by")
+  updatedAt         DateTime?             @updatedAt @map("updated_at") @db.Timestamp(6)
+  halfDayType       String?               @map("half_day_type") @db.VarChar(2)
+  teamScope         String?               @map("team_scope") @db.VarChar(20)
+  usageDate         DateTime?             @map("usage_date") @db.Date
+  isRecurring       Boolean               @default(false) @map("is_recurring")
+  recurrenceEndDate DateTime?             @map("recurrence_end_date") @db.Timestamp(6)
+  recurrenceType    String?               @map("recurrence_type") @db.VarChar(10)
+  participants      ScheduleParticipant[]
+  creator           User                  @relation("ScheduleCreator", fields: [createdBy], references: [id])
+  project           Project?              @relation(fields: [projectId], references: [id])
 
-  // 관계
-  project      Project?            @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  creator      User                @relation("ScheduleCreator", fields: [createdBy], references: [id], onDelete: Restrict)
-  participants ScheduleParticipant[]
-
-  // 인덱스
   @@index([projectId], map: "idx_schedules_project_id")
   @@index([scheduleType], map: "idx_schedules_type")
   @@index([startDate, endDate], map: "idx_schedules_dates")
@@ -256,25 +218,20 @@ model Schedule {
   @@index([isRecurring], map: "idx_schedules_is_recurring")
   @@index([recurrenceType], map: "idx_schedules_recurrence_type")
   @@index([isRecurring, recurrenceEndDate], map: "idx_schedules_recurring_end")
-
   @@map("schedules")
 }
 
 model ScheduleParticipant {
-  id         BigInt    @id @default(autoincrement())
-  scheduleId BigInt    @map("schedule_id")
-  userId     BigInt    @map("user_id")
-  status     String    @default("PENDING") @db.VarChar(20) // PENDING, ACCEPTED, DECLINED
-  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  id         BigInt   @id @default(autoincrement())
+  scheduleId BigInt   @map("schedule_id")
+  userId     BigInt   @map("user_id")
+  status     String   @default("PENDING") @db.VarChar(20)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  schedule   Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // 관계
-  schedule Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // 제약조건 및 인덱스
   @@unique([scheduleId, userId], map: "unique_schedule_user")
   @@index([scheduleId], map: "idx_schedule_participants_schedule_id")
   @@index([userId], map: "idx_schedule_participants_user_id")
-
   @@map("schedule_participants")
 }

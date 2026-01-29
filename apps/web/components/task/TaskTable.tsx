@@ -28,7 +28,11 @@ interface TaskTableProps {
   isValidating?: boolean;
 }
 
-export function TaskTable({ tasks, onTaskClick, isValidating }: TaskTableProps) {
+export function TaskTable({
+  tasks,
+  onTaskClick,
+  isValidating,
+}: TaskTableProps) {
   const formatDate = (dateString?: string) => {
     if (!dateString) return '-';
     try {
@@ -60,6 +64,7 @@ export function TaskTable({ tasks, onTaskClick, isValidating }: TaskTableProps) 
         <TableHeader>
           <TableRow>
             <TableHead className="w-[250px]">업무명</TableHead>
+            <TableHead className="w-[120px]">업무 구분</TableHead>
             <TableHead className="w-[100px]">난이도</TableHead>
             <TableHead className="w-[120px]">진행상태</TableHead>
             <TableHead className="min-w-[200px]">담당자</TableHead>
@@ -74,7 +79,7 @@ export function TaskTable({ tasks, onTaskClick, isValidating }: TaskTableProps) 
           {tasks.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={6}
+                colSpan={8}
                 className="text-center py-12 text-muted-foreground"
               >
                 조건에 맞는 업무가 없습니다
@@ -87,9 +92,18 @@ export function TaskTable({ tasks, onTaskClick, isValidating }: TaskTableProps) 
                 className="cursor-pointer hover:bg-muted/50"
                 onClick={() => onTaskClick?.(task)}
               >
-                <TableCell className="font-medium">{task.taskName}</TableCell>
+                <TableCell className="font-medium line-clamp-1">
+                  {task.taskName}
+                </TableCell>
+                <TableCell className="text-sm">
+                  {task.taskType?.name || '-'}
+                </TableCell>
                 <TableCell>
-                  <Badge className={DIFFICULTY_COLORS[task.difficulty as TaskDifficulty]}>
+                  <Badge
+                    className={
+                      DIFFICULTY_COLORS[task.difficulty as TaskDifficulty]
+                    }
+                  >
                     {DIFFICULTY_LABELS[task.difficulty as TaskDifficulty]}
                   </Badge>
                 </TableCell>

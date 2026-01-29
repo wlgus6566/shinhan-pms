@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { TaskDifficultyEnum, TaskStatusEnum, TASK_DIFFICULTY_OPTIONS, TASK_STATUS_OPTIONS } from '@repo/schema';
 import type { UpdateTaskRequest } from '@repo/schema';
 import { updateTask } from '@/lib/api/tasks';
+import { useProjectTaskTypes } from '@/lib/api/projects';
 import { Button } from '@/components/ui/button';
 import { BaseDialog } from '@/components/ui/base-dialog';
 import { Form } from '@/components/ui/form';
@@ -18,6 +19,7 @@ import type { Task, TaskStatus, TaskDifficulty } from '@/types/task';
 // Form schema with string IDs for checkboxes (converted to numbers on submit)
 const EditTaskFormSchema = z.object({
   taskName: z.string().min(2, '작업명은 2자 이상이어야 합니다').max(100, '작업명은 100자 이하여야 합니다'),
+  taskTypeId: z.string().optional(),
   description: z.string().max(1000, '작업내용은 1000자 이하여야 합니다').optional(),
   difficulty: TaskDifficultyEnum,
   status: TaskStatusEnum,
@@ -57,10 +59,13 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const { taskTypes } = useProjectTaskTypes(task.projectId);
+
   const form = useForm<EditTaskFormValues>({
     resolver: zodResolver(EditTaskFormSchema),
     defaultValues: {
       taskName: task.taskName,
+      taskTypeId: task.taskType?.id || '',
       description: task.description || '',
       difficulty: task.difficulty as TaskDifficulty,
       status: task.status as TaskStatus,
@@ -80,6 +85,7 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
   useEffect(() => {
     form.reset({
       taskName: task.taskName,
+      taskTypeId: task.taskType?.id || '',
       description: task.description || '',
       difficulty: task.difficulty as TaskDifficulty,
       status: task.status as TaskStatus,
@@ -108,6 +114,7 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
 
       const requestData: UpdateTaskRequest = {
         taskName: data.taskName,
+        taskTypeId: data.taskTypeId ? Number(data.taskTypeId) : undefined,
         description: data.description || undefined,
         difficulty: data.difficulty,
         status: data.status,
@@ -174,6 +181,14 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
               name="taskName"
               label="작업명 *"
               placeholder="메인 페이지 개발"
+            />
+
+            <FormSelect
+              control={form.control}
+              name="taskTypeId"
+              label="업무 구분"
+              placeholder="업무 구분 선택"
+              options={taskTypes?.map(t => ({ value: t.id, label: t.name })) || []}
             />
 
             <FormTextarea

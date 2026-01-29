@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { CommonModule } from './common/common.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ProjectsModule } from './projects/projects.module';
+import { ProjectTaskTypesModule } from './project-task-types/project-task-types.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { TasksModule } from './tasks/tasks.module';
@@ -12,6 +13,6 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
-  imports: [CommonModule, PrismaModule, AuthModule, UsersModule, ProjectsModule, TasksModule, WorkLogsModule, SchedulesModule, DashboardModule, AnalyticsModule],
+  imports: [CommonModule, PrismaModule, AuthModule, UsersModule, ProjectsModule, ProjectTaskTypesModule, TasksModule, WorkLogsModule, SchedulesModule, DashboardModule, AnalyticsModule],
 })
 export class AppModule {}

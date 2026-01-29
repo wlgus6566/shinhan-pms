@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import type { Project, UserBasicInfo } from '@repo/schema';
+import type { Project, UserBasicInfo, ProjectTaskType } from '@repo/schema';
 
 class UserBasicInfoDto implements UserBasicInfo {
   @ApiProperty({ description: '사용자 ID', example: '1' })
@@ -10,6 +10,14 @@ class UserBasicInfoDto implements UserBasicInfo {
 
   @ApiProperty({ description: '사용자 이메일', example: 'hong@example.com' })
   email: string;
+}
+
+class ProjectTaskTypeDto {
+  @ApiProperty({ description: '업무 구분 ID', example: '1' })
+  id: string;
+
+  @ApiProperty({ description: '업무 구분명', example: '기획' })
+  name: string;
 }
 
 export class ProjectResponseDto implements Project {
@@ -72,4 +80,11 @@ export class ProjectResponseDto implements Project {
     required: false,
   })
   updatedAt?: string;
+
+  @ApiProperty({
+    description: '프로젝트 업무 구분 목록',
+    type: [ProjectTaskTypeDto],
+    required: false,
+  })
+  taskTypes?: ProjectTaskType[];
 }

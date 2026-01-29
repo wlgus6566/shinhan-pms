@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { ProjectTypeEnum, ProjectStatusEnum } from '../common/enums';
+import { TaskTypeUpdateInputSchema } from './task-type-input.schema';
 
 export const UpdateProjectSchema = z.object({
   name: z
@@ -19,6 +20,7 @@ export const UpdateProjectSchema = z.object({
   startDate: z.string().optional(),
   endDate: z.string().optional(),
   status: ProjectStatusEnum.optional(),
+  taskTypes: z.array(TaskTypeUpdateInputSchema).optional(),
 });
 
 export type UpdateProjectRequest = z.infer<typeof UpdateProjectSchema>;

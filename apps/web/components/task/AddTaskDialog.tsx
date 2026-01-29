@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { TaskDifficultyEnum, TASK_DIFFICULTY_OPTIONS } from '@repo/schema';
 import type { CreateTaskRequest } from '@repo/schema';
 import { createTask } from '@/lib/api/tasks';
+import { useProjectTaskTypes } from '@/lib/api/projects';
 import { Button } from '@/components/ui/button';
 import { BaseDialog } from '@/components/ui/base-dialog';
 import { Form } from '@/components/ui/form';
@@ -17,6 +18,7 @@ import type { ProjectMember } from '@/types/project';
 // Form schema with string IDs for checkboxes (converted to numbers on submit)
 const AddTaskFormSchema = z.object({
   taskName: z.string().min(2, '작업명은 2자 이상이어야 합니다').max(100, '작업명은 100자 이하여야 합니다'),
+  taskTypeId: z.string().min(1, '업무 구분을 선택해주세요'),
   description: z.string().max(1000, '작업내용은 1000자 이하여야 합니다').optional(),
   difficulty: TaskDifficultyEnum,
   clientName: z.string().max(100, '담당 RM은 100자 이하여야 합니다').optional(),
@@ -55,10 +57,13 @@ export function AddTaskDialog({ projectId, projectMembers, open, onOpenChange, o
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const { taskTypes } = useProjectTaskTypes(projectId);
+
   const form = useForm<AddTaskFormValues>({
     resolver: zodResolver(AddTaskFormSchema),
     defaultValues: {
       taskName: '',
+      taskTypeId: '',
       description: '',
       difficulty: 'MEDIUM',
       clientName: '',
@@ -86,6 +91,7 @@ export function AddTaskDialog({ projectId, projectMembers, open, onOpenChange, o
 
       const requestData: CreateTaskRequest = {
         taskName: data.taskName,
+        taskTypeId: Number(data.taskTypeId),
         description: data.description || undefined,
         difficulty: data.difficulty,
         clientName: data.clientName || undefined,
@@ -154,6 +160,14 @@ export function AddTaskDialog({ projectId, projectMembers, open, onOpenChange, o
             name="taskName"
             label="작업명 *"
             placeholder="메인 페이지 개발"
+          />
+
+          <FormSelect
+            control={form.control}
+            name="taskTypeId"
+            label="업무 구분 *"
+            placeholder="업무 구분 선택"
+            options={taskTypes?.map(t => ({ value: t.id, label: t.name })) || []}
           />
 
           <FormTextarea

@@ -133,6 +133,24 @@ export function TaskDetailSheet({
         </SheetHeader>
 
         <div className="mt-10 space-y-6">
+          {/* 업무 구분 */}
+          {task.taskType && (
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                업무 구분
+              </h3>
+              <div className="pl-6">
+                <p className="text-base font-medium">{task.taskType.name}</p>
+                {task.taskType.description && (
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {task.taskType.description}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* RM 정보 */}
           {task.clientName && (
             <div className="space-y-2">

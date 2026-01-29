@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CreateProjectSchema } from '@repo/schema';
-import type { CreateProjectRequest } from '@repo/schema';
+import { CreateProjectSchema, UpdateProjectSchema } from '@repo/schema';
+import type { CreateProjectRequest, TaskTypeInput } from '@repo/schema';
 import {
   useProject,
   createProject,
@@ -25,8 +25,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { CheckCircle2, Loader2 } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { CheckCircle2, Loader2, Plus, Trash2 } from 'lucide-react';
 import type { ProjectStatus } from '@/types/project';
+import { RECOMMENDED_TASK_TYPES } from '@/lib/constants/task-types';
 
 // Hoist static data outside component
 const projectTypeOptions = [
@@ -40,9 +42,14 @@ type ProjectFormValues = CreateProjectRequest;
 interface ProjectFormProps {
   projectId?: string;
   mode: 'create' | 'edit';
+  initialTaskTypes?: Array<{ name: string }>;
 }
 
-export function ProjectForm({ projectId, mode }: ProjectFormProps) {
+export function ProjectForm({
+  projectId,
+  mode,
+  initialTaskTypes,
+}: ProjectFormProps) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -57,14 +64,22 @@ export function ProjectForm({ projectId, mode }: ProjectFormProps) {
   } = useProject(mode === 'edit' ? (projectId ?? null) : null);
 
   const form = useForm<ProjectFormValues>({
-    resolver: zodResolver(CreateProjectSchema),
+    resolver: zodResolver(
+      mode === 'create' ? CreateProjectSchema : UpdateProjectSchema,
+    ),
     defaultValues: {
       name: '',
       client: '',
       projectType: 'BUILD',
       startDate: '',
       endDate: '',
+      taskTypes: initialTaskTypes || [],
     },
+  });
+
+  const { fields, append, remove, replace } = useFieldArray({
+    control: form.control,
+    name: 'taskTypes',
   });
 
   // Update form when project data is loaded
@@ -82,6 +97,11 @@ export function ProjectForm({ projectId, mode }: ProjectFormProps) {
         projectType: (project.projectType as 'OPERATION' | 'BUILD') || 'BUILD',
         startDate,
         endDate,
+        taskTypes:
+          project.taskTypes?.map((tt) => ({
+            id: tt.id,
+            name: tt.name,
+          })) || [],
       });
     }
   }, [project, mode]); // Removed form from deps
@@ -130,6 +150,20 @@ export function ProjectForm({ projectId, mode }: ProjectFormProps) {
       setIsDeleting(false);
     }
   }, [projectId, router]);
+
+  const handleApplyRecommended = useCallback(() => {
+    replace(
+      RECOMMENDED_TASK_TYPES.map((name) => ({
+        name,
+      })),
+    );
+  }, [replace]);
+
+  const handleAddTaskType = useCallback(() => {
+    append({
+      name: '',
+    });
+  }, [append]);
 
   if (isLoading) {
     return (
@@ -194,6 +228,65 @@ export function ProjectForm({ projectId, mode }: ProjectFormProps) {
             label="종료일 *"
             type="date"
           />
+        </div>
+
+        {/* 업무 구분 섹션 */}
+        <Separator className="my-6" />
+
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-md font-semibold">업무 구분</h3>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleApplyRecommended}
+              >
+                추천 업무 구분 적용
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleAddTaskType}
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                추가
+              </Button>
+            </div>
+          </div>
+
+          {fields.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
+              업무 구분이 없습니다. "추천 업무 구분 적용" 버튼을 눌러 기본 업무
+              구분을 추가하세요.
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {fields.map((field, index) => (
+                <div
+                  key={field.id}
+                  className="flex gap-2 items-center relative"
+                >
+                  <FormInput
+                    control={form.control}
+                    name={`taskTypes.${index}.name`}
+                    placeholder="프로젝트성 업무"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => remove(index)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2"
+                  >
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="flex gap-4">

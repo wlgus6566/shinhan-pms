@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { ProjectForm } from '@/components/project/ProjectForm';
+import { RECOMMENDED_TASK_TYPES } from '@/lib/constants/task-types';
 import {
   Card,
   CardContent,
@@ -19,6 +20,14 @@ export default function NewProjectPage() {
   const router = useRouter();
   const { user } = useAuth();
   const canCreate = user?.role === 'SUPER_ADMIN' || user?.role === 'PM';
+
+  const initialTaskTypes = useMemo(
+    () =>
+      RECOMMENDED_TASK_TYPES.map((name) => ({
+        name,
+      })),
+    []
+  );
 
   useEffect(() => {
     if (user && !canCreate) {
@@ -46,7 +55,7 @@ export default function NewProjectPage() {
           <CardTitle>새 프로젝트 등록</CardTitle>
         </CardHeader>
         <CardContent>
-          <ProjectForm mode="create" />
+          <ProjectForm mode="create" initialTaskTypes={initialTaskTypes} />
         </CardContent>
       </Card>
     </div>

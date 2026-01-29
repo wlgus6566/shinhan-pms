@@ -17,6 +17,12 @@ export interface Task {
   description?: string;
   difficulty: string;
   clientName?: string;
+  taskTypeId?: string;
+  taskType?: {
+    id: string;
+    name: string;
+    description?: string;
+  };
   planningAssignees?: UserDetailInfo[];
   designAssignees?: UserDetailInfo[];
   frontendAssignees?: UserDetailInfo[];
@@ -38,6 +44,12 @@ export const TaskSchema = z
     description: z.string().optional(),
     difficulty: z.string(),
     clientName: z.string().optional(),
+    taskTypeId: z.string().optional(),
+    taskType: z.object({
+      id: z.string(),
+      name: z.string(),
+      description: z.string().optional(),
+    }).optional(),
     planningAssignees: z.array(UserDetailInfoSchema).optional(),
     designAssignees: z.array(UserDetailInfoSchema).optional(),
     frontendAssignees: z.array(UserDetailInfoSchema).optional(),

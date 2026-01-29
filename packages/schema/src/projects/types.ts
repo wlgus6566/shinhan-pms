@@ -27,6 +27,7 @@ export interface Project {
   creator?: UserBasicInfo;
   createdAt: string;
   updatedAt?: string;
+  taskTypes?: ProjectTaskType[];
 }
 
 export const ProjectSchema = z
@@ -97,3 +98,18 @@ export const MyProjectSchema = z.object({
   startDate: z.string().optional(),
   endDate: z.string().optional(),
 });
+
+// ============================================
+// Project Task Type Response
+// ============================================
+
+export interface ProjectTaskType {
+  id: string;
+  projectId: string;
+  name: string;
+  isActive: boolean;
+  createdBy: string;
+  createdAt: Date | string;
+  updatedBy?: string;
+  updatedAt?: Date | string;
+}
