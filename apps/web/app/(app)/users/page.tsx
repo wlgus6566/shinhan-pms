@@ -24,7 +24,7 @@ export default function UsersAdminPage() {
         </div>
         {canCreateUser && (
           <Button asChild>
-            <Link href="/dashboard/admin/users/new">
+            <Link href="/users/new">
               <Plus className="h-4 w-4 mr-2" />새 멤버 등록
             </Link>
           </Button>

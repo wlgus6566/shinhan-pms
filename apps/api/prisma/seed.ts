@@ -10,12 +10,12 @@ async function main() {
   const adminPasswordHash = await bcrypt.hash('password123', 10);
   const admin = await prisma.user.upsert({
     where: { email: 'admin@emotion.co.kr' },
-    update: { role: 'SUPER_ADMIN', department: '경영전략본부', position: 'GENERAL_MANAGER' },
+    update: { role: 'SUPER_ADMIN', department: 'PLANNING_STRATEGY', position: 'GENERAL_MANAGER' },
     create: {
       email: 'admin@emotion.co.kr',
       passwordHash: adminPasswordHash,
       name: '시스템 관리자',
-      department: '경영전략본부',
+      department: 'PLANNING_STRATEGY',
       position: 'GENERAL_MANAGER',
       role: 'SUPER_ADMIN',
       createdBy: BigInt(1),
@@ -27,12 +27,12 @@ async function main() {
   const userPasswordHash = await bcrypt.hash('password123', 10);
   const kim = await prisma.user.upsert({
     where: { email: 'kim@emotion.co.kr' },
-    update: { role: 'PM', department: '기획본부1', position: 'PRINCIPAL_LEADER' },
+    update: { role: 'PM', department: 'DESIGN_1', position: 'PRINCIPAL_LEADER' },
     create: {
       email: 'kim@emotion.co.kr',
       passwordHash: userPasswordHash,
       name: '김진아',
-      department: '기획본부1',
+      department: 'DESIGN_1',
       position: 'PRINCIPAL_LEADER',
       role: 'PM',
       createdBy: admin.id,
@@ -41,12 +41,12 @@ async function main() {
 
   const lee = await prisma.user.upsert({
     where: { email: 'lee@emotion.co.kr' },
-    update: { role: 'MEMBER', department: '개발본부1', position: 'PRINCIPAL_LEADER' },
+    update: { role: 'MEMBER', department: 'DEVELOPMENT_1', position: 'PRINCIPAL_LEADER' },
     create: {
       email: 'lee@emotion.co.kr',
       passwordHash: userPasswordHash,
       name: '이남규',
-      department: '개발본부1',
+      department: 'DEVELOPMENT_1',
       position: 'PRINCIPAL_LEADER',
       role: 'MEMBER',
       createdBy: admin.id,
@@ -55,12 +55,12 @@ async function main() {
 
   const park = await prisma.user.upsert({
     where: { email: 'park@emotion.co.kr' },
-    update: { role: 'MEMBER', department: '기획본부1', position: 'SENIOR_LEADER' },
+    update: { role: 'MEMBER', department: 'DESIGN_1', position: 'SENIOR_LEADER' },
     create: {
       email: 'park@emotion.co.kr',
       passwordHash: userPasswordHash,
       name: '박기호',
-      department: '기획본부1',
+      department: 'DESIGN_1',
       position: 'SENIOR_LEADER',
       role: 'MEMBER',
       createdBy: admin.id,
@@ -69,12 +69,12 @@ async function main() {
 
   const choi = await prisma.user.upsert({
     where: { email: 'choi@emotion.co.kr' },
-    update: { role: 'MEMBER', department: '디자인본부1', position: 'LEADER' },
+    update: { role: 'MEMBER', department: 'DIGITAL_1', position: 'LEADER' },
     create: {
       email: 'choi@emotion.co.kr',
       passwordHash: userPasswordHash,
       name: '최승민',
-      department: '디자인본부1',
+      department: 'DIGITAL_1',
       position: 'LEADER',
       role: 'MEMBER',
       createdBy: admin.id,
@@ -83,12 +83,12 @@ async function main() {
 
   const jung = await prisma.user.upsert({
     where: { email: 'jung@emotion.co.kr' },
-    update: { role: 'MEMBER', department: '디자인본부1', position: 'SENIOR_LEADER' },
+    update: { role: 'MEMBER', department: 'DIGITAL_1', position: 'SENIOR_LEADER' },
     create: {
       email: 'jung@emotion.co.kr',
       passwordHash: userPasswordHash,
       name: '정서영',
-      department: '디자인본부1',
+      department: 'DIGITAL_1',
       position: 'SENIOR_LEADER',
       role: 'MEMBER',
       createdBy: admin.id,

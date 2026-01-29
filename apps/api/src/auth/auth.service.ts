@@ -125,11 +125,12 @@ export class AuthService {
       10,
     );
 
-    // 비밀번호 업데이트
+    // 비밀번호 업데이트 및 requirePasswordChange를 false로 변경
     await this.prisma.user.update({
       where: { id: userId },
       data: {
         passwordHash: newPasswordHash,
+        requirePasswordChange: false,
         updatedBy: userId,
         updatedAt: new Date(),
       },

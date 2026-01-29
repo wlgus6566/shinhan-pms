@@ -12,7 +12,7 @@ export class UserResponseDto implements User {
   @ApiProperty({ example: '홍길동' })
   name: string;
 
-  @ApiProperty({ example: 'DEVELOPMENT' })
+  @ApiProperty({ example: 'DEVELOPMENT_1' })
   department: string;
 
   @ApiProperty({ example: 'TEAM_MEMBER' })
@@ -23,6 +23,9 @@ export class UserResponseDto implements User {
 
   @ApiProperty({ example: true })
   isActive: boolean;
+
+  @ApiProperty({ example: false })
+  requirePasswordChange: boolean;
 
   @ApiProperty({ example: '2024-01-15T10:30:00Z', required: false })
   lastLoginAt?: string;

@@ -23,13 +23,8 @@ export default function TaskManagementPage() {
   const { user } = useAuth();
   const projectId = params.projectId as string;
 
-  const {
-    project,
-    isLoading,
-    error,
-  } = useProject(projectId);
+  const { project, isLoading, error } = useProject(projectId);
   const { members, isLoading: membersLoading } = useProjectMembers(projectId);
-
 
   // Check if current user is PM of this project
   const isPM = useMemo(() => {
@@ -41,25 +36,14 @@ export default function TaskManagementPage() {
   }, [user, members]);
 
   const statusConfig = {
-    label: PROJECT_STATUS_LABELS[project?.status as ProjectStatus] || '알 수 없음',
-    variant: PROJECT_STATUS_VARIANTS[project?.status as ProjectStatus] || 'outline',
+    label:
+      PROJECT_STATUS_LABELS[project?.status as ProjectStatus] || '알 수 없음',
+    variant:
+      PROJECT_STATUS_VARIANTS[project?.status as ProjectStatus] || 'outline',
   };
 
   return (
     <div className="space-y-6">
-      {/* 헤더 */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/projects">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              프로젝트 목록
-            </Link>
-          </Button>
-        </div>
-      </div>
-
-      {/* 프로젝트 정보 카드 */}
       <div className="flex flex-col gap-4 p-3 pt-0 bg-transparent border-none">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -90,7 +74,13 @@ export default function TaskManagementPage() {
           <CardTitle className="text-lg font-semibold">업무 목록</CardTitle>
         </CardHeader>
         <CardContent>
-          <TaskList error={error} isLoading={isLoading} projectId={projectId} isPM={isPM} projectMembers={members ?? []} />
+          <TaskList
+            error={error}
+            isLoading={isLoading}
+            projectId={projectId}
+            isPM={isPM}
+            projectMembers={members ?? []}
+          />
         </CardContent>
       </Card>
     </div>

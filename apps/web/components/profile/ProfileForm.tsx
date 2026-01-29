@@ -10,17 +10,11 @@ import { Form } from '@/components/ui/form';
 import { FormInput, FormSelect } from '@/components/form';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle2, Loader2 } from 'lucide-react';
-
-const departmentOptions = [
-  { value: 'PLANNING', label: '기획' },
-  { value: 'DESIGN', label: '디자인' },
-  { value: 'FRONTEND', label: '프론트엔드' },
-  { value: 'DEVELOPMENT', label: '개발' },
-];
+import { DEPARTMENT_OPTIONS, type Department } from '@repo/schema';
 
 const profileSchema = z.object({
   name: z.string().min(2, '이름은 최소 2자 이상이어야 합니다').max(50),
-  department: z.enum(['PLANNING', 'DESIGN', 'FRONTEND', 'DEVELOPMENT']),
+  department: z.custom<Department>(),
 });
 
 type ProfileValues = z.infer<typeof profileSchema>;
@@ -35,7 +29,7 @@ export function ProfileForm() {
     resolver: zodResolver(profileSchema),
     defaultValues: {
       name: '',
-      department: 'DEVELOPMENT',
+      department: 'DEVELOPMENT_1' as Department,
     },
   });
 
@@ -93,9 +87,9 @@ export function ProfileForm() {
         <FormSelect
           control={form.control}
           name="department"
-          label="파트"
-          placeholder="파트를 선택하세요"
-          options={departmentOptions}
+          label="본부"
+          placeholder="본부를 선택하세요"
+          options={DEPARTMENT_OPTIONS}
         />
         <Button type="submit" disabled={isSaving}>
           {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

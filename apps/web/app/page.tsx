@@ -16,12 +16,12 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && user) {
+    if (!loading && user && !user.requirePasswordChange) {
       router.push('/dashboard');
     }
   }, [user, loading, router]);
 
-  if (loading || user) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-[#1e1f2e] flex items-center justify-center">
         <div className="text-center">
@@ -30,6 +30,11 @@ export default function LoginPage() {
         </div>
       </div>
     );
+  }
+
+  // requirePasswordChange가 true인 경우 로그인 페이지에 머물러서 알럿을 표시
+  if (user && !user.requirePasswordChange) {
+    return null; // useEffect에서 리다이렉트 처리
   }
 
   return (

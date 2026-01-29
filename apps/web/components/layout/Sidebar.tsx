@@ -20,6 +20,7 @@ import {
   FileText,
 } from 'lucide-react';
 import { useState, useCallback } from 'react';
+import { DEPARTMENT_LABELS, type Department } from '@repo/schema';
 
 const menuItems = [
   { icon: LayoutDashboard, label: '대시보드', href: '/dashboard' },
@@ -331,7 +332,7 @@ export function Sidebar({
                   {user.name}
                 </p>
                 <p className="text-[11px] text-slate-500 truncate">
-                  {user.department}
+                  {DEPARTMENT_LABELS[user.department as Department] || user.department}
                 </p>
               </div>
             )}

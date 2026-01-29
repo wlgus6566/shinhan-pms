@@ -31,8 +31,12 @@ import { Search, MoreHorizontal, ArrowUpDown } from 'lucide-react';
 import {
   ROLE_LABELS,
   ROLE_VARIANTS,
-  GRADE_OPTIONS,
 } from '@/lib/constants/roles';
+import {
+  DEPARTMENT_LABELS,
+  GRADE_OPTIONS,
+  type Department,
+} from '@repo/schema';
 export function UserListTable() {
   const [search, setSearch] = useState('');
   const [role, setRole] = useState('ALL');
@@ -148,7 +152,7 @@ export function UserListTable() {
                   </TableCell>
                   <TableCell>
                     <span className="text-sm text-slate-700">
-                      {user.department}
+                      {DEPARTMENT_LABELS[user.department as Department] || user.department}
                     </span>
                   </TableCell>
                   <TableCell>

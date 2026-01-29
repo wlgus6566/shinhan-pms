@@ -1,23 +1,12 @@
 import useSWR from 'swr';
 import { fetcher } from './fetcher';
-import type { PaginatedData } from '@repo/schema';
+import type { PaginatedData, CreateUserRequest } from '@repo/schema';
 import {
   extractPagination,
   appendPaginationParams,
   buildQueryString,
   type PaginationParams,
 } from './pagination';
-
-export interface CreateUserRequest {
-  email: string;
-  password: string;
-  name: string;
-  profileImage?: string;
-  department: string;
-  position: string;
-  role: string;
-  grade: string;
-}
 
 export interface User {
   id: string | number;

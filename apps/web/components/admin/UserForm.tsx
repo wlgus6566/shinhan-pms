@@ -22,40 +22,36 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { CheckCircle2, Loader2, Upload, User } from 'lucide-react';
-import { DEPARTMENT_OPTIONS, ROLE_OPTIONS, POSITION_OPTIONS, GRADE_OPTIONS } from '@/lib/constants/roles';
+import {
+  DEPARTMENT_OPTIONS,
+  USER_ROLE_OPTIONS as ROLE_OPTIONS,
+  POSITION_OPTIONS,
+  GRADE_OPTIONS,
+  type Department,
+  type UserRole,
+  type Position,
+  type Grade,
+} from '@repo/schema';
 
-// Create 모드 스키마 (비밀번호 포함)
-const userCreateSchema = z
-  .object({
-    name: z
-      .string()
-      .min(2, '이름은 최소 2자 이상이어야 합니다')
-      .max(50, '이름은 최대 50자까지 입력할 수 있습니다'),
-    email: z.string().email('올바른 이메일 형식이 아닙니다'),
-    password: z
-      .string()
-      .min(8, '비밀번호는 최소 8자 이상이어야 합니다')
-      .regex(
-        /^(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
-        '비밀번호는 영문 소문자, 숫자, 특수문자를 포함해야 합니다',
-      ),
-    confirmPassword: z.string(),
-    department: z.string().min(1, '본부를 선택하세요'),
-    position: z.enum(['DIVISION_HEAD', 'GENERAL_MANAGER', 'PRINCIPAL_LEADER', 'SENIOR_LEADER', 'LEADER', 'TEAM_MEMBER']),
-    role: z.enum(['SUPER_ADMIN', 'PM', 'MEMBER']),
-    grade: z.enum(['EXPERT', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER']),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: '비밀번호가 일치하지 않습니다',
-    path: ['confirmPassword'],
-  });
+// Create 모드 스키마
+const userCreateSchema = z.object({
+  name: z
+    .string()
+    .min(2, '이름은 최소 2자 이상이어야 합니다')
+    .max(50, '이름은 최대 50자까지 입력할 수 있습니다'),
+  email: z.string().email('올바른 이메일 형식이 아닙니다'),
+  department: z.custom<Department>(),
+  position: z.custom<Position>(),
+  role: z.custom<UserRole>(),
+  grade: z.custom<Grade>(),
+});
 
 // Edit 모드 스키마 (비밀번호 제외)
 const userEditSchema = z.object({
-  department: z.string().min(1, '본부를 선택하세요'),
-  position: z.enum(['DIVISION_HEAD', 'GENERAL_MANAGER', 'PRINCIPAL_LEADER', 'SENIOR_LEADER', 'LEADER', 'TEAM_MEMBER']),
-  role: z.enum(['SUPER_ADMIN', 'PM', 'MEMBER']),
-  grade: z.enum(['EXPERT', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER']),
+  department: z.custom<Department>(),
+  position: z.custom<Position>(),
+  role: z.custom<UserRole>(),
+  grade: z.custom<Grade>(),
   isActive: z.boolean(),
 });
 
@@ -96,8 +92,6 @@ export function UserForm({ mode, userId }: UserFormProps) {
       ? {
           name: '',
           email: '',
-          password: '',
-          confirmPassword: '',
           department: '',
           position: 'TEAM_MEMBER',
           role: 'MEMBER',
@@ -116,10 +110,10 @@ export function UserForm({ mode, userId }: UserFormProps) {
   useEffect(() => {
     if (userData && mode === 'edit') {
       form.reset({
-        department: userData.department,
-        position: userData.position as 'DIVISION_HEAD' | 'GENERAL_MANAGER' | 'PRINCIPAL_LEADER' | 'SENIOR_LEADER' | 'LEADER' | 'TEAM_MEMBER',
-        role: userData.role as 'SUPER_ADMIN' | 'PM' | 'MEMBER',
-        grade: userData.grade as 'EXPERT' | 'ADVANCED' | 'INTERMEDIATE' | 'BEGINNER',
+        department: userData.department as Department,
+        position: userData.position as Position,
+        role: userData.role as UserRole,
+        grade: userData.grade as Grade,
         isActive: userData.isActive,
       });
       // 프로필 이미지 설정
@@ -166,7 +160,6 @@ export function UserForm({ mode, userId }: UserFormProps) {
         const userData = {
           name: createValues.name,
           email: createValues.email,
-          password: createValues.password,
           department: createValues.department,
           position: createValues.position,
           role: createValues.role,
@@ -315,23 +308,12 @@ export function UserForm({ mode, userId }: UserFormProps) {
                 placeholder="email@emotion.co.kr"
               />
 
-              {/* 비밀번호 (Create만) */}
-              <div className="grid grid-cols-2 gap-4">
-                <FormInput
-                  control={form.control}
-                  name="password"
-                  label="비밀번호 *"
-                  type="password"
-                  placeholder="••••••••"
-                />
-                <FormInput
-                  control={form.control}
-                  name="confirmPassword"
-                  label="비밀번호 확인 *"
-                  type="password"
-                  placeholder="••••••••"
-                />
-              </div>
+              {/* 초기 비밀번호 안내 */}
+              <Alert className="bg-blue-50 border-blue-200">
+                <AlertDescription className="text-blue-700">
+                  초기 비밀번호는 <strong>password123</strong>으로 설정됩니다. 사용자는 최초 로그인 시 비밀번호를 변경해야 합니다.
+                </AlertDescription>
+              </Alert>
             </>
           )}
 

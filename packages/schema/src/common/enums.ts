@@ -121,13 +121,47 @@ export type WorkArea = z.infer<typeof WorkAreaEnum>;
 
 // User Related Enums
 export const DepartmentEnum = z.enum(
-  ['PLANNING', 'DESIGN', 'FRONTEND', 'DEVELOPMENT'],
+  [
+    'PLANNING_STRATEGY',
+    'DESIGN_1',
+    'DEVELOPMENT_1',
+    'DIGITAL_1',
+    'BUSINESS_1',
+    'PLANNING_2',
+    'DEVELOPMENT_2',
+    'DIGITAL_2',
+    'SERVICE_OPERATION',
+    'PLATFORM_OPERATION',
+    'PLATFORM_STRATEGY',
+    'MARKETING_STRATEGY',
+    'XC',
+  ],
   {
-    errorMap: () => ({ message: '올바른 파트를 선택해주세요' }),
+    errorMap: () => ({ message: '올바른 본부를 선택해주세요' }),
   },
 );
 
 export type Department = z.infer<typeof DepartmentEnum>;
+
+export const DEPARTMENT_LABELS: Record<Department, string> = {
+  PLANNING_STRATEGY: '경영전략본부',
+  DESIGN_1: '기획본부1',
+  DEVELOPMENT_1: '개발본부1',
+  DIGITAL_1: '디지털본부1',
+  BUSINESS_1: '사업본부1',
+  PLANNING_2: '기획본부2',
+  DEVELOPMENT_2: '개발본부2',
+  DIGITAL_2: '디지털본부2',
+  SERVICE_OPERATION: '서비스운영본부',
+  PLATFORM_OPERATION: '플랫폼운영본부',
+  PLATFORM_STRATEGY: '플랫폼전략실',
+  MARKETING_STRATEGY: '마케팅전략실',
+  XC: 'XC본부',
+};
+
+export const DEPARTMENT_OPTIONS = Object.entries(DEPARTMENT_LABELS).map(
+  ([value, label]) => ({ value, label }),
+);
 
 export const GradeEnum = z.enum(
   ['EXPERT', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
@@ -141,13 +175,34 @@ export const GradeEnum = z.enum(
 
 export type Grade = z.infer<typeof GradeEnum>;
 
-export const UserRoleEnum = z.enum(['PM', 'PL', 'PA', 'MEMBER'], {
+export const GRADE_LABELS: Record<Grade, string> = {
+  EXPERT: '특급',
+  ADVANCED: '고급',
+  INTERMEDIATE: '중급',
+  BEGINNER: '초급',
+};
+
+export const GRADE_OPTIONS = Object.entries(GRADE_LABELS).map(
+  ([value, label]) => ({ value, label }),
+);
+
+export const UserRoleEnum = z.enum(['SUPER_ADMIN', 'PM', 'MEMBER'], {
   errorMap: () => ({
-    message: '역할은 PM, PL, PA, MEMBER 중 하나여야 합니다',
+    message: '역할은 SUPER_ADMIN, PM, MEMBER 중 하나여야 합니다',
   }),
 });
 
 export type UserRole = z.infer<typeof UserRoleEnum>;
+
+export const USER_ROLE_LABELS: Record<UserRole, string> = {
+  SUPER_ADMIN: '슈퍼 관리자',
+  PM: '프로젝트 관리자',
+  MEMBER: '일반',
+};
+
+export const USER_ROLE_OPTIONS = Object.entries(USER_ROLE_LABELS).map(
+  ([value, label]) => ({ value, label }),
+);
 
 export const PositionEnum = z.enum(
   [
@@ -167,6 +222,19 @@ export const PositionEnum = z.enum(
 );
 
 export type Position = z.infer<typeof PositionEnum>;
+
+export const POSITION_LABELS: Record<Position, string> = {
+  DIVISION_HEAD: '부문장',
+  GENERAL_MANAGER: '본부장',
+  PRINCIPAL_LEADER: '책임리더',
+  SENIOR_LEADER: '선임리더',
+  LEADER: '리더',
+  TEAM_MEMBER: '팀원',
+};
+
+export const POSITION_OPTIONS = Object.entries(POSITION_LABELS).map(
+  ([value, label]) => ({ value, label }),
+);
 
 // Schedule Related Enums
 export const ScheduleTypeEnum = z.enum(

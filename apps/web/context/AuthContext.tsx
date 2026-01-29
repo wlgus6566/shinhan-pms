@@ -11,6 +11,7 @@ interface User {
   name: string;
   department: string;
   role: string;
+  requirePasswordChange?: boolean;
 }
 
 interface AuthContextType {

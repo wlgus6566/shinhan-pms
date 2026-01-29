@@ -1,3 +1,11 @@
+/**
+ * @deprecated 이 파일은 더 이상 사용되지 않습니다.
+ * @repo/schema의 enums를 사용하세요:
+ * - UserRoleEnum, USER_ROLE_LABELS, USER_ROLE_OPTIONS
+ * - DepartmentEnum, DEPARTMENT_LABELS, DEPARTMENT_OPTIONS
+ * - PositionEnum, GradeEnum 등
+ */
+
 // 관리자 유형
 export const ROLES = {
   SUPER_ADMIN: 'SUPER_ADMIN',
@@ -26,20 +34,20 @@ export const ROLE_DESCRIPTIONS: Record<Role, string> = {
   MEMBER: '업무일지 작성',
 };
 
-// 본부
+// 본부 - @repo/schema에서 import 사용 권장
 export const DEPARTMENTS = {
-  PLANNING: '경영전략본부',
+  PLANNING_STRATEGY: '경영전략본부',
   DESIGN_1: '기획본부1',
   DEVELOPMENT_1: '개발본부1',
-  DIGITAL_1: '디지인본부1',
-  BUSINESS_1: '사업부본1',
+  DIGITAL_1: '디지털본부1',
+  BUSINESS_1: '사업본부1',
   PLANNING_2: '기획본부2',
   DEVELOPMENT_2: '개발본부2',
-  DIGITAL_2: '디지인본부2',
-  SERVICE: '서비스운영본부',
-  PLATFORM: '플랫폼운영본부',
+  DIGITAL_2: '디지털본부2',
+  SERVICE_OPERATION: '서비스운영본부',
+  PLATFORM_OPERATION: '플랫폼운영본부',
   PLATFORM_STRATEGY: '플랫폼전략실',
-  MARKETING: '마케팅전략실',
+  MARKETING_STRATEGY: '마케팅전략실',
   XC: 'XC본부',
 } as const;
 
@@ -47,7 +55,7 @@ export type Department = (typeof DEPARTMENTS)[keyof typeof DEPARTMENTS];
 
 export const DEPARTMENT_OPTIONS = Object.entries(DEPARTMENTS).map(
   ([key, label]) => ({
-    value: label,
+    value: key,
     label,
   }),
 );
@@ -57,7 +65,7 @@ export const ROLE_OPTIONS = Object.entries(ROLES).map(([key, value]) => ({
   label: ROLE_LABELS[value as Role],
 }));
 
-// 직책
+// 직책 - @repo/schema의 PositionEnum 사용 권장
 export const POSITIONS = {
   DIVISION_HEAD: 'DIVISION_HEAD', // 부문장
   GENERAL_MANAGER: 'GENERAL_MANAGER', // 본부장
@@ -85,7 +93,7 @@ export const POSITION_OPTIONS = Object.entries(POSITIONS).map(
   }),
 );
 
-// 등급
+// 등급 - @repo/schema의 GradeEnum 사용 권장
 export const GRADES = {
   EXPERT: 'EXPERT', // 특급
   ADVANCED: 'ADVANCED', // 고급

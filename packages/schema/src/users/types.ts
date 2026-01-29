@@ -17,6 +17,7 @@ export interface User {
   position?: string;
   role: string;
   isActive: boolean;
+  requirePasswordChange: boolean;
   lastLoginAt?: string;
   createdAt: string;
   updatedAt?: string;
@@ -31,6 +32,7 @@ export const UserSchema = z
     position: z.string().optional(),
     role: z.string(),
     isActive: z.boolean(),
+    requirePasswordChange: z.boolean(),
     lastLoginAt: z.string().optional(),
   })
   .merge(AuditFieldsSchema);

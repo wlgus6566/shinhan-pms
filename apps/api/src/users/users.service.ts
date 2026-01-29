@@ -28,8 +28,8 @@ export class UsersService {
       throw new ConflictException('이미 사용 중인 이메일입니다');
     }
 
-    // 비밀번호 해시
-    const passwordHash = await bcrypt.hash(createUserDto.password, 10);
+    // 초기 비밀번호 고정: password123
+    const passwordHash = await bcrypt.hash('password123', 10);
 
     // 사용자 생성
     const user = await this.prisma.user.create({
@@ -42,6 +42,7 @@ export class UsersService {
         position: createUserDto.position,
         role: createUserDto.role,
         grade: createUserDto.grade,
+        requirePasswordChange: true,
         createdBy,
       },
     });

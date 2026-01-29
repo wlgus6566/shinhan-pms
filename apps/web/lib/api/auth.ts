@@ -1,4 +1,5 @@
 import { fetcher, tokenManager } from './fetcher';
+import type { User, ChangePasswordRequest } from '@repo/schema';
 
 export interface LoginRequest {
   email: string;
@@ -7,18 +8,7 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   accessToken: string;
-  user: {
-    id: string;
-    email: string;
-    name: string;
-    role: string;
-    department: string;
-  };
-}
-
-export interface ChangePasswordRequest {
-  currentPassword: string;
-  newPassword: string;
+  user: User;
 }
 
 export async function login(data: LoginRequest): Promise<LoginResponse> {

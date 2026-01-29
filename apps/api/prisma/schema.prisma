@@ -53,6 +53,7 @@ model User {
   updatedAt              DateTime?             @updatedAt @map("updated_at") @db.Timestamp(6)
   position               String                @default("TEAM_MEMBER") @db.VarChar(30)
   grade                  String                @default("BEGINNER") @db.VarChar(20)
+  requirePasswordChange  Boolean               @default(false) @map("require_password_change")
   projectMemberships     ProjectMember[]
   scheduleParticipations ScheduleParticipant[]
   createdSchedules       Schedule[]            @relation("ScheduleCreator")
