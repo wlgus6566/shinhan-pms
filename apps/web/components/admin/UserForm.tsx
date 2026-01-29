@@ -5,7 +5,12 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { createUser, updateUser, deactivateUser, useUser } from '@/lib/api/users';
+import {
+  createUser,
+  updateUser,
+  deactivateUser,
+  useUser,
+} from '@/lib/api/users';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
@@ -81,29 +86,34 @@ export function UserForm({ mode, userId }: UserFormProps) {
   );
 
   // Edit 모드일 때만 사용자 데이터 조회
-  const { user: userData, isLoading, error: fetchError } = useUser(
-    mode === 'edit' ? (userId ?? null) : null
-  );
+  const {
+    user: userData,
+    isLoading,
+    error: fetchError,
+  } = useUser(mode === 'edit' ? (userId ?? null) : null);
 
   // 조건부 스키마 적용
   const form = useForm<UserCreateValues | UserEditValues>({
-    resolver: zodResolver(mode === 'create' ? userCreateSchema : userEditSchema),
-    defaultValues: mode === 'create'
-      ? {
-          name: '',
-          email: '',
-          department: '',
-          position: 'TEAM_MEMBER',
-          role: 'MEMBER',
-          grade: 'BEGINNER',
-        }
-      : {
-          department: '',
-          position: 'TEAM_MEMBER',
-          role: 'MEMBER',
-          grade: 'BEGINNER',
-          isActive: true,
-        },
+    resolver: zodResolver(
+      mode === 'create' ? userCreateSchema : userEditSchema,
+    ),
+    defaultValues:
+      mode === 'create'
+        ? {
+            name: '',
+            email: '',
+            department: undefined,
+            position: 'TEAM_MEMBER',
+            role: 'MEMBER',
+            grade: 'BEGINNER',
+          }
+        : {
+            department: undefined,
+            position: 'TEAM_MEMBER',
+            role: 'MEMBER',
+            grade: 'BEGINNER',
+            isActive: true,
+          },
   });
 
   // Edit 모드에서 데이터 로딩 후 폼에 설정
@@ -224,7 +234,10 @@ export function UserForm({ mode, userId }: UserFormProps) {
       )}
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form
+          onSubmit={form.handleSubmit(onSubmit as any)}
+          className="space-y-6"
+        >
           {success && (
             <Alert className="bg-green-50 text-green-700 border-green-200">
               <CheckCircle2 className="h-4 w-4" />
@@ -311,7 +324,8 @@ export function UserForm({ mode, userId }: UserFormProps) {
               {/* 초기 비밀번호 안내 */}
               <Alert className="bg-blue-50 border-blue-200">
                 <AlertDescription className="text-blue-700">
-                  초기 비밀번호는 <strong>password123</strong>으로 설정됩니다. 사용자는 최초 로그인 시 비밀번호를 변경해야 합니다.
+                  초기 비밀번호는 <strong>password123</strong>으로 설정됩니다.
+                  사용자는 최초 로그인 시 비밀번호를 변경해야 합니다.
                 </AlertDescription>
               </Alert>
             </>
@@ -373,7 +387,9 @@ export function UserForm({ mode, userId }: UserFormProps) {
             {mode === 'create' ? (
               <>
                 <Button type="submit" disabled={isSaving} className="flex-1">
-                  {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {isSaving && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
                   등록
                 </Button>
                 <Button
@@ -389,7 +405,9 @@ export function UserForm({ mode, userId }: UserFormProps) {
               canEdit && (
                 <>
                   <Button type="submit" disabled={isSaving}>
-                    {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {isSaving && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
                     저장
                   </Button>
 
@@ -401,8 +419,8 @@ export function UserForm({ mode, userId }: UserFormProps) {
                       <DialogHeader>
                         <DialogTitle>사용자 비활성화</DialogTitle>
                         <DialogDescription>
-                          정말 이 사용자를 비활성화하시겠습니까? 비활성화된 사용자는
-                          시스템에 접근할 수 없습니다.
+                          정말 이 사용자를 비활성화하시겠습니까? 비활성화된
+                          사용자는 시스템에 접근할 수 없습니다.
                         </DialogDescription>
                       </DialogHeader>
                       <DialogFooter>
