@@ -12,7 +12,10 @@ interface ProjectDetailProps {
   project: Project;
 }
 
-const fallbackStatus = { label: '알 수 없음', className: 'bg-slate-100 text-slate-700' };
+const fallbackStatus = {
+  label: '알 수 없음',
+  className: 'bg-slate-100 text-slate-700',
+};
 
 // Cache formatted dates (js-cache-function-results)
 const dateFormatCache = new Map<string, string>();
@@ -32,15 +35,17 @@ const formatDate = (dateString: string): string => {
 export const ProjectDetail = memo(function ProjectDetail({
   project,
 }: ProjectDetailProps) {
-  const status = PROJECT_STATUS_BADGE_STYLES[project.status as ProjectStatus] || fallbackStatus;
+  const status =
+    PROJECT_STATUS_BADGE_STYLES[project.status as ProjectStatus] ||
+    fallbackStatus;
 
   // Memoize formatted dates
   const formattedStartDate = useMemo(
-    () => project.startDate ? formatDate(project.startDate) : '-',
+    () => (project.startDate ? formatDate(project.startDate) : '-'),
     [project.startDate],
   );
   const formattedEndDate = useMemo(
-    () => project.endDate ? formatDate(project.endDate) : '-',
+    () => (project.endDate ? formatDate(project.endDate) : '-'),
     [project.endDate],
   );
   const formattedCreatedAt = useMemo(
@@ -48,7 +53,7 @@ export const ProjectDetail = memo(function ProjectDetail({
     [project.createdAt],
   );
   const formattedUpdatedAt = useMemo(
-    () => project.updatedAt ? formatDate(project.updatedAt.toString()) : '-',
+    () => (project.updatedAt ? formatDate(project.updatedAt.toString()) : '-'),
     [project.updatedAt],
   );
 
@@ -75,7 +80,8 @@ export const ProjectDetail = memo(function ProjectDetail({
             타입
           </h3>
           <Badge variant="outline" className="font-normal">
-            {PROJECT_TYPE_LABELS[project.projectType as ProjectType] || project.projectType}
+            {PROJECT_TYPE_LABELS[project.projectType as ProjectType] ||
+              project.projectType}
           </Badge>
         </div>
         <div>
@@ -83,6 +89,20 @@ export const ProjectDetail = memo(function ProjectDetail({
             상태
           </h3>
           <Badge className={status.className}>{status.label}</Badge>
+        </div>
+      </div>
+
+      {/* 프로젝트 업무구분 */}
+      <div>
+        <h3 className="text-sm font-medium text-muted-foreground mb-2">
+          업무구분
+        </h3>
+        <div className="flex flex-wrap gap-2">
+          {project.taskTypes?.map((taskType) => (
+            <Badge key={taskType.id} variant="outline" className="font-normal">
+              {taskType.name}
+            </Badge>
+          ))}
         </div>
       </div>
 

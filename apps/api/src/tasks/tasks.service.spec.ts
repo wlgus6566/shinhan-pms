@@ -1,7 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TasksService } from './tasks.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 
 describe('TasksService', () => {
   let service: TasksService;
@@ -70,25 +74,79 @@ describe('TasksService', () => {
         description: createTaskDto.description,
         difficulty: createTaskDto.difficulty,
         assignees: [
-          { id: BigInt(1), taskId: BigInt(1), userId: BigInt(1), workArea: 'PLANNING', user: { id: BigInt(1), name: 'User 1', email: 'user1@test.com' } },
-          { id: BigInt(2), taskId: BigInt(1), userId: BigInt(2), workArea: 'PLANNING', user: { id: BigInt(2), name: 'User 2', email: 'user2@test.com' } },
-          { id: BigInt(3), taskId: BigInt(1), userId: BigInt(3), workArea: 'DESIGN', user: { id: BigInt(3), name: 'User 3', email: 'user3@test.com' } },
-          { id: BigInt(4), taskId: BigInt(1), userId: BigInt(4), workArea: 'BACKEND', user: { id: BigInt(4), name: 'User 4', email: 'user4@test.com' } },
-          { id: BigInt(5), taskId: BigInt(1), userId: BigInt(5), workArea: 'BACKEND', user: { id: BigInt(5), name: 'User 5', email: 'user5@test.com' } },
+          {
+            id: BigInt(1),
+            taskId: BigInt(1),
+            userId: BigInt(1),
+            workArea: 'PLANNING',
+            user: { id: BigInt(1), name: 'User 1', email: 'user1@test.com' },
+          },
+          {
+            id: BigInt(2),
+            taskId: BigInt(1),
+            userId: BigInt(2),
+            workArea: 'PLANNING',
+            user: { id: BigInt(2), name: 'User 2', email: 'user2@test.com' },
+          },
+          {
+            id: BigInt(3),
+            taskId: BigInt(1),
+            userId: BigInt(3),
+            workArea: 'DESIGN',
+            user: { id: BigInt(3), name: 'User 3', email: 'user3@test.com' },
+          },
+          {
+            id: BigInt(4),
+            taskId: BigInt(1),
+            userId: BigInt(4),
+            workArea: 'BACKEND',
+            user: { id: BigInt(4), name: 'User 4', email: 'user4@test.com' },
+          },
+          {
+            id: BigInt(5),
+            taskId: BigInt(1),
+            userId: BigInt(5),
+            workArea: 'BACKEND',
+            user: { id: BigInt(5), name: 'User 5', email: 'user5@test.com' },
+          },
         ],
       };
 
       mockPrismaService.project.findUnique.mockResolvedValue(mockProject);
       mockPrismaService.projectMember.findFirst
         .mockResolvedValueOnce(mockMember) // PM check
-        .mockResolvedValueOnce({ projectId, memberId: BigInt(1), workArea: 'PLANNING' }) // planning assignee 1
-        .mockResolvedValueOnce({ projectId, memberId: BigInt(2), workArea: 'PLANNING' }) // planning assignee 2
-        .mockResolvedValueOnce({ projectId, memberId: BigInt(3), workArea: 'DESIGN' }) // design assignee
-        .mockResolvedValueOnce({ projectId, memberId: BigInt(4), workArea: 'BACKEND' }) // backend assignee 1
-        .mockResolvedValueOnce({ projectId, memberId: BigInt(5), workArea: 'BACKEND' }); // backend assignee 2
+        .mockResolvedValueOnce({
+          projectId,
+          memberId: BigInt(1),
+          workArea: 'PLANNING',
+        }) // planning assignee 1
+        .mockResolvedValueOnce({
+          projectId,
+          memberId: BigInt(2),
+          workArea: 'PLANNING',
+        }) // planning assignee 2
+        .mockResolvedValueOnce({
+          projectId,
+          memberId: BigInt(3),
+          workArea: 'DESIGN',
+        }) // design assignee
+        .mockResolvedValueOnce({
+          projectId,
+          memberId: BigInt(4),
+          workArea: 'BACKEND',
+        }) // backend assignee 1
+        .mockResolvedValueOnce({
+          projectId,
+          memberId: BigInt(5),
+          workArea: 'BACKEND',
+        }); // backend assignee 2
       mockPrismaService.task.create.mockResolvedValue(mockTask);
 
-      const result = await service.create(projectId, userId, createTaskDto as any);
+      const result = await service.create(
+        projectId,
+        userId,
+        createTaskDto as any,
+      );
 
       expect(result).toEqual(mockTask);
       expect(mockPrismaService.task.create).toHaveBeenCalledWith(
@@ -220,7 +278,11 @@ describe('TasksService', () => {
       mockPrismaService.task.findUnique.mockResolvedValue(mockTask);
       mockPrismaService.projectMember.findFirst
         .mockResolvedValueOnce(mockMember)
-        .mockResolvedValue({ projectId: BigInt(1), memberId: BigInt(1), workArea: 'PLANNING' });
+        .mockResolvedValue({
+          projectId: BigInt(1),
+          memberId: BigInt(1),
+          workArea: 'PLANNING',
+        });
       mockPrismaService.taskAssignee.deleteMany.mockResolvedValue({ count: 0 });
       mockPrismaService.task.update.mockResolvedValue({
         ...mockTask,
@@ -474,16 +536,15 @@ describe('TasksService', () => {
             },
           },
         ],
-      };
+      } as any;
 
       mockPrismaService.task.findUnique.mockResolvedValue(mockTask);
 
-      const result = await service.findOne(taskId);
+      const result: any = await service.findOne(taskId);
 
-      expect(result).toEqual(mockTask);
-      expect(result.assignees[0].user.position).toBe('LEADER');
-      expect(result.assignees[0].user.department).toBe('개발본부1');
-      expect(result.assignees[0].user.role).toBe('PM');
+      expect(result?.assignees[0]?.user?.position).toBe('LEADER');
+      expect(result?.assignees[0]?.user?.department).toBe('개발본부1');
+      expect(result?.assignees[0]?.user?.role).toBe('PM');
     });
 
     it('should handle null/undefined position gracefully', async () => {
@@ -511,11 +572,11 @@ describe('TasksService', () => {
             },
           },
         ],
-      };
+      } as any;
 
       mockPrismaService.task.findUnique.mockResolvedValue(mockTask);
 
-      const result = await service.findOne(taskId);
+      const result: any = await service.findOne(taskId);
 
       expect(result).toEqual(mockTask);
       expect(result.assignees[0].user.position).toBeNull();
@@ -591,12 +652,12 @@ describe('TasksService', () => {
             },
           ],
         },
-      ];
+      ] as any;
 
       mockPrismaService.task.findMany.mockResolvedValue(mockTasks);
       mockPrismaService.task.count.mockResolvedValue(1);
 
-      const result = await service.findAllByProject(projectId);
+      const result: any = await service.findAllByProject(projectId);
 
       expect(result.list).toHaveLength(1);
       expect(result.list[0].assignees).toHaveLength(4);

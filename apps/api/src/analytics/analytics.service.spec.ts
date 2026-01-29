@@ -128,9 +128,9 @@ describe('AnalyticsService', () => {
         { workDate: new Date('2026-01-01'), _sum: { workHours: 8 } },
         { workDate: new Date('2026-01-02'), _sum: { workHours: 7.5 } },
         { workDate: new Date('2026-01-03'), _sum: { workHours: 9 } },
-      ];
+      ] as any;
 
-      jest.spyOn(prisma.workLog, 'groupBy').mockResolvedValue(mockData as any);
+      jest.spyOn(prisma.workLog as any, 'groupBy').mockResolvedValueOnce(mockData);
 
       const result = await service.getWorkHoursTrend(startDate, endDate, 'day');
 
@@ -146,7 +146,7 @@ describe('AnalyticsService', () => {
       const endDate = '2026-01-07';
       const userId = BigInt(1);
 
-      jest.spyOn(prisma.workLog, 'groupBy').mockResolvedValue([]);
+      jest.spyOn(prisma.workLog as any, 'groupBy').mockResolvedValueOnce([]);
 
       await service.getWorkHoursTrend(startDate, endDate, 'day', undefined, userId);
 
