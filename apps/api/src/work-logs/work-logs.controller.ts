@@ -378,8 +378,6 @@ export class WorkLogsController {
     @Query('year') year: string,
     @Query('month') month: string,
   ): Promise<StreamableFile> {
-    console.log('[Controller] exportMonthlyStaffReport called:', { projectId, year, month });
-
     const yearNum = parseInt(year, 10);
     const monthNum = parseInt(month, 10);
 
@@ -389,22 +387,17 @@ export class WorkLogsController {
       monthNum,
     );
 
-    console.log('[Controller] Buffer received, size:', buffer.length);
-
     // 파일명: 1월_투입인력별상세업무현황.xlsx
     // HTTP 헤더에 한글 직접 사용 불가 - ASCII 폴백 필요
     const filename = `${monthNum}월_투입인력별상세업무현황.xlsx`;
     const asciiFilename = `monthly_staff_report_${yearNum}_${String(monthNum).padStart(2, '0')}.xlsx`;
     const encodedFilename = encodeURIComponent(filename);
 
-    console.log('[Controller] Creating StreamableFile with filename:', filename);
-
     const streamableFile = new StreamableFile(buffer, {
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       disposition: `attachment; filename="${asciiFilename}"; filename*=UTF-8''${encodedFilename}`,
     });
 
-    console.log('[Controller] Returning StreamableFile');
     return streamableFile;
   }
 

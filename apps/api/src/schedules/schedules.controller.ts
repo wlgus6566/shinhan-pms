@@ -199,19 +199,7 @@ export class SchedulesController {
   }
 
   private transformSchedule(schedule: any): any {
-    // 🔍 디버깅: Prisma 결과 확인
-    console.log(
-      '🔍 [SchedulesController] transformSchedule Schedule raw data:',
-      {
-        id: schedule.id,
-        title: schedule.title,
-        teamScope: schedule.teamScope,
-        hasTeamScope: 'teamScope' in schedule,
-        allKeys: Object.keys(schedule),
-      },
-    );
-
-    const result = {
+    return {
       id: schedule.id.toString(),
       projectId: schedule.projectId?.toString(),
       title: schedule.title,
@@ -242,13 +230,5 @@ export class SchedulesController {
       createdAt: schedule.createdAt.toISOString(),
       updatedAt: schedule.updatedAt?.toISOString(),
     };
-
-    console.log('🔍 [transformSchedule] Transformed result:', {
-      id: result.id,
-      teamScope: result.teamScope,
-      hasTeamScope: 'teamScope' in result,
-    });
-
-    return result;
   }
 }

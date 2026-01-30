@@ -209,7 +209,7 @@ export function ProjectListTable() {
                 <TableHead>클라이언트</TableHead>
                 <TableHead className="text-center">타입</TableHead>
                 <TableHead className="text-center">상태</TableHead>
-                <TableHead>
+                <TableHead className="w-[200px]">
                   <div className="flex items-center gap-1 cursor-pointer hover:text-slate-700">
                     기간
                   </div>
@@ -223,7 +223,7 @@ export function ProjectListTable() {
                   <TableCell>
                     <Link
                       href={`/projects/${project.id}`}
-                      className="font-semibold text-slate-900 hover:text-blue-600 transition-colors"
+                      className="font-semibold w-full inline-block text-slate-900 hover:text-blue-600 transition-colors"
                     >
                       {project.name}
                     </Link>

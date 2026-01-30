@@ -34,12 +34,6 @@ export class TasksService {
     }
 
     // 5. 담당자 유효성 검증
-    console.log('Service received assignee IDs:', {
-      planning: createTaskDto.planningAssigneeIds,
-      design: createTaskDto.designAssigneeIds,
-      frontend: createTaskDto.frontendAssigneeIds,
-      backend: createTaskDto.backendAssigneeIds,
-    });
     await this.validateAssignees(
       projectId,
       createTaskDto.planningAssigneeIds,
@@ -47,7 +41,6 @@ export class TasksService {
       createTaskDto.frontendAssigneeIds,
       createTaskDto.backendAssigneeIds,
     );
-    console.log('Assignee validation passed');
 
     // 6. 업무 생성
     const assigneesToCreate = [
@@ -68,7 +61,6 @@ export class TasksService {
         workArea: 'BACKEND',
       })) || []),
     ];
-    console.log('Assignees to create:', assigneesToCreate.length, assigneesToCreate);
 
     return await this.prisma.task.create({
       data: {

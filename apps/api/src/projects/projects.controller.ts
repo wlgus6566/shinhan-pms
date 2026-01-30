@@ -43,6 +43,8 @@ export class ProjectsController {
   ) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ResponseCode('SUC002')
   @ApiOperation({ summary: '프로젝트 생성' })
   @ApiResponse({
@@ -54,17 +56,14 @@ export class ProjectsController {
     status: 400,
     description: '잘못된 요청 (중복된 프로젝트명, 날짜 오류 등)',
   })
-  async create(@Body() createProjectDto: CreateProjectDto) {
-    console.log(
-      '[DEBUG Controller] Raw DTO received:',
-      JSON.stringify(createProjectDto, null, 2),
+  async create(
+    @CurrentUser() user: any,
+    @Body() createProjectDto: CreateProjectDto,
+  ) {
+    const project = await this.projectsService.create(
+      createProjectDto,
+      BigInt(user.id),
     );
-    console.log('[DEBUG Controller] DTO type:', typeof createProjectDto);
-    console.log('[DEBUG Controller] DTO keys:', Object.keys(createProjectDto));
-
-    // TODO: 실제로는 JWT에서 userId 추출
-    const userId = 1n;
-    const project = await this.projectsService.create(createProjectDto, userId);
 
     return this.transformProject(project);
   }
@@ -154,6 +153,8 @@ export class ProjectsController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: '프로젝트 수정' })
   @ApiParam({ name: 'id', description: '프로젝트 ID' })
   @ApiResponse({
@@ -167,14 +168,14 @@ export class ProjectsController {
     description: '잘못된 요청 (중복된 프로젝트명, 날짜 오류 등)',
   })
   async update(
+    @CurrentUser() user: any,
     @Param('id') id: string,
     @Body() updateProjectDto: UpdateProjectDto,
   ) {
-    const userId = 1n;
     const project = await this.projectsService.update(
       BigInt(id),
       updateProjectDto,
-      userId,
+      BigInt(user.id),
     );
     return this.transformProject(project);
   }
@@ -286,6 +287,8 @@ export class ProjectsController {
   }
 
   @Post(':id/members')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ResponseCode('SUC002')
   @ApiOperation({ summary: '프로젝트 멤버 추가' })
   @ApiParam({ name: 'id', description: '프로젝트 ID' })
@@ -300,19 +303,21 @@ export class ProjectsController {
   })
   @ApiResponse({ status: 409, description: '이미 프로젝트 멤버입니다' })
   async addProjectMember(
+    @CurrentUser() user: any,
     @Param('id') id: string,
     @Body() addMemberDto: AddProjectMemberDto,
   ) {
-    const userId = 1n; // TODO: JWT에서 추출
     const member = await this.projectsService.addProjectMember(
       BigInt(id),
       addMemberDto,
-      userId,
+      BigInt(user.id),
     );
     return this.transformProjectMember(member);
   }
 
   @Patch(':id/members/:memberId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: '프로젝트 멤버 역할 수정' })
   @ApiParam({ name: 'id', description: '프로젝트 ID' })
   @ApiParam({ name: 'memberId', description: '멤버 ID' })
@@ -323,16 +328,16 @@ export class ProjectsController {
   })
   @ApiResponse({ status: 404, description: '프로젝트 멤버를 찾을 수 없습니다' })
   async updateProjectMemberRole(
+    @CurrentUser() user: any,
     @Param('id') id: string,
     @Param('memberId', ParseIntPipe) memberId: number,
     @Body() updateRoleDto: UpdateProjectMemberRoleDto,
   ) {
-    const userId = 1n; // TODO: JWT에서 추출
     const member = await this.projectsService.updateProjectMemberRole(
       BigInt(id),
       BigInt(memberId),
       updateRoleDto,
-      userId,
+      BigInt(user.id),
     );
     return this.transformProjectMember(member);
   }
@@ -438,17 +443,6 @@ export class ProjectsController {
    * Schedule 변환 헬퍼
    */
   private transformSchedule(schedule: any): any {
-    // 🔍 디버깅: Prisma 결과 확인
-    console.log(
-      '🔍 [ProjectsController] transformSchedule Schedule raw data:',
-      {
-        id: schedule.id,
-        title: schedule.title,
-        teamScope: schedule.teamScope,
-        hasTeamScope: 'teamScope' in schedule,
-        allKeys: Object.keys(schedule),
-      },
-    );
     return {
       id: schedule.id.toString(),
       projectId: schedule.projectId?.toString(),

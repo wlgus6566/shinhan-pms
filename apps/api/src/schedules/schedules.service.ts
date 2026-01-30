@@ -50,7 +50,6 @@ export class SchedulesService {
         throw new ForbiddenException('프로젝트 멤버만 일정을 생성할 수 있습니다');
       }
     }
-    console.log('[DEBUG] scheduleData:', scheduleData);
 
     // 정기 일정 검증
     if (scheduleData.isRecurring) {

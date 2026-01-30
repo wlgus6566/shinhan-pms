@@ -705,16 +705,8 @@ export class WorkLogsService {
       // 1. 해당 월의 첫날과 마지막날 계산
       const firstDay = new Date(year, month - 1, 1);
       const lastDay = new Date(year, month, 0); // 해당 월의 마지막 날
-      console.log('[generateMonthlyStaffReport] Start:', {
-        projectId: projectId.toString(),
-        year,
-        month,
-        firstDay,
-        lastDay,
-      });
 
       // 2. 해당 월의 work_logs 조회
-      console.log('[generateMonthlyStaffReport] Fetching work logs...');
       const workLogs = await this.prisma.workLog.findMany({
         where: {
           task: { projectId, isActive: true },
@@ -726,34 +718,20 @@ export class WorkLogsService {
           user: true,
         },
       });
-      console.log(
-        '[generateMonthlyStaffReport] Work logs count:',
-        workLogs.length,
-      );
 
       // 3. 프로젝트 멤버 조회
-      console.log('[generateMonthlyStaffReport] Fetching project members...');
       const projectMembers = await this.prisma.projectMember.findMany({
         where: { projectId },
         include: { member: true },
       });
-      console.log(
-        '[generateMonthlyStaffReport] Project members count:',
-        projectMembers.length,
-      );
 
       // 4. 해당 월의 휴가 데이터 조회 (VACATION, HALF_DAY)
       // usageDate 필드를 사용해야 함 (휴가/반차 전용 날짜 필드)
       const memberIds = projectMembers.map((m) => m.memberId);
       const memberIdSet = new Set(memberIds.map((id) => id.toString()));
-      console.log(
-        '[generateMonthlyStaffReport] Member IDs:',
-        memberIds.map((id) => id.toString()),
-      );
 
       let vacations: any[] = [];
       if (memberIds.length > 0) {
-        console.log('[generateMonthlyStaffReport] Fetching vacations...');
         vacations = await this.prisma.schedule.findMany({
           where: {
             scheduleType: { in: ['VACATION', 'HALF_DAY'] },
@@ -767,10 +745,6 @@ export class WorkLogsService {
             participants: true,
           },
         });
-        console.log(
-          '[generateMonthlyStaffReport] Vacations count:',
-          vacations.length,
-        );
       }
 
       // 5. 한글 변환 맵
@@ -938,11 +912,6 @@ export class WorkLogsService {
       });
 
       // 8. ExcelJS로 파일 생성
-      console.log(
-        '[generateMonthlyStaffReport] Creating Excel with',
-        employees.length,
-        'employees',
-      );
       const workbook = new ExcelJS.Workbook();
       workbook.creator = 'Emotion PMS';
       workbook.created = new Date();
@@ -1099,10 +1068,8 @@ export class WorkLogsService {
 
       // Buffer 반환
       const arrayBuffer = await workbook.xlsx.writeBuffer();
-      console.log('[generateMonthlyStaffReport] Success: Excel generated');
       return Buffer.from(arrayBuffer);
     } catch (error) {
-      console.error('[generateMonthlyStaffReport] Error:', error);
       throw error;
     }
   }

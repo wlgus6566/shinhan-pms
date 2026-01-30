@@ -11,7 +11,13 @@ import { PrismaModule } from '../prisma/prisma.module';
     PrismaModule,
     PassportModule,
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'your-secret-key-change-in-production',
+      secret: (() => {
+        const secret = process.env.JWT_SECRET;
+        if (!secret) {
+          throw new Error('JWT_SECRET environment variable must be set');
+        }
+        return secret;
+      })(),
       signOptions: { expiresIn: (process.env.JWT_EXPIRES_IN || '1h') as any },
     }),
   ],

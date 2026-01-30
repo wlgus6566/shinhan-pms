@@ -54,13 +54,11 @@ export class TasksController {
     @Body() createTaskDto: CreateTaskDto,
     @CurrentUser() user: any,
   ) {
-    console.log('Controller received DTO:', JSON.stringify(createTaskDto, null, 2));
     const task = await this.tasksService.create(
       BigInt(projectId),
       BigInt(user.id),
       createTaskDto,
     );
-    // console.log('Service returned task with assignees:', task.assignees?.length || 0);
     return this.transformTask(task);
   }
 

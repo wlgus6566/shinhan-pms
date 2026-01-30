@@ -21,6 +21,9 @@ export class UserResponseDto implements User {
   @ApiProperty({ example: 'MEMBER' })
   role: string;
 
+  @ApiProperty({ example: 'ADVANCED' })
+  grade?: string;
+
   @ApiProperty({ example: true })
   isActive: boolean;
 

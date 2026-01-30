@@ -169,7 +169,7 @@ export function TaskList({
             </TabsTrigger>
             <TabsTrigger value="table" className="flex items-center gap-2">
               <Table2 className="h-4 w-4" />
-              <span>테이블 뷰</span>
+              <span>테이블</span>
             </TabsTrigger>
           </TabsList>
         </Tabs>
