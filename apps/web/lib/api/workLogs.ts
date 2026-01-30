@@ -163,6 +163,48 @@ export async function exportMonthlyStaffReport(
   window.URL.revokeObjectURL(downloadUrl);
 }
 
+/**
+ * 월간 업무별 공수투입현황 엑셀 다운로드
+ */
+export async function exportMonthlyTaskReport(
+  projectId: string,
+  year: number,
+  month: number,
+): Promise<void> {
+  const params = new URLSearchParams();
+  params.append('year', year.toString());
+  params.append('month', month.toString());
+
+  const url = `/api/projects/${projectId}/work-logs/export-monthly-task?${params.toString()}`;
+  const token = localStorage.getItem('accessToken');
+
+  const response = await fetch(process.env.NEXT_PUBLIC_API_URL + url, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('다운로드에 실패했습니다');
+  }
+
+  // Blob으로 변환
+  const blob = await response.blob();
+
+  // 파일 다운로드 트리거
+  const downloadUrl = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = downloadUrl;
+  // 파일명: 1월_업무별공수투입현황.xlsx
+  const filename = `${month}월_업무별공수투입현황.xlsx`;
+  link.setAttribute('download', filename);
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(downloadUrl);
+}
+
 // ============================================================================
 // SWR Hooks
 // ============================================================================

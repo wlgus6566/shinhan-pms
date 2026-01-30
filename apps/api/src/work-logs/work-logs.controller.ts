@@ -401,6 +401,43 @@ export class WorkLogsController {
     return streamableFile;
   }
 
+  @Get('projects/:projectId/work-logs/export-monthly-task')
+  @SkipResponseWrapper()
+  @ApiOperation({ summary: '월간 업무별 공수투입현황 엑셀 다운로드' })
+  @ApiParam({ name: 'projectId', description: '프로젝트 ID' })
+  @ApiQuery({ name: 'year', description: '연도', required: true, type: Number })
+  @ApiQuery({ name: 'month', description: '월', required: true, type: Number })
+  @ApiResponse({
+    status: 200,
+    description: '월간 업무별 공수투입현황 엑셀 파일',
+  })
+  @ApiResponse({ status: 400, description: '잘못된 요청' })
+  @ApiResponse({ status: 404, description: '프로젝트를 찾을 수 없습니다' })
+  async exportMonthlyTaskReport(
+    @Param('projectId') projectId: string,
+    @Query('year') year: string,
+    @Query('month') month: string,
+  ): Promise<StreamableFile> {
+    const yearNum = parseInt(year, 10);
+    const monthNum = parseInt(month, 10);
+
+    const buffer = await this.workLogsService.generateMonthlyTaskReport(
+      BigInt(projectId),
+      yearNum,
+      monthNum,
+    );
+
+    // 파일명: 1월_업무별공수투입현황.xlsx
+    const filename = `${monthNum}월_업무별공수투입현황.xlsx`;
+    const asciiFilename = `monthly_task_report_${yearNum}_${String(monthNum).padStart(2, '0')}.xlsx`;
+    const encodedFilename = encodeURIComponent(filename);
+
+    return new StreamableFile(buffer, {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      disposition: `attachment; filename="${asciiFilename}"; filename*=UTF-8''${encodedFilename}`,
+    });
+  }
+
   private transformWorkLog(workLog: any): any {
     return {
       id: workLog.id.toString(),

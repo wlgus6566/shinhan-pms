@@ -6,6 +6,7 @@ import { WorkLogCalendar } from './WorkLogCalendar';
 import { TeamWorkLogFilters } from './TeamWorkLogFilters';
 import { WeeklyReportExportButton } from './WeeklyReportExportButton';
 import { MonthlyStaffReportExportButton } from './MonthlyStaffReportExportButton';
+import { MonthlyTaskReportExportButton } from './MonthlyTaskReportExportButton';
 import { TeamWorkLogDetailDialog } from './TeamWorkLogDetailDialog';
 import type { WorkLog } from '@/types/work-log';
 import type { ProjectMember } from '@/types/project';
@@ -148,16 +149,22 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-row gap-2 items-end">
-        <MonthlyStaffReportExportButton
-          projectId={projectId}
-          defaultDate={currentMonth}
-        />
+      <div className="flex flex-row flex-wrap justify-end gap-2">
         <WeeklyReportExportButton
           projectId={projectId}
           defaultStartDate={format(startOfMonth(currentMonth), 'yyyy-MM-dd')}
           defaultEndDate={format(endOfMonth(currentMonth), 'yyyy-MM-dd')}
         />
+        <div className="flex flex-row flex-wrap gap-2">
+          <MonthlyStaffReportExportButton
+            projectId={projectId}
+            defaultDate={currentMonth}
+          />
+          <MonthlyTaskReportExportButton
+            projectId={projectId}
+            defaultDate={currentMonth}
+          />
+        </div>
       </div>
       {/* Filters */}
       <TeamWorkLogFilters
