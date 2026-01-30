@@ -6,3 +6,4 @@ export * from './work-logs';
 export * from './schedules';
 export * from './users';
 export * from './analytics';
+export * from './dashboard';

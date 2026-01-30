@@ -27,6 +27,9 @@ describe('AuthController', () => {
     position: '과장',
     grade: 'ADVANCED',
     isActive: true,
+    requirePasswordChange: false,
+    passwordHash: '1234567890',
+    createdBy: 1n,
     createdAt: '2024-01-01T00:00:00.000Z',
     updatedAt: '2024-01-01T00:00:00.000Z',
   };
@@ -144,7 +147,6 @@ describe('AuthController', () => {
     it('should update user profile successfully', async () => {
       const updateDto: UpdateProfileDto = {
         department: 'PLANNING',
-        position: '차장',
       };
 
       const updatedUser = { ...mockUser, ...updateDto };
@@ -244,7 +246,10 @@ describe('AuthController', () => {
     });
 
     it('should require authentication for updateProfile endpoint', async () => {
-      const guards = Reflect.getMetadata('__guards__', controller.updateProfile);
+      const guards = Reflect.getMetadata(
+        '__guards__',
+        controller.updateProfile,
+      );
       expect(guards).toBeDefined();
     });
 

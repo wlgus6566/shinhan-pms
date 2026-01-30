@@ -1,75 +1,21 @@
 import useSWR from 'swr';
+import type {
+  DashboardStats,
+  DashboardTimeline,
+  RecentActivity,
+  UpcomingSchedule,
+} from '@repo/schema';
 
-// ============================================================================
-// Types
-// ============================================================================
-
-export interface DashboardStats {
-  projects: {
-    total: number;
-    active: number;
-    completed: number;
-    suspended: number;
-  };
-  myTasks: {
-    total: number;
-    waiting: number;
-    inProgress: number;
-    completed: number;
-    high: number;
-  };
-  thisWeekWorkHours: number;
-}
-
-export interface RecentActivity {
-  type: 'worklog' | 'task';
-  id: string;
-  title: string;
-  description: string;
-  user: {
-    id: string;
-    name: string;
-  };
-  project?: {
-    id: string;
-    name: string;
-  };
-  createdAt: string;
-}
-
-export interface UpcomingSchedule {
-  id: string;
-  projectId?: string;
-  title: string | null;
-  description: string | null;
-  scheduleType: string;
-  startDate: string;
-  endDate: string;
-  location: string | null;
-  isAllDay: boolean;
-  color: string | null;
-  teamScope: string | null;
-  project?: {
-    id: string;
-    name: string;
-  };
-  participants: Array<{
-    id: string;
-    name: string;
-    email: string;
-    status: string;
-  }>;
-  createdBy: string;
-  creatorName: string;
-  createdAt: string;
-}
+// Re-export types for backward compatibility
+export type { DashboardStats, DashboardTimeline, RecentActivity, UpcomingSchedule };
 
 // ============================================================================
 // SWR Hooks
 // ============================================================================
 
 /**
- * SWR hook for fetching dashboard statistics
+ * SWR hook for fetching consolidated dashboard statistics
+ * Includes: projects, tasks, work hours, and today's stats
  */
 export function useDashboardStats() {
   const { data, error, isLoading, mutate } = useSWR<DashboardStats>(
@@ -85,31 +31,16 @@ export function useDashboardStats() {
 }
 
 /**
- * SWR hook for fetching recent activities
+ * SWR hook for fetching dashboard timeline
+ * Includes: recent activities and upcoming schedules
  */
-export function useRecentActivities() {
-  const { data, error, isLoading, mutate } = useSWR<RecentActivity[]>(
-    '/api/dashboard/activities'
+export function useDashboardTimeline() {
+  const { data, error, isLoading, mutate } = useSWR<DashboardTimeline>(
+    '/api/dashboard/timeline'
   );
 
   return {
-    activities: data,
-    isLoading,
-    error,
-    mutate,
-  };
-}
-
-/**
- * SWR hook for fetching upcoming schedules
- */
-export function useUpcomingSchedules() {
-  const { data, error, isLoading, mutate } = useSWR<UpcomingSchedule[]>(
-    '/api/dashboard/schedules'
-  );
-
-  return {
-    schedules: data,
+    timeline: data,
     isLoading,
     error,
     mutate,

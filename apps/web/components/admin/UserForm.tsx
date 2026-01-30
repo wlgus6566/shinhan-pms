@@ -53,6 +53,7 @@ const userCreateSchema = z.object({
 
 // Edit 모드 스키마 (비밀번호 제외)
 const userEditSchema = z.object({
+  profileImage: z.string().optional(),
   department: z.custom<Department>(),
   position: z.custom<Position>(),
   role: z.custom<UserRole>(),
@@ -108,6 +109,7 @@ export function UserForm({ mode, userId }: UserFormProps) {
             grade: 'BEGINNER',
           }
         : {
+            profileImage: undefined,
             department: undefined,
             position: 'TEAM_MEMBER',
             role: 'MEMBER',
@@ -120,6 +122,7 @@ export function UserForm({ mode, userId }: UserFormProps) {
   useEffect(() => {
     if (userData && mode === 'edit') {
       form.reset({
+        profileImage: userData.profileImage || undefined,
         department: userData.department as Department,
         position: userData.position as Position,
         role: userData.role as UserRole,
@@ -185,7 +188,11 @@ export function UserForm({ mode, userId }: UserFormProps) {
           throw new Error('사용자 ID가 필요합니다');
         }
         const editValues = values as UserEditValues;
-        await updateUser(userId.toString(), editValues);
+        const updateData = {
+          ...editValues,
+          profileImage: profileImage || undefined,
+        };
+        await updateUser(userId.toString(), updateData);
         setSuccess(true);
         setTimeout(() => setSuccess(false), 3000);
       }

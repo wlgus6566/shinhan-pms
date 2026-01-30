@@ -10,7 +10,10 @@ interface User {
   email: string;
   name: string;
   department: string;
+  position: string;
   role: string;
+  grade?: string;
+  profileImage?: string;
   requirePasswordChange?: boolean;
 }
 

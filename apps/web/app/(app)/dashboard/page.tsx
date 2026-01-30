@@ -23,14 +23,17 @@ import {
   Loader2,
   FileText,
 } from 'lucide-react';
-import {
-  useDashboardStats,
-  useRecentActivities,
-  useUpcomingSchedules,
-} from '@/lib/api/dashboard';
+import { useDashboardStats, useDashboardTimeline } from '@/lib/api/dashboard';
 import { useMyProjects } from '@/lib/api/projects';
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  POSITION_LABELS,
+  DEPARTMENT_LABELS,
+  type Position,
+  type Department,
+} from '@repo/schema';
 
 // Hoist static data outside component (rendering-hoist-jsx)
 const colorClassesMap = {
@@ -142,8 +145,8 @@ const QuickActionCard = memo(function QuickActionCard({
 
   return (
     <Link href={href} className="group">
-      <Card className="border-slate-100 hover:border-slate-200 hover:shadow-lg transition-all duration-200">
-        <CardHeader className="pb-3">
+      <Card className="border-slate-100 hover:border-slate-200 hover:shadow-lg transition-all duration-200 h-full">
+        <CardHeader>
           <div className="flex items-center gap-4">
             <div
               className={`p-3 rounded-xl ${colorClass.bg} ${colorClass.hover} transition-colors`}
@@ -185,8 +188,7 @@ const scheduleTypeColors: Record<string, string> = {
 export default function DashboardPage() {
   const { user } = useAuth();
   const { stats, isLoading: statsLoading } = useDashboardStats();
-  const { activities, isLoading: activitiesLoading } = useRecentActivities();
-  const { schedules, isLoading: schedulesLoading } = useUpcomingSchedules();
+  const { timeline, isLoading: timelineLoading } = useDashboardTimeline();
   const { projects } = useMyProjects();
 
   // PM 프로젝트 조회 및 필터링
@@ -208,7 +210,7 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-8">
       {/* Header */}
       <section className="flex items-end justify-between">
         <div>
@@ -221,80 +223,130 @@ export default function DashboardPage() {
           <p className="text-sm text-slate-400">{formattedDate}</p>
         </div>
       </section>
+      <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
+        <Card className="p-6 border-slate-100 shadow-sm flex flex-col align-center justify-center">
+          {/* Profile Section */}
+          <div className="flex flex-col items-center text-center mb-6">
+            <Avatar className="h-20 w-20 mb-3 border-2 border-slate-200">
+              {user?.profileImage && (
+                <AvatarImage src={user.profileImage} alt={user.name} />
+              )}
+              <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-blue-500 to-cyan-500 text-white">
+                {user?.name?.slice(0, 2) || 'U'}
+              </AvatarFallback>
+            </Avatar>
+            <h3 className="font-semibold text-lg text-slate-900">
+              {user?.name || '사용자'}{' '}
+              {user?.position
+                ? POSITION_LABELS[user.position as Position]
+                : '리더'}
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {user?.department
+                ? DEPARTMENT_LABELS[user.department as Department]
+                : '-'}
+            </p>
+          </div>
 
-      {/* Stats Grid */}
-      <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 stagger-children">
-        <StatsCard
-          label="진행중 프로젝트"
-          value={stats?.projects.active ?? 0}
-          icon={FolderKanban}
-          color="blue"
-          isLoading={statsLoading}
-        />
-        <StatsCard
-          label="내 업무 (진행중)"
-          value={stats?.myTasks.inProgress ?? 0}
-          icon={Clock}
-          color="emerald"
-          isLoading={statsLoading}
-        />
-        <StatsCard
-          label="이번 주 작업시간"
-          value={`${stats?.thisWeekWorkHours.toFixed(1) ?? 0}h`}
-          icon={CheckCircle2}
-          color="amber"
-          isLoading={statsLoading}
-        />
-        <StatsCard
-          label="중요 업무"
-          value={stats?.myTasks.high ?? 0}
-          icon={AlertCircle}
-          color="rose"
-          isLoading={statsLoading}
-        />
-      </section>
-      {/* Quick Actions */}
-      <section>
-        <h2 className="text-lg font-semibold text-slate-900 mb-4">바로가기</h2>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {pmProjects.length > 0 ? (
-            <>
-              {pmProjects.slice(0, 3).map((project) => (
+          {/* Today Stats Grid */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-xs font-medium mb-1">오늘 만료 예정</p>
+              <p className="text-4xl font-bold tracking-tight">
+                {stats?.today?.tasksDue || 0}
+              </p>
+            </div>
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-xs font-medium mb-1">오늘의 일정</p>
+              <p className="text-4xl font-bold tracking-tight">
+                {stats?.today?.schedules || 0}
+              </p>
+            </div>
+          </div>
+        </Card>
+        <div className="space-y-4">
+          {/* Stats Grid */}
+          <section>
+            <h2 className="text-lg font-semibold text-slate-900 mb-4">
+              진행중 현황
+            </h2>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 stagger-children">
+              <StatsCard
+                label="진행중 프로젝트"
+                value={stats?.projects.active ?? 0}
+                icon={FolderKanban}
+                color="blue"
+                isLoading={statsLoading}
+              />
+              <StatsCard
+                label="내 업무 (진행중)"
+                value={stats?.myTasks.inProgress ?? 0}
+                icon={Clock}
+                color="emerald"
+                isLoading={statsLoading}
+              />
+              <StatsCard
+                label="이번 주 작업시간"
+                value={`${stats?.thisWeekWorkHours.toFixed(1) ?? 0}h`}
+                icon={CheckCircle2}
+                color="amber"
+                isLoading={statsLoading}
+              />
+              <StatsCard
+                label="중요 업무"
+                value={stats?.myTasks.high ?? 0}
+                icon={AlertCircle}
+                color="rose"
+                isLoading={statsLoading}
+              />
+            </div>
+          </section>
+          {/* Quick Actions */}
+          <section>
+            <h2 className="text-lg font-semibold text-slate-900 mb-4">
+              바로가기
+            </h2>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {pmProjects.length > 0 ? (
+                <>
+                  {pmProjects.slice(0, 3).map((project) => (
+                    <QuickActionCard
+                      key={project.id}
+                      title={project.name + ' 업무 관리'}
+                      description="팀 업무일지를 확인하고 관리합니다"
+                      href={`/projects/${project.id}?tab=team-logs`}
+                      icon={FileText}
+                      color="emerald"
+                    />
+                  ))}
+                </>
+              ) : (
                 <QuickActionCard
-                  key={project.id}
-                  title={project.name + ' 업무 관리'}
-                  description="팀 업무일지를 확인하고 관리합니다"
-                  href={`/projects/${project.id}?tab=team-logs`}
-                  icon={FileText}
+                  title="업무일지 작성"
+                  description="오늘의 업무 내용을 기록합니다"
+                  href="/work-logs"
+                  icon={ClipboardList}
                   color="emerald"
                 />
-              ))}
-            </>
-          ) : (
-            <QuickActionCard
-              title="업무일지 작성"
-              description="오늘의 업무 내용을 기록합니다"
-              href="/work-logs"
-              icon={ClipboardList}
-              color="emerald"
-            />
-          )}
-          <QuickActionCard
-            title="프로젝트 관리"
-            description="진행 중인 프로젝트를 확인하고 관리합니다"
-            href="/projects"
-            icon={FolderKanban}
-            color="blue"
-          />
-          <QuickActionCard
-            title="일정 확인"
-            description="팀 캘린더와 일정을 확인합니다"
-            href="/schedule"
-            icon={Calendar}
-            color="amber"
-          />
+              )}
+              <QuickActionCard
+                title="프로젝트 관리"
+                description="진행 중인 프로젝트를 확인하고 관리합니다"
+                href="/projects"
+                icon={FolderKanban}
+                color="blue"
+              />
+              <QuickActionCard
+                title="일정 확인"
+                description="팀 캘린더와 일정을 확인합니다"
+                href="/schedule"
+                icon={Calendar}
+                color="amber"
+              />
+            </div>
+          </section>
         </div>
-      </section>
+      </div>
 
       {/* Recent Activity & Upcoming Schedules */}
       <section className="grid gap-6 lg:grid-cols-2">
@@ -305,13 +357,14 @@ export default function DashboardPage() {
             <CardDescription>최근 업무일지 및 업무 생성 내역</CardDescription>
           </CardHeader>
           <CardContent>
-            {activitiesLoading ? (
+            {timelineLoading ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin text-slate-300" />
               </div>
-            ) : activities && activities.length > 0 ? (
+            ) : timeline?.recentActivities &&
+              timeline.recentActivities.length > 0 ? (
               <div className="space-y-4">
-                {activities.slice(0, 5).map((activity) => (
+                {timeline.recentActivities.slice(0, 5).map((activity) => (
                   <div
                     key={`${activity.type}-${activity.id}`}
                     className="flex items-start gap-3"
@@ -365,13 +418,14 @@ export default function DashboardPage() {
             <CardDescription>예정된 일정과 마일스톤입니다</CardDescription>
           </CardHeader>
           <CardContent>
-            {schedulesLoading ? (
+            {timelineLoading ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin text-slate-300" />
               </div>
-            ) : schedules && schedules.length > 0 ? (
+            ) : timeline?.upcomingSchedules &&
+              timeline.upcomingSchedules.length > 0 ? (
               <div className="space-y-3">
-                {schedules.map((schedule) => (
+                {timeline.upcomingSchedules.map((schedule) => (
                   <div
                     key={schedule.id}
                     className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors"

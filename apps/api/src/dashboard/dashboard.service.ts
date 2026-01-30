@@ -1,76 +1,111 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-
-export interface DashboardStats {
-  projects: {
-    total: number;
-    active: number;
-    completed: number;
-    suspended: number;
-  };
-  myTasks: {
-    total: number;
-    waiting: number;
-    inProgress: number;
-    completed: number;
-    high: number;
-  };
-  thisWeekWorkHours: number;
-}
-
-export interface RecentActivity {
-  type: 'worklog' | 'task';
-  id: string;
-  title: string;
-  description: string;
-  user: {
-    id: string;
-    name: string;
-  };
-  project?: {
-    id: string;
-    name: string;
-  };
-  createdAt: Date;
-}
+import { startOfDay, endOfDay } from 'date-fns';
+import type {
+  DashboardStats,
+  DashboardTimeline,
+  RecentActivity,
+  UpcomingSchedule,
+} from '@repo/schema';
 
 @Injectable()
 export class DashboardService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * 대시보드 통계 조회
+   * 프로젝트 필터 조건 생성 헬퍼
+   * @param userId - 사용자 ID
+   * @param userRole - 사용자 역할
+   */
+  private getProjectWhereClause(userId: bigint, userRole: string) {
+    const projectWhere: any = { isActive: true };
+
+    if (userRole !== 'SUPER_ADMIN') {
+      projectWhere.members = {
+        some: {
+          memberId: userId,
+        },
+      };
+    }
+
+    return projectWhere;
+  }
+
+  /**
+   * 사용자가 속한 프로젝트 ID 목록 조회 헬퍼
+   * @param userId - 사용자 ID
+   * @param userRole - 사용자 역할
+   */
+  private async getUserProjectIds(
+    userId: bigint,
+    userRole: string,
+  ): Promise<bigint[]> {
+    if (userRole === 'SUPER_ADMIN') {
+      return [];
+    }
+
+    const myProjects = await this.prisma.projectMember.findMany({
+      where: { memberId: userId },
+      select: { projectId: true },
+    });
+
+    return myProjects.map((pm) => pm.projectId);
+  }
+
+  /**
+   * 오늘 날짜 범위 헬퍼
+   */
+  private getTodayDateRange() {
+    return {
+      start: startOfDay(new Date()),
+      end: endOfDay(new Date()),
+    };
+  }
+
+  /**
+   * 이번 주 날짜 범위 헬퍼 (월요일 ~ 일요일)
+   */
+  private getThisWeekDateRange() {
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // 0(일) ~ 6(토)
+    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // 월요일까지의 차이
+    const monday = new Date(now);
+    monday.setDate(now.getDate() + diff);
+    monday.setHours(0, 0, 0, 0);
+
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    sunday.setHours(23, 59, 59, 999);
+
+    return { monday, sunday };
+  }
+
+  /**
+   * 대시보드 통합 통계 조회 (프로젝트, 업무, 작업시간, 오늘 통계)
    * @param userId - 사용자 ID
    * @param userRole - 사용자 역할 ('SUPER_ADMIN', 'PM', 'MEMBER' 등)
    */
   async getStats(userId: bigint, userRole: string): Promise<DashboardStats> {
     // 1. 프로젝트 통계 (SUPER_ADMIN은 전체, 일반 사용자는 자신이 속한 프로젝트만)
-    let projectWhere: any = { isActive: true };
+    const projectWhere = this.getProjectWhereClause(userId, userRole);
 
-    if (userRole !== 'SUPER_ADMIN') {
-      projectWhere = {
-        ...projectWhere,
-        members: {
-          some: {
-            memberId: userId,
-          },
-        },
-      };
-    }
-
-    const [totalProjects, activeProjects, completedProjects, suspendedProjects] =
-      await Promise.all([
-        this.prisma.project.count({ where: projectWhere }),
-        this.prisma.project.count({
-          where: { ...projectWhere, status: 'ACTIVE' },
-        }),
-        this.prisma.project.count({
-          where: { ...projectWhere, status: 'COMPLETED' },
-        }),
-        this.prisma.project.count({
-          where: { ...projectWhere, status: 'SUSPENDED' },
-        }),
-      ]);
+    const [
+      totalProjects,
+      activeProjects,
+      completedProjects,
+      suspendedProjects,
+    ] = await Promise.all([
+      this.prisma.project.count({ where: projectWhere }),
+      this.prisma.project.count({
+        where: { ...projectWhere, status: 'ACTIVE' },
+      }),
+      this.prisma.project.count({
+        where: { ...projectWhere, status: 'COMPLETED' },
+      }),
+      this.prisma.project.count({
+        where: { ...projectWhere, status: 'SUSPENDED' },
+      }),
+    ]);
 
     // 2. 내 업무 통계
     const myTaskWhere = {
@@ -82,34 +117,47 @@ export class DashboardService {
       },
     };
 
-    const [totalTasks, waitingTasks, inProgressTasks, completedTasks, highPriorityTasks] =
-      await Promise.all([
-        this.prisma.task.count({ where: myTaskWhere }),
-        this.prisma.task.count({
-          where: { ...myTaskWhere, status: 'WAITING' },
-        }),
-        this.prisma.task.count({
-          where: { ...myTaskWhere, status: 'IN_PROGRESS' },
-        }),
-        this.prisma.task.count({
-          where: { ...myTaskWhere, status: 'COMPLETED' },
-        }),
-        this.prisma.task.count({
-          where: { ...myTaskWhere, difficulty: 'HIGH' },
-        }),
-      ]);
+    // 오늘 날짜 범위
+    const { start: todayStart, end: todayEnd } = this.getTodayDateRange();
+
+    const [
+      totalTasks,
+      waitingTasks,
+      inProgressTasks,
+      completedTasks,
+      highPriorityTasks,
+      todayTasksDue,
+    ] = await Promise.all([
+      this.prisma.task.count({ where: myTaskWhere }),
+      this.prisma.task.count({
+        where: { ...myTaskWhere, status: 'WAITING' },
+      }),
+      this.prisma.task.count({
+        where: { ...myTaskWhere, status: 'IN_PROGRESS' },
+      }),
+      this.prisma.task.count({
+        where: { ...myTaskWhere, status: 'COMPLETED' },
+      }),
+      this.prisma.task.count({
+        where: { ...myTaskWhere, difficulty: 'HIGH' },
+      }),
+      // 오늘 마감 업무 (통합)
+      this.prisma.taskAssignee.count({
+        where: {
+          userId,
+          task: {
+            isActive: true,
+            endDate: {
+              gte: todayStart,
+              lte: todayEnd,
+            },
+          },
+        },
+      }),
+    ]);
 
     // 3. 이번 주 작업 시간 (월요일 ~ 일요일)
-    const now = new Date();
-    const dayOfWeek = now.getDay(); // 0(일) ~ 6(토)
-    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // 월요일까지의 차이
-    const monday = new Date(now);
-    monday.setDate(now.getDate() + diff);
-    monday.setHours(0, 0, 0, 0);
-
-    const sunday = new Date(monday);
-    sunday.setDate(monday.getDate() + 6);
-    sunday.setHours(23, 59, 59, 999);
+    const { monday, sunday } = this.getThisWeekDateRange();
 
     const workLogs = await this.prisma.workLog.aggregate({
       where: {
@@ -129,6 +177,22 @@ export class DashboardService {
       ? Number(workLogs._sum.workHours)
       : 0;
 
+    // 4. 오늘의 일정
+    const todaySchedules = await this.prisma.scheduleParticipant.count({
+      where: {
+        userId,
+        schedule: {
+          isActive: true,
+          startDate: {
+            lte: todayEnd,
+          },
+          endDate: {
+            gte: todayStart,
+          },
+        },
+      },
+    });
+
     return {
       projects: {
         total: totalProjects,
@@ -144,6 +208,10 @@ export class DashboardService {
         high: highPriorityTasks,
       },
       thisWeekWorkHours,
+      today: {
+        tasksDue: todayTasksDue,
+        schedules: todaySchedules,
+      },
     };
   }
 
@@ -159,14 +227,7 @@ export class DashboardService {
     limit: number = 10,
   ): Promise<RecentActivity[]> {
     // 프로젝트 필터 (SUPER_ADMIN이 아닌 경우 내가 속한 프로젝트만)
-    let projectIds: bigint[] = [];
-    if (userRole !== 'SUPER_ADMIN') {
-      const myProjects = await this.prisma.projectMember.findMany({
-        where: { memberId: userId },
-        select: { projectId: true },
-      });
-      projectIds = myProjects.map((pm) => pm.projectId);
-    }
+    const projectIds = await this.getUserProjectIds(userId, userRole);
 
     // 최근 업무일지 (내 프로젝트의 팀원 활동)
     const workLogWhere = {
@@ -243,7 +304,9 @@ export class DashboardService {
         type: 'worklog' as const,
         id: log.id.toString(),
         title: `업무일지: ${log.task.taskName}`,
-        description: log.content.substring(0, 100) + (log.content.length > 100 ? '...' : ''),
+        description:
+          log.content.substring(0, 100) +
+          (log.content.length > 100 ? '...' : ''),
         user: {
           id: log.user.id.toString(),
           name: log.user.name,
@@ -361,5 +424,70 @@ export class DashboardService {
       creatorName: schedule.creator.name,
       createdAt: schedule.createdAt.toISOString(),
     }));
+  }
+
+  /**
+   * 대시보드 타임라인 조회 (최근 활동 + 예정 일정)
+   * @param userId - 사용자 ID
+   * @param userRole - 사용자 역할
+   */
+  async getTimeline(
+    userId: bigint,
+    userRole: string,
+  ): Promise<DashboardTimeline> {
+    const [recentActivities, upcomingSchedules] = await Promise.all([
+      this.getRecentActivities(userId, userRole, 10),
+      this.getUpcomingSchedules(userId, 5),
+    ]);
+
+    return {
+      recentActivities,
+      upcomingSchedules,
+    };
+  }
+
+  /**
+   * @deprecated 이 메서드는 getStats()로 통합되었습니다.
+   * 사용자 위젯 통계 조회
+   * @param userId - 사용자 ID
+   */
+  async getUserWidgetStats(userId: bigint) {
+    const today = startOfDay(new Date());
+    const endOfToday = endOfDay(new Date());
+
+    // Query tasks assigned to user that are due today
+    const todayTasksDue = await this.prisma.taskAssignee.count({
+      where: {
+        userId,
+        task: {
+          isActive: true,
+          endDate: {
+            gte: today,
+            lte: endOfToday,
+          },
+        },
+      },
+    });
+
+    // Query schedules for today where user is a participant
+    const todaySchedules = await this.prisma.scheduleParticipant.count({
+      where: {
+        userId,
+        schedule: {
+          isActive: true,
+          startDate: {
+            lte: endOfToday,
+          },
+          endDate: {
+            gte: today,
+          },
+        },
+      },
+    });
+
+    return {
+      todayTasksDue,
+      todaySchedules,
+    };
   }
 }

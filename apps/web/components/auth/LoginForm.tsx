@@ -47,12 +47,12 @@ export function LoginForm() {
         const result = await loginApi(values);
         // 비밀번호 변경이 필요한 경우
         if (result.user.requirePasswordChange) {
-          login(result.accessToken, result.user);
+          login(result.accessToken, result.user as any);
           setShowPasswordChangeAlert(true);
           return;
         }
 
-        login(result.accessToken, result.user);
+        login(result.accessToken, result.user as any);
         router.push('/dashboard');
       } catch (err: any) {
         setError(err.message || '로그인 중 오류가 발생했습니다');
