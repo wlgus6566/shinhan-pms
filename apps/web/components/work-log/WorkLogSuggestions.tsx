@@ -62,11 +62,6 @@ export function WorkLogSuggestions({
         sideOffset={4}
       >
         <Command shouldFilter={false}>
-          <CommandInput
-            placeholder="작업 내용 검색..."
-            value={searchQuery}
-            onValueChange={setSearchQuery}
-          />
           <CommandList className="max-h-[300px] overflow-y-auto">
             {isLoading ? (
               <div className="p-4 text-sm text-muted-foreground text-center">

@@ -48,8 +48,17 @@ export class WorkLogsService {
       throw new ForbiddenException('PM은 업무일지를 작성할 수 없습니다');
     }
 
-    // 4. 동일 날짜에 일지가 있는지 확인 (soft delete 포함)
+    // 4. 미래 날짜 검증
     const workDate = new Date(createWorkLogDto.workDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    workDate.setHours(0, 0, 0, 0);
+
+    if (workDate > today) {
+      throw new BadRequestException('미래 날짜의 업무일지는 작성할 수 없습니다');
+    }
+
+    // 5. 동일 날짜에 일지가 있는지 확인 (soft delete 포함)
     const existingLog = await this.prisma.workLog.findFirst({
       where: {
         taskId,
@@ -91,7 +100,7 @@ export class WorkLogsService {
       });
     }
 
-    // 5. 업무일지 생성
+    // 6. 업무일지 생성
     try {
       return await this.prisma.workLog.create({
         data: {
