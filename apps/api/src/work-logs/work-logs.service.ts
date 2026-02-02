@@ -8,7 +8,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateWorkLogDto } from './dto/create-work-log.dto';
 import { UpdateWorkLogDto } from './dto/update-work-log.dto';
-import { Decimal } from '@prisma/client/runtime/library';
+import { Decimal, PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { parsePaginationParams } from '../common/helpers/pagination.helper';
 import * as ExcelJS from 'exceljs';
 import { TASK_STATUS_METADATA } from '@repo/schema';
@@ -48,7 +48,7 @@ export class WorkLogsService {
       throw new ForbiddenException('PM은 업무일지를 작성할 수 없습니다');
     }
 
-    // 4. 동일 날짜에 이미 일지가 있는지 확인
+    // 4. 동일 날짜에 활성화된 일지가 있는지 확인
     const workDate = new Date(createWorkLogDto.workDate);
     const existingLog = await this.prisma.workLog.findFirst({
       where: {
@@ -64,31 +64,42 @@ export class WorkLogsService {
     }
 
     // 5. 업무일지 생성
-    return await this.prisma.workLog.create({
-      data: {
-        taskId,
-        userId,
-        workDate,
-        content: createWorkLogDto.content,
-        workHours: createWorkLogDto.workHours
-          ? new Decimal(createWorkLogDto.workHours)
-          : null,
-        progress: createWorkLogDto.progress,
-        issues: createWorkLogDto.issues,
-      },
-      include: {
-        task: {
-          select: {
-            id: true,
-            taskName: true,
-            projectId: true,
-            status: true,
-            difficulty: true,
-          },
+    try {
+      return await this.prisma.workLog.create({
+        data: {
+          taskId,
+          userId,
+          workDate,
+          content: createWorkLogDto.content,
+          workHours: createWorkLogDto.workHours
+            ? new Decimal(createWorkLogDto.workHours)
+            : null,
+          progress: createWorkLogDto.progress,
+          issues: createWorkLogDto.issues,
         },
-        user: { select: { id: true, name: true, email: true } },
-      },
-    });
+        include: {
+          task: {
+            select: {
+              id: true,
+              taskName: true,
+              projectId: true,
+              status: true,
+              difficulty: true,
+            },
+          },
+          user: { select: { id: true, name: true, email: true } },
+        },
+      });
+    } catch (error) {
+      // Unique constraint 에러 (P2002) 처리 - race condition 대응
+      if (
+        error instanceof PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new ConflictException('해당 날짜에 이미 업무일지가 존재합니다');
+      }
+      throw error;
+    }
   }
 
   /**
@@ -316,7 +327,7 @@ export class WorkLogsService {
   }
 
   /**
-   * 업무일지 삭제 (soft delete)
+   * 업무일지 삭제 (hard delete)
    */
   async remove(id: bigint, userId: bigint) {
     const workLog = await this.findOne(id);
@@ -326,9 +337,8 @@ export class WorkLogsService {
       throw new ForbiddenException('본인이 작성한 일지만 삭제할 수 있습니다');
     }
 
-    await this.prisma.workLog.update({
+    await this.prisma.workLog.delete({
       where: { id },
-      data: { isActive: false },
     });
   }
 

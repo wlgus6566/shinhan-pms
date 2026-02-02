@@ -156,10 +156,10 @@ export default function WorkLogsPage() {
     [filteredWorkLogs],
   );
 
-  // 일지 삭제
+  // 일지 전체 삭제 (해당 날짜의 모든 업무일지)
   const handleDelete = useCallback(async () => {
-    if (editingWorkLogs) {
-      await deleteWorkLog(editingWorkLogs[0]!.id);
+    if (editingWorkLogs && editingWorkLogs.length > 0) {
+      await Promise.all(editingWorkLogs.map((log) => deleteWorkLog(log.id)));
       mutateWorkLogs();
     }
   }, [editingWorkLogs, mutateWorkLogs]);
@@ -222,17 +222,6 @@ export default function WorkLogsPage() {
 
       mutateWorkLogs();
       return { success, failed };
-    },
-    [mutateWorkLogs],
-  );
-
-  // 일지 삭제 (개별 - 다이얼로그 내 카드에서)
-  const handleDeleteWorkLog = useCallback(
-    async (workLog: WorkLog) => {
-      if (confirm('정말 삭제하시겠습니까?')) {
-        await deleteWorkLog(workLog.id);
-        mutateWorkLogs();
-      }
     },
     [mutateWorkLogs],
   );
@@ -357,7 +346,6 @@ export default function WorkLogsPage() {
         onMultiSubmit={handleMultiSubmit}
         onMultiUpdate={handleMultiUpdate}
         onDelete={handleDelete}
-        onDeleteWorkLog={handleDeleteWorkLog}
       />
     </div>
   );

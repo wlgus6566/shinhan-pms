@@ -7,7 +7,7 @@ import { z } from 'zod';
 import type { CreateWorkLogRequest, UpdateWorkLogRequest } from '@repo/schema';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { Loader2, CheckCircle2, Trash2 } from 'lucide-react';
+import { Loader2, CheckCircle2 } from 'lucide-react';
 import { BaseDialog } from '@/components/ui/base-dialog';
 import { Button } from '@/components/ui/button';
 import {
@@ -79,7 +79,6 @@ interface WorkLogDialogProps {
     updates: Array<{ workLogId: string; data: UpdateWorkLogRequest }>,
   ) => Promise<MultiSubmitResult>;
   onDelete?: () => Promise<void>;
-  onDeleteWorkLog?: (workLog: WorkLog) => Promise<void>;
 }
 
 const WORK_HOURS_PRESETS = [0.5, 1, 2, 4, 8];
@@ -98,12 +97,12 @@ export function WorkLogDialog({
   onMultiSubmit,
   onMultiUpdate,
   onDelete,
-  onDeleteWorkLog,
 }: WorkLogDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState<number | null>(null);
   const textareaRefs = useRef<(HTMLTextAreaElement | null)[]>([]);
+  const dialogInitializedRef = useRef(false);
 
   // 다중 폼 (생성/수정 모드 통합)
   const multiForm = useForm<MultiWorkLogFormValues>({
@@ -130,6 +129,12 @@ export function WorkLogDialog({
   // 폼 초기화
   useEffect(() => {
     if (open) {
+      // 다이얼로그가 열릴 때 suggestions 비활성화, 잠시 후 활성화
+      dialogInitializedRef.current = false;
+      const timer = setTimeout(() => {
+        dialogInitializedRef.current = true;
+      }, 300);
+
       const dateStr = format(selectedDate, 'yyyy-MM-dd');
 
       if (mode === 'edit' && workLogs.length > 0) {
@@ -169,6 +174,10 @@ export function WorkLogDialog({
           entries: entries.length > 0 ? entries : [],
         });
       }
+
+      return () => clearTimeout(timer);
+    } else {
+      dialogInitializedRef.current = false;
     }
   }, [open, mode, workLogs, existingWorkLogs, myTasks, selectedDate]);
 
@@ -185,7 +194,8 @@ export function WorkLogDialog({
   };
 
   const handleContentFocus = (index: number) => {
-    if (mode === 'create') {
+    // 다이얼로그가 열린 직후에는 suggestions를 열지 않음
+    if (mode === 'create' && dialogInitializedRef.current) {
       const taskId = multiForm.watch(`entries.${index}.taskId`);
       if (taskId) {
         setShowSuggestions(index);
@@ -543,16 +553,28 @@ export function WorkLogDialog({
           <>
             <Button
               type="button"
-              variant="destructive"
-              onClick={handleDelete}
-              disabled={isSubmitting}
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isSubmitting || isDeleting}
             >
-              {isDeleting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              {isDeleting ? '삭제 중...' : '삭제'}
+              취소
             </Button>
+            {mode === 'edit' && onDelete && (
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={handleDelete}
+                disabled={isSubmitting || isDeleting}
+              >
+                {isDeleting && (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                )}
+                삭제
+              </Button>
+            )}
             <Button
               onClick={multiForm.handleSubmit(handleMultiFormSubmit)}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isDeleting}
             >
               {isSubmitting && (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
