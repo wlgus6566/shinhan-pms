@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import { format, startOfMonth, endOfMonth, subDays } from 'date-fns';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { FileText, Loader2 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/context/AuthContext';
@@ -13,6 +13,7 @@ import {
   WorkLogList,
   MyTaskList,
 } from '@/components/work-log';
+import type { MultiSubmitResult } from '@/components/work-log/WorkLogDialog';
 import {
   createWorkLog,
   updateWorkLog,
@@ -33,7 +34,7 @@ export default function WorkLogsPage() {
   const [selectedTaskId, setSelectedTaskId] = useState<string | undefined>();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
-  const [editingWorkLog, setEditingWorkLog] = useState<WorkLog | null>(null);
+  const [editingWorkLogs, setEditingWorkLogs] = useState<WorkLog[]>([]);
 
   // 프로젝트 필터 탭 (URL 동기화)
   const {
@@ -101,17 +102,6 @@ export default function WorkLogsPage() {
     return workLogs.filter((log) => projectTaskIds.has(log.taskId));
   }, [workLogs, myTasks, selectedProjectId]);
 
-  // 어제 일지 (복사 기능용)
-  const previousLog = useMemo(() => {
-    if (!selectedTaskId) return null;
-    const yesterday = format(subDays(selectedDate, 1), 'yyyy-MM-dd');
-    return (
-      workLogs.find(
-        (log) => log.taskId === selectedTaskId && log.workDate === yesterday,
-      ) || null
-    );
-  }, [workLogs, selectedTaskId, selectedDate]);
-
   // 프로젝트 전환 시 선택된 업무가 필터 범위에 없으면 리셋
   useEffect(() => {
     if (
@@ -137,19 +127,36 @@ export default function WorkLogsPage() {
   // 일지 작성 다이얼로그 열기
   const handleCreateClick = useCallback(() => {
     setDialogMode('create');
-    setEditingWorkLog(null);
+    setEditingWorkLogs([]);
     setDialogOpen(true);
   }, []);
 
-  // 일지 수정 다이얼로그 열기
+  // 일지 수정 다이얼로그 열기 (단일)
   const handleEditClick = useCallback((workLog: WorkLog) => {
     setDialogMode('edit');
-    setEditingWorkLog(workLog);
+    setEditingWorkLogs([workLog]);
     setSelectedDate(new Date(workLog.workDate));
     setDialogOpen(true);
   }, []);
 
-  // 일지 작성/수정 제출
+  // 캘린더에서 업무일지 클릭 시 - 해당 날짜의 모든 업무일지 수정
+  const handleWorkLogClick = useCallback(
+    (date: Date) => {
+      setSelectedDate(date);
+
+      const dateStr = format(date, 'yyyy-MM-dd');
+      const logsForDate = filteredWorkLogs.filter(
+        (log) => log.workDate === dateStr,
+      );
+
+      setDialogMode('edit');
+      setEditingWorkLogs(logsForDate);
+      setDialogOpen(true);
+    },
+    [filteredWorkLogs],
+  );
+
+  // 일지 작성/수정 제출 (단일)
   const handleSubmit = useCallback(
     async (
       data: CreateWorkLogRequest | UpdateWorkLogRequest,
@@ -158,8 +165,11 @@ export default function WorkLogsPage() {
       try {
         if (dialogMode === 'create' && taskId) {
           await createWorkLog(taskId, data as CreateWorkLogRequest);
-        } else if (dialogMode === 'edit' && editingWorkLog) {
-          await updateWorkLog(editingWorkLog.id, data as UpdateWorkLogRequest);
+        } else if (dialogMode === 'edit' && editingWorkLogs.length === 1) {
+          await updateWorkLog(
+            editingWorkLogs[0]!.id,
+            data as UpdateWorkLogRequest,
+          );
         }
         mutateWorkLogs();
       } catch (error: any) {
@@ -173,24 +183,80 @@ export default function WorkLogsPage() {
         throw error; // 에러를 다시 던져서 다이얼로그가 닫히지 않도록 함
       }
     },
-    [dialogMode, editingWorkLog, mutateWorkLogs],
+    [dialogMode, editingWorkLogs, mutateWorkLogs],
   );
 
-  // 일지 삭제
-  const handleDelete = useCallback(async () => {
-    if (editingWorkLog) {
-      await deleteWorkLog(editingWorkLog.id);
-      mutateWorkLogs();
-    }
-  }, [editingWorkLog, mutateWorkLogs]);
+  // 다중 수정 핸들러
+  const handleMultiUpdate = useCallback(
+    async (
+      updates: Array<{ workLogId: string; data: UpdateWorkLogRequest }>,
+    ): Promise<MultiSubmitResult> => {
+      const results = await Promise.allSettled(
+        updates.map(({ workLogId, data }) => updateWorkLog(workLogId, data)),
+      );
 
-  // 일지 삭제 (카드에서)
-  const handleDeleteFromCard = useCallback(
+      const success: string[] = [];
+      const failed: Array<{ taskId: string; error: string }> = [];
+
+      results.forEach((result, index) => {
+        const update = updates[index];
+        if (!update) return;
+        if (result.status === 'fulfilled') {
+          success.push(update.workLogId);
+        } else {
+          const error = result.reason as any;
+          failed.push({
+            taskId: update.workLogId,
+            error: error?.message || '저장 중 오류가 발생했습니다',
+          });
+        }
+      });
+
+      mutateWorkLogs();
+      return { success, failed };
+    },
+    [mutateWorkLogs],
+  );
+
+  // 일지 삭제 (개별 - 다이얼로그 내 카드에서)
+  const handleDeleteWorkLog = useCallback(
     async (workLog: WorkLog) => {
       if (confirm('정말 삭제하시겠습니까?')) {
         await deleteWorkLog(workLog.id);
         mutateWorkLogs();
       }
+    },
+    [mutateWorkLogs],
+  );
+
+  // 다중 일지 제출
+  const handleMultiSubmit = useCallback(
+    async (
+      entries: Array<{ taskId: string; data: CreateWorkLogRequest }>,
+    ): Promise<MultiSubmitResult> => {
+      const results = await Promise.allSettled(
+        entries.map(({ taskId, data }) => createWorkLog(taskId, data)),
+      );
+
+      const success: string[] = [];
+      const failed: Array<{ taskId: string; error: string }> = [];
+
+      results.forEach((result, index) => {
+        const entry = entries[index];
+        if (!entry) return;
+        if (result.status === 'fulfilled') {
+          success.push(entry.taskId);
+        } else {
+          const error = result.reason as any;
+          failed.push({
+            taskId: entry.taskId,
+            error: error?.message || '저장 중 오류가 발생했습니다',
+          });
+        }
+      });
+
+      mutateWorkLogs();
+      return { success, failed };
     },
     [mutateWorkLogs],
   );
@@ -250,7 +316,6 @@ export default function WorkLogsPage() {
               currentUserId={user?.id.toString()}
               selectedDate={selectedDate}
               onEdit={handleEditClick}
-              onDelete={handleDeleteFromCard}
               onCreate={handleCreateClick}
             />
             <MyTaskList tasks={filteredTasks} />
@@ -263,6 +328,7 @@ export default function WorkLogsPage() {
               selectedDate={selectedDate}
               onDateSelect={handleDateSelect}
               onMonthChange={handleMonthChange}
+              onWorkLogClick={handleWorkLogClick}
               showUserName={false}
             />
           </div>
@@ -274,13 +340,15 @@ export default function WorkLogsPage() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         mode={dialogMode}
-        workLog={editingWorkLog}
+        workLogs={editingWorkLogs}
+        existingWorkLogs={filteredWorkLogs}
         selectedDate={selectedDate}
         selectedTaskId={selectedTaskId}
         myTasks={filteredTasks}
-        previousLog={previousLog}
         onSubmit={handleSubmit}
-        onDelete={dialogMode === 'edit' ? handleDelete : undefined}
+        onMultiSubmit={handleMultiSubmit}
+        onMultiUpdate={handleMultiUpdate}
+        onDeleteWorkLog={handleDeleteWorkLog}
       />
     </div>
   );

@@ -21,7 +21,10 @@ import type {
 import koLocale from '@fullcalendar/core/locales/ko';
 
 // Utilities
-import { transformWorkLogsToEvents, type ColorBy } from './workLogCalendarUtils';
+import {
+  transformWorkLogsToEvents,
+  type ColorBy,
+} from './workLogCalendarUtils';
 import { progressColor } from './WorkLogCard';
 
 interface WorkLogCalendarProps {
@@ -29,6 +32,7 @@ interface WorkLogCalendarProps {
   selectedDate: Date;
   onDateSelect: (date: Date) => void;
   onMonthChange: (date: Date) => void;
+  onWorkLogClick?: (date: Date) => void;
   showUserName?: boolean;
 }
 
@@ -37,6 +41,7 @@ export function WorkLogCalendar({
   selectedDate,
   onDateSelect,
   onMonthChange,
+  onWorkLogClick,
   showUserName = false,
 }: WorkLogCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date(selectedDate));
@@ -106,8 +111,13 @@ export function WorkLogCalendar({
 
   const handleEventClick = (arg: EventClickArg) => {
     arg.jsEvent.stopPropagation();
-    // Select the date of the clicked event
-    onDateSelect(arg.event.start || new Date());
+    const date = arg.event.start || new Date();
+
+    if (onWorkLogClick) {
+      onWorkLogClick(date);
+    } else {
+      onDateSelect(date);
+    }
   };
 
   const handleDatesSet = (arg: DatesSetArg) => {

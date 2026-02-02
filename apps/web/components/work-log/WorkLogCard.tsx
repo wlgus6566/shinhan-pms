@@ -34,28 +34,16 @@ export function WorkLogCard({
         <h3 className="font-semibold text-slate-800 truncate">
           {workLog.task?.taskName}
         </h3>
-        {isOwner && (
+        {isOwner && onEdit && (
           <div className="flex items-center gap-1 ml-2">
-            {onEdit && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 text-slate-400 hover:text-blue-600"
-                onClick={onEdit}
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-            )}
-            {onDelete && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 text-slate-400 hover:text-rose-600"
-                onClick={onDelete}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 text-slate-400 hover:text-blue-600"
+              onClick={onEdit}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
           </div>
         )}
       </div>

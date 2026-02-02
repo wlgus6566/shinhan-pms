@@ -77,7 +77,7 @@ export default function ProjectDetailPage() {
   }
 
   return (
-    <div className="max-w-7xl">
+    <div className="max-w-[1920px]">
       <div className="mb-6 flex items-center justify-between">
         <Button variant="ghost" size="sm" asChild>
           <Link href="/projects">
