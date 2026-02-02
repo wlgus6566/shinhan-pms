@@ -37,7 +37,7 @@ export const ROLE_DESCRIPTIONS: Record<Role, string> = {
 // 본부 - @repo/schema에서 import 사용 권장
 export const DEPARTMENTS = {
   PLANNING_STRATEGY: '경영전략본부',
-  DESIGN_1: '기획본부1',
+  PLANNING_1: '기획본부1',
   DEVELOPMENT_1: '개발본부1',
   DIGITAL_1: '디지털본부1',
   BUSINESS_1: '사업본부1',

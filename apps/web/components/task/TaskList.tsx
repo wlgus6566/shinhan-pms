@@ -175,7 +175,10 @@ export function TaskList({
         </Tabs>
 
         {isPM && (
-          <Button onClick={() => setDialogOpen(true)}>
+          <Button
+            onClick={() => setDialogOpen(true)}
+            className="gradient-primary border-none"
+          >
             <Plus className="h-4 w-4 mr-2" />
             업무 추가
           </Button>

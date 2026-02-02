@@ -78,6 +78,7 @@ interface WorkLogDialogProps {
   onMultiUpdate?: (
     updates: Array<{ workLogId: string; data: UpdateWorkLogRequest }>,
   ) => Promise<MultiSubmitResult>;
+  onDelete?: () => Promise<void>;
   onDeleteWorkLog?: (workLog: WorkLog) => Promise<void>;
 }
 
@@ -96,6 +97,7 @@ export function WorkLogDialog({
   onSubmit,
   onMultiSubmit,
   onMultiUpdate,
+  onDelete,
   onDeleteWorkLog,
 }: WorkLogDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -169,6 +171,18 @@ export function WorkLogDialog({
       }
     }
   }, [open, mode, workLogs, existingWorkLogs, myTasks, selectedDate]);
+
+  const handleDelete = async () => {
+    if (!onDelete || !confirm('정말 삭제하시겠습니까?')) return;
+
+    setIsDeleting(true);
+    try {
+      await onDelete();
+      onOpenChange(false);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const handleContentFocus = (index: number) => {
     if (mode === 'create') {
@@ -529,11 +543,12 @@ export function WorkLogDialog({
           <>
             <Button
               type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
+              variant="destructive"
+              onClick={handleDelete}
               disabled={isSubmitting}
             >
-              취소
+              {isDeleting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {isDeleting ? '삭제 중...' : '삭제'}
             </Button>
             <Button
               onClick={multiForm.handleSubmit(handleMultiFormSubmit)}
@@ -564,9 +579,7 @@ export function WorkLogDialog({
             onSubmit={multiForm.handleSubmit(handleMultiFormSubmit)}
             className="space-y-4"
           >
-            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
-              {fields.map((_, index) => renderEntryCard(index))}
-            </div>
+            {fields.map((_, index) => renderEntryCard(index))}
           </form>
         </Form>
       )}

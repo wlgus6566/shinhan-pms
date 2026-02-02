@@ -369,7 +369,7 @@ export default function DashboardPage() {
                     key={`${activity.type}-${activity.id}`}
                     className="flex items-start gap-3"
                   >
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
+                    <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
                       {activity.type === 'worklog' ? (
                         <FileText className="h-4 w-4" />
                       ) : (

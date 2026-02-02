@@ -87,7 +87,7 @@ export function WorkLogList({
       {onCreate && (
         <Button
           onClick={onCreate}
-          className="fixed bottom-8 right-8 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow z-50"
+          className="gradient-primary border-none fixed bottom-8 right-8 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow z-50"
           size="icon"
         >
           <Plus className="h-6 w-6" />

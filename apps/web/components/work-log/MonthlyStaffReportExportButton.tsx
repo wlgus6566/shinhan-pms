@@ -76,7 +76,7 @@ export function MonthlyStaffReportExportButton({
         onClick={handleExport}
         disabled={isExporting}
         variant="default"
-        className="whitespace-nowrap min-w-[225px]"
+        className="gradient-primary border-none whitespace-nowrap min-w-[225px]"
       >
         {isExporting ? (
           <>

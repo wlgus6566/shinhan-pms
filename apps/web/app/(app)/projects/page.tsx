@@ -22,7 +22,7 @@ export default function ProjectsPage() {
           </p>
         </div>
         {canCreateProject && (
-          <Button asChild>
+          <Button asChild className="gradient-primary border-none">
             <Link href="/projects/new">
               <Plus className="h-4 w-4 mr-2" />새 프로젝트 등록
             </Link>

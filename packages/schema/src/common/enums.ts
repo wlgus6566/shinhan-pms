@@ -123,7 +123,7 @@ export type WorkArea = z.infer<typeof WorkAreaEnum>;
 export const DepartmentEnum = z.enum(
   [
     'PLANNING_STRATEGY',
-    'DESIGN_1',
+    'PLANNING_1',
     'DEVELOPMENT_1',
     'DIGITAL_1',
     'BUSINESS_1',
@@ -145,7 +145,7 @@ export type Department = z.infer<typeof DepartmentEnum>;
 
 export const DEPARTMENT_LABELS: Record<Department, string> = {
   PLANNING_STRATEGY: '경영전략본부',
-  DESIGN_1: '기획본부1',
+  PLANNING_1: '기획본부1',
   DEVELOPMENT_1: '개발본부1',
   DIGITAL_1: '디지털본부1',
   BUSINESS_1: '사업본부1',
@@ -280,11 +280,14 @@ export const ParticipantStatusEnum = z.enum(
 
 export type ParticipantStatus = z.infer<typeof ParticipantStatusEnum>;
 
-export const RecurrenceTypeEnum = z.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'], {
-  errorMap: () => ({
-    message: '반복 유형은 DAILY, WEEKLY, MONTHLY, YEARLY 중 하나여야 합니다',
-  }),
-});
+export const RecurrenceTypeEnum = z.enum(
+  ['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'],
+  {
+    errorMap: () => ({
+      message: '반복 유형은 DAILY, WEEKLY, MONTHLY, YEARLY 중 하나여야 합니다',
+    }),
+  },
+);
 
 export type RecurrenceType = z.infer<typeof RecurrenceTypeEnum>;
 
@@ -297,6 +300,6 @@ export const RECURRENCE_TYPE_LABELS = {
 } as const satisfies Record<RecurrenceType, string>;
 
 // Helper for FormSelect components
-export const RECURRENCE_TYPE_OPTIONS = Object.entries(RECURRENCE_TYPE_LABELS).map(
-  ([value, label]) => ({ value, label }),
-);
+export const RECURRENCE_TYPE_OPTIONS = Object.entries(
+  RECURRENCE_TYPE_LABELS,
+).map(([value, label]) => ({ value, label }));

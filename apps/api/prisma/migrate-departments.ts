@@ -8,23 +8,23 @@ const prisma = new PrismaClient();
 
 // 한글 → 영문 enum 매핑
 const DEPARTMENT_MAPPING: Record<string, string> = {
-  '경영전략본부': 'PLANNING_STRATEGY',
-  '기획본부1': 'DESIGN_1',
-  '개발본부1': 'DEVELOPMENT_1',
-  '디자인본부1': 'DIGITAL_1',
-  '디지인본부1': 'DIGITAL_1', // 오타 대응
-  '디지털본부1': 'DIGITAL_1', // 오타 대응
-  '사업본부1': 'BUSINESS_1',
-  '사업부본1': 'BUSINESS_1', // 오타 대응
-  '기획본부2': 'PLANNING_2',
-  '개발본부2': 'DEVELOPMENT_2',
-  '디자인본부2': 'DIGITAL_2',
-  '디지털본부2': 'DIGITAL_2', // 오타 대응
-  '서비스운영본부': 'SERVICE_OPERATION',
-  '플랫폼운영본부': 'PLATFORM_OPERATION',
-  '플랫폼전략실': 'PLATFORM_STRATEGY',
-  '마케팅전략실': 'MARKETING_STRATEGY',
-  'XC본부': 'XC',
+  경영전략본부: 'PLANNING_STRATEGY',
+  기획본부1: 'PLANNING_1',
+  개발본부1: 'DEVELOPMENT_1',
+  디자인본부1: 'DIGITAL_1',
+  디지인본부1: 'DIGITAL_1', // 오타 대응
+  디지털본부1: 'DIGITAL_1', // 오타 대응
+  사업본부1: 'BUSINESS_1',
+  사업부본1: 'BUSINESS_1', // 오타 대응
+  기획본부2: 'PLANNING_2',
+  개발본부2: 'DEVELOPMENT_2',
+  디자인본부2: 'DIGITAL_2',
+  디지털본부2: 'DIGITAL_2', // 오타 대응
+  서비스운영본부: 'SERVICE_OPERATION',
+  플랫폼운영본부: 'PLATFORM_OPERATION',
+  플랫폼전략실: 'PLATFORM_STRATEGY',
+  마케팅전략실: 'MARKETING_STRATEGY',
+  XC본부: 'XC',
 };
 
 async function main() {
@@ -93,15 +93,10 @@ async function main() {
         data: { department: newDept },
       });
 
-      console.log(
-        `✅ ${user.name} (${user.id}): ${oldDept} → ${newDept}`,
-      );
+      console.log(`✅ ${user.name} (${user.id}): ${oldDept} → ${newDept}`);
       successCount++;
     } catch (error) {
-      console.error(
-        `❌ ${user.name} (${user.id}) 업데이트 실패:`,
-        error,
-      );
+      console.error(`❌ ${user.name} (${user.id}) 업데이트 실패:`, error);
       errorCount++;
     }
   }

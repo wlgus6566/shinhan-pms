@@ -1,5 +1,5 @@
 import { fetcher, tokenManager } from './fetcher';
-import type { User, ChangePasswordRequest } from '@repo/schema';
+import type { User, ChangePasswordInput } from '@repo/schema';
 
 export interface LoginRequest {
   email: string;
@@ -16,12 +16,12 @@ export async function login(data: LoginRequest): Promise<LoginResponse> {
     method: 'POST',
     body: data,
   });
-  
+
   if (result.accessToken) {
     tokenManager.setAccessToken(result.accessToken);
     localStorage.setItem('user', JSON.stringify(result.user));
   }
-  
+
   return result;
 }
 
@@ -41,7 +41,7 @@ export async function updateMe(data: any) {
   });
 }
 
-export async function changePassword(data: ChangePasswordRequest) {
+export async function changePassword(data: ChangePasswordInput) {
   return fetcher('/api/auth/me/password', {
     method: 'PATCH',
     body: data,

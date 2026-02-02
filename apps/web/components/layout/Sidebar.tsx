@@ -78,7 +78,7 @@ export function Sidebar({
           href="/dashboard"
           className="flex items-center gap-3 overflow-hidden"
         >
-          <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex-shrink-0 flex items-center justify-center shadow-lg shadow-blue-500/25">
+          <div className="w-9 h-9 gradient-primary rounded-xl flex-shrink-0 flex items-center justify-center shadow-lg shadow-blue-500/25">
             <span className="text-white font-bold text-base">E</span>
           </div>
           {sidebarOpen && (
@@ -332,7 +332,8 @@ export function Sidebar({
                   {user.name}
                 </p>
                 <p className="text-[11px] text-slate-500 truncate">
-                  {DEPARTMENT_LABELS[user.department as Department] || user.department}
+                  {DEPARTMENT_LABELS[user.department as Department] ||
+                    user.department}
                 </p>
               </div>
             )}

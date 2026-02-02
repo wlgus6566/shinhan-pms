@@ -156,6 +156,14 @@ export default function WorkLogsPage() {
     [filteredWorkLogs],
   );
 
+  // 일지 삭제
+  const handleDelete = useCallback(async () => {
+    if (editingWorkLogs) {
+      await deleteWorkLog(editingWorkLogs[0]!.id);
+      mutateWorkLogs();
+    }
+  }, [editingWorkLogs, mutateWorkLogs]);
+
   // 일지 작성/수정 제출 (단일)
   const handleSubmit = useCallback(
     async (
@@ -348,6 +356,7 @@ export default function WorkLogsPage() {
         onSubmit={handleSubmit}
         onMultiSubmit={handleMultiSubmit}
         onMultiUpdate={handleMultiUpdate}
+        onDelete={handleDelete}
         onDeleteWorkLog={handleDeleteWorkLog}
       />
     </div>

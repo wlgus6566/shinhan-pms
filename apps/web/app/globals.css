@@ -115,7 +115,23 @@
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
 }
+.gradient-primary {
+  @apply shadow-lg flex items-center justify-center;
+  background: linear-gradient(90deg, #57dbff 0%, #2d7bff 55%, #b8a7ff 100%);
+}
 
+.gradient-border {
+  @apply shadow-lg flex items-center justify-center;
+  background-color: #fff;
+  color: #2d7bff;
+  background:
+    linear-gradient(#ffffff, #ffffff) padding-box,
+    linear-gradient(90deg, #02b6d7 0%, #9f1aff 100%) border-box;
+  border: 1px solid transparent;
+}
+.gradient-border-b {
+  border-bottom: 2px solid linear-gradient(90deg, #02b6d7 0%, #9f1aff 100%);
+}
 /* Status Badge Variants - CRM Style */
 .badge-success {
   @apply bg-emerald-50 text-emerald-700 border-emerald-100;

@@ -91,7 +91,7 @@ export function WeeklyReportExportButton({
         onClick={handleExport}
         disabled={isExporting}
         variant="success"
-        className="whitespace-nowrap min-w-[262px]"
+        className="gradient-border whitespace-nowrap min-w-[262px]"
       >
         {isExporting ? (
           <>
