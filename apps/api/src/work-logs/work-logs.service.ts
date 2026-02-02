@@ -48,19 +48,47 @@ export class WorkLogsService {
       throw new ForbiddenException('PM은 업무일지를 작성할 수 없습니다');
     }
 
-    // 4. 동일 날짜에 활성화된 일지가 있는지 확인
+    // 4. 동일 날짜에 일지가 있는지 확인 (soft delete 포함)
     const workDate = new Date(createWorkLogDto.workDate);
     const existingLog = await this.prisma.workLog.findFirst({
       where: {
         taskId,
         userId,
         workDate,
-        isActive: true,
       },
     });
 
     if (existingLog) {
-      throw new ConflictException('해당 날짜에 이미 업무일지가 존재합니다');
+      // 활성 상태인 일지가 있으면 에러
+      if (existingLog.isActive) {
+        throw new ConflictException('해당 날짜에 이미 업무일지가 존재합니다');
+      }
+
+      // soft delete된 일지가 있으면 재활성화
+      return await this.prisma.workLog.update({
+        where: { id: existingLog.id },
+        data: {
+          content: createWorkLogDto.content,
+          workHours: createWorkLogDto.workHours
+            ? new Decimal(createWorkLogDto.workHours)
+            : null,
+          progress: createWorkLogDto.progress,
+          issues: createWorkLogDto.issues,
+          isActive: true,
+        },
+        include: {
+          task: {
+            select: {
+              id: true,
+              taskName: true,
+              projectId: true,
+              status: true,
+              difficulty: true,
+            },
+          },
+          user: { select: { id: true, name: true, email: true } },
+        },
+      });
     }
 
     // 5. 업무일지 생성
@@ -327,7 +355,7 @@ export class WorkLogsService {
   }
 
   /**
-   * 업무일지 삭제 (hard delete)
+   * 업무일지 삭제 (soft delete)
    */
   async remove(id: bigint, userId: bigint) {
     const workLog = await this.findOne(id);
@@ -337,8 +365,9 @@ export class WorkLogsService {
       throw new ForbiddenException('본인이 작성한 일지만 삭제할 수 있습니다');
     }
 
-    await this.prisma.workLog.delete({
+    await this.prisma.workLog.update({
       where: { id },
+      data: { isActive: false },
     });
   }
 
