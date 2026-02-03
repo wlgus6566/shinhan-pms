@@ -16,9 +16,23 @@ export const tokenManager = {
     return null;
   },
 
+  setRefreshToken: (token: string) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('refreshToken', token);
+    }
+  },
+
+  getRefreshToken: (): string | null => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('refreshToken');
+    }
+    return null;
+  },
+
   clearTokens: () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
     }
   },
@@ -33,7 +47,22 @@ const apiClient = axios.create({
   },
 });
 
-let isHandlingAuthError = false;
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (value: any) => void;
+  reject: (reason: any) => void;
+}> = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
 
 // Request Interceptor
 apiClient.interceptors.request.use(
@@ -61,31 +90,84 @@ apiClient.interceptors.response.use(
     return apiResponse;
   },
   async (error: AxiosError<any>) => {
-    // 로그인 요청은 401 처리 건너뜀
-    const isLoginRequest = error.config?.url?.includes('/auth/login');
+    const originalRequest = error.config as any;
+
+    // 로그인/리프레시 요청은 401 처리 건너뜀
+    const isLoginRequest = originalRequest?.url?.includes('/api/auth/login');
+    const isRefreshRequest = originalRequest?.url?.includes('/api/auth/refresh');
 
     // 401 Unauthorized 처리
-    if (error.response?.status === 401 && !isLoginRequest) {
-      // 중복 처리 방지
-      if (isHandlingAuthError) {
+    if (error.response?.status === 401 && !isLoginRequest && !isRefreshRequest) {
+      if (isRefreshing) {
+        // 이미 갱신 중이면 큐에 추가
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers['Authorization'] = 'Bearer ' + token;
+            return apiClient(originalRequest);
+          })
+          .catch((err) => {
+            return Promise.reject(err);
+          });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      const refreshToken = tokenManager.getRefreshToken();
+
+      if (!refreshToken) {
+        // Refresh Token이 없으면 로그아웃
+        tokenManager.clearTokens();
+        if (typeof window !== 'undefined') {
+          window.location.href = '/';
+        }
         return Promise.reject(error.response?.data || error);
       }
-      isHandlingAuthError = true;
 
-      // 토큰 제거 및 로그아웃 처리
-      tokenManager.clearTokens();
+      try {
+        // Refresh Token으로 새 토큰 발급
+        console.log('[Token Refresh] Attempting to refresh access token...');
+        const response = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/refresh`,
+          { refreshToken }
+        );
 
-      // 로그인 페이지로 리다이렉트
-      if (typeof window !== 'undefined') {
-        window.location.href = '/';
+        console.log('[Token Refresh] Response:', response.data);
+
+        const { accessToken, refreshToken: newRefreshToken } = response.data.data || response.data;
+
+        if (!accessToken) {
+          throw new Error('No access token received from refresh endpoint');
+        }
+
+        // 새 토큰 저장
+        tokenManager.setAccessToken(accessToken);
+        if (newRefreshToken) {
+          tokenManager.setRefreshToken(newRefreshToken);
+        }
+
+        console.log('[Token Refresh] Success - tokens updated');
+
+        // 대기 중인 요청들 재시도
+        processQueue(null, accessToken);
+
+        // 원래 요청 재시도
+        originalRequest.headers['Authorization'] = 'Bearer ' + accessToken;
+        return apiClient(originalRequest);
+      } catch (refreshError: any) {
+        // Refresh Token도 만료됨 - 로그아웃
+        console.error('[Token Refresh] Failed:', refreshError.response?.data || refreshError.message);
+        processQueue(refreshError, null);
+        tokenManager.clearTokens();
+        if (typeof window !== 'undefined') {
+          window.location.href = '/';
+        }
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
-
-      // 플래그 리셋
-      setTimeout(() => {
-        isHandlingAuthError = false;
-      }, 1000);
-
-      return Promise.reject(error.response?.data || error);
     }
 
     // 403 Forbidden 처리

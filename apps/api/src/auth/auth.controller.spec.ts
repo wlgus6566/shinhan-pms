@@ -5,6 +5,7 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { UserResponseDto } from '../users/dto/user-response.dto';
 
 describe('AuthController', () => {
@@ -16,6 +17,8 @@ describe('AuthController', () => {
     getProfile: jest.fn(),
     updateProfile: jest.fn(),
     changePassword: jest.fn(),
+    refresh: jest.fn(),
+    logout: jest.fn(),
   };
 
   const mockUser: UserResponseDto = {
@@ -62,6 +65,7 @@ describe('AuthController', () => {
 
       const expectedResult = {
         accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.refresh...',
         user: mockUser,
       };
 
@@ -146,7 +150,7 @@ describe('AuthController', () => {
   describe('updateProfile', () => {
     it('should update user profile successfully', async () => {
       const updateDto: UpdateProfileDto = {
-        department: 'PLANNING',
+        department: 'PLANNING_1',
       };
 
       const updatedUser = { ...mockUser, ...updateDto };
@@ -161,7 +165,7 @@ describe('AuthController', () => {
 
     it('should update only provided fields', async () => {
       const updateDto: UpdateProfileDto = {
-        department: 'DESIGN',
+        department: 'PLANNING_1',
       };
 
       const updatedUser = { ...mockUser, department: 'DESIGN' };
@@ -264,6 +268,73 @@ describe('AuthController', () => {
     it('should NOT require authentication for login endpoint', async () => {
       const guards = Reflect.getMetadata('__guards__', controller.login);
       expect(guards).toBeUndefined();
+    });
+  });
+
+  describe('refresh', () => {
+    it('should return new access and refresh tokens', async () => {
+      const refreshTokenDto: RefreshTokenDto = {
+        refreshToken: 'valid_refresh_token',
+      };
+
+      const expectedResult = {
+        accessToken: 'new_access_token',
+        refreshToken: 'new_refresh_token',
+        user: mockUser,
+      };
+
+      const mockReq = {
+        user: {
+          userId: BigInt(1),
+          email: 'kim@emotion.co.kr',
+          version: 1,
+        },
+      };
+
+      mockAuthService.refresh.mockResolvedValue(expectedResult);
+
+      const result = await controller.refresh(mockReq as any, refreshTokenDto);
+
+      expect(result).toEqual(expectedResult);
+      expect(service.refresh).toHaveBeenCalledWith(
+        mockReq.user.userId,
+        mockReq.user,
+      );
+      expect(service.refresh).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw UnauthorizedException with invalid refresh token', async () => {
+      const refreshTokenDto: RefreshTokenDto = {
+        refreshToken: 'invalid_refresh_token',
+      };
+
+      const mockReq = {
+        user: {
+          userId: BigInt(1),
+          email: 'kim@emotion.co.kr',
+          version: 1,
+        },
+      };
+
+      mockAuthService.refresh.mockRejectedValue(
+        new UnauthorizedException('유효하지 않은 Refresh Token입니다'),
+      );
+
+      await expect(
+        controller.refresh(mockReq as any, refreshTokenDto),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+  });
+
+  describe('logout', () => {
+    it('should logout successfully', async () => {
+      mockAuthService.logout.mockResolvedValue(undefined);
+
+      const result = await controller.logout(mockUser);
+
+      expect(result).toEqual({ message: '로그아웃되었습니다' });
+      expect(service.logout).toHaveBeenCalledWith(BigInt(1));
+      expect(service.logout).toHaveBeenCalledTimes(1);
     });
   });
 });

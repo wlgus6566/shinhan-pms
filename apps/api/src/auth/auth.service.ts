@@ -4,6 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
@@ -16,11 +17,16 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private configService: ConfigService,
   ) {}
 
   async login(
     loginDto: LoginDto,
-  ): Promise<{ accessToken: string; user: UserResponseDto }> {
+  ): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    user: UserResponseDto;
+  }> {
     // 사용자 조회
     const user = await this.prisma.user.findUnique({
       where: { email: loginDto.email },
@@ -48,13 +54,33 @@ export class AuthService {
       );
     }
 
-    // 마지막 로그인 시간 업데이트
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { lastLoginAt: new Date() },
+    const newVersion = (user.refreshTokenVersion || 0) + 1;
+
+    // JWT Refresh Token 먼저 생성 (version 포함)
+    const refreshTokenPayload = {
+      sub: user.id.toString(),
+      email: user.email,
+      version: newVersion,
+    };
+    const refreshToken = this.jwtService.sign(refreshTokenPayload, {
+      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+      expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') as any,
     });
 
-    // JWT 토큰 생성
+    // JWT Refresh Token의 해시를 DB에 저장
+    const refreshTokenHash = await bcrypt.hash(refreshToken, 10);
+
+    // 마지막 로그인 시간 및 Refresh Token 업데이트
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        lastLoginAt: new Date(),
+        refreshTokenHash,
+        refreshTokenVersion: newVersion,
+      },
+    });
+
+    // JWT Access Token 생성
     const payload = {
       sub: user.id.toString(),
       email: user.email,
@@ -64,6 +90,7 @@ export class AuthService {
 
     return {
       accessToken,
+      refreshToken,
       user: new UserResponseDto(user),
     };
   }
@@ -147,5 +174,117 @@ export class AuthService {
     }
 
     return new UserResponseDto(user);
+  }
+
+  async refresh(
+    userId: bigint,
+    refreshTokenPayload: { sub: string; email: string; version: number },
+  ): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    user: UserResponseDto;
+  }> {
+    // 사용자 조회
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user || !user.refreshTokenHash) {
+      throw new UnauthorizedException('유효하지 않은 Refresh Token입니다');
+    }
+
+    // Token rotation 공격 감지 (version 불일치)
+    if (user.refreshTokenVersion !== refreshTokenPayload.version) {
+      // 모든 토큰 무효화
+      await this.revokeAllRefreshTokens(userId);
+      throw new UnauthorizedException(
+        'Token rotation 공격 감지. 모든 토큰이 무효화되었습니다',
+      );
+    }
+
+    const newVersion = user.refreshTokenVersion + 1;
+
+    // 새로운 Refresh Token JWT 먼저 생성
+    const newRefreshTokenPayload = {
+      sub: user.id.toString(),
+      email: user.email,
+      version: newVersion,
+    };
+    const refreshToken = this.jwtService.sign(newRefreshTokenPayload, {
+      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+      expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') as any,
+    });
+
+    // JWT Refresh Token의 해시를 DB에 저장
+    const newRefreshTokenHash = await bcrypt.hash(refreshToken, 10);
+
+    // Refresh Token 업데이트
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        refreshTokenHash: newRefreshTokenHash,
+        refreshTokenVersion: newVersion,
+        updatedBy: userId,
+      },
+    });
+
+    // 새로운 Access Token 생성
+    const accessTokenPayload = {
+      sub: user.id.toString(),
+      email: user.email,
+      role: user.role,
+    };
+    const accessToken = this.jwtService.sign(accessTokenPayload);
+
+    return {
+      accessToken,
+      refreshToken,
+      user: new UserResponseDto(user),
+    };
+  }
+
+  async validateRefreshToken(
+    userId: bigint,
+    refreshToken: string,
+    version: number,
+  ): Promise<boolean> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { refreshTokenHash: true, refreshTokenVersion: true },
+    });
+
+    if (!user || !user.refreshTokenHash) {
+      return false;
+    }
+
+    // Version 검증
+    if (user.refreshTokenVersion !== version) {
+      return false;
+    }
+
+    // Hash 검증
+    const isValid = await bcrypt.compare(refreshToken, user.refreshTokenHash);
+    return isValid;
+  }
+
+  async logout(userId: bigint): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        refreshTokenHash: null,
+        updatedBy: userId,
+      },
+    });
+  }
+
+  async revokeAllRefreshTokens(userId: bigint): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        refreshTokenHash: null,
+        refreshTokenVersion: 0,
+        updatedBy: userId,
+      },
+    });
   }
 }

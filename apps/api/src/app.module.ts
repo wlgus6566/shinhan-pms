@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 
 import { CommonModule } from './common/common.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -13,6 +14,22 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
-  imports: [CommonModule, PrismaModule, AuthModule, UsersModule, ProjectsModule, ProjectTaskTypesModule, TasksModule, WorkLogsModule, SchedulesModule, DashboardModule, AnalyticsModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
+    CommonModule,
+    PrismaModule,
+    AuthModule,
+    UsersModule,
+    ProjectsModule,
+    ProjectTaskTypesModule,
+    TasksModule,
+    WorkLogsModule,
+    SchedulesModule,
+    DashboardModule,
+    AnalyticsModule,
+  ],
 })
 export class AppModule {}

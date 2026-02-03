@@ -54,6 +54,8 @@ model User {
   position               String                @default("TEAM_MEMBER") @db.VarChar(30)
   grade                  String                @default("BEGINNER") @db.VarChar(20)
   requirePasswordChange  Boolean               @default(false) @map("require_password_change")
+  refreshTokenHash       String?               @map("refresh_token_hash") @db.VarChar(255)
+  refreshTokenVersion    Int                   @default(0) @map("refresh_token_version")
   projectMemberships     ProjectMember[]
   scheduleParticipations ScheduleParticipant[]
   createdSchedules       Schedule[]            @relation("ScheduleCreator")
@@ -69,6 +71,7 @@ model User {
   @@index([isActive], map: "idx_users_is_active")
   @@index([department, isActive], map: "idx_users_department_active")
   @@index([role, isActive], map: "idx_users_role_active")
+  @@index([refreshTokenVersion], map: "idx_users_refresh_token_version")
   @@map("users")
 }
 

@@ -13,9 +13,11 @@ import {
 const pathMap: Record<string, string> = {
   dashboard: '대시보드',
   projects: '프로젝트 관리',
+  tasks: '업무 관리',
   'work-logs': '업무일지',
   schedule: '일정 관리',
   users: '멤버 관리',
+  analytics: '프로젝트 리포트',
   new: '새 프로젝트',
   edit: '수정',
 };

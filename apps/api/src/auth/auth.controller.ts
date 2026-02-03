@@ -7,6 +7,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Request,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -19,8 +20,10 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { UserResponseDto } from '../users/dto/user-response.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 
 @ApiTags('인증')
@@ -120,5 +123,52 @@ export class AuthController {
     @Body() changePasswordDto: ChangePasswordDto,
   ): Promise<void> {
     return this.authService.changePassword(BigInt(user.id), changePasswordDto);
+  }
+
+  @Post('refresh')
+  @UseGuards(JwtRefreshGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Access Token 갱신' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        refreshToken: {
+          type: 'string',
+          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: '토큰 갱신 성공',
+    schema: {
+      type: 'object',
+      properties: {
+        accessToken: { type: 'string' },
+        refreshToken: { type: 'string' },
+        user: { type: 'object' },
+      },
+    },
+  })
+  @ApiResponse({ status: 401, description: '유효하지 않은 Refresh Token' })
+  async refresh(
+    @Request() req: any,
+    @Body() refreshTokenDto: RefreshTokenDto,
+  ) {
+    return this.authService.refresh(req.user.userId, req.user);
+  }
+
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '로그아웃' })
+  @ApiResponse({ status: 200, description: '로그아웃 성공' })
+  @ApiResponse({ status: 401, description: '인증 필요' })
+  async logout(@CurrentUser() user: UserResponseDto) {
+    await this.authService.logout(BigInt(user.id));
+    return { message: '로그아웃되었습니다' };
   }
 }

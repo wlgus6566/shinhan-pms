@@ -60,7 +60,7 @@ export default function LoginPage() {
                 로그인
               </h2>
               <CardDescription className="text-slate-500 text-center">
-                계정에 로그인하여 대시보드에 접속하세요
+                로그인하여 프로젝트 및 업무 관리를 시작하세요
               </CardDescription>
             </CardHeader>
             <CardContent className="px-8 pb-8 pt-4">

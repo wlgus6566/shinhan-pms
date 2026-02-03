@@ -28,12 +28,15 @@ describe('UsersController', () => {
     name: '슈퍼관리자',
     email: 'admin@emotion.co.kr',
     role: 'SUPER_ADMIN',
-    department: '경영지원팀',
-    position: '부장',
+    department: 'PLANNING_STRATEGY',
+    position: 'GENERAL_MANAGER',
     grade: 'EXPERT',
     isActive: true,
     createdAt: '2024-01-01T00:00:00.000Z',
     updatedAt: '2024-01-01T00:00:00.000Z',
+    requirePasswordChange: false,
+    passwordHash: 'password123',
+    createdBy: BigInt(1),
   };
 
   const mockPM: UserResponseDto = {
@@ -41,12 +44,15 @@ describe('UsersController', () => {
     name: 'PM 사용자',
     email: 'pm@emotion.co.kr',
     role: 'PM',
-    department: '개발팀',
-    position: '과장',
+    department: 'PLANNING_1',
+    position: 'PRINCIPAL_LEADER',
     grade: 'ADVANCED',
     isActive: true,
     createdAt: '2024-01-01T00:00:00.000Z',
     updatedAt: '2024-01-01T00:00:00.000Z',
+    requirePasswordChange: false,
+    passwordHash: 'password123',
+    createdBy: BigInt(1),
   };
 
   const mockUser: UserResponseDto = {
@@ -54,12 +60,15 @@ describe('UsersController', () => {
     name: '일반 사용자',
     email: 'user@emotion.co.kr',
     role: 'MEMBER',
-    department: '개발팀',
-    position: '사원',
+    department: 'DEVELOPMENT_1',
+    position: 'TEAM_MEMBER',
     grade: 'INTERMEDIATE',
     isActive: true,
     createdAt: '2024-01-01T00:00:00.000Z',
     updatedAt: '2024-01-01T00:00:00.000Z',
+    requirePasswordChange: false,
+    passwordHash: 'password123',
+    createdBy: BigInt(1),
   };
 
   beforeEach(async () => {
@@ -85,9 +94,8 @@ describe('UsersController', () => {
     const createUserDto: CreateUserDto = {
       name: '신규 사용자',
       email: 'new@emotion.co.kr',
-      password: 'Password123!',
-      department: '개발팀',
-      position: '사원',
+      department: 'DEVELOPMENT_1',
+      position: 'TEAM_MEMBER',
       role: 'MEMBER',
       grade: 'BEGINNER',
     };
@@ -305,8 +313,8 @@ describe('UsersController', () => {
 
   describe('update', () => {
     const updateUserDto: UpdateUserDto = {
-      department: '디자인팀',
-      position: '대리',
+      department: 'PLANNING_1',
+      position: 'LEADER',
     };
 
     it('should update user as SUPER_ADMIN', async () => {

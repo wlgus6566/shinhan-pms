@@ -1,5 +1,5 @@
 import { fetcher, tokenManager } from './fetcher';
-import type { User, ChangePasswordInput } from '@repo/schema';
+import type { User, ChangePasswordRequest } from '@repo/schema';
 
 export interface LoginRequest {
   email: string;
@@ -8,6 +8,7 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   accessToken: string;
+  refreshToken: string;
   user: User;
 }
 
@@ -19,6 +20,7 @@ export async function login(data: LoginRequest): Promise<LoginResponse> {
 
   if (result.accessToken) {
     tokenManager.setAccessToken(result.accessToken);
+    tokenManager.setRefreshToken(result.refreshToken);
     localStorage.setItem('user', JSON.stringify(result.user));
   }
 
@@ -26,8 +28,17 @@ export async function login(data: LoginRequest): Promise<LoginResponse> {
 }
 
 export async function logout(): Promise<void> {
-  tokenManager.clearTokens();
-  // Optional: call logout API if exists
+  try {
+    // Call logout API to invalidate refresh token
+    await fetcher('/api/auth/logout', {
+      method: 'POST',
+    });
+  } catch (error) {
+    // Ignore errors - clear tokens anyway
+    console.error('Logout API error:', error);
+  } finally {
+    tokenManager.clearTokens();
+  }
 }
 
 export async function getMe() {
@@ -41,7 +52,7 @@ export async function updateMe(data: any) {
   });
 }
 
-export async function changePassword(data: ChangePasswordInput) {
+export async function changePassword(data: ChangePasswordRequest) {
   return fetcher('/api/auth/me/password', {
     method: 'PATCH',
     body: data,
