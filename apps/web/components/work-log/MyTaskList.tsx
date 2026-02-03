@@ -35,7 +35,7 @@ export function MyTaskList({ tasks }: MyTaskListProps) {
         </p>
       </div>
 
-      <div className="max-h-[500px] overflow-y-auto">
+      <div className="max-h-[412px] overflow-y-auto">
         {tasks.map((task) => {
           return (
             <div

@@ -8,6 +8,7 @@ import {
   HttpCode,
   HttpStatus,
   Request,
+  Res,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -16,6 +17,8 @@ import {
   ApiBearerAuth,
   ApiBody,
 } from '@nestjs/swagger';
+import { Response } from 'express';
+import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
@@ -29,7 +32,10 @@ import { CurrentUser } from './decorators/current-user.decorator';
 @ApiTags('인증')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
@@ -51,7 +57,7 @@ export class AuthController {
   })
   @ApiResponse({
     status: 200,
-    description: '로그인 성공',
+    description: '로그인 성공 (Refresh Token은 HttpOnly 쿠키로 설정됨)',
     schema: {
       type: 'object',
       properties: {
@@ -81,8 +87,26 @@ export class AuthController {
     },
   })
   @ApiResponse({ status: 401, description: '인증 실패' })
-  async login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+  async login(
+    @Body() loginDto: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.authService.login(loginDto);
+
+    // Set refresh token as HttpOnly cookie
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: this.configService.get<string>('COOKIE_SECURE') === 'true',
+      sameSite: 'strict',
+      path: '/api/auth/refresh',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    // Return only accessToken and user (NO refreshToken in body)
+    return {
+      accessToken: result.accessToken,
+      user: result.user,
+    };
   }
 
   @Get('me')
@@ -132,12 +156,7 @@ export class AuthController {
   @ApiBody({
     schema: {
       type: 'object',
-      properties: {
-        refreshToken: {
-          type: 'string',
-          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-        },
-      },
+      properties: {},
     },
   })
   @ApiResponse({
@@ -147,7 +166,6 @@ export class AuthController {
       type: 'object',
       properties: {
         accessToken: { type: 'string' },
-        refreshToken: { type: 'string' },
         user: { type: 'object' },
       },
     },
@@ -155,9 +173,23 @@ export class AuthController {
   @ApiResponse({ status: 401, description: '유효하지 않은 Refresh Token' })
   async refresh(
     @Request() req: any,
-    @Body() refreshTokenDto: RefreshTokenDto,
+    @Res({ passthrough: true }) res: Response,
   ) {
-    return this.authService.refresh(req.user.userId, req.user);
+    const result = await this.authService.refresh(req.user.userId, req.user);
+
+    // Set new refresh token as HttpOnly cookie
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: this.configService.get<string>('COOKIE_SECURE') === 'true',
+      sameSite: 'strict',
+      path: '/api/auth/refresh',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return {
+      accessToken: result.accessToken,
+      user: result.user,
+    };
   }
 
   @Post('logout')
@@ -167,8 +199,17 @@ export class AuthController {
   @ApiOperation({ summary: '로그아웃' })
   @ApiResponse({ status: 200, description: '로그아웃 성공' })
   @ApiResponse({ status: 401, description: '인증 필요' })
-  async logout(@CurrentUser() user: UserResponseDto) {
+  async logout(
+    @CurrentUser() user: UserResponseDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     await this.authService.logout(BigInt(user.id));
+
+    // Clear refresh token cookie
+    res.clearCookie('refreshToken', {
+      path: '/api/auth/refresh',
+    });
+
     return { message: '로그아웃되었습니다' };
   }
 }

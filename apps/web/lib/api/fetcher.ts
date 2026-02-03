@@ -16,23 +16,9 @@ export const tokenManager = {
     return null;
   },
 
-  setRefreshToken: (token: string) => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('refreshToken', token);
-    }
-  },
-
-  getRefreshToken: (): string | null => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('refreshToken');
-    }
-    return null;
-  },
-
   clearTokens: () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
     }
   },
@@ -45,6 +31,7 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // Enable sending cookies
 });
 
 let isRefreshing = false;
@@ -115,40 +102,27 @@ apiClient.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
 
-      const refreshToken = tokenManager.getRefreshToken();
-
-      if (!refreshToken) {
-        // Refresh Token이 없으면 로그아웃
-        tokenManager.clearTokens();
-        if (typeof window !== 'undefined') {
-          window.location.href = '/';
-        }
-        return Promise.reject(error.response?.data || error);
-      }
-
       try {
-        // Refresh Token으로 새 토큰 발급
+        // Refresh Token으로 새 토큰 발급 (cookie에서 자동으로 전송됨)
         console.log('[Token Refresh] Attempting to refresh access token...');
         const response = await axios.post(
           `${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/refresh`,
-          { refreshToken }
+          {}, // Empty body
+          { withCredentials: true } // Send cookies
         );
 
         console.log('[Token Refresh] Response:', response.data);
 
-        const { accessToken, refreshToken: newRefreshToken } = response.data.data || response.data;
+        const { accessToken } = response.data.data || response.data;
 
         if (!accessToken) {
           throw new Error('No access token received from refresh endpoint');
         }
 
-        // 새 토큰 저장
+        // 새 access token 저장 (refresh token은 쿠키로 자동 관리됨)
         tokenManager.setAccessToken(accessToken);
-        if (newRefreshToken) {
-          tokenManager.setRefreshToken(newRefreshToken);
-        }
 
-        console.log('[Token Refresh] Success - tokens updated');
+        console.log('[Token Refresh] Success - token updated');
 
         // 대기 중인 요청들 재시도
         processQueue(null, accessToken);

@@ -2,6 +2,7 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { ClassSerializerInterceptor } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ZodValidationPipe, patchNestJsSwagger } from 'nestjs-zod';
+import * as cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
 
@@ -16,14 +17,20 @@ async function bootstrap() {
     return this.toString();
   };
 
+  // Cookie Parser (MUST be before other middleware)
+  app.use(cookieParser.default());
+
   // 전역 API 접두사 설정
   app.setGlobalPrefix('api');
 
   // 전역 Interceptor 설정 (Exclude 등 반영)
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
-  // CORS 설정
-  app.enableCors();
+  // CORS 설정 - credentials 지원
+  app.enableCors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:3001',
+    credentials: true, // HttpOnly 쿠키 전송 허용
+  });
 
   // 전역 Validation 설정 (Zod만 사용)
   // ZodValidationPipe만 사용하여 Zod 스키마로 검증

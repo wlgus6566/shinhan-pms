@@ -8,7 +8,6 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   accessToken: string;
-  refreshToken: string;
   user: User;
 }
 
@@ -20,7 +19,6 @@ export async function login(data: LoginRequest): Promise<LoginResponse> {
 
   if (result.accessToken) {
     tokenManager.setAccessToken(result.accessToken);
-    tokenManager.setRefreshToken(result.refreshToken);
     localStorage.setItem('user', JSON.stringify(result.user));
   }
 
