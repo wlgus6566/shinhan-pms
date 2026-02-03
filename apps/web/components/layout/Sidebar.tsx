@@ -71,14 +71,14 @@ export function Sidebar({
       <div
         className={cn(
           'h-16 flex items-center border-b border-white/5',
-          sidebarOpen ? 'justify-center px-0' : 'px-5',
+          sidebarOpen ? 'justify-start px-6' : 'justify-center px-0',
         )}
       >
         <Link
           href="/dashboard"
           className="flex items-center gap-3 overflow-hidden"
         >
-          <div className="w-9 h-9 gradient-primary rounded-xl flex-shrink-0 flex items-center justify-center shadow-lg shadow-blue-500/25">
+          <div className="w-8 h-8 gradient-primary rounded-xl flex-shrink-0 flex items-center justify-center shadow-lg shadow-blue-500/25">
             <span className="text-white font-bold text-base">E</span>
           </div>
           {sidebarOpen && (

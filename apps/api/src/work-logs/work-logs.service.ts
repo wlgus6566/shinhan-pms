@@ -48,13 +48,16 @@ export class WorkLogsService {
       throw new ForbiddenException('PM은 업무일지를 작성할 수 없습니다');
     }
 
-    // 4. 미래 날짜 검증
-    const workDate = new Date(createWorkLogDto.workDate);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    workDate.setHours(0, 0, 0, 0);
+    // 4. 미래 날짜 검증 (UTC 기준으로 날짜 처리하여 타임존 문제 방지)
+    const workDateStr = createWorkLogDto.workDate; // "YYYY-MM-DD" 형식
+    const [year, month, day] = workDateStr.split('-').map(Number);
+    const workDate = new Date(Date.UTC(year, month - 1, day));
 
-    if (workDate > today) {
+    // 오늘 날짜도 UTC 기준으로 계산
+    const now = new Date();
+    const todayUTC = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+
+    if (workDate > todayUTC) {
       throw new BadRequestException('미래 날짜의 업무일지는 작성할 수 없습니다');
     }
 
@@ -314,14 +317,16 @@ export class WorkLogsService {
       throw new ForbiddenException('본인이 작성한 일지만 수정할 수 있습니다');
     }
 
-    // 날짜 변경 시 중복 체크
+    // 날짜 변경 시 중복 체크 (UTC 기준으로 날짜 처리)
+    let newWorkDate: Date | undefined;
     if (updateWorkLogDto.workDate) {
-      const newDate = new Date(updateWorkLogDto.workDate);
+      const [year, month, day] = updateWorkLogDto.workDate.split('-').map(Number);
+      newWorkDate = new Date(Date.UTC(year, month - 1, day));
       const existingLog = await this.prisma.workLog.findFirst({
         where: {
           taskId: workLog.taskId,
           userId,
-          workDate: newDate,
+          workDate: newWorkDate,
           isActive: true,
           id: { not: id },
         },
@@ -335,9 +340,7 @@ export class WorkLogsService {
     return await this.prisma.workLog.update({
       where: { id },
       data: {
-        workDate: updateWorkLogDto.workDate
-          ? new Date(updateWorkLogDto.workDate)
-          : undefined,
+        workDate: newWorkDate,
         content: updateWorkLogDto.content,
         workHours:
           updateWorkLogDto.workHours !== undefined
