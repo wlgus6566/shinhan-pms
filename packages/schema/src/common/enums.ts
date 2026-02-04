@@ -303,3 +303,25 @@ export const RECURRENCE_TYPE_LABELS = {
 export const RECURRENCE_TYPE_OPTIONS = Object.entries(
   RECURRENCE_TYPE_LABELS,
 ).map(([value, label]) => ({ value, label }));
+
+// Day of Week Enum (for weekly recurrence)
+export const DayOfWeekEnum = z.enum(['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'], {
+  errorMap: () => ({
+    message: '요일은 SUN, MON, TUE, WED, THU, FRI, SAT 중 하나여야 합니다',
+  }),
+});
+
+export type DayOfWeek = z.infer<typeof DayOfWeekEnum>;
+
+// Day of Week UI Metadata
+export const DAY_OF_WEEK_LABELS = {
+  SUN: '일',
+  MON: '월',
+  TUE: '화',
+  WED: '수',
+  THU: '목',
+  FRI: '금',
+  SAT: '토',
+} as const satisfies Record<DayOfWeek, string>;
+
+export const DAY_OF_WEEK_ORDER: DayOfWeek[] = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];

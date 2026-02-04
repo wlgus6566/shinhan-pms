@@ -51,6 +51,7 @@ export interface Schedule {
   isRecurring?: boolean;
   recurrenceType?: string;
   recurrenceEndDate?: string;
+  recurrenceDaysOfWeek?: string[];
   originalScheduleId?: string;
   instanceDate?: string;
 }
@@ -76,6 +77,7 @@ export const ScheduleSchema = z
     isRecurring: z.boolean().optional(),
     recurrenceType: z.string().optional(),
     recurrenceEndDate: z.string().optional(),
+    recurrenceDaysOfWeek: z.array(z.string()).optional(),
     originalScheduleId: z.string().optional(),
     instanceDate: z.string().optional(),
   })

@@ -5,3 +5,5 @@ export { default as FormCheckbox } from "./FormCheckbox";
 export { default as FormCheckboxGroup } from "./FormCheckboxGroup";
 export { default as FormRadioGroup } from "./FormRadioGroup";
 export { default as FormSwitch } from "./FormSwitch";
+export { default as FormDateTimePicker } from "./FormDateTimePicker";
+export { default as FormDaysOfWeekPicker } from "./FormDaysOfWeekPicker";

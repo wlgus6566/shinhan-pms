@@ -5,7 +5,6 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
-import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { UserResponseDto } from '../users/dto/user-response.dto';
 
 describe('AuthController', () => {
@@ -69,13 +68,28 @@ describe('AuthController', () => {
         user: mockUser,
       };
 
+      const mockRes = {
+        cookie: jest.fn(),
+      } as any;
+
       mockAuthService.login.mockResolvedValue(expectedResult);
 
-      const result = await controller.login(loginDto);
+      const result = await controller.login(loginDto, mockRes);
 
-      expect(result).toEqual(expectedResult);
+      expect(result).toEqual({
+        accessToken: expectedResult.accessToken,
+        user: mockUser,
+      });
       expect(service.login).toHaveBeenCalledWith(loginDto);
       expect(service.login).toHaveBeenCalledTimes(1);
+      expect(mockRes.cookie).toHaveBeenCalledWith(
+        'refreshToken',
+        expectedResult.refreshToken,
+        expect.objectContaining({
+          httpOnly: true,
+          path: '/api/auth/refresh',
+        }),
+      );
     });
 
     it('should throw UnauthorizedException on invalid password', async () => {
@@ -84,11 +98,15 @@ describe('AuthController', () => {
         password: 'wrongpassword',
       };
 
+      const mockRes = {
+        cookie: jest.fn(),
+      } as any;
+
       mockAuthService.login.mockRejectedValue(
         new UnauthorizedException('이메일 또는 비밀번호가 일치하지 않습니다'),
       );
 
-      await expect(controller.login(loginDto)).rejects.toThrow(
+      await expect(controller.login(loginDto, mockRes)).rejects.toThrow(
         UnauthorizedException,
       );
       expect(service.login).toHaveBeenCalledWith(loginDto);
@@ -100,11 +118,15 @@ describe('AuthController', () => {
         password: 'Password123!',
       };
 
+      const mockRes = {
+        cookie: jest.fn(),
+      } as any;
+
       mockAuthService.login.mockRejectedValue(
         new UnauthorizedException('이메일 또는 비밀번호가 일치하지 않습니다'),
       );
 
-      await expect(controller.login(loginDto)).rejects.toThrow(
+      await expect(controller.login(loginDto, mockRes)).rejects.toThrow(
         UnauthorizedException,
       );
     });
@@ -115,11 +137,15 @@ describe('AuthController', () => {
         password: 'Password123!',
       };
 
+      const mockRes = {
+        cookie: jest.fn(),
+      } as any;
+
       mockAuthService.login.mockRejectedValue(
         new UnauthorizedException('비활성화된 계정입니다'),
       );
 
-      await expect(controller.login(loginDto)).rejects.toThrow(
+      await expect(controller.login(loginDto, mockRes)).rejects.toThrow(
         UnauthorizedException,
       );
     });
@@ -273,10 +299,6 @@ describe('AuthController', () => {
 
   describe('refresh', () => {
     it('should return new access and refresh tokens', async () => {
-      const refreshTokenDto: RefreshTokenDto = {
-        refreshToken: 'valid_refresh_token',
-      };
-
       const expectedResult = {
         accessToken: 'new_access_token',
         refreshToken: 'new_refresh_token',
@@ -291,23 +313,34 @@ describe('AuthController', () => {
         },
       };
 
+      const mockRes = {
+        cookie: jest.fn(),
+      } as any;
+
       mockAuthService.refresh.mockResolvedValue(expectedResult);
 
-      const result = await controller.refresh(mockReq as any, refreshTokenDto);
+      const result = await controller.refresh(mockReq as any, mockRes);
 
-      expect(result).toEqual(expectedResult);
+      expect(result).toEqual({
+        accessToken: expectedResult.accessToken,
+        user: mockUser,
+      });
       expect(service.refresh).toHaveBeenCalledWith(
         mockReq.user.userId,
         mockReq.user,
       );
       expect(service.refresh).toHaveBeenCalledTimes(1);
+      expect(mockRes.cookie).toHaveBeenCalledWith(
+        'refreshToken',
+        expectedResult.refreshToken,
+        expect.objectContaining({
+          httpOnly: true,
+          path: '/api/auth/refresh',
+        }),
+      );
     });
 
     it('should throw UnauthorizedException with invalid refresh token', async () => {
-      const refreshTokenDto: RefreshTokenDto = {
-        refreshToken: 'invalid_refresh_token',
-      };
-
       const mockReq = {
         user: {
           userId: BigInt(1),
@@ -316,25 +349,39 @@ describe('AuthController', () => {
         },
       };
 
+      const mockRes = {
+        cookie: jest.fn(),
+      } as any;
+
       mockAuthService.refresh.mockRejectedValue(
         new UnauthorizedException('유효하지 않은 Refresh Token입니다'),
       );
 
       await expect(
-        controller.refresh(mockReq as any, refreshTokenDto),
+        controller.refresh(mockReq as any, mockRes),
       ).rejects.toThrow(UnauthorizedException);
     });
   });
 
   describe('logout', () => {
     it('should logout successfully', async () => {
+      const mockRes = {
+        clearCookie: jest.fn(),
+      } as any;
+
       mockAuthService.logout.mockResolvedValue(undefined);
 
-      const result = await controller.logout(mockUser);
+      const result = await controller.logout(mockUser, mockRes);
 
       expect(result).toEqual({ message: '로그아웃되었습니다' });
       expect(service.logout).toHaveBeenCalledWith(BigInt(1));
       expect(service.logout).toHaveBeenCalledTimes(1);
+      expect(mockRes.clearCookie).toHaveBeenCalledWith(
+        'refreshToken',
+        expect.objectContaining({
+          path: '/api/auth/refresh',
+        }),
+      );
     });
   });
 });

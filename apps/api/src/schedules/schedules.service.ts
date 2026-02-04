@@ -59,6 +59,9 @@ export class SchedulesService {
       if (!scheduleData.recurrenceEndDate) {
         throw new BadRequestException('반복 종료일을 선택해주세요');
       }
+      if (scheduleData.recurrenceType === 'WEEKLY' && (!scheduleData.recurrenceDaysOfWeek || scheduleData.recurrenceDaysOfWeek.length === 0)) {
+        throw new BadRequestException('반복할 요일을 최소 1개 이상 선택해주세요');
+      }
       const recurrenceEnd = new Date(scheduleData.recurrenceEndDate);
       if (recurrenceEnd < startDate) {
         throw new BadRequestException('반복 종료일은 시작 날짜보다 이후여야 합니다');
@@ -83,6 +86,7 @@ export class SchedulesService {
         isRecurring: scheduleData.isRecurring ?? false,
         recurrenceType: scheduleData.recurrenceType,
         recurrenceEndDate: scheduleData.recurrenceEndDate ? new Date(scheduleData.recurrenceEndDate) : null,
+        recurrenceDaysOfWeek: scheduleData.recurrenceDaysOfWeek ? JSON.stringify(scheduleData.recurrenceDaysOfWeek) : null,
         createdBy: userId,
       },
       include: {
@@ -111,7 +115,18 @@ export class SchedulesService {
       );
 
       // 참가자 정보를 포함하여 다시 조회
-      return this.findOne(schedule.id);
+      return this.formatScheduleResponse(await this.prisma.schedule.findUnique({
+        where: { id: schedule.id },
+        include: {
+          project: { select: { id: true, projectName: true } },
+          creator: { select: { id: true, name: true, email: true } },
+          participants: {
+            include: {
+              user: { select: { id: true, name: true, email: true } },
+            },
+          },
+        },
+      }));
     }
 
     return schedule;
@@ -314,7 +329,19 @@ export class SchedulesService {
       throw new NotFoundException('일정을 찾을 수 없습니다');
     }
 
-    return schedule;
+    return this.formatScheduleResponse(schedule);
+  }
+
+  /**
+   * Schedule 응답 형식 변환 (JSON 문자열을 배열로 변환)
+   */
+  private formatScheduleResponse(schedule: any) {
+    return {
+      ...schedule,
+      recurrenceDaysOfWeek: schedule.recurrenceDaysOfWeek
+        ? JSON.parse(schedule.recurrenceDaysOfWeek)
+        : null,
+    };
   }
 
   /**
@@ -382,8 +409,9 @@ export class SchedulesService {
     if (scheduleData.isRecurring !== undefined) updateData.isRecurring = scheduleData.isRecurring;
     if (scheduleData.recurrenceType !== undefined) updateData.recurrenceType = scheduleData.recurrenceType;
     if (scheduleData.recurrenceEndDate !== undefined) updateData.recurrenceEndDate = scheduleData.recurrenceEndDate ? new Date(scheduleData.recurrenceEndDate) : null;
+    if (scheduleData.recurrenceDaysOfWeek !== undefined) updateData.recurrenceDaysOfWeek = scheduleData.recurrenceDaysOfWeek ? JSON.stringify(scheduleData.recurrenceDaysOfWeek) : null;
 
-    return await this.prisma.schedule.update({
+    const updatedSchedule = await this.prisma.schedule.update({
       where: { id },
       data: updateData,
       include: {
@@ -396,6 +424,8 @@ export class SchedulesService {
         },
       },
     });
+
+    return this.formatScheduleResponse(updatedSchedule);
   }
 
   /**

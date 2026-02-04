@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ScheduleTypeEnum, TeamScopeEnum, HalfDayTypeEnum, RecurrenceTypeEnum } from '../common/enums';
+import { ScheduleTypeEnum, TeamScopeEnum, HalfDayTypeEnum, RecurrenceTypeEnum, DayOfWeekEnum } from '../common/enums';
 
 export const CreateScheduleSchema = z
   .object({
@@ -26,6 +26,7 @@ export const CreateScheduleSchema = z
     isRecurring: z.boolean().default(false).optional(),
     recurrenceType: RecurrenceTypeEnum.optional(),
     recurrenceEndDate: z.string().optional(),
+    recurrenceDaysOfWeek: z.array(DayOfWeekEnum).optional(),
   })
   // 조건부 검증 1: 연차/반차가 아닌 경우 startDate, endDate 필수
   .refine(
@@ -161,6 +162,19 @@ export const CreateScheduleSchema = z
     {
       message: '반복 종료일은 시작 날짜보다 이후여야 합니다',
       path: ['recurrenceEndDate'],
+    }
+  )
+  // 조건부 검증 11: 매주 반복인 경우 요일 선택 필수
+  .refine(
+    (data) => {
+      if (data.recurrenceType === 'WEEKLY') {
+        return data.recurrenceDaysOfWeek !== undefined && data.recurrenceDaysOfWeek.length > 0;
+      }
+      return true;
+    },
+    {
+      message: '반복할 요일을 최소 1개 이상 선택해주세요',
+      path: ['recurrenceDaysOfWeek'],
     }
   );
 
