@@ -40,7 +40,7 @@ export default function NewProjectPage() {
   }
 
   return (
-    <div className="max-w-7xl">
+    <div className="max-w-7xl page-animate">
       <div className="mb-6">
         <Button variant="ghost" size="sm" asChild>
           <Link href="/projects">

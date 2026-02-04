@@ -21,7 +21,7 @@ export default function UserEditPage() {
   const canEdit = user?.role === 'SUPER_ADMIN';
 
   return (
-    <div className="max-w-4xl">
+    <div className="max-w-4xl page-animate">
       <Button
         variant="ghost"
         className="mb-6 -ml-2 text-slate-500 hover:text-blue-600"

@@ -32,7 +32,7 @@ export default function UserCreatePage() {
   }
 
   return (
-    <div className="max-w-7xl">
+    <div className="max-w-7xl page-animate">
       <Button
         variant="ghost"
         className="mb-6 -ml-2 text-slate-500 hover:text-blue-600"

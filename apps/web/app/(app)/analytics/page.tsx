@@ -74,7 +74,7 @@ export default function AnalyticsPage() {
 
   if (!projects || projects.length === 0) {
     return (
-      <div className="max-w-[1920px] p-6">
+      <div className="max-w-[1920px]">
         <div className="flex items-center justify-center min-h-[400px]">
           <p className="text-muted-foreground">프로젝트가 없습니다</p>
         </div>
@@ -83,8 +83,8 @@ export default function AnalyticsPage() {
   }
 
   return (
-    <div className="max-w-[1920px] p-6 pt-0 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="max-w-[1920px] space-y-6 page-animate">
+      <div className="flex items-start justify-between">
         <h1 className="text-3xl font-bold">프로젝트 리포트</h1>
         <MonthPicker value={selectedMonth} onChange={setSelectedMonth} />
       </div>

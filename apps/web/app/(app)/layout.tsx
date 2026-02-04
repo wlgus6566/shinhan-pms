@@ -47,7 +47,9 @@ export default function DashboardLayout({
         <Header />
 
         {/* 페이지 콘텐츠 */}
-        <main className=" p-8">{children}</main>
+        <main className="p-8" style={{ viewTransitionName: 'page-content' }}>
+          {children}
+        </main>
       </div>
 
       {/* Toast 알림 */}

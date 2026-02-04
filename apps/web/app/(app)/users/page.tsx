@@ -12,7 +12,7 @@ export default function UsersAdminPage() {
   const canCreateUser = user?.role === 'SUPER_ADMIN';
 
   return (
-    <div className="">
+    <div className="page-animate">
       <div className="mb-8 flex justify-between items-start">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">

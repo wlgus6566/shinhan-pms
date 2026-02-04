@@ -13,8 +13,6 @@ import {
 import {
   FolderKanban,
   ClipboardList,
-  TrendingUp,
-  TrendingDown,
   ArrowRight,
   Calendar,
   CheckCircle2,
@@ -37,11 +35,31 @@ import {
 
 // Hoist static data outside component (rendering-hoist-jsx)
 const colorClassesMap = {
-  blue: 'from-blue-500 to-blue-600 shadow-blue-500/25',
-  emerald: 'from-emerald-500 to-emerald-600 shadow-emerald-500/25',
-  amber: 'from-amber-500 to-amber-600 shadow-amber-500/25',
-  rose: 'from-rose-500 to-rose-600 shadow-rose-500/25',
-  sky: 'from-sky-500 to-sky-600 shadow-sky-500/25',
+  blue: {
+    bar: 'from-blue-400 via-blue-500 to-cyan-400',
+    iconBg: 'bg-blue-50',
+    iconText: 'text-blue-500',
+  },
+  emerald: {
+    bar: 'from-emerald-400 via-emerald-500 to-teal-400',
+    iconBg: 'bg-emerald-50',
+    iconText: 'text-emerald-500',
+  },
+  amber: {
+    bar: 'from-amber-400 via-amber-500 to-orange-400',
+    iconBg: 'bg-amber-50',
+    iconText: 'text-amber-500',
+  },
+  rose: {
+    bar: 'from-rose-400 via-rose-500 to-pink-400',
+    iconBg: 'bg-rose-50',
+    iconText: 'text-rose-500',
+  },
+  sky: {
+    bar: 'from-sky-400 via-sky-500 to-cyan-400',
+    iconBg: 'bg-sky-50',
+    iconText: 'text-sky-500',
+  },
 } as const;
 
 const actionColorClasses = {
@@ -71,56 +89,44 @@ const actionColorClasses = {
 const StatsCard = memo(function StatsCard({
   label,
   value,
-  trend,
-  trendValue,
   icon: Icon,
   color = 'blue',
   isLoading,
 }: {
   label: string;
   value: string | number;
-  trend?: 'up' | 'down';
-  trendValue?: string;
   icon: React.ElementType;
   color?: 'blue' | 'emerald' | 'amber' | 'rose' | 'sky';
   isLoading?: boolean;
 }) {
+  const colorClass = colorClassesMap[color];
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 p-5 hover:shadow-md transition-all duration-200">
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-            {label}
-          </p>
-          {isLoading ? (
-            <div className="mt-1">
+    <div className="relative bg-white rounded-2xl border border-slate-100 overflow-hidden hover:shadow-lg transition-all duration-200">
+      {/* Left gradient bar */}
+      <div
+        className={`absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b ${colorClass.bar}`}
+      />
+      <div className="pl-5 pr-4 py-4">
+        <div className="flex items-center gap-3">
+          {/* Icon in circle */}
+          <div
+            className={`w-10 h-10 rounded-full ${colorClass.iconBg} flex items-center justify-center flex-shrink-0`}
+          >
+            <Icon className={`h-5 w-5 ${colorClass.iconText}`} />
+          </div>
+          {/* Value and label */}
+          <div className="flex-1 min-w-0">
+            {isLoading ? (
               <Loader2 className="h-6 w-6 animate-spin text-slate-300" />
-            </div>
-          ) : (
-            <>
-              <p className="text-2xl font-bold text-slate-900 mt-1">{value}</p>
-              {trend && trendValue && (
-                <div
-                  className={`flex items-center gap-1 mt-2 text-xs font-medium ${
-                    trend === 'up' ? 'text-emerald-600' : 'text-rose-600'
-                  }`}
-                >
-                  {trend === 'up' ? (
-                    <TrendingUp className="h-3 w-3" />
-                  ) : (
-                    <TrendingDown className="h-3 w-3" />
-                  )}
-                  <span>{trendValue}</span>
-                  <span className="text-slate-400 ml-1">이번 주</span>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-        <div
-          className={`p-3 rounded-xl bg-gradient-to-br ${colorClassesMap[color]} shadow-lg`}
-        >
-          <Icon className="h-5 w-5 text-white" />
+            ) : (
+              <>
+                <p className="text-2xl font-bold text-slate-900 leading-none">
+                  {value}
+                </p>
+                <p className="text-xs text-slate-500 mt-1 truncate">{label}</p>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -210,7 +216,7 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 page-animate">
       {/* Header */}
       <section className="flex items-end justify-between">
         <div>
@@ -270,7 +276,7 @@ export default function DashboardPage() {
             <h2 className="text-lg font-semibold text-slate-900 mb-4">
               진행중 현황
             </h2>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 stagger-children">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <StatsCard
                 label="진행중 프로젝트"
                 value={stats?.projects.active ?? 0}

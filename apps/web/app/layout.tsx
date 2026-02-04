@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
+import { ViewTransitions } from 'next-view-transitions';
 import './globals.css';
 import { Providers } from '@/components/Providers';
 
@@ -23,12 +24,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Providers>
-          {children}
-        </Providers>
-      </body>
-    </html>
+    <ViewTransitions>
+      <html lang="ko" suppressHydrationWarning>
+        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+          <Providers>
+            {children}
+          </Providers>
+        </body>
+      </html>
+    </ViewTransitions>
   );
 }

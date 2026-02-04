@@ -11,7 +11,7 @@ export default function ProjectsPage() {
   const canCreateProject = user?.role === 'SUPER_ADMIN' || user?.role === 'PM';
 
   return (
-    <div className="">
+    <div className="page-animate">
       <div className="mb-8 flex justify-between items-start">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">

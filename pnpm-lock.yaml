@@ -268,6 +268,9 @@ importers:
       next:
         specifier: 16.0.10
         version: 16.0.10(react-dom@19.2.0)(react@19.2.0)
+      next-view-transitions:
+        specifier: ^0.3.5
+        version: 0.3.5(next@16.0.10)(react-dom@19.2.0)(react@19.2.0)
       react:
         specifier: ^19.1.0
         version: 19.2.0
@@ -7844,6 +7847,18 @@ packages:
       '@nestjs/swagger': 8.1.1(@nestjs/common@11.1.11)(@nestjs/core@11.1.11)(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)
       merge-deep: 3.0.3
       zod: 3.25.76
+    dev: false
+
+  /next-view-transitions@0.3.5(next@16.0.10)(react-dom@19.2.0)(react@19.2.0):
+    resolution: {integrity: sha512-yP8OPNydLmKpmE94hLurLGEzPsUy1uyl9iSv8oxaC2JwhSXTD86SVwk1NMMQT7Ado4kMENDJ7fNBIXHy3GU/Lg==}
+    peerDependencies:
+      next: '>=14.0.0'
+      react: '>=18.2.0 || ^19.0.0'
+      react-dom: '>=18.2.0 || ^19.0.0'
+    dependencies:
+      next: 16.0.10(react-dom@19.2.0)(react@19.2.0)
+      react: 19.2.0
+      react-dom: 19.2.0(react@19.2.0)
     dev: false
 
   /next@16.0.10(@babel/core@7.28.5)(react-dom@19.2.3)(react@19.2.3):

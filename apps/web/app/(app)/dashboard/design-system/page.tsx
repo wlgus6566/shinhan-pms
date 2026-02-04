@@ -44,7 +44,7 @@ import {
 
 export default function DesignSystemPage() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 page-animate">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground mb-2">

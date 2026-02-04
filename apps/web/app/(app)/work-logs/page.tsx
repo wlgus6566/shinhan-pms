@@ -261,7 +261,7 @@ export default function WorkLogsPage() {
   const isLoading = workLogsLoading || tasksLoading;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 page-animate">
       {/* 페이지 헤더 */}
       <div className="flex items-center justify-between">
         <div>

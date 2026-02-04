@@ -4,6 +4,48 @@
 @tailwind components;
 @tailwind utilities;
 
+/* View Transition Styles */
+/* 루트 트랜지션 비활성화 (사이드바, 헤더 고정) */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+/* 페이지 콘텐츠 영역만 트랜지션 적용 */
+::view-transition-old(page-content),
+::view-transition-new(page-content) {
+  animation-duration: 0.25s;
+  animation-timing-function: ease-out;
+}
+
+::view-transition-old(page-content) {
+  animation-name: view-fade-out;
+}
+
+::view-transition-new(page-content) {
+  animation-name: view-fade-in;
+}
+
+@keyframes view-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes view-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* 접근성: 모션 감소 설정 시 애니메이션 비활성화 */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(page-content),
+  ::view-transition-new(page-content) {
+    animation: none;
+  }
+}
+
 @layer base {
   :root {
     /* CRM UI Kit inspired color system - Blue Theme */
@@ -766,4 +808,52 @@
   .stagger-children > *:nth-child(6) {
     animation-delay: 0.3s;
   }
+
+  /* Page Section Animations */
+  .page-animate > * {
+    animation: pageSlideUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    opacity: 0;
+  }
+
+  .page-animate > *:nth-child(1) {
+    animation-delay: 0s;
+  }
+  .page-animate > *:nth-child(2) {
+    animation-delay: 0.08s;
+  }
+  .page-animate > *:nth-child(3) {
+    animation-delay: 0.16s;
+  }
+  .page-animate > *:nth-child(4) {
+    animation-delay: 0.24s;
+  }
+  .page-animate > *:nth-child(5) {
+    animation-delay: 0.32s;
+  }
+  .page-animate > *:nth-child(6) {
+    animation-delay: 0.4s;
+  }
+
+  @keyframes pageSlideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Individual animate classes with delays */
+  .animate-in {
+    animation: pageSlideUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    opacity: 0;
+  }
+
+  .delay-1 { animation-delay: 0.05s; }
+  .delay-2 { animation-delay: 0.1s; }
+  .delay-3 { animation-delay: 0.15s; }
+  .delay-4 { animation-delay: 0.2s; }
+  .delay-5 { animation-delay: 0.25s; }
 }

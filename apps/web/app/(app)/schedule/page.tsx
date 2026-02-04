@@ -66,7 +66,7 @@ export default function TeamSchedulesPage() {
   }
 
   return (
-    <div className="mx-auto">
+    <div className="mx-auto page-animate">
       <div className="space-y-6">
         {/* Header */}
         <div>
