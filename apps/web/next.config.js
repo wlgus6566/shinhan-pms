@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // CSR mode with dynamic routes
   trailingSlash: false,
   images: {
     unoptimized: true,
