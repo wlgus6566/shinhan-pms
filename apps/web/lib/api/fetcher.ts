@@ -1,5 +1,6 @@
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 import { z } from 'zod';
+import { toast } from 'sonner';
 
 // Token Manager
 export const tokenManager = {
@@ -65,9 +66,29 @@ apiClient.interceptors.request.use(
   }
 );
 
+// Mutation 메서드별 성공 메시지
+const MUTATION_SUCCESS_MESSAGES: Record<string, string> = {
+  POST: '저장되었습니다',
+  PATCH: '수정되었습니다',
+  PUT: '수정되었습니다',
+  DELETE: '삭제되었습니다',
+};
+
+// Toast를 표시하지 않을 URL 패턴
+const SILENT_URL_PATTERNS = ['/auth/', '/export'];
+
 // Response Interceptor
 apiClient.interceptors.response.use(
   (response) => {
+    // Mutation 성공 시 toast 표시
+    const method = response.config.method?.toUpperCase();
+    const url = response.config.url || '';
+    const isSilent = SILENT_URL_PATTERNS.some((p) => url.includes(p));
+
+    if (method && method in MUTATION_SUCCESS_MESSAGES && !isSilent) {
+      toast.success(MUTATION_SUCCESS_MESSAGES[method]);
+    }
+
     const apiResponse = response.data;
     // 새 응답 구조: { code, message, data }
     if (apiResponse && typeof apiResponse === 'object' && 'code' in apiResponse && 'data' in apiResponse) {
@@ -146,18 +167,22 @@ apiClient.interceptors.response.use(
 
     // 403 Forbidden 처리
     if (error.response?.status === 403) {
-      if (typeof window !== 'undefined') {
-        alert('접근 권한이 없습니다.');
-      }
+      toast.error('접근 권한이 없습니다');
       return Promise.reject(error.response?.data || error);
     }
 
     // 500 Server Error 처리
     if (error.response?.status === 500) {
-      if (typeof window !== 'undefined') {
-        console.error('서버 오류가 발생했습니다:', error.response?.data);
-      }
+      toast.error('서버 오류가 발생했습니다');
       return Promise.reject(error.response?.data || error);
+    }
+
+    // 기타 에러 (400, 404, 409 등)
+    const errorMessage = error.response?.data?.message;
+    if (errorMessage && typeof errorMessage === 'string') {
+      toast.error(errorMessage);
+    } else if (error.response?.status) {
+      toast.error('요청 처리 중 오류가 발생했습니다');
     }
 
     return Promise.reject(error.response?.data || error);

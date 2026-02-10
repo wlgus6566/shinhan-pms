@@ -4,7 +4,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export function ScheduleSidebarSkeleton() {
   return (
-    <div className="flex flex-col gap-6 w-[30%]">
+    <div className="hidden lg:flex flex-col gap-6 w-[30%]">
       {/* Team filter skeleton */}
       <div className="bg-white rounded-lg border p-4">
         <div className="space-y-2">

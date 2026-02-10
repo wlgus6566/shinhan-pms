@@ -30,7 +30,7 @@ const menuItems = [
   { icon: FileText, label: '업무일지', href: '/work-logs' },
   { icon: CalendarIcon, label: '일정 관리', href: '/schedule' },
   { icon: BarChart3, label: '프로젝트 리포트', href: '/analytics' },
-  { icon: Palette, label: '디자인', href: '/dashboard/design-system' },
+  // { icon: Palette, label: '디자인', href: '/dashboard/design-system' },
 ];
 
 const adminMenuItems = [{ icon: Users, label: '멤버 관리', href: '/users' }];
@@ -122,7 +122,7 @@ export function Sidebar({
                   'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative',
                   active
                     ? 'bg-blue-500/15 text-blue-400'
-                    : 'text-slate-400 hover:bg-white/5 hover:text-white',
+                    : 'text-white hover:bg-white/5',
                 )}
               >
                 {active && (

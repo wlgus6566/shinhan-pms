@@ -30,9 +30,6 @@ export function generateRecurrenceInstances(
   const { startDate, endDate, recurrenceType, recurrenceEndDate, recurrenceDaysOfWeek } = options;
   const instances: ScheduleInstance[] = [];
 
-  // 일정 기간 계산 (밀리초)
-  const duration = endDate.getTime() - startDate.getTime();
-
   // WEEKLY + recurrenceDaysOfWeek: 지정된 요일마다 인스턴스 생성
   if (recurrenceType === 'WEEKLY' && recurrenceDaysOfWeek && recurrenceDaysOfWeek.length > 0) {
     // 시작일이 속한 주의 일요일(0)부터 탐색
@@ -54,7 +51,7 @@ export function generateRecurrenceInstances(
           continue;
         }
 
-        const instanceEnd = new Date(instanceStart.getTime() + duration);
+        const instanceEnd = calculateInstanceEnd(instanceStart, endDate);
 
         instances.push({
           startDate: instanceStart,
@@ -78,7 +75,7 @@ export function generateRecurrenceInstances(
 
   while (currentDate <= recurrenceEndDate && iterationCount < maxInstances) {
     const instanceStart = new Date(currentDate);
-    const instanceEnd = new Date(currentDate.getTime() + duration);
+    const instanceEnd = calculateInstanceEnd(instanceStart, endDate);
 
     instances.push({
       startDate: instanceStart,
@@ -124,18 +121,35 @@ function getNextOccurrence(
 
     case 'YEARLY':
       nextDate.setFullYear(nextDate.getFullYear() + 1);
-      // 윤년 처리 (2월 29일 → 2월 28일)
+      // 윤년 처리: setFullYear이 2월 29일 → 3월 1일로 롤오버하므로 월+일 함께 설정
       if (
         currentDate.getMonth() === 1 &&
         currentDate.getDate() === 29 &&
         !isLeapYear(nextDate.getFullYear())
       ) {
-        nextDate.setDate(28);
+        nextDate.setMonth(1, 28); // 2월 28일
       }
       break;
   }
 
   return nextDate;
+}
+
+/**
+ * 인스턴스 종료 시간 계산
+ * 시작일에 endDate의 시/분/초를 적용하고, 야간 일정(종료가 시작보다 이전)이면 다음 날로 처리
+ * @param instanceStart 인스턴스 시작 시간
+ * @param endDate 원본 종료 시간 (시/분/초 참조용)
+ * @returns 인스턴스 종료 시간
+ */
+function calculateInstanceEnd(instanceStart: Date, endDate: Date): Date {
+  const instanceEnd = new Date(instanceStart);
+  instanceEnd.setHours(endDate.getHours(), endDate.getMinutes(), endDate.getSeconds(), endDate.getMilliseconds());
+  // endTime이 startTime보다 이전이면 다음 날로 처리 (야간 일정)
+  if (instanceEnd < instanceStart) {
+    instanceEnd.setDate(instanceEnd.getDate() + 1);
+  }
+  return instanceEnd;
 }
 
 /**

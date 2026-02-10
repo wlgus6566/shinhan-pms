@@ -17,8 +17,8 @@ export const CreateProjectSchema = z
       .string()
       .max(1000, '설명은 최대 1000자까지 입력 가능합니다')
       .optional(),
-    startDate: z.string().optional(),
-    endDate: z.string().optional(),
+    startDate: z.string().min(1, '시작일은 필수 항목입니다'),
+    endDate: z.string().min(1, '종료일은 필수 항목입니다'),
     taskTypes: z.array(TaskTypeInputSchema).optional(),
   })
   .refine(

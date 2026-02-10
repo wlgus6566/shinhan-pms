@@ -80,7 +80,7 @@ export function ProjectMembersTable({
       mutate(); // SWR 캐시 갱신
       setMemberToRemove(null);
     } catch (error: any) {
-      alert(error.message);
+      // toast는 interceptor에서 자동 표시
     } finally {
       setIsRemoving(false);
     }

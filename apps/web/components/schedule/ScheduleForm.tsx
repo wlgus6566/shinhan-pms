@@ -183,10 +183,24 @@ export function ScheduleForm({
     } else {
       // 일반 일정: data already contains ISO strings
       const { halfDayType, teamScope, ...restData } = data;
+
+      let finalEndDate = data.endDate!;
+      // 정기 일정: endDate의 날짜 부분을 startDate와 동일하게 보정 (timeOnly 모드에서 날짜가 다를 수 있음)
+      if (data.isRecurring && data.startDate && data.endDate) {
+        const startObj = new Date(data.startDate);
+        const endObj = new Date(data.endDate);
+        endObj.setFullYear(
+          startObj.getFullYear(),
+          startObj.getMonth(),
+          startObj.getDate(),
+        );
+        finalEndDate = endObj.toISOString();
+      }
+
       submitData = {
         ...restData,
         startDate: data.startDate!,
-        endDate: data.endDate!,
+        endDate: finalEndDate,
         teamScope: teamScope ?? undefined,
       };
     }
@@ -364,12 +378,14 @@ export function ScheduleForm({
               }))}
             />
           ))}
-        <FormCheckbox
-          control={form.control}
-          name="isRecurring"
-          label="정기 일정으로 등록"
-          disabled={viewMode}
-        />
+        {!isVacation && (
+          <FormCheckbox
+            control={form.control}
+            name="isRecurring"
+            label="정기 일정으로 등록"
+            disabled={viewMode}
+          />
+        )}
         {/* 연차/반차 시 사용일 필드 */}
         {isVacation ? (
           <>

@@ -12,7 +12,6 @@ import {
   formatWeekDisplay,
   formatWeekDisplayWithWeekNumber,
 } from '@/lib/utils/week';
-import { Card } from '../ui/card';
 
 interface WeeklyReportExportButtonProps {
   projectId: string;
@@ -63,23 +62,25 @@ export function WeeklyReportExportButton({
   };
 
   return (
-    <Card className="p-2 flex flex-row gap-2 hover:shadow-none">
-      <div className="flex items-center gap-2">
+    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+      <div className="flex items-center justify-center gap-1">
         <Button
           variant="outline"
           size="icon"
+          className="h-8 w-8 shrink-0"
           onClick={handlePrevWeek}
           disabled={isExporting}
           aria-label="이전 주"
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <span className="text-sm font-medium w-[200px] text-center">
+        <span className="text-xs font-medium text-center whitespace-nowrap px-1">
           {displayText}
         </span>
         <Button
           variant="outline"
           size="icon"
+          className="h-8 w-8 shrink-0"
           onClick={handleNextWeek}
           disabled={isExporting}
           aria-label="다음 주"
@@ -91,25 +92,26 @@ export function WeeklyReportExportButton({
         onClick={handleExport}
         disabled={isExporting}
         variant="success"
-        className="gradient-border whitespace-nowrap min-w-[262px]"
+        className="gradient-border whitespace-nowrap text-xs h-9 w-full sm:w-auto"
+        size="sm"
       >
         {isExporting ? (
           <>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
             다운로드 중...
           </>
         ) : (
           <>
-            <Download className="w-4 h-4 mr-2" />
+            <Download className="w-3.5 h-3.5 mr-1.5" />
             <span
               dangerouslySetInnerHTML={{
                 __html: formatWeekDisplayWithWeekNumber(selectedDate),
               }}
             />
-            주간보고 엑셀 다운로드
+            주간보고 다운로드
           </>
         )}
       </Button>
-    </Card>
+    </div>
   );
 }

@@ -7,9 +7,11 @@ import { z } from 'zod';
 import type { CreateWorkLogRequest, UpdateWorkLogRequest } from '@repo/schema';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
+import { toast } from 'sonner';
 import { Loader2, CheckCircle2, History } from 'lucide-react';
 import { BaseDialog } from '@/components/ui/base-dialog';
 import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import {
   Form,
   FormControl,
@@ -100,6 +102,7 @@ export function WorkLogDialog({
 }: WorkLogDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState<number | null>(null);
   const textareaRefs = useRef<(HTMLTextAreaElement | null)[]>([]);
 
@@ -171,11 +174,12 @@ export function WorkLogDialog({
   }, [open, mode, workLogs, existingWorkLogs, myTasks, selectedDate]);
 
   const handleDelete = async () => {
-    if (!onDelete || !confirm('정말 삭제하시겠습니까?')) return;
+    if (!onDelete) return;
 
     setIsDeleting(true);
     try {
       await onDelete();
+      setShowDeleteConfirm(false);
       onOpenChange(false);
     } finally {
       setIsDeleting(false);
@@ -206,7 +210,7 @@ export function WorkLogDialog({
     );
 
     if (filledEntries.length === 0) {
-      alert('최소 1개 이상의 업무일지를 작성해주세요.');
+      toast.warning('최소 1개 이상의 업무일지를 작성해주세요.');
       return;
     }
 
@@ -239,7 +243,7 @@ export function WorkLogDialog({
                 `• ${workLogs.find((l) => l.id === f.taskId)?.task?.taskName || f.taskId}: ${f.error}`,
             )
             .join('\n');
-          alert(`일부 업무일지 수정에 실패했습니다:\n${errorMessages}`);
+          toast.error(`일부 업무일지 수정에 실패했습니다`);
         }
       } else if (mode === 'create' && onMultiSubmit) {
         // 생성 모드
@@ -273,7 +277,7 @@ export function WorkLogDialog({
                 `• ${myTasks.find((t) => t.id === f.taskId)?.taskName || f.taskId}: ${f.error}`,
             )
             .join('\n');
-          alert(`일부 업무일지 저장에 실패했습니다:\n${errorMessages}`);
+          toast.error(`일부 업무일지 저장에 실패했습니다`);
         } else {
           const errorMessages = result.failed
             .map(
@@ -281,7 +285,7 @@ export function WorkLogDialog({
                 `• ${myTasks.find((t) => t.id === f.taskId)?.taskName || f.taskId}: ${f.error}`,
             )
             .join('\n');
-          alert(`업무일지 저장에 실패했습니다:\n${errorMessages}`);
+          toast.error(`업무일지 저장에 실패했습니다`);
         }
       } else {
         // fallback: 단일 제출 방식
@@ -529,6 +533,7 @@ export function WorkLogDialog({
   };
 
   return (
+    <>
     <BaseDialog
       open={open}
       onOpenChange={onOpenChange}
@@ -560,12 +565,10 @@ export function WorkLogDialog({
               <Button
                 type="button"
                 variant="destructive"
-                onClick={handleDelete}
+                onClick={() => setShowDeleteConfirm(true)}
                 disabled={isSubmitting || isDeleting}
+                loading={isDeleting}
               >
-                {isDeleting && (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                )}
                 삭제
               </Button>
             )}
@@ -603,5 +606,15 @@ export function WorkLogDialog({
         </Form>
       )}
     </BaseDialog>
+    <ConfirmDialog
+      open={showDeleteConfirm}
+      onOpenChange={setShowDeleteConfirm}
+      onConfirm={handleDelete}
+      title="업무일지 삭제"
+      description="정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
+      confirmLabel="삭제"
+      variant="destructive"
+    />
+    </>
   );
 }

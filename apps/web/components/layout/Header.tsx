@@ -32,7 +32,12 @@ export function Header({
   setMobileMenuOpen?: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const pathname = usePathname();
-  const paths = pathname?.split('/').filter(Boolean) || [];
+  const allPaths = pathname?.split('/').filter(Boolean) || [];
+  // 마지막 세그먼트가 숫자(ID)이면 breadcrumb에서 제외
+  const paths =
+    allPaths.length > 0 && /^\d+$/.test(allPaths?.[allPaths?.length - 1] || '')
+      ? allPaths.slice(0, -1)
+      : allPaths;
 
   return (
     <header className="h-16 flex items-center px-4 md:px-6 lg:px-8 bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-slate-100">

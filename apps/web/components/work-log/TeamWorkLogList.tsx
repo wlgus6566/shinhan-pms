@@ -12,6 +12,10 @@ import type { WorkLog } from '@/types/work-log';
 import type { ProjectMember } from '@/types/project';
 import type { TaskStatus, TaskDifficulty } from '@/types/task';
 import { getProjectWorkLogs } from '@/lib/api/workLogs';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Download, SlidersHorizontal, ChevronDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface TeamWorkLogListProps {
   projectId: string;
@@ -147,9 +151,105 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
     return Array.from(areas).sort();
   }, [members]);
 
+  const [exportOpen, setExportOpen] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (selectedWorkArea !== 'all') count++;
+    if (assigneeFilter !== 'all') count++;
+    if (statusFilter.length > 0) count++;
+    if (difficultyFilter.length > 0) count++;
+    return count;
+  }, [selectedWorkArea, assigneeFilter, statusFilter, difficultyFilter]);
+
   return (
-    <div className="space-y-4">
-      <div className="flex flex-row flex-wrap justify-end gap-2">
+    <div className="space-y-3 sm:space-y-4">
+      {/* Mobile: Compact action bar */}
+      <div className="flex sm:hidden gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex-1 h-9 text-xs justify-between"
+          onClick={() => setExportOpen(!exportOpen)}
+        >
+          <span className="flex items-center gap-1.5">
+            <Download className="w-3.5 h-3.5" />
+            엑셀 다운로드
+          </span>
+          <ChevronDown className={cn(
+            'w-3.5 h-3.5 transition-transform duration-200',
+            exportOpen && 'rotate-180'
+          )} />
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex-1 h-9 text-xs justify-between"
+          onClick={() => setFilterOpen(!filterOpen)}
+        >
+          <span className="flex items-center gap-1.5">
+            <SlidersHorizontal className="w-3.5 h-3.5" />
+            필터
+            {activeFilterCount > 0 && (
+              <span className="bg-primary text-primary-foreground text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-semibold">
+                {activeFilterCount}
+              </span>
+            )}
+          </span>
+          <ChevronDown className={cn(
+            'w-3.5 h-3.5 transition-transform duration-200',
+            filterOpen && 'rotate-180'
+          )} />
+        </Button>
+      </div>
+
+      {/* Mobile: Collapsible export section */}
+      <div className={cn(
+        'sm:hidden overflow-hidden transition-all duration-300 ease-in-out',
+        exportOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+      )}>
+        <Card className="p-3 space-y-3 shadow-none">
+          <WeeklyReportExportButton
+            projectId={projectId}
+            defaultStartDate={format(startOfMonth(currentMonth), 'yyyy-MM-dd')}
+            defaultEndDate={format(endOfMonth(currentMonth), 'yyyy-MM-dd')}
+          />
+          <div className="border-t border-slate-100" />
+          <MonthlyStaffReportExportButton
+            projectId={projectId}
+            defaultDate={currentMonth}
+          />
+          <div className="border-t border-slate-100" />
+          <MonthlyTaskReportExportButton
+            projectId={projectId}
+            defaultDate={currentMonth}
+          />
+        </Card>
+      </div>
+
+      {/* Mobile: Collapsible filter section */}
+      <div className={cn(
+        'sm:hidden overflow-hidden transition-all duration-300 ease-in-out',
+        filterOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
+      )}>
+        <TeamWorkLogFilters
+          selectedWorkArea={selectedWorkArea}
+          setSelectedWorkArea={setSelectedWorkArea}
+          availableWorkAreas={availableWorkAreas}
+          assigneeFilter={assigneeFilter}
+          setAssigneeFilter={setAssigneeFilter}
+          filteredAssignees={filteredAssignees}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          difficultyFilter={difficultyFilter}
+          setDifficultyFilter={setDifficultyFilter}
+          resetFilters={resetFilters}
+        />
+      </div>
+
+      {/* Desktop: Export buttons (unchanged layout) */}
+      <div className="hidden sm:flex flex-row flex-wrap justify-end gap-2">
         <WeeklyReportExportButton
           projectId={projectId}
           defaultStartDate={format(startOfMonth(currentMonth), 'yyyy-MM-dd')}
@@ -166,20 +266,23 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
           />
         </div>
       </div>
-      {/* Filters */}
-      <TeamWorkLogFilters
-        selectedWorkArea={selectedWorkArea}
-        setSelectedWorkArea={setSelectedWorkArea}
-        availableWorkAreas={availableWorkAreas}
-        assigneeFilter={assigneeFilter}
-        setAssigneeFilter={setAssigneeFilter}
-        filteredAssignees={filteredAssignees}
-        statusFilter={statusFilter}
-        setStatusFilter={setStatusFilter}
-        difficultyFilter={difficultyFilter}
-        setDifficultyFilter={setDifficultyFilter}
-        resetFilters={resetFilters}
-      />
+
+      {/* Desktop: Filters (always visible) */}
+      <div className="hidden sm:block">
+        <TeamWorkLogFilters
+          selectedWorkArea={selectedWorkArea}
+          setSelectedWorkArea={setSelectedWorkArea}
+          availableWorkAreas={availableWorkAreas}
+          assigneeFilter={assigneeFilter}
+          setAssigneeFilter={setAssigneeFilter}
+          filteredAssignees={filteredAssignees}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          difficultyFilter={difficultyFilter}
+          setDifficultyFilter={setDifficultyFilter}
+          resetFilters={resetFilters}
+        />
+      </div>
 
       {/* 캘린더 */}
       {loading ? (
@@ -187,15 +290,13 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
           <p className="text-muted-foreground">로드 중...</p>
         </div>
       ) : (
-        <>
-          <WorkLogCalendar
-            workLogs={filteredAndSortedWorkLogs}
-            selectedDate={selectedDate}
-            onDateSelect={handleDateSelect}
-            onMonthChange={handleMonthChange}
-            showUserName={true}
-          />
-        </>
+        <WorkLogCalendar
+          workLogs={filteredAndSortedWorkLogs}
+          selectedDate={selectedDate}
+          onDateSelect={handleDateSelect}
+          onMonthChange={handleMonthChange}
+          showUserName={true}
+        />
       )}
 
       {/* 업무일지 상세 모달 */}

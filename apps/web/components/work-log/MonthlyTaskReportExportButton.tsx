@@ -6,7 +6,6 @@ import { ko } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
 import { Download, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { exportMonthlyTaskReport } from '@/lib/api/workLogs';
-import { Card } from '../ui/card';
 
 interface MonthlyTaskReportExportButtonProps {
   projectId: string;
@@ -48,23 +47,25 @@ export function MonthlyTaskReportExportButton({
   };
 
   return (
-    <Card className="p-2 flex flex-row gap-2 hover:shadow-none">
-      <div className="flex items-center gap-2">
+    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+      <div className="flex items-center justify-center gap-1">
         <Button
           variant="outline"
           size="icon"
+          className="h-8 w-8 shrink-0"
           onClick={handlePrevMonth}
           disabled={isExporting}
           aria-label="이전 월"
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <span className="text-sm font-medium w-[120px] text-center">
+        <span className="text-xs font-medium text-center whitespace-nowrap w-[90px]">
           {displayText}
         </span>
         <Button
           variant="outline"
           size="icon"
+          className="h-8 w-8 shrink-0"
           onClick={handleNextMonth}
           disabled={isExporting}
           aria-label="다음 월"
@@ -76,25 +77,26 @@ export function MonthlyTaskReportExportButton({
         onClick={handleExport}
         disabled={isExporting}
         variant="default"
-        className="whitespace-nowrap min-w-[225px]"
+        className="whitespace-nowrap text-xs h-9 w-full sm:w-auto"
+        size="sm"
       >
         {isExporting ? (
           <>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
             다운로드 중...
           </>
         ) : (
           <>
-            <Download className="w-4 h-4 mr-2" />
-            {month}월 업무별공수 엑셀 다운로드
+            <Download className="w-3.5 h-3.5 mr-1.5" />
+            {month}월 업무별공수 다운로드
           </>
         )}
       </Button>
       {error && (
-        <span className="text-sm text-destructive ml-2 self-center">
+        <span className="text-xs text-destructive self-center">
           {error}
         </span>
       )}
-    </Card>
+    </div>
   );
 }

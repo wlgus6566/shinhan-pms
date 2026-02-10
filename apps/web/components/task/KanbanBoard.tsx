@@ -118,10 +118,8 @@ export function KanbanBoard({
       setIsUpdating(true);
       await updateTask(taskId, { status: newStatus });
       onRefresh(); // SWR mutate
-      toast.success('업무 상태가 변경되었습니다');
     } catch (error) {
       console.error('Failed to update task status:', error);
-      toast.error('업무 상태 변경에 실패했습니다');
     } finally {
       setIsUpdating(false);
     }

@@ -5,11 +5,16 @@ import { createPortal } from 'react-dom';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Plus, PenLine } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { ScheduleCalendar } from './ScheduleCalendar';
-import { ScheduleCalendarSkeleton } from './skeleton/ScheduleCalendarSkeleton';
-import { ScheduleSidebarSkeleton } from './skeleton/ScheduleSidebarSkeleton';
 import { ScheduleDialog } from './ScheduleDialog';
 import { SelectedDateScheduleList } from './SelectedDateScheduleList';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 import type { Schedule, TeamScope } from '@/types/schedule';
 import { TEAM_SCOPE_LABELS, TEAM_SCOPE_FILTER_COLORS } from '@/types/schedule';
 import { getProjectSchedules } from '@/lib/api/schedules';
@@ -30,6 +35,7 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [dialogState, setDialogState] = useState<DialogState>({ open: false });
   const [loading, setLoading] = useState(true);
+  const [bottomSheetOpen, setBottomSheetOpen] = useState(false);
 
   // Filter state
   const [selectedTeams, setSelectedTeams] = useState<TeamScope[]>([]);
@@ -96,6 +102,10 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
+    // 모바일에서는 bottom sheet 열기
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      setBottomSheetOpen(true);
+    }
   };
 
   const handleMonthChange = (date: Date) => {
@@ -131,47 +141,46 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
       {/* Two-column layout: Sidebar (filters + selected date list) and Calendar */}
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
         {loading ? (
-          <>
-            <ScheduleSidebarSkeleton />
-            <div className="flex-1">
-              <ScheduleCalendarSkeleton />
-            </div>
-          </>
+          <div className="text-center py-12 w-full">
+            <p className="text-muted-foreground">로드 중...</p>
+          </div>
         ) : (
           <>
-            {/* Left Sidebar */}
-            <div className="flex flex-col gap-4 lg:gap-6 w-full lg:w-[30%] order-2 lg:order-1">
+            {/* Left Sidebar - 데스크톱에서만 표시 */}
+            <div className="hidden lg:flex flex-col gap-6 w-[30%]">
               {/* Team Filter */}
-              <div className="bg-white rounded-lg border p-4 sm:block hidden">
-                <div className="space-y-2">
-                  {availableTeamScopes.map((teamScope) => (
-                    <label
-                      key={teamScope}
-                      className="flex items-center justify-between gap-2 cursor-pointer hover:bg-slate-50 p-2 rounded transition-colors"
-                    >
-                      <div className="flex items-center gap-2 flex-1">
-                        <input
-                          type="checkbox"
-                          checked={selectedTeams.includes(teamScope)}
-                          onChange={() => toggleTeamFilter(teamScope)}
-                          className="rounded border-slate-300 text-emotion-primary focus:ring-emotion-primary"
+              {availableTeamScopes.length > 0 && (
+                <div className="bg-white rounded-lg border p-4">
+                  <div className="space-y-2">
+                    {availableTeamScopes.map((teamScope) => (
+                      <label
+                        key={teamScope}
+                        className="flex items-center justify-between gap-2 cursor-pointer hover:bg-slate-50 p-2 rounded transition-colors"
+                      >
+                        <div className="flex items-center gap-2 flex-1">
+                          <input
+                            type="checkbox"
+                            checked={selectedTeams.includes(teamScope)}
+                            onChange={() => toggleTeamFilter(teamScope)}
+                            className="rounded border-slate-300 text-emotion-primary focus:ring-emotion-primary"
+                          />
+                          <span className="text-sm text-slate-700">
+                            {TEAM_SCOPE_LABELS[teamScope]}
+                          </span>
+                        </div>
+                        <span
+                          className="w-3 h-3 rounded-full"
+                          style={{
+                            backgroundColor: TEAM_SCOPE_FILTER_COLORS[
+                              teamScope
+                            ] as string,
+                          }}
                         />
-                        <span className="text-sm text-slate-700">
-                          {TEAM_SCOPE_LABELS[teamScope]}
-                        </span>
-                      </div>
-                      <span
-                        className="w-3 h-3 rounded-full"
-                        style={{
-                          backgroundColor: TEAM_SCOPE_FILTER_COLORS[
-                            teamScope
-                          ] as string,
-                        }}
-                      />
-                    </label>
-                  ))}
+                      </label>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Selected Date Schedule List */}
               <SelectedDateScheduleList
@@ -181,8 +190,8 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
               />
             </div>
 
-            {/* Right Content - Calendar (모바일에서 먼저 표시) */}
-            <div className="flex-1 order-1 lg:order-2">
+            {/* Calendar */}
+            <div className="flex-1">
               <ScheduleCalendar
                 schedules={filteredSchedules}
                 selectedDate={selectedDate}
@@ -191,6 +200,60 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
                 onScheduleClick={handleScheduleClick}
               />
             </div>
+
+            {/* 모바일 Bottom Sheet */}
+            <Sheet open={bottomSheetOpen} onOpenChange={setBottomSheetOpen}>
+              <SheetContent
+                side="bottom"
+                className="max-h-[70vh] rounded-t-2xl px-4 pb-6 pt-0 lg:hidden"
+              >
+                <SheetHeader className="py-4 sticky top-0 bg-background z-10">
+                  <div className="mx-auto w-12 h-1.5 rounded-full bg-slate-300 mb-2" />
+                  <SheetTitle className="text-left text-base">
+                    일정 목록
+                  </SheetTitle>
+                </SheetHeader>
+                <div className="overflow-y-auto max-h-[calc(70vh-80px)] space-y-4">
+                  {/* Team Filter */}
+                  {availableTeamScopes.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {availableTeamScopes.map((teamScope) => (
+                        <button
+                          key={teamScope}
+                          type="button"
+                          onClick={() => toggleTeamFilter(teamScope)}
+                          className={cn(
+                            'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm border transition-colors',
+                            selectedTeams.includes(teamScope)
+                              ? 'bg-slate-900 text-white border-slate-900'
+                              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50',
+                          )}
+                        >
+                          <span
+                            className="w-2 h-2 rounded-full"
+                            style={{
+                              backgroundColor: TEAM_SCOPE_FILTER_COLORS[
+                                teamScope
+                              ] as string,
+                            }}
+                          />
+                          {TEAM_SCOPE_LABELS[teamScope]}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {/* Schedule List */}
+                  <SelectedDateScheduleList
+                    schedules={filteredSchedules}
+                    selectedDate={selectedDate}
+                    onScheduleClick={(schedule) => {
+                      setBottomSheetOpen(false);
+                      handleScheduleClick(schedule);
+                    }}
+                  />
+                </div>
+              </SheetContent>
+            </Sheet>
           </>
         )}
       </div>

@@ -176,14 +176,6 @@ export function ProjectForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {success && (
-          <Alert className="bg-green-50 text-green-700 border-green-200">
-            <CheckCircle2 className="h-4 w-4" />
-            <AlertDescription>
-              프로젝트 정보가 업데이트되었습니다
-            </AlertDescription>
-          </Alert>
-        )}
         {error && (
           <Alert variant="destructive">
             <AlertDescription>{error}</AlertDescription>
