@@ -99,7 +99,8 @@ body {
 }
 ```
 - Remove `min-width: 1440px`
-- Change `overflow-x: auto` to `overflow-x: hidden` (prevent accidental horizontal scroll)
+- Change `overflow-x: auto` to `overflow-x: hidden`
+- **NOTE**: `overflow-x: hidden` is a **safety net** to prevent accidental horizontal scroll caused by stray elements during the responsive migration. It is NOT a primary fix -- each component must be individually fixed to not overflow. This global rule catches edge cases that slip through.
 
 ### Task 1.2: Remove app shell min-width constraint
 **File**: `apps/web/app/(app)/layout.tsx`
@@ -114,16 +115,23 @@ body {
 ```
 - Remove `min-w-[1280px]` class
 
-### Task 1.3: Verify viewport meta tag
+### Task 1.3: Add viewport export (Next.js App Router separate export)
 **File**: `apps/web/app/layout.tsx`
-**Verify** that the root layout includes proper viewport meta. Next.js App Router should include this by default, but verify:
+
+The current file at `apps/web/app/layout.tsx` has only a `metadata` export with `title` and `description`. In Next.js App Router (14+), viewport configuration must be a **separate named export** using the `Viewport` type. Do NOT put viewport inside the `metadata` object.
+
+**Add** the following export ABOVE the existing `metadata` export:
+
 ```tsx
-export const metadata = {
-  // ...existing metadata
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
+import type { Metadata, Viewport } from 'next';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
 };
 ```
-If not present via metadata export, ensure it exists.
+
+**IMPORTANT - Do NOT include `maximum-scale=1`**: Setting `maximumScale: 1` prevents pinch-to-zoom, which is a WCAG 2.1 SC 1.4.4 violation (Resize Text). If iOS auto-zoom on text inputs is a concern, the correct fix is to ensure all `<input>` and `<textarea>` elements use `font-size >= 16px`, which prevents Safari's auto-zoom behavior without disabling accessibility. (This is already handled by shadcn/ui default input styles which use `text-sm` = 14px, so we may need to verify and bump input font sizes to 16px on mobile -- see Task 5.4.)
 
 ### Task 1.4: Add responsive utility classes to globals.css
 **File**: `apps/web/app/globals.css`
@@ -147,10 +155,11 @@ If not present via metadata export, ensure it exists.
 ### Acceptance Criteria (Phase 1)
 - [ ] Body no longer has `min-width: 1440px`
 - [ ] App shell no longer has `min-w-[1280px]`
-- [ ] `overflow-x: hidden` on body prevents horizontal scroll
+- [ ] `overflow-x: hidden` on body as a safety net (documented as such, not primary fix)
 - [ ] Page renders at 360px width without horizontal scrollbar (content may overlap/break - that is expected and will be fixed in later phases)
 - [ ] Desktop layout at 1440px is unchanged
-- [ ] Viewport meta tag is correct
+- [ ] Viewport is a separate `export const viewport: Viewport` (NOT inside metadata)
+- [ ] No `maximum-scale` restriction (pinch-to-zoom remains enabled)
 
 ---
 
@@ -192,14 +201,29 @@ Convert the fixed sidebar into a mobile-friendly drawer that opens via a hamburg
 
 ### Task 2.2: Make Sidebar responsive with Sheet (drawer) for mobile
 **File**: `apps/web/components/layout/Sidebar.tsx`
-**Changes**:
-- Import `Sheet`, `SheetContent`, `SheetTrigger` from shadcn
-- On mobile (< lg): Render sidebar content inside a `Sheet` component (slide-in drawer from left)
-- On desktop (lg+): Keep existing fixed sidebar behavior
-- Update props to accept `mobileMenuOpen` and `setMobileMenuOpen`
+
+#### Problem Analysis
+
+The Sidebar has ~15 places where content is conditionally rendered based on `sidebarOpen`:
+- **Line 84**: `{sidebarOpen && (<div className="flex flex-col">` -- Logo text "Emotion PMS"
+- **Line 122**: `{sidebarOpen && (<span className="text-sm...` -- Menu item labels (first 2 items)
+- **Lines 158-175**: `{sidebarOpen && (<>...<ChevronDown/>...</>)}` -- "업무 관리" label + chevron
+- **Line 179**: `{sidebarOpen && isTaskMenuOpen && (<div...` -- Task submenu project list
+- **Lines 239, 257, 289**: `{sidebarOpen && (<span...` -- Menu item labels (remaining items, admin items)
+- **Lines 304-313**: `{sidebarOpen && (<div...` -- Stats card
+- **Lines 317, 329, 344**: `{sidebarOpen && ...` -- User profile name, department, logout button layout
+
+The mobile drawer must show ALL labels/content (equivalent to `sidebarOpen = true`), but `sidebarOpen` is a desktop state that could be `false` when the user has collapsed the sidebar. Simply extracting a `navigationContent` variable will NOT work because the conditional rendering depends on `sidebarOpen`.
+
+#### Solution: Option A -- `renderNavigation(isExpanded: boolean)` function
+
+Create a render function that accepts a boolean parameter to control whether labels are visible, decoupling mobile visibility from the desktop `sidebarOpen` state.
+
+**Concrete implementation**:
 
 ```tsx
-// Updated component structure:
+import { Sheet, SheetContent } from '@/components/ui/sheet';
+
 export function Sidebar({
   sidebarOpen,
   setSidebarOpen,
@@ -211,22 +235,181 @@ export function Sidebar({
   mobileMenuOpen: boolean;
   setMobileMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-  // ... existing hooks ...
+  const pathname = usePathname(); // Already imported at line 4, already used at line 44
+  const { user, logout } = useAuth();
+  const { projects: myProjects } = useMyProjects();
+  const [isTaskMenuOpen, setIsTaskMenuOpen] = useState(
+    pathname?.startsWith('/tasks') || false,
+  );
 
-  // Shared navigation content (extracted to avoid duplication)
-  const navigationContent = (
+  const isActive = useCallback(
+    (href: string) => pathname === href || pathname?.startsWith(`${href}/`),
+    [pathname],
+  );
+  const toggleTaskMenu = useCallback(() => {
+    setIsTaskMenuOpen((prev) => !prev);
+  }, []);
+  const isTasksActive = pathname?.startsWith('/tasks');
+
+  // Close mobile menu on route change
+  // (usePathname is already imported and used -- reuse existing import)
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname, setMobileMenuOpen]);
+
+  // Callback for mobile link clicks (close drawer)
+  const handleMobileLinkClick = useCallback(() => {
+    setMobileMenuOpen(false);
+  }, [setMobileMenuOpen]);
+
+  /**
+   * Render the full navigation content.
+   * @param isExpanded - true = show labels (mobile drawer always, desktop when sidebarOpen)
+   *                     false = icon-only (desktop when collapsed)
+   * @param onLinkClick - optional callback to fire when a nav link is clicked
+   */
+  const renderNavigation = (isExpanded: boolean, onLinkClick?: () => void) => (
     <>
       {/* Logo Area */}
-      {/* ... existing logo ... */}
+      <div
+        className={cn(
+          'h-16 flex items-center border-b border-white/5',
+          isExpanded ? 'justify-start px-6' : 'justify-center px-0',
+        )}
+      >
+        <Link href="/dashboard" className="flex items-center gap-3 overflow-hidden" onClick={onLinkClick}>
+          <div className="w-8 h-8 gradient-primary rounded-xl flex-shrink-0 flex items-center justify-center shadow-lg shadow-blue-500/25">
+            <span className="text-white font-bold text-base">E</span>
+          </div>
+          {isExpanded && (
+            <div className="flex flex-col">
+              <span className="text-white font-bold text-sm tracking-tight">Emotion PMS</span>
+            </div>
+          )}
+        </Link>
+      </div>
 
       {/* Navigation */}
-      {/* ... existing nav items (always show labels in mobile drawer) ... */}
+      <nav className="flex-1 py-4 px-3 overflow-y-auto scrollbar-thin">
+        <div className="space-y-1">
+          {/* First 2 menu items */}
+          {menuItems.slice(0, 2).map((item) => {
+            const active = isActive(item.href);
+            return (
+              <Link key={item.href} href={item.href} onClick={onLinkClick}
+                className={cn(
+                  'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative',
+                  active ? 'bg-blue-500/15 text-blue-400' : 'text-slate-400 hover:bg-white/5 hover:text-white',
+                )}
+              >
+                {active && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-blue-500 rounded-r-full" />}
+                <item.icon className={cn('h-5 w-5 flex-shrink-0 transition-colors', active ? 'text-blue-400' : 'text-slate-500 group-hover:text-white')} />
+                {isExpanded && (
+                  <span className={cn('text-sm font-medium truncate', active && 'font-semibold')}>{item.label}</span>
+                )}
+              </Link>
+            );
+          })}
+
+          {/* Task management dropdown -- uses isExpanded instead of sidebarOpen */}
+          <div>
+            <button onClick={toggleTaskMenu} className={cn(/* ... same classes ... */)}>
+              {/* ... indicator ... */}
+              <ClipboardList className={cn(/* ... same ... */)} />
+              {isExpanded && (
+                <>
+                  <span className={cn('text-sm font-medium truncate flex-1 text-left', isTasksActive && 'font-semibold')}>업무 관리</span>
+                  <ChevronDown className={cn('h-4 w-4 transition-transform duration-200', isTaskMenuOpen && 'rotate-180')} />
+                </>
+              )}
+            </button>
+            {isExpanded && isTaskMenuOpen && (
+              <div className="mt-1 ml-4 pl-4 border-l border-white/10 space-y-1">
+                {myProjects && myProjects.length > 0 ? (
+                  myProjects.map((project) => {
+                    const projectActive = pathname === `/tasks/${project.id}`;
+                    return (
+                      <Link key={project.id} href={`/tasks/${project.id}`} onClick={onLinkClick}
+                        className={cn(/* ... same ... */)}
+                      >
+                        <div className={cn('w-1.5 h-1.5 rounded-full flex-shrink-0', projectActive ? 'bg-blue-400' : 'bg-slate-600')} />
+                        <span className="truncate">{project.name}</span>
+                      </Link>
+                    );
+                  })
+                ) : (
+                  <p className="px-3 py-2 text-xs text-slate-600">참여 중인 프로젝트가 없습니다</p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Remaining menu items */}
+          {menuItems.slice(2).map((item) => {
+            const active = isActive(item.href);
+            return (
+              <Link key={item.href} href={item.href} onClick={onLinkClick}
+                className={cn(/* ... same ... */)}
+              >
+                {active && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-blue-500 rounded-r-full" />}
+                <item.icon className={cn(/* ... same ... */)} />
+                {isExpanded && (
+                  <span className={cn('text-sm font-medium truncate', active && 'font-semibold')}>{item.label}</span>
+                )}
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Admin Section */}
+        {(user?.role === 'SUPER_ADMIN' || user?.role === 'PM') && (
+          <div className="mt-6 pt-6 border-t border-white/5">
+            {isExpanded && (
+              <p className="px-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-3">관리자</p>
+            )}
+            {adminMenuItems.map((item) => {
+              const active = isActive(item.href);
+              return (
+                <Link key={item.href} href={item.href} onClick={onLinkClick}
+                  className={cn(/* ... same ... */)}
+                >
+                  {/* ... same icon + label pattern using isExpanded ... */}
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </nav>
 
       {/* Stats Card */}
-      {/* ... existing stats ... */}
+      {isExpanded && (
+        <div className="mx-3 mb-4 p-4 bg-gradient-to-br from-blue-500/10 to-blue-600/5 rounded-2xl border border-blue-500/10">
+          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">진행중인 내 프로젝트</p>
+          <p className="text-2xl font-bold text-white">{myProjects?.length || 0}</p>
+        </div>
+      )}
 
       {/* User Profile */}
-      {/* ... existing user profile ... */}
+      <div className={cn('border-t border-white/5', isExpanded ? 'p-2' : 'p-3')}>
+        {user && (
+          <div className={cn('flex items-center gap-3 p-2 rounded-xl transition-colors', isExpanded && 'hover:bg-white/5')}>
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
+              {user.name.charAt(0)}
+            </div>
+            {isExpanded && (
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-white truncate">{user.name}</p>
+                <p className="text-[11px] text-slate-500 truncate">
+                  {DEPARTMENT_LABELS[user.department as Department] || user.department}
+                </p>
+              </div>
+            )}
+            <button onClick={logout} className={cn(/* ... same ... */)} title="로그아웃">
+              <LogOut className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+      </div>
     </>
   );
 
@@ -236,20 +419,26 @@ export function Sidebar({
       <aside
         className={cn(
           'fixed left-0 top-0 h-full bg-[#1e1f2e] transition-all duration-300 z-50 flex flex-col',
-          'hidden lg:flex',  // ADD: hide on mobile
+          'hidden lg:flex',  // Hide on mobile, show on desktop
           sidebarOpen ? 'w-[240px]' : 'w-[72px]',
         )}
       >
-        {navigationContent}
+        {renderNavigation(sidebarOpen)}
 
         {/* Collapse Toggle - desktop only */}
-        <button ... />
+        <button
+          onClick={() => setSidebarOpen((prev: boolean) => !prev)}
+          className="absolute -right-3 top-20 w-6 h-6 bg-[#1e1f2e] border border-white/10 rounded-full flex items-center justify-center text-slate-500 hover:text-white transition-colors shadow-lg"
+          aria-label={sidebarOpen ? '사이드바 접기' : '사이드바 펼치기'}
+        >
+          {sidebarOpen ? <ChevronLeft className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+        </button>
       </aside>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Drawer - always renders labels (isExpanded = true) */}
       <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
         <SheetContent side="left" className="w-[280px] p-0 bg-[#1e1f2e] border-none lg:hidden">
-          {navigationContent}
+          {renderNavigation(true, handleMobileLinkClick)}
         </SheetContent>
       </Sheet>
     </>
@@ -257,12 +446,13 @@ export function Sidebar({
 }
 ```
 
-Key details:
-- Desktop sidebar: Add `hidden lg:flex` to show only on lg+
-- Mobile drawer: Use shadcn Sheet with `side="left"`, width 280px, same dark navy background
-- In mobile drawer, always show full labels (equivalent to `sidebarOpen = true`)
-- Close drawer on navigation link click (call `setMobileMenuOpen(false)` in link onClick)
-- Remove the collapse toggle button from mobile drawer (not needed)
+**Key design decisions**:
+- `renderNavigation(isExpanded, onLinkClick?)` replaces every `sidebarOpen` conditional with `isExpanded`
+- Desktop sidebar calls `renderNavigation(sidebarOpen)` -- respects collapse state
+- Mobile drawer calls `renderNavigation(true, handleMobileLinkClick)` -- always shows labels, closes on click
+- The `onLinkClick` callback is passed to all `<Link>` and navigation elements to close the drawer
+- Collapse toggle button is rendered OUTSIDE `renderNavigation` (desktop only)
+- No separate mobile component needed; one render function serves both contexts
 
 ### Task 2.3: Add hamburger menu button to Header for mobile
 **File**: `apps/web/components/layout/Header.tsx`
@@ -305,18 +495,24 @@ export function Header({
 ### Task 2.4: Close mobile menu on route change
 **File**: `apps/web/components/layout/Sidebar.tsx`
 **Changes**:
-- Use `usePathname()` to detect route changes
-- Add `useEffect` to close mobile drawer when pathname changes:
+- `usePathname()` is **already imported** (line 4: `import { usePathname } from 'next/navigation'`) and **already used** (line 44: `const pathname = usePathname()`). Reuse the existing `pathname` variable.
+- Add `useEffect` import (add to existing `useState, useCallback` import at line 22)
+- Add effect to close mobile drawer when pathname changes:
 ```tsx
-const pathname = usePathname();
+// Add useEffect to existing import at line 22:
+import { useState, useCallback, useEffect } from 'react';
+
+// Add inside component body:
 useEffect(() => {
   setMobileMenuOpen(false);
-}, [pathname]);
+}, [pathname, setMobileMenuOpen]);
 ```
+Note: This is already included in the `renderNavigation` approach above (Task 2.2). Listed here explicitly for clarity.
 
 ### Acceptance Criteria (Phase 2)
 - [ ] At < 1024px (lg): Sidebar is hidden, hamburger icon visible in header
 - [ ] Tapping hamburger opens a slide-in drawer from the left with full navigation
+- [ ] Mobile drawer ALWAYS shows labels regardless of desktop `sidebarOpen` state
 - [ ] Drawer closes when a navigation link is tapped
 - [ ] Drawer closes when clicking outside (Sheet default behavior)
 - [ ] Drawer closes on route change
@@ -358,16 +554,35 @@ Many pages use this pattern:
 - `apps/web/app/(app)/analytics/page.tsx` (line 87-90)
 - `apps/web/app/(app)/dashboard/page.tsx` (line 221-231)
 
-### Task 3.2: Make page title text responsive
-All `<h1>` titles currently use `text-3xl`. Make responsive:
-```tsx
-// BEFORE
-<h1 className="text-3xl font-bold ...">
+### Task 3.2: Make page title text responsive (per-page audit)
 
-// AFTER
-<h1 className="text-2xl lg:text-3xl font-bold ...">
-```
-**Apply to all 15 pages** that have an h1 title.
+**Audit results from actual codebase** -- each page's `<h1>` current state and required action:
+
+**Pages with `text-3xl` (need responsive change to `text-2xl lg:text-3xl`)**:
+| Page | File | Line | Current |
+|------|------|------|---------|
+| Projects | `apps/web/app/(app)/projects/page.tsx` | 17 | `text-3xl font-bold tracking-tight` |
+| Analytics | `apps/web/app/(app)/analytics/page.tsx` | 88 | `text-3xl font-bold` |
+| Users | `apps/web/app/(app)/users/page.tsx` | 18 | `text-3xl font-bold tracking-tight` |
+| Schedule (2 h1s) | `apps/web/app/(app)/schedule/page.tsx` | 46, 73 | `text-3xl font-bold tracking-tight` |
+| Project Detail | `apps/web/app/(app)/projects/[id]/page.tsx` | 91 | `text-3xl font-bold tracking-tight` |
+| New User | `apps/web/app/(app)/users/new/page.tsx` | 46 | `text-3xl font-bold tracking-tight` |
+| User Detail | `apps/web/app/(app)/users/[id]/page.tsx` | 35 | `text-3xl font-bold tracking-tight` |
+| Profile | `apps/web/app/(app)/dashboard/profile/page.tsx` | 12 | `text-3xl font-bold tracking-tight` |
+| Work Logs | `apps/web/app/(app)/work-logs/page.tsx` | 268 | `text-3xl font-bold` |
+
+**Action for all above**: Change `text-3xl` to `text-2xl lg:text-3xl`
+
+**Pages with `text-2xl` (leave as-is)**:
+| Page | File | Line | Current | Action |
+|------|------|------|---------|--------|
+| Dashboard | `apps/web/app/(app)/dashboard/page.tsx` | 223 | `text-2xl font-bold` | Leave as-is (already appropriately sized) |
+| Design System | `apps/web/app/(app)/dashboard/design-system/page.tsx` | 50 | `text-2xl font-bold` | Leave as-is (internal tool page) |
+
+**Pages with other sizes**:
+| Page | File | Line | Current | Action |
+|------|------|------|---------|--------|
+| Login | `apps/web/app/page.tsx` | 51 | `text-lg` (h1) | Leave as-is (login card, small title) |
 
 ### Task 3.3: Make Tabs overflow-scrollable on mobile
 Multiple pages use `<TabsList>` with many tabs that can overflow on mobile.
@@ -394,7 +609,8 @@ Alternatively, add `overflow-x-auto scrollbar-hide` class to each `<TabsList>` c
 
 ### Acceptance Criteria (Phase 3)
 - [ ] Page headers stack vertically on mobile with action button below title
-- [ ] Title text is appropriately sized on mobile (text-2xl) vs desktop (text-3xl)
+- [ ] Title text is `text-2xl lg:text-3xl` on pages that had `text-3xl`; pages already at `text-2xl` are left unchanged
+- [ ] Dashboard h1 remains `text-2xl` (not changed)
 - [ ] Tabs are horizontally scrollable on mobile without visible scrollbar
 - [ ] No horizontal overflow caused by tab lists on any page
 
@@ -572,16 +788,32 @@ The `ProjectForm` component itself needs responsive treatment for its form field
 
 **Task 4.9b: TaskFilters responsive**
 **File**: `apps/web/components/task/TaskFilters.tsx`
+
+**Current state** (verified from source):
+- Line 58: Search input has `w-[280px]` (fixed width, will overflow on mobile)
+- Lines 78-79: Status/difficulty sections use `<div className="flex gap-4">` with `<div className="w-[50%]">` for status and unsized div for difficulty
+
 **Changes**:
 ```tsx
+// Search input (line 58):
 // BEFORE
 <Input ... className="pl-9 w-[280px]" />
 
 // AFTER
 <Input ... className="pl-9 w-full sm:w-[280px]" />
+
+// Filter columns container (line 78):
+// BEFORE
+<div className="flex gap-4">
+  <div className="w-[50%]">
+
+// AFTER
+<div className="flex flex-col sm:flex-row gap-4">
+  <div className="w-full sm:w-[50%]">
 ```
 - Search input full-width on mobile
-- Filter badges wrap naturally (already uses flex)
+- Status/difficulty filter sections stack vertically on mobile, side-by-side on sm+
+- `w-[50%]` becomes `w-full sm:w-[50%]`
 
 **Task 4.9c: KanbanBoard responsive**
 **File**: `apps/web/components/task/KanbanBoard.tsx`
@@ -743,6 +975,7 @@ The `ProjectForm` component itself needs responsive treatment for its form field
 - [ ] Project detail: Tabs scrollable, content single-column on mobile
 - [ ] Project forms (new/edit): Form fields stack on mobile
 - [ ] Task management: Kanban columns scroll horizontally with snap, filters stack
+- [ ] Task filters: `w-[50%]` becomes `w-full sm:w-[50%]`, search input full-width on mobile
 - [ ] Work logs: Calendar above sidebar on mobile, side-by-side on desktop
 - [ ] Schedule: Calendar above filters on mobile, side-by-side on desktop
 - [ ] Analytics: Charts single-column on mobile, responsive grids on larger screens
@@ -814,44 +1047,226 @@ export function ResponsiveTable({ children, minWidth = '600px' }: { children: Re
 ```
 Use this wrapper in ProjectListTable, UserListTable, TaskTable to enable horizontal scrolling on mobile.
 
-### Task 5.3: Dialog/Sheet responsive sizing
-**Files**: Various dialog components
-**Changes**: Most shadcn Dialogs already have responsive max-width. Verify that all dialogs using `BaseDialog` render correctly on mobile (should be near full-width with small margin).
+**Also update the barrel file** `apps/web/components/common/table/index.ts` to export the new component:
+```tsx
+// Current exports:
+export { TablePagination } from './TablePagination';
+export { TableLoading } from './TableLoading';
+export { TableError } from './TableError';
+export { TableEmpty } from './TableEmpty';
 
-The existing BaseDialog pattern `max-w-[min(700px,calc(100%-2.5rem))]` is already responsive-friendly. Verify no override breaks this.
+// Add:
+export { ResponsiveTable } from './ResponsiveTable';
+```
 
-### Task 5.4: Form components responsive
+### Task 5.3: Dialog/Sheet responsive sizing (verified from source)
+**Files**: `apps/web/components/ui/dialog.tsx`, `apps/web/components/ui/base-dialog.tsx`
+
+**Actual DialogContent default styles** (verified from `dialog.tsx` line 37-39):
+```
+'fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] ...'
+'flex flex-col max-h-[80vh] md:max-h-[80vh] max-w-[min(700px,calc(100%-2.5rem))] min-w-[320px] overflow-y-auto'
+```
+
+The DialogContent has TWO `max-w-` classes: `max-w-lg` (from shadcn default on line 38) AND `max-w-[min(700px,calc(100%-2.5rem))]` (custom override on line 39). The custom one wins because it appears later. This means:
+- On desktop: max-width is 700px
+- On mobile: max-width is `calc(100% - 2.5rem)` = viewport width minus 40px (20px margin each side)
+- min-width is 320px
+
+This is already responsive-friendly for mobile viewports >= 360px (360 - 40 = 320px effective width).
+
+**BaseDialog size overrides** (verified from `base-dialog.tsx` lines 39-41):
+- `size === 'sm'`: `sm:max-w-[500px]` -- on mobile (<640px), falls through to DialogContent default (calc-based)
+- `size === 'md'`: `sm:max-w-[600px]` -- on mobile (<640px), falls through to DialogContent default
+- `size === 'lg'`: `max-w-2xl` (672px) -- applies at all breakpoints
+
+**Action needed**: The `size === 'lg'` variant uses `max-w-2xl` without a `sm:` prefix, which means on mobile it tries to be 672px wide. This could overflow on small screens. Fix:
+```tsx
+// BEFORE (base-dialog.tsx line 41)
+size === 'lg' && 'max-w-2xl',
+
+// AFTER
+size === 'lg' && 'sm:max-w-2xl',
+```
+This makes the `lg` size also fall through to the responsive DialogContent default on mobile.
+
+**Dialog form content with grid-cols-2** (verified from source):
+- `AddTaskDialog.tsx` lines 197, 247: `grid grid-cols-2 gap-4`
+- `EditTaskDialog.tsx` lines 203, 229, 279: `grid grid-cols-2 gap-4`
+
+These 2-column grids inside dialogs will be too cramped on mobile (dialog width ~320px / 2 = 160px per column). Fix:
+```tsx
+// BEFORE (in AddTaskDialog, EditTaskDialog)
+<div className="grid grid-cols-2 gap-4">
+
+// AFTER
+<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+```
+**Files to update**:
+- `apps/web/components/task/AddTaskDialog.tsx` (lines 197, 247)
+- `apps/web/components/task/EditTaskDialog.tsx` (lines 203, 229, 279)
+
+**WorkLogDialog.tsx**: Has a `w-[100px]` element at line 402. Verify this is a small label/indicator that won't cause overflow. If it's inside a flex container it should be fine.
+
+### Task 5.4: Form components responsive + iOS zoom prevention
 **File**: `apps/web/components/form/` directory
 **Changes**: Verify FormInput, FormSelect, FormTextarea etc. use `w-full` by default. If any have fixed widths, change to responsive.
 
-### Task 5.5: ProductivityStats responsive
-**File**: `apps/web/components/analytics/ProductivityStats.tsx`
-**Changes**: Ensure the stats grid is responsive:
-```tsx
-// Likely pattern:
-<div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+**iOS zoom prevention** (related to Task 1.3 -- no `maximum-scale`):
+Add to `apps/web/app/globals.css`:
+```css
+/* Prevent iOS Safari auto-zoom on input focus (minimum 16px) */
+@media (max-width: 767px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
 ```
-Change to `grid-cols-1 sm:grid-cols-2 lg:grid-cols-4` if needed.
+This ensures all form inputs have >= 16px font-size on mobile, preventing Safari's auto-zoom without needing `maximum-scale=1`.
+
+### Task 5.5: ProductivityStats -- VERIFY ONLY (already responsive)
+**File**: `apps/web/components/analytics/ProductivityStats.tsx`
+
+**Verified from source** (line 15 and line 59):
+```tsx
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+```
+This component is **already responsive**: 1 column on mobile, 2 on md, 4 on lg. **No changes needed.** Simply verify it renders correctly at 360px during testing.
 
 ### Task 5.6: WorkLogCalendar touch interactions
 **File**: `apps/web/components/work-log/WorkLogCalendar.tsx`
 **Changes**: Ensure calendar date cells and events have adequate touch targets (min 44px). The FullCalendar library handles most touch interactions, but verify click handlers work on touch devices.
 
-### Task 5.7: TeamWorkLogFilters responsive
+### Task 5.7: TeamWorkLogFilters -- VERIFY ONLY (already responsive)
 **File**: `apps/web/components/work-log/TeamWorkLogFilters.tsx`
-**Changes**: Ensure filter dropdowns stack on mobile:
+
+**Verified from source** (line 87):
 ```tsx
-// Standard pattern:
-<div className="flex flex-col sm:flex-row flex-wrap gap-3">
+<div className="flex flex-col md:flex-row gap-4">
 ```
+The first row of filters **already uses `flex-col md:flex-row`**. The select triggers also already use `w-full md:w-48` (lines 90, 109).
+
+**However**, the second row (line 133) also uses `flex flex-col md:flex-row gap-4` which is good, BUT the children use fixed percentage widths:
+- Line 135: `<div className="w-[60%]">` (status filters)
+- Line 163: `<div className="w-[30%]">` (difficulty filters)
+
+These percentages need responsive treatment:
+```tsx
+// BEFORE (line 135)
+<div className="w-[60%]">
+
+// AFTER
+<div className="w-full md:w-[60%]">
+
+// BEFORE (line 163)
+<div className="w-[30%]">
+
+// AFTER
+<div className="w-full md:w-[30%]">
+```
+On mobile (flex-col), `w-[60%]` would make the status filter section only 60% of full width, wasting space. Change to `w-full` on mobile.
+
+### Task 5.8: Toaster positioning for mobile
+**File**: `apps/web/components/ui/toaster.tsx`
+
+**Current** (line 8): `position="top-right"`
+
+On a 360px mobile viewport, toasts positioned at top-right may be too wide or partially clipped. The Sonner library supports responsive positioning.
+
+**Change**:
+```tsx
+// BEFORE
+<Sonner
+  position="top-right"
+  duration={3000}
+
+// AFTER
+<Sonner
+  position="top-center"
+  duration={3000}
+  className="!right-0 sm:!right-auto"
+  toastOptions={{
+    classNames: {
+      toast:
+        'group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg w-full sm:w-auto',
+```
+
+Alternatively, a simpler approach that works well: change to `position="top-center"` on all viewports. This is actually more natural UX on mobile and still looks good on desktop.
+
+```tsx
+<Sonner
+  position="top-center"
+  duration={3000}
+```
+
+Decision: Use `top-center` globally. It is simpler and works well on both mobile and desktop.
+
+### Task 5.9: TablePagination responsive
+**File**: `apps/web/components/common/table/TablePagination.tsx`
+
+**Current** (line 66): `<div className="flex items-center justify-center px-4 py-4 border-t border-slate-100">`
+
+The PaginationContent renders: Previous button + up to 7 page number links + ellipsis + Next button. At 360px wide, this can total ~9 items at ~36px each = ~324px, which is tight but possible.
+
+**Potential overflow scenario**: When `totalPages > 7`, the pagination shows: [이전] [1] [...] [4] [5] [6] [...] [10] [다음] = 9 items. The "이전" and "다음" text labels (PaginationPrevious, PaginationNext) take extra space.
+
+**Changes**:
+```tsx
+// BEFORE (line 66)
+<div className="flex items-center justify-center px-4 py-4 border-t border-slate-100">
+
+// AFTER
+<div className="flex items-center justify-center px-2 sm:px-4 py-4 border-t border-slate-100">
+```
+
+Additionally, hide the "이전"/"다음" text labels on very small screens, showing only the chevron icons:
+```tsx
+// PaginationPrevious children (line 71-79):
+<PaginationPrevious
+  onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+  className={cn(
+    currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer',
+    'gap-1 px-2 sm:px-2.5'
+  )}
+>
+  <span className="hidden sm:inline">이전</span>
+</PaginationPrevious>
+
+// PaginationNext children (line 99-109):
+<PaginationNext
+  onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+  className={cn(
+    currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer',
+    'gap-1 px-2 sm:px-2.5'
+  )}
+>
+  <span className="hidden sm:inline">다음</span>
+</PaginationNext>
+```
+
+### Task 5.10: Dialog form content responsive (AddTaskDialog, EditTaskDialog)
+**File**: `apps/web/components/task/AddTaskDialog.tsx`
+**File**: `apps/web/components/task/EditTaskDialog.tsx`
+
+(Detailed in Task 5.3 above. Listed here as a separate task for execution tracking.)
+
+All `grid grid-cols-2 gap-4` instances inside these dialogs need `grid-cols-1 sm:grid-cols-2`:
+- `AddTaskDialog.tsx` lines 197, 247
+- `EditTaskDialog.tsx` lines 203, 229, 279
 
 ### Acceptance Criteria (Phase 5)
 - [ ] Calendar renders cleanly on 360px without overflow
 - [ ] Calendar day cells and events are readable on mobile
 - [ ] All data tables have horizontal scroll wrapper on mobile
-- [ ] All dialogs/sheets render within viewport on mobile
+- [ ] ResponsiveTable is exported from `common/table/index.ts` barrel file
+- [ ] All dialogs/sheets render within viewport on mobile (BaseDialog lg variant fixed)
+- [ ] Dialog form grids stack to single column on mobile (<640px)
 - [ ] All form fields are full-width on mobile
-- [ ] Filter dropdowns stack vertically on mobile
+- [ ] Input font-size is >= 16px on mobile (prevents iOS auto-zoom)
+- [ ] Toaster uses `top-center` positioning (works on 360px mobile)
+- [ ] TablePagination fits within 360px width (text labels hidden on small screens)
+- [ ] TeamWorkLogFilters percentage widths become full-width on mobile
+- [ ] ProductivityStats verified as already responsive (no changes)
 - [ ] Touch targets are minimum 44px on interactive elements
 
 ---
@@ -860,15 +1275,15 @@ Change to `grid-cols-1 sm:grid-cols-2 lg:grid-cols-4` if needed.
 
 | Commit | Scope | Description |
 |--------|-------|-------------|
-| 1 | Phase 1 | Remove desktop barriers (min-width), add responsive utilities |
-| 2 | Phase 2 | Mobile navigation: sidebar drawer + hamburger menu |
-| 3 | Phase 3 | Layout components: responsive headers, titles, tabs |
+| 1 | Phase 1 | Remove desktop barriers (min-width), add viewport export, add responsive utilities |
+| 2 | Phase 2 | Mobile navigation: sidebar drawer with renderNavigation pattern + hamburger menu |
+| 3 | Phase 3 | Layout components: responsive headers, per-page title audit, tabs |
 | 4 | Phase 4.1-4.4 | Responsive pages: login, dashboard, profile, design-system |
 | 5 | Phase 4.5-4.8 | Responsive pages: projects (list, new, detail, edit) |
-| 6 | Phase 4.9 | Responsive pages: task management (kanban, table, filters) |
+| 6 | Phase 4.9 | Responsive pages: task management (kanban, table, filters with w-[50%] fix) |
 | 7 | Phase 4.10-4.11 | Responsive pages: work-logs, schedule (calendar layouts) |
 | 8 | Phase 4.12-4.15 | Responsive pages: analytics, users |
-| 9 | Phase 5 | Component-level fixes: calendar, tables, forms, dialogs |
+| 9 | Phase 5 | Component fixes: calendar, tables, dialogs, toaster, pagination, iOS zoom, barrel file |
 
 ---
 
@@ -882,6 +1297,7 @@ Change to `grid-cols-1 sm:grid-cols-2 lg:grid-cols-4` if needed.
 | Kanban drag-and-drop on touch | Low | Low | The KanbanBoard already uses `TouchSensor` from dnd-kit with appropriate `delay` and `tolerance`. Should work on mobile. |
 | Table readability on mobile | Medium | Medium | Use horizontal scroll with min-width rather than hiding too many columns. Users can scroll to see all data. |
 | View transitions on mobile | Low | Low | CSS view transitions are progressive enhancement. They work or gracefully degrade. |
+| iOS input zoom | Medium | Low | Addressed by setting `font-size: 16px` on inputs on mobile in globals.css, instead of `maximum-scale=1` which violates WCAG. |
 
 ---
 
@@ -911,9 +1327,15 @@ Change to `grid-cols-1 sm:grid-cols-2 lg:grid-cols-4` if needed.
    - Scroll tables horizontally on mobile
    - Interact with calendar (select dates, view events)
 
-4. **No Horizontal Scroll**: At each breakpoint, verify no horizontal scrollbar appears on the body/page level.
+4. **No Horizontal Scroll**: At each breakpoint, verify no horizontal scrollbar appears on the body/page level. Note: `overflow-x: hidden` on body is a safety net, but each component should be individually verified.
 
 5. **Desktop Regression**: After all changes, verify the 1440px desktop layout matches the current production layout exactly.
+
+6. **Toast Notification**: Verify toast appears centered and readable on 360px mobile.
+
+7. **Pagination**: Verify TablePagination fits within 360px without overflow, with prev/next text hidden on small screens.
+
+8. **Dialogs**: Open every dialog (AddTask, EditTask, WorkLog, Schedule, AddMember, TeamWorkLogDetail) on 360px and verify form fields are single-column and content doesn't overflow.
 
 ### Automated Verification
 - Run `pnpm --filter web build` to verify no build errors
@@ -924,14 +1346,14 @@ Change to `grid-cols-1 sm:grid-cols-2 lg:grid-cols-4` if needed.
 
 ## File Change Summary
 
-### Files Modified (estimated ~25 files)
+### Files Modified (estimated ~30 files)
 
 | File | Phase | Type of Change |
 |------|-------|----------------|
-| `apps/web/app/globals.css` | 1, 5 | Remove min-width, add utilities, calendar responsive |
+| `apps/web/app/globals.css` | 1, 5 | Remove min-width, add utilities, calendar responsive, iOS input zoom |
 | `apps/web/app/(app)/layout.tsx` | 1, 2 | Remove min-w, add mobile state, responsive padding |
-| `apps/web/app/layout.tsx` | 1 | Verify viewport meta |
-| `apps/web/components/layout/Sidebar.tsx` | 2 | Desktop/mobile split, Sheet drawer |
+| `apps/web/app/layout.tsx` | 1 | Add separate `viewport` export (NOT inside metadata) |
+| `apps/web/components/layout/Sidebar.tsx` | 2 | renderNavigation(isExpanded) pattern, Sheet drawer, route-change close |
 | `apps/web/components/layout/Header.tsx` | 2 | Hamburger button, responsive padding |
 | `apps/web/app/page.tsx` | 4 | Login responsive padding |
 | `apps/web/app/(app)/dashboard/page.tsx` | 3, 4 | Header, grids responsive |
@@ -944,15 +1366,22 @@ Change to `grid-cols-1 sm:grid-cols-2 lg:grid-cols-4` if needed.
 | `apps/web/components/project/ProjectForm.tsx` | 4 | Form grid responsive |
 | `apps/web/app/(app)/tasks/[projectId]/page.tsx` | 4 | Minor responsive |
 | `apps/web/components/task/TaskList.tsx` | 4 | View toggle responsive |
-| `apps/web/components/task/TaskFilters.tsx` | 4 | Search input responsive |
+| `apps/web/components/task/TaskFilters.tsx` | 4 | Search w-full, w-[50%] to w-full sm:w-[50%] |
 | `apps/web/components/task/KanbanBoard.tsx` | 4 | Scroll snap, margins |
 | `apps/web/components/task/KanbanColumn.tsx` | 4 | Column width responsive |
+| `apps/web/components/task/AddTaskDialog.tsx` | 5 | grid-cols-1 sm:grid-cols-2 (lines 197, 247) |
+| `apps/web/components/task/EditTaskDialog.tsx` | 5 | grid-cols-1 sm:grid-cols-2 (lines 203, 229, 279) |
 | `apps/web/app/(app)/work-logs/page.tsx` | 4 | Sidebar/calendar stack |
+| `apps/web/components/work-log/TeamWorkLogFilters.tsx` | 5 | w-[60%]/w-[30%] to w-full md:w-[60%]/w-full md:w-[30%] |
 | `apps/web/components/schedule/ProjectScheduleList.tsx` | 4 | Sidebar/calendar stack |
 | `apps/web/app/(app)/analytics/page.tsx` | 4 | Header, chart grids |
 | `apps/web/app/(app)/users/page.tsx` | 3 | Header responsive |
 | `apps/web/components/admin/UserListTable.tsx` | 4 | Filters, table responsive |
 | `apps/web/app/(app)/users/[id]/page.tsx` | 4 | Minor responsive |
+| `apps/web/components/ui/base-dialog.tsx` | 5 | lg size: `max-w-2xl` to `sm:max-w-2xl` |
+| `apps/web/components/ui/toaster.tsx` | 5 | position `top-right` to `top-center` |
+| `apps/web/components/common/table/TablePagination.tsx` | 5 | Responsive padding, hide prev/next text on mobile |
+| `apps/web/components/common/table/index.ts` | 5 | Add ResponsiveTable export |
 
 ### Files Created (1 file)
 | File | Phase | Purpose |
@@ -970,3 +1399,7 @@ Change to `grid-cols-1 sm:grid-cols-2 lg:grid-cols-4` if needed.
 5. **Desktop Preservation**: 1440px desktop layout is pixel-identical to current production
 6. **Build Success**: `pnpm --filter web build` passes without errors
 7. **No Feature Loss**: All features remain accessible on all viewports (may be reorganized but not removed)
+8. **Accessibility**: Pinch-to-zoom remains enabled (no maximum-scale restriction)
+9. **iOS Compatibility**: No input auto-zoom on iOS Safari (font-size >= 16px on mobile inputs)
+10. **Toast Visibility**: Toast notifications visible and readable on 360px mobile
+11. **Pagination Usability**: Page navigation controls fit within 360px viewport
