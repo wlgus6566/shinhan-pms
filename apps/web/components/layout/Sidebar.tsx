@@ -22,6 +22,12 @@ import {
 import { useState, useCallback, useEffect } from 'react';
 import { DEPARTMENT_LABELS, type Department } from '@repo/schema';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 const menuItems = [
   { icon: LayoutDashboard, label: '대시보드', href: '/dashboard' },
@@ -81,6 +87,7 @@ export function Sidebar({
    * @param onLinkClick - optional callback to fire when a nav link is clicked
    */
   const renderNavigation = (isExpanded: boolean, onLinkClick?: () => void) => (
+    <TooltipProvider>
     <div className="flex flex-col h-full">
       {/* Logo Area */}
       <div
@@ -113,7 +120,7 @@ export function Sidebar({
           {/* 일반 메뉴 아이템 - 프로젝트까지 */}
           {menuItems.slice(0, 2).map((item) => {
             const active = isActive(item.href);
-            return (
+            const linkEl = (
               <Link
                 key={item.href}
                 href={item.href}
@@ -139,7 +146,7 @@ export function Sidebar({
                 {isExpanded && (
                   <span
                     className={cn(
-                      'text-sm font-medium truncate',
+                      'text-sm font-medium truncate animate-[fadeIn_0.2s_ease-out]',
                       active && 'font-semibold',
                     )}
                   >
@@ -148,6 +155,17 @@ export function Sidebar({
                 )}
               </Link>
             );
+            if (!isExpanded) {
+              return (
+                <Tooltip key={item.href} delayDuration={0}>
+                  <TooltipTrigger asChild>{linkEl}</TooltipTrigger>
+                  <TooltipContent side="right" className="font-medium">
+                    {item.label}
+                  </TooltipContent>
+                </Tooltip>
+              );
+            }
+            return linkEl;
           })}
 
           {/* 업무 관리 드롭다운 메뉴 */}
@@ -232,7 +250,7 @@ export function Sidebar({
           {/* 나머지 메뉴 아이템 */}
           {menuItems.slice(2).map((item) => {
             const active = isActive(item.href);
-            return (
+            const linkEl = (
               <Link
                 key={item.href}
                 href={item.href}
@@ -258,7 +276,7 @@ export function Sidebar({
                 {isExpanded && (
                   <span
                     className={cn(
-                      'text-sm font-medium truncate',
+                      'text-sm font-medium truncate animate-[fadeIn_0.2s_ease-out]',
                       active && 'font-semibold',
                     )}
                   >
@@ -267,6 +285,17 @@ export function Sidebar({
                 )}
               </Link>
             );
+            if (!isExpanded) {
+              return (
+                <Tooltip key={item.href} delayDuration={0}>
+                  <TooltipTrigger asChild>{linkEl}</TooltipTrigger>
+                  <TooltipContent side="right" className="font-medium">
+                    {item.label}
+                  </TooltipContent>
+                </Tooltip>
+              );
+            }
+            return linkEl;
           })}
         </div>
 
@@ -280,7 +309,7 @@ export function Sidebar({
             )}
             {adminMenuItems.map((item) => {
               const active = isActive(item.href);
-              return (
+              const linkEl = (
                 <Link
                   key={item.href}
                   href={item.href}
@@ -306,7 +335,7 @@ export function Sidebar({
                   {isExpanded && (
                     <span
                       className={cn(
-                        'text-sm font-medium truncate',
+                        'text-sm font-medium truncate animate-[fadeIn_0.2s_ease-out]',
                         active && 'font-semibold',
                       )}
                     >
@@ -315,6 +344,17 @@ export function Sidebar({
                   )}
                 </Link>
               );
+              if (!isExpanded) {
+                return (
+                  <Tooltip key={item.href} delayDuration={0}>
+                    <TooltipTrigger asChild>{linkEl}</TooltipTrigger>
+                    <TooltipContent side="right" className="font-medium">
+                      {item.label}
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              }
+              return linkEl;
             })}
           </div>
         )}
@@ -371,6 +411,7 @@ export function Sidebar({
         )}
       </div>
     </div>
+    </TooltipProvider>
   );
 
   return (

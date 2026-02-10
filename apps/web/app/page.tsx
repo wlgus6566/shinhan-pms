@@ -38,14 +38,54 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1e1f2e] flex">
+    <div className="min-h-screen flex">
+      {/* Left Side - Branding Panel (desktop only) */}
+      <div className="hidden lg:flex lg:w-[480px] xl:w-[520px] bg-[#1e1f2e] relative overflow-hidden flex-col justify-between p-10">
+        {/* Background decoration */}
+        <div className="absolute inset-0 opacity-[0.03]">
+          <div className="absolute top-20 -left-10 w-72 h-72 bg-blue-500 rounded-full blur-3xl" />
+          <div className="absolute bottom-20 right-0 w-96 h-96 bg-purple-500 rounded-full blur-3xl" />
+        </div>
+
+        {/* Logo */}
+        <div className="relative z-10 flex items-center gap-3">
+          <div className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25">
+            <span className="text-white font-bold text-lg">E</span>
+          </div>
+          <span className="text-white font-bold text-lg tracking-tight">
+            Emotion PMS
+          </span>
+        </div>
+
+        {/* Tagline */}
+        <div className="relative z-10 space-y-6">
+          <h2 className="text-3xl font-bold text-white leading-tight">
+            이모션의
+            <br />
+            <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              프로젝트 관리 시스템
+            </span>
+          </h2>
+          <p className="text-slate-400 text-sm leading-relaxed max-w-sm">
+            팀 업무 관리, 일정 추적, 리포트 분석까지.
+            <br />
+            프로젝트의 모든 것을 한 곳에서 관리하세요.
+          </p>
+        </div>
+
+        {/* Footer */}
+        <p className="relative z-10 text-xs text-slate-600">
+          &copy; 2026 Emotion Inc. All rights reserved.
+        </p>
+      </div>
+
       {/* Right Side - Login Form */}
       <div className="flex-1 flex items-center justify-center p-4 sm:p-8 bg-slate-50">
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-md animate-[fadeIn_0.4s_ease-out]">
           {/* Mobile Logo */}
-          <div className="flex items-center justify-center gap-3 mb-10">
+          <div className="flex items-center justify-center gap-3 mb-10 lg:hidden">
             <div className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25">
-              <span className="text-white font-bold text-lg">C</span>
+              <span className="text-white font-bold text-lg">E</span>
             </div>
             <div>
               <h1 className="text-slate-900 font-bold text-lg tracking-tight">

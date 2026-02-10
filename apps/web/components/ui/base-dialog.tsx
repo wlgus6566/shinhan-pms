@@ -43,7 +43,7 @@ export function BaseDialog({
         )}
       >
         {/* Sticky Header */}
-        <div className="sticky top-0 bg-background z-10 border-b pb-4 -mx-6 px-6">
+        <div className="sticky top-0 z-10 border-b pb-4 -mx-6 px-6">
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
             {description && (
@@ -64,7 +64,7 @@ export function BaseDialog({
 
         {/* Sticky Footer (optional) */}
         {footer && (
-          <div className="sticky bottom-0 bg-background z-10 border-t pt-4 -mx-6 px-6 flex justify-end gap-2">
+          <div className="sticky bottom-0 z-10 border-t pt-4 -mx-6 px-6 flex justify-end gap-2">
             {footer}
           </div>
         )}

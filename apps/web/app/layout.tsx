@@ -1,17 +1,7 @@
 import type { Metadata, Viewport } from 'next';
-import localFont from 'next/font/local';
 import { ViewTransitions } from 'next-view-transitions';
 import './globals.css';
 import { Providers } from '@/components/Providers';
-
-const geistSans = localFont({
-  src: './fonts/GeistVF.woff',
-  variable: '--font-geist-sans',
-});
-const geistMono = localFont({
-  src: './fonts/GeistMonoVF.woff',
-  variable: '--font-geist-mono',
-});
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -31,7 +21,7 @@ export default function RootLayout({
   return (
     <ViewTransitions>
       <html lang="ko" suppressHydrationWarning>
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <body className="antialiased">
           <Providers>
             {children}
           </Providers>

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { memo, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useCountUp } from '@/hooks/useCountUp';
 import {
   Card,
   CardContent,
@@ -39,26 +40,31 @@ const colorClassesMap = {
     bar: 'from-blue-400 via-blue-500 to-cyan-400',
     iconBg: 'bg-blue-50',
     iconText: 'text-blue-500',
+    cardBg: 'from-blue-50/50 to-transparent',
   },
   emerald: {
     bar: 'from-emerald-400 via-emerald-500 to-teal-400',
     iconBg: 'bg-emerald-50',
     iconText: 'text-emerald-500',
+    cardBg: 'from-emerald-50/50 to-transparent',
   },
   amber: {
     bar: 'from-amber-400 via-amber-500 to-orange-400',
     iconBg: 'bg-amber-50',
     iconText: 'text-amber-500',
+    cardBg: 'from-amber-50/50 to-transparent',
   },
   rose: {
     bar: 'from-rose-400 via-rose-500 to-pink-400',
     iconBg: 'bg-rose-50',
     iconText: 'text-rose-500',
+    cardBg: 'from-rose-50/50 to-transparent',
   },
   sky: {
     bar: 'from-sky-400 via-sky-500 to-cyan-400',
     iconBg: 'bg-sky-50',
     iconText: 'text-sky-500',
+    cardBg: 'from-sky-50/50 to-transparent',
   },
 } as const;
 
@@ -100,8 +106,20 @@ const StatsCard = memo(function StatsCard({
   isLoading?: boolean;
 }) {
   const colorClass = colorClassesMap[color];
+
+  // 숫자 부분만 추출하여 카운트업 적용
+  const numericValue = typeof value === 'number'
+    ? value
+    : parseFloat(value) || 0;
+  const suffix = typeof value === 'string' ? value.replace(/[\d.]/g, '') : '';
+  const animatedValue = useCountUp(isLoading ? 0 : numericValue);
+
+  const displayValue = suffix
+    ? `${animatedValue % 1 === 0 ? animatedValue : animatedValue.toFixed(1)}${suffix}`
+    : animatedValue;
+
   return (
-    <div className="relative bg-white rounded-2xl border border-slate-100 overflow-hidden hover:shadow-lg transition-all duration-200">
+    <div className={`relative bg-gradient-to-br ${colorClass.cardBg} bg-white rounded-2xl border border-slate-100 overflow-hidden hover:shadow-lg transition-all duration-200`}>
       {/* Left gradient bar */}
       <div
         className={`absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b ${colorClass.bar}`}
@@ -120,8 +138,8 @@ const StatsCard = memo(function StatsCard({
               <Loader2 className="h-6 w-6 animate-spin text-slate-300" />
             ) : (
               <>
-                <p className="text-2xl font-bold text-slate-900 leading-none">
-                  {value}
+                <p className="text-2xl font-bold text-slate-900 leading-none tabular-nums">
+                  {displayValue}
                 </p>
                 <p className="text-xs text-slate-500 mt-1 truncate">{label}</p>
               </>

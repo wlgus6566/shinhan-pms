@@ -115,7 +115,7 @@ export function LoginForm() {
               type="password"
               placeholder="••••••••"
             />
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full gradient-primary border-none text-white h-11 text-sm font-semibold rounded-xl" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               로그인
             </Button>

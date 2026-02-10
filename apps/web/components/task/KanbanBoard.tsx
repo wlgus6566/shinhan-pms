@@ -143,9 +143,10 @@ export function KanbanBoard({
       </div>
 
       {isUpdating && (
-        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-4 shadow-lg">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emotion-primary"></div>
+        <div className="fixed inset-0 bg-black/10 backdrop-blur-[2px] flex items-center justify-center z-50 animate-[fadeIn_0.15s_ease-out]">
+          <div className="bg-white rounded-2xl px-6 py-4 shadow-xl shadow-slate-900/10 flex items-center gap-3">
+            <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent" />
+            <span className="text-sm font-medium text-slate-600">상태 변경 중...</span>
           </div>
         </div>
       )}

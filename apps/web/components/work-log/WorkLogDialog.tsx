@@ -534,87 +534,87 @@ export function WorkLogDialog({
 
   return (
     <>
-    <BaseDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      size="md"
-      title={mode === 'edit' ? '업무일지 수정' : '업무일지 작성'}
-      description={format(selectedDate, 'yyyy년 M월 d일 (EEEE)', {
-        locale: ko,
-      })}
-      footer={
-        noEntriesAvailable ? (
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-          >
-            닫기
-          </Button>
-        ) : (
-          <>
+      <BaseDialog
+        open={open}
+        onOpenChange={onOpenChange}
+        size="md"
+        title={mode === 'edit' ? '업무일지 수정' : '업무일지 작성'}
+        description={format(selectedDate, 'yyyy년 M월 d일 (EEEE)', {
+          locale: ko,
+        })}
+        footer={
+          noEntriesAvailable ? (
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              disabled={isSubmitting || isDeleting}
             >
-              취소
+              닫기
             </Button>
-            {mode === 'edit' && onDelete && (
+          ) : (
+            <>
               <Button
                 type="button"
-                variant="destructive"
-                onClick={() => setShowDeleteConfirm(true)}
+                variant="outline"
+                onClick={() => onOpenChange(false)}
                 disabled={isSubmitting || isDeleting}
-                loading={isDeleting}
               >
-                삭제
+                취소
               </Button>
-            )}
-            <Button
-              onClick={multiForm.handleSubmit(handleMultiFormSubmit)}
-              disabled={isSubmitting || isDeleting}
-            >
-              {isSubmitting && (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              {mode === 'edit' && onDelete && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  disabled={isSubmitting || isDeleting}
+                  loading={isDeleting}
+                >
+                  삭제
+                </Button>
               )}
-              {mode === 'edit' ? '수정' : '작성'} ({fields.length}건)
-            </Button>
-          </>
-        )
-      }
-    >
-      {noEntriesAvailable ? (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <CheckCircle2 className="h-16 w-16 text-emerald-500 mb-4" />
-          <h3 className="text-lg font-semibold text-slate-800 mb-2">
-            모든 업무일지가 작성되었습니다
-          </h3>
-          <p className="text-slate-500">
-            선택한 날짜에 모든 업무에 대한 일지가 이미 작성되어 있습니다.
-          </p>
-        </div>
-      ) : (
-        <Form {...multiForm}>
-          <form
-            onSubmit={multiForm.handleSubmit(handleMultiFormSubmit)}
-            className="space-y-4"
-          >
-            {fields.map((_, index) => renderEntryCard(index))}
-          </form>
-        </Form>
-      )}
-    </BaseDialog>
-    <ConfirmDialog
-      open={showDeleteConfirm}
-      onOpenChange={setShowDeleteConfirm}
-      onConfirm={handleDelete}
-      title="업무일지 삭제"
-      description="정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
-      confirmLabel="삭제"
-      variant="destructive"
-    />
+              <Button
+                onClick={multiForm.handleSubmit(handleMultiFormSubmit)}
+                disabled={isSubmitting || isDeleting}
+              >
+                {isSubmitting && (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                )}
+                {mode === 'edit' ? '수정' : '작성'}
+              </Button>
+            </>
+          )
+        }
+      >
+        {noEntriesAvailable ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <CheckCircle2 className="h-16 w-16 text-emerald-500 mb-4" />
+            <h3 className="text-lg font-semibold text-slate-800 mb-2">
+              모든 업무일지가 작성되었습니다
+            </h3>
+            <p className="text-slate-500">
+              선택한 날짜에 모든 업무에 대한 일지가 이미 작성되어 있습니다.
+            </p>
+          </div>
+        ) : (
+          <Form {...multiForm}>
+            <form
+              onSubmit={multiForm.handleSubmit(handleMultiFormSubmit)}
+              className="space-y-4"
+            >
+              {fields.map((_, index) => renderEntryCard(index))}
+            </form>
+          </Form>
+        )}
+      </BaseDialog>
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        onConfirm={handleDelete}
+        title="업무일지 삭제"
+        description="정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
+        confirmLabel="삭제"
+        variant="destructive"
+      />
     </>
   );
 }

@@ -32,8 +32,8 @@ export function KanbanColumn({ status, tasks, onTaskClick }: KanbanColumnProps) 
       <div
         ref={setNodeRef}
         className={cn(
-          'flex-1 p-3 space-y-3 min-h-[200px] bg-gray-50 rounded-b-lg',
-          isOver && 'bg-blue-50 ring-2 ring-blue-300',
+          'flex-1 p-3 space-y-3 min-h-[200px] bg-gray-50 rounded-b-lg transition-all duration-200',
+          isOver && 'bg-blue-50/80 ring-2 ring-blue-400/50 ring-offset-1 scale-[1.01]',
         )}
       >
         {tasks.length === 0 ? (
