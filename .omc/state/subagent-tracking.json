@@ -30,11 +30,13 @@
       "agent_type": "oh-my-claudecode:critic",
       "started_at": "2026-02-10T06:51:47.437Z",
       "parent_mode": "none",
-      "status": "running"
+      "status": "completed",
+      "completed_at": "2026-02-10T06:53:25.965Z",
+      "duration_ms": 98528
     }
   ],
   "total_spawned": 4,
-  "total_completed": 2,
+  "total_completed": 3,
   "total_failed": 0,
-  "last_updated": "2026-02-10T06:51:47.540Z"
+  "last_updated": "2026-02-10T06:55:02.415Z"
 }
