@@ -58,7 +58,6 @@ yarn-error.log*
 pnpm-debug.log*
 
 # Prisma
-**/prisma/migrations/**/migration.sql
 *.db
 *.db-journal
 

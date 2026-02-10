@@ -1,0 +1,59 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script_stop: true
+          command_timeout: 15m
+          script: |
+            set -e
+
+            cd ~/pms
+
+            echo "=== Pull latest code ==="
+            git fetch origin main
+            git reset --hard origin/main
+
+            echo "=== Install dependencies ==="
+            pnpm install --frozen-lockfile
+
+            echo "=== Build shared schema ==="
+            cd packages/schema
+            npx tsc -b
+            cd ~/pms
+
+            echo "=== Build & Deploy API ==="
+            cd apps/api
+            pnpm prisma:generate
+            npx prisma migrate deploy
+            pnpm build
+            pm2 restart pms-api || pm2 start dist/src/main.js --name pms-api
+            cd ~/pms
+
+            echo "=== Build & Deploy Web ==="
+            cd apps/web
+            NODE_OPTIONS="--max-old-space-size=512" pnpm build
+            pm2 restart pms-web || PORT=3001 pm2 start node --name pms-web -- node_modules/next/dist/bin/next start -p 3001
+
+            echo "=== Save PM2 state ==="
+            pm2 save
+
+            echo "=== Deploy complete ==="
