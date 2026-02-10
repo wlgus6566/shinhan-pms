@@ -263,9 +263,9 @@ export default function WorkLogsPage() {
   return (
     <div className="space-y-6 page-animate">
       {/* 페이지 헤더 */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800">업무일지</h1>
+          <h1 className="text-2xl lg:text-3xl font-bold text-slate-800">업무일지</h1>
           <p className="text-slate-500 mt-1">
             담당 업무의 일지를 작성하고 관리하세요
           </p>
@@ -306,8 +306,8 @@ export default function WorkLogsPage() {
           </p>
         </div>
       ) : (
-        <div className="flex gap-6">
-          <div className="flex flex-col gap-6 w-[30%]">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
+          <div className="flex flex-col gap-4 lg:gap-6 w-full lg:w-[30%] order-2 lg:order-1">
             <WorkLogList
               workLogs={filteredWorkLogs}
               currentUserId={user?.id.toString()}
@@ -318,8 +318,8 @@ export default function WorkLogsPage() {
             <MyTaskList tasks={filteredTasks} />
           </div>
 
-          {/* 가운데: 달력 */}
-          <div className="flex-1">
+          {/* 달력 (모바일에서 먼저 표시) */}
+          <div className="flex-1 order-1 lg:order-2">
             <WorkLogCalendar
               workLogs={filteredWorkLogs}
               selectedDate={selectedDate}

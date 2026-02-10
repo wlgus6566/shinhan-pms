@@ -16,7 +16,7 @@ export function KanbanColumn({ status, tasks, onTaskClick }: KanbanColumnProps) 
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
   return (
-    <div className="flex flex-col min-w-[320px] max-w-[320px]">
+    <div className="flex flex-col min-w-[280px] max-w-[280px] lg:min-w-[320px] lg:max-w-[320px] snap-start">
       {/* Header: 상태명 + 개수 */}
       <div
         className={cn(

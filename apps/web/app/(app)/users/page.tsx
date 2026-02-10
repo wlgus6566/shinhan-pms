@@ -13,9 +13,9 @@ export default function UsersAdminPage() {
 
   return (
     <div className="page-animate">
-      <div className="mb-8 flex justify-between items-start">
+      <div className="mb-6 lg:mb-8 flex flex-col sm:flex-row justify-between items-start gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-slate-900">
             멤버 관리
           </h1>
           <p className="text-muted-foreground mt-1">

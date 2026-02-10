@@ -43,7 +43,7 @@ export default function UserCreatePage() {
       </Button>
 
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+        <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-slate-900">
           멤버 등록
         </h1>
         <p className="text-muted-foreground mt-1">

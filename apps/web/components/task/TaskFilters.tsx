@@ -55,7 +55,7 @@ export function TaskFilters({
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="pl-9 w-[280px]"
+            className="pl-9 w-full sm:w-[280px]"
           />
         </div>
         <Button
@@ -75,8 +75,8 @@ export function TaskFilters({
         )}
       </div>
 
-      <div className="flex gap-4">
-        <div className="w-[50%]">
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="w-full sm:w-[50%]">
           <div className="text-sm font-medium mb-2">상태</div>
           <div className="flex flex-wrap gap-2">
             {(Object.keys(STATUS_LABELS) as TaskStatus[]).map((status) => {

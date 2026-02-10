@@ -194,7 +194,7 @@ export function AddTaskDialog({ projectId, projectMembers, open, onOpenChange, o
             placeholder="신한카드"
           />
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormCheckboxGroup
               control={form.control}
               name="planningAssigneeIds"
@@ -244,7 +244,7 @@ export function AddTaskDialog({ projectId, projectMembers, open, onOpenChange, o
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormInput
               control={form.control}
               name="startDate"

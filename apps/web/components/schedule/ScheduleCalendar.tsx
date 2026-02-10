@@ -136,12 +136,19 @@ export function ScheduleCalendar({
                 TEAM_SCOPE_FILTER_COLORS[schedule.teamScope as TeamScope],
             }}
           />
-          <span className="text-[12px] font-medium text-slate-700 truncate block gap-1">
+          <span className="text-[12px] font-medium text-slate-700 truncate block gap-1 sm:block hidden">
             {schedule.scheduleType === 'VACATION'
               ? `🌴 ${schedule.creatorName}  연차`
               : schedule.scheduleType === 'HALF_DAY'
                 ? `🌴 ${schedule.creatorName}  반차`
                 : `${format(parseUTCAsLocal(schedule.startDate), 'HH:mm')} ${schedule.title}`}
+          </span>
+          <span className="text-[12px] font-medium text-slate-700 truncate block gap-1 sm:hidden block">
+            {schedule.scheduleType === 'VACATION'
+              ? `🌴 ${schedule.creatorName}  연차`
+              : schedule.scheduleType === 'HALF_DAY'
+                ? `🌴 ${schedule.creatorName}  반차`
+                : `${schedule.title}`}
           </span>
         </div>
       );
@@ -165,85 +172,150 @@ export function ScheduleCalendar({
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-8 w-8"
-            onClick={handlePrevMonth}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-8 w-8"
-            onClick={handleNextMonth}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleToday}
-            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-          >
-            오늘
-          </Button>
+      {/* Header - Desktop: single row / Mobile: two clean rows */}
+      <div className="border-b border-slate-100 bg-slate-50/50">
+        {/* Desktop header (single row) */}
+        <div className="hidden sm:flex items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8"
+              onClick={handlePrevMonth}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8"
+              onClick={handleNextMonth}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleToday}
+              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+            >
+              오늘
+            </Button>
+          </div>
+
+          <h2 className="text-lg font-bold text-slate-800">
+            {format(currentMonth, 'yyyy년 M월', { locale: ko })}
+          </h2>
+
+          <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
+            <Button
+              variant={viewMode === 'month' ? 'default' : 'ghost'}
+              size="sm"
+              className={cn(
+                'h-7 px-3',
+                viewMode === 'month' ? '' : 'text-slate-600',
+              )}
+              onClick={() => setViewMode('month')}
+            >
+              <Calendar className="h-4 w-4 mr-1" />월
+            </Button>
+            <Button
+              variant={viewMode === 'week' ? 'default' : 'ghost'}
+              size="sm"
+              className={cn(
+                'h-7 px-3',
+                viewMode === 'week' ? '' : 'text-slate-600',
+              )}
+              onClick={() => setViewMode('week')}
+            >
+              <CalendarDays className="h-4 w-4 mr-1" />주
+            </Button>
+            <Button
+              variant={viewMode === 'day' ? 'default' : 'ghost'}
+              size="sm"
+              className={cn(
+                'h-7 px-3',
+                viewMode === 'day' ? '' : 'text-slate-600',
+              )}
+              onClick={() => setViewMode('day')}
+            >
+              <Clock className="h-4 w-4 mr-1" />일
+            </Button>
+            <Button
+              variant={viewMode === 'list' ? 'default' : 'ghost'}
+              size="sm"
+              className={cn(
+                'h-7 px-3',
+                viewMode === 'list' ? '' : 'text-slate-600',
+              )}
+              onClick={() => setViewMode('list')}
+            >
+              <List className="h-4 w-4 mr-1" />
+              목록
+            </Button>
+          </div>
         </div>
 
-        <h2 className="text-lg font-bold text-slate-800">
-          {format(currentMonth, 'yyyy년 M월', { locale: ko })}
-        </h2>
+        {/* Mobile header (two rows) */}
+        <div className="sm:hidden px-4 py-3 space-y-3">
+          {/* Row 1: Navigation arrows flanking the title */}
+          <div className="flex items-center justify-between">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 rounded-full border-slate-200"
+              onClick={handlePrevMonth}
+            >
+              <ChevronLeft className="h-4 w-4 text-slate-600" />
+            </Button>
+            <h2 className="text-[17px] font-bold tracking-tight text-slate-800">
+              {format(currentMonth, 'yyyy년 M월', { locale: ko })}
+            </h2>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 rounded-full border-slate-200"
+              onClick={handleNextMonth}
+            >
+              <ChevronRight className="h-4 w-4 text-slate-600" />
+            </Button>
+          </div>
 
-        <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
-          <Button
-            variant={viewMode === 'month' ? 'default' : 'ghost'}
-            size="sm"
-            className={cn(
-              'h-7 px-3',
-              viewMode === 'month' ? '' : 'text-slate-600',
-            )}
-            onClick={() => setViewMode('month')}
-          >
-            <Calendar className="h-4 w-4 mr-1" />월
-          </Button>
-          <Button
-            variant={viewMode === 'week' ? 'default' : 'ghost'}
-            size="sm"
-            className={cn(
-              'h-7 px-3',
-              viewMode === 'week' ? '' : 'text-slate-600',
-            )}
-            onClick={() => setViewMode('week')}
-          >
-            <CalendarDays className="h-4 w-4 mr-1" />주
-          </Button>
-          <Button
-            variant={viewMode === 'day' ? 'default' : 'ghost'}
-            size="sm"
-            className={cn(
-              'h-7 px-3',
-              viewMode === 'day' ? '' : 'text-slate-600',
-            )}
-            onClick={() => setViewMode('day')}
-          >
-            <Clock className="h-4 w-4 mr-1" />일
-          </Button>
-          <Button
-            variant={viewMode === 'list' ? 'default' : 'ghost'}
-            size="sm"
-            className={cn(
-              'h-7 px-3',
-              viewMode === 'list' ? '' : 'text-slate-600',
-            )}
-            onClick={() => setViewMode('list')}
-          >
-            <List className="h-4 w-4 mr-1" />
-            목록
-          </Button>
+          {/* Row 2: Today button + View mode switcher */}
+          <div className="flex items-center justify-between gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleToday}
+              className="h-8 px-3 text-xs font-semibold text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700 rounded-full"
+            >
+              오늘
+            </Button>
+            <div className="flex items-center gap-0.5 bg-slate-100 rounded-full p-0.5">
+              {(
+                [
+                  { key: 'month', icon: Calendar, label: '월' },
+                  { key: 'week', icon: CalendarDays, label: '주' },
+                  { key: 'day', icon: Clock, label: '일' },
+                  { key: 'list', icon: List, label: '목록' },
+                ] as const
+              ).map(({ key, icon: Icon, label }) => (
+                <button
+                  key={key}
+                  onClick={() => setViewMode(key)}
+                  className={cn(
+                    'flex items-center gap-1 h-7 px-2.5 rounded-full text-xs font-medium transition-all',
+                    viewMode === key
+                      ? 'bg-white text-slate-800 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700',
+                  )}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 

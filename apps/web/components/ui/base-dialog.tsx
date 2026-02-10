@@ -38,7 +38,7 @@ export function BaseDialog({
           'overflow-hidden flex flex-col',
           size === 'sm' && 'sm:max-w-[500px]',
           size === 'md' && 'sm:max-w-[600px]',
-          size === 'lg' && 'max-w-2xl',
+          size === 'lg' && 'sm:max-w-2xl',
           className,
         )}
       >

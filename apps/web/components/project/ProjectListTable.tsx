@@ -86,13 +86,13 @@ export function ProjectListTable() {
   return (
     <div className="space-y-2">
       {/* Filters */}
-      <div className="flex flex-wrap gap-4 items-center justify-between">
-        <div className="flex gap-3 items-center">
+      <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 items-stretch sm:items-center justify-between">
+        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
           <div className="relative">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input
               placeholder="프로젝트명 검색..."
-              className="pl-10 w-[280px]"
+              className="pl-10 w-full sm:w-[280px]"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -104,7 +104,7 @@ export function ProjectListTable() {
               setParams({ status: value, pageNum: 1 });
             }}
           >
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-full sm:w-[140px]">
               <SelectValue placeholder="상태 필터" />
             </SelectTrigger>
             <SelectContent>
@@ -198,23 +198,23 @@ export function ProjectListTable() {
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
-          <Table>
+          <Table className="min-w-[700px]">
             <TableHeader>
               <TableRow className="hover:bg-transparent border-b border-slate-100">
-                <TableHead className="">
+                <TableHead className="min-w-[200px]">
                   <div className="flex items-center gap-1 cursor-pointer hover:text-slate-700">
                     프로젝트명
                   </div>
                 </TableHead>
-                <TableHead>클라이언트</TableHead>
-                <TableHead className="text-center">타입</TableHead>
-                <TableHead className="text-center">상태</TableHead>
+                <TableHead className="w-[100px]">클라이언트</TableHead>
+                <TableHead className="w-[70px] text-center">타입</TableHead>
+                <TableHead className="w-[70px] text-center">상태</TableHead>
                 <TableHead className="w-[200px]">
                   <div className="flex items-center gap-1 cursor-pointer hover:text-slate-700">
                     기간
                   </div>
                 </TableHead>
-                <TableHead className="w-[60px]"></TableHead>
+                <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

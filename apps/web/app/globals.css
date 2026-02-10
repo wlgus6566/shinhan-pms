@@ -152,8 +152,7 @@
 
   body {
     @apply bg-background text-foreground;
-    overflow-x: auto;
-    min-width: 1440px;
+    overflow-x: hidden;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
 }
@@ -846,14 +845,83 @@
   }
 
   /* Individual animate classes with delays */
-  .animate-in {
+  .page-slide-in {
     animation: pageSlideUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     opacity: 0;
   }
 
-  .delay-1 { animation-delay: 0.05s; }
-  .delay-2 { animation-delay: 0.1s; }
-  .delay-3 { animation-delay: 0.15s; }
-  .delay-4 { animation-delay: 0.2s; }
-  .delay-5 { animation-delay: 0.25s; }
+  .delay-1 {
+    animation-delay: 0.05s;
+  }
+  .delay-2 {
+    animation-delay: 0.1s;
+  }
+  .delay-3 {
+    animation-delay: 0.15s;
+  }
+  .delay-4 {
+    animation-delay: 0.2s;
+  }
+  .delay-5 {
+    animation-delay: 0.25s;
+  }
+
+  /* Responsive calendar - mobile adjustments */
+  @media (max-width: 767px) {
+    .fc-daygrid-day-frame {
+      min-height: 60px;
+      padding: 4px 2px;
+    }
+    .fc-col-header-cell-cushion {
+      font-size: 10px;
+    }
+    .fc-daygrid-day-number {
+      font-size: 12px;
+      width: 24px;
+      height: 24px;
+    }
+    .fc-daygrid-event {
+      font-size: 10px;
+    }
+    .fc-multiday-event .fc-event-main {
+      height: 16px;
+    }
+    .fc-multiday-event .fc-event-title,
+    .fc-singleday-event .fc-event-title {
+      font-size: 10px;
+    }
+  }
+
+  /* Prevent iOS Safari auto-zoom on input focus */
+  @media (max-width: 767px) {
+    input,
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
+  }
+
+  /* Responsive tabs - horizontal scroll on mobile */
+  [role='tablist'] {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  [role='tablist']::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Mobile-specific utilities */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  /* Hide scrollbar but allow scrolling */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }

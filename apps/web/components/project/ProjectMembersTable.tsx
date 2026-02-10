@@ -155,10 +155,10 @@ export function ProjectMembersTable({
             ) : (
               members.map((member) => (
                 <TableRow key={member.id}>
-                  <TableCell className="font-medium">
+                  <TableCell className="font-medium whitespace-nowrap">
                     {member.member?.name}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">
                     <span className="text-sm text-slate-700">
                       {member.member?.position
                         ? POSITION_LABELS[member.member.position as Position] ||
@@ -166,7 +166,7 @@ export function ProjectMembersTable({
                         : '-'}
                     </span>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">
                     <span className="text-sm text-slate-700">
                       {member.member?.department
                         ? DEPARTMENT_LABELS[
@@ -175,7 +175,7 @@ export function ProjectMembersTable({
                         : '-'}
                     </span>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">
                     {member.workArea ? (
                       <Badge variant="secondary">
                         {WORK_AREA_LABELS_STRICT[member.workArea as WorkArea] ||
@@ -185,7 +185,7 @@ export function ProjectMembersTable({
                       <span className="text-sm text-slate-500">-</span>
                     )}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">
                     <Badge
                       variant={
                         PROJECT_ROLE_VARIANTS[member.role as ProjectRole]
@@ -194,7 +194,7 @@ export function ProjectMembersTable({
                       {member.role}
                     </Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">
                     <span className="text-sm text-slate-600">
                       {member.notes || '-'}
                     </span>

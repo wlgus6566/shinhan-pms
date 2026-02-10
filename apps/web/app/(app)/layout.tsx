@@ -16,6 +16,7 @@ export default function DashboardLayout({
   const { user, loading } = useAuth();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -32,22 +33,31 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen min-w-[1280px] bg-emotion-lightgray">
-      {/* 고정 사이드바 */}
-      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+    <div className="min-h-screen bg-emotion-lightgray">
+      {/* 사이드바 (데스크톱: 고정, 모바일: 드로어) */}
+      <Sidebar
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        mobileMenuOpen={mobileMenuOpen}
+        setMobileMenuOpen={setMobileMenuOpen}
+      />
 
-      {/* 메인 콘텐츠 영역 (사이드바 너비만큼 왼쪽 여백) */}
+      {/* 메인 콘텐츠 영역 */}
       <div
         className={cn(
-          'pl-[240px] transition-all duration-300',
-          sidebarOpen ? 'pl-[240px]' : 'pl-[72px]',
+          'transition-all duration-300',
+          'pl-0',
+          sidebarOpen ? 'lg:pl-[240px]' : 'lg:pl-[72px]',
         )}
       >
         {/* 상단 헤더 */}
-        <Header />
+        <Header
+          mobileMenuOpen={mobileMenuOpen}
+          setMobileMenuOpen={setMobileMenuOpen}
+        />
 
         {/* 페이지 콘텐츠 */}
-        <main className="p-8" style={{ viewTransitionName: 'page-content' }}>
+        <main className="p-4 md:p-6 lg:p-8" style={{ viewTransitionName: 'page-content' }}>
           {children}
         </main>
       </div>

@@ -167,7 +167,6 @@ export function WorkLogDialog({
           entries: entries.length > 0 ? entries : [],
         });
       }
-
     }
   }, [open, mode, workLogs, existingWorkLogs, myTasks, selectedDate]);
 
@@ -397,7 +396,7 @@ export function WorkLogDialog({
           </div>
 
           {/* 작업 시간 */}
-          <div className="flex justify-between items-end space-y-2">
+          <div className="flex sm:justify-between space-y-2 flex-col sm:flex-row sm:items-end">
             <div className="flex gap-2 items-end">
               <div className="w-[100px]">
                 <FormInput
@@ -415,7 +414,7 @@ export function WorkLogDialog({
               </div>
               <span className="text-sm text-slate-500 pb-2">시간</span>
             </div>
-            <div className="flex gap-1 flex-1 justify-end">
+            <div className="flex gap-1 flex-1 sm:justify-end">
               {WORK_HOURS_PRESETS.map((hours) => (
                 <Button
                   key={hours}

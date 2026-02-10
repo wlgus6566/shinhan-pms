@@ -106,7 +106,7 @@ const StatsCard = memo(function StatsCard({
       <div
         className={`absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b ${colorClass.bar}`}
       />
-      <div className="pl-5 pr-4 py-4">
+      <div className="pl-5 pr-4 py-8">
         <div className="flex items-center gap-3">
           {/* Icon in circle */}
           <div
@@ -218,7 +218,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8 page-animate">
       {/* Header */}
-      <section className="flex items-end justify-between">
+      <section className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-2">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
             안녕하세요, {user?.name}님
@@ -229,7 +229,7 @@ export default function DashboardPage() {
           <p className="text-sm text-slate-400">{formattedDate}</p>
         </div>
       </section>
-      <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-[320px_1fr] gap-4 xl:gap-6">
         <Card className="p-6 border-slate-100 shadow-sm flex flex-col align-center justify-center">
           {/* Profile Section */}
           <div className="flex flex-col items-center text-center mb-6">
@@ -273,10 +273,7 @@ export default function DashboardPage() {
         <div className="space-y-4">
           {/* Stats Grid */}
           <section>
-            <h2 className="text-lg font-semibold text-slate-900 mb-4">
-              진행중 현황
-            </h2>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-3 grid-cols-2 xl:grid-cols-4">
               <StatsCard
                 label="진행중 프로젝트"
                 value={stats?.projects.active ?? 0}
@@ -312,7 +309,7 @@ export default function DashboardPage() {
             <h2 className="text-lg font-semibold text-slate-900 mb-4">
               바로가기
             </h2>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 md:gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
               {pmProjects.length > 0 ? (
                 <>
                   {pmProjects.slice(0, 3).map((project) => (

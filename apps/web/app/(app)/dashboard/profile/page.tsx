@@ -9,7 +9,7 @@ export default function ProfilePage() {
   return (
     <div className="max-w-2xl page-animate">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">프로필 설정</h1>
+        <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-slate-900">프로필 설정</h1>
         <p className="text-muted-foreground mt-1">내 정보를 관리하고 보안 설정을 업데이트하세요</p>
       </div>
 

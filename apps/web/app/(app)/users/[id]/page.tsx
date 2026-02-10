@@ -32,7 +32,7 @@ export default function UserEditPage() {
       </Button>
 
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+        <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-slate-900">
           {canEdit ? '멤버 상세 설정' : '멤버 정보'}
         </h1>
         <p className="text-muted-foreground mt-1">

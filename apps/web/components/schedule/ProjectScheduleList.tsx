@@ -129,7 +129,7 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
   return (
     <div className="relative">
       {/* Two-column layout: Sidebar (filters + selected date list) and Calendar */}
-      <div className="flex gap-6">
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
         {loading ? (
           <>
             <ScheduleSidebarSkeleton />
@@ -140,9 +140,9 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
         ) : (
           <>
             {/* Left Sidebar */}
-            <div className="flex flex-col gap-6 w-[30%]">
+            <div className="flex flex-col gap-4 lg:gap-6 w-full lg:w-[30%] order-2 lg:order-1">
               {/* Team Filter */}
-              <div className="bg-white rounded-lg border p-4">
+              <div className="bg-white rounded-lg border p-4 sm:block hidden">
                 <div className="space-y-2">
                   {availableTeamScopes.map((teamScope) => (
                     <label
@@ -181,8 +181,8 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
               />
             </div>
 
-            {/* Right Content - Calendar */}
-            <div className="flex-1">
+            {/* Right Content - Calendar (모바일에서 먼저 표시) */}
+            <div className="flex-1 order-1 lg:order-2">
               <ScheduleCalendar
                 schedules={filteredSchedules}
                 selectedDate={selectedDate}

@@ -88,7 +88,7 @@ export default function ProjectDetailPage() {
       </div>
 
       <div className="mb-6">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+        <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-slate-900">
           {project.name}
         </h1>
       </div>

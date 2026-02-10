@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useCallback, memo } from 'react';
+import { createPortal } from 'react-dom';
 import { useTasks, deleteTask } from '@/lib/api/tasks';
 import { useUrlQueryParams } from '@/hooks/useUrlQueryParams';
 import { useSearchButton } from '@/hooks/useSearchButton';
@@ -175,7 +176,7 @@ export function TaskList({
         </Tabs>
 
         {isPM && (
-          <Button onClick={() => setDialogOpen(true)}>
+          <Button onClick={() => setDialogOpen(true)} className="hidden sm:inline-flex">
             <Plus className="h-4 w-4 mr-2" />
             업무 추가
           </Button>
@@ -265,6 +266,19 @@ export function TaskList({
           onSuccess={handleSuccess}
         />
       )}
+
+      {/* Mobile FAB */}
+      {isPM &&
+        createPortal(
+          <Button
+            onClick={() => setDialogOpen(true)}
+            className="gradient-primary border-none fixed bottom-8 right-8 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow z-50 sm:hidden"
+            size="icon"
+          >
+            <Plus className="h-6 w-6" />
+          </Button>,
+          document.body,
+        )}
     </div>
   );
 }

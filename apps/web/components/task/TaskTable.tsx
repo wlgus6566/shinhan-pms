@@ -63,7 +63,7 @@ export function TaskTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="">업무명</TableHead>
+            <TableHead className="min-w-[200px]">업무명</TableHead>
             <TableHead className="w-[120px]">업무 구분</TableHead>
             <TableHead className="w-[100px]">난이도</TableHead>
             <TableHead className="w-[120px]">진행상태</TableHead>
@@ -163,7 +163,7 @@ export function TaskTable({
                 <TableCell className="text-xs">
                   {formatDate(task.openDate)}
                 </TableCell>
-                <TableCell className="text-xs">
+                <TableCell className="text-xs whitespace-nowrap">
                   {formatDateRange(task.startDate, task.endDate)}
                 </TableCell>
                 <TableCell className="hidden md:table-cell">

@@ -9,10 +9,13 @@ interface ProductivityStatsProps {
   isLoading: boolean;
 }
 
-export function ProductivityStats({ stats, isLoading }: ProductivityStatsProps) {
+export function ProductivityStats({
+  stats,
+  isLoading,
+}: ProductivityStatsProps) {
   if (isLoading || !stats) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[1, 2, 3, 4].map((i) => (
           <Card key={i}>
             <CardContent className="p-6">
@@ -56,14 +59,16 @@ export function ProductivityStats({ stats, isLoading }: ProductivityStatsProps) 
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {statItems.map((item) => {
         const Icon = item.icon;
         return (
           <Card key={item.label}>
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className={`p-3 rounded-full ${item.bgColor} ${item.color}`}>
+                <div
+                  className={`p-3 rounded-full ${item.bgColor} ${item.color}`}
+                >
                   <Icon className="h-6 w-6" />
                 </div>
                 <div>

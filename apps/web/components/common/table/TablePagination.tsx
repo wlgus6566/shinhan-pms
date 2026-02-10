@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { cn } from '@/lib/utils';
 import {
   Pagination,
   PaginationContent,
@@ -63,19 +64,20 @@ export function TablePagination({
   if (totalPages <= 1) return null;
 
   return (
-    <div className="flex items-center justify-center px-4 py-4 border-t border-slate-100">
+    <div className="flex items-center justify-center px-2 sm:px-4 py-4 border-t border-slate-100">
       <Pagination>
         <PaginationContent>
           <PaginationItem>
             <PaginationPrevious
               onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-              className={
+              className={cn(
                 currentPage === 1
                   ? 'pointer-events-none opacity-50'
-                  : 'cursor-pointer'
-              }
+                  : 'cursor-pointer',
+                'gap-1 px-2 sm:px-2.5',
+              )}
             >
-              이전
+              <span className="hidden sm:inline">이전</span>
             </PaginationPrevious>
           </PaginationItem>
 
@@ -98,13 +100,14 @@ export function TablePagination({
           <PaginationItem>
             <PaginationNext
               onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-              className={
+              className={cn(
                 currentPage === totalPages
                   ? 'pointer-events-none opacity-50'
-                  : 'cursor-pointer'
-              }
+                  : 'cursor-pointer',
+                'gap-1 px-2 sm:px-2.5',
+              )}
             >
-              다음
+              <span className="hidden sm:inline">다음</span>
             </PaginationNext>
           </PaginationItem>
         </PaginationContent>

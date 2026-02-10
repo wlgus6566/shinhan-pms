@@ -200,7 +200,7 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
               rows={3}
             />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormSelect
                 control={form.control}
                 name="difficulty"
@@ -226,7 +226,7 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
             />
 
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormCheckboxGroup
                 control={form.control}
                 name="planningAssigneeIds"
@@ -276,7 +276,7 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormInput
                 control={form.control}
                 name="startDate"

@@ -19,8 +19,9 @@ import {
   Palette,
   FileText,
 } from 'lucide-react';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { DEPARTMENT_LABELS, type Department } from '@repo/schema';
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 
 const menuItems = [
   { icon: LayoutDashboard, label: '대시보드', href: '/dashboard' },
@@ -37,9 +38,13 @@ const adminMenuItems = [{ icon: Users, label: '멤버 관리', href: '/users' }]
 export function Sidebar({
   sidebarOpen,
   setSidebarOpen,
+  mobileMenuOpen,
+  setMobileMenuOpen,
 }: {
   sidebarOpen: boolean;
   setSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  mobileMenuOpen: boolean;
+  setMobileMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
@@ -60,28 +65,39 @@ export function Sidebar({
 
   const isTasksActive = pathname?.startsWith('/tasks');
 
-  return (
-    <aside
-      className={cn(
-        'fixed left-0 top-0 h-full bg-[#1e1f2e] transition-all duration-300 z-50 flex flex-col',
-        sidebarOpen ? 'w-[240px]' : 'w-[72px]',
-      )}
-    >
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname, setMobileMenuOpen]);
+
+  const handleMobileLinkClick = useCallback(() => {
+    setMobileMenuOpen(false);
+  }, [setMobileMenuOpen]);
+
+  /**
+   * Render the full navigation content.
+   * @param isExpanded - true = show labels (mobile drawer always, desktop when sidebarOpen)
+   *                     false = icon-only (desktop when collapsed)
+   * @param onLinkClick - optional callback to fire when a nav link is clicked
+   */
+  const renderNavigation = (isExpanded: boolean, onLinkClick?: () => void) => (
+    <div className="flex flex-col h-full">
       {/* Logo Area */}
       <div
         className={cn(
           'h-16 flex items-center border-b border-white/5',
-          sidebarOpen ? 'justify-start px-6' : 'justify-center px-0',
+          isExpanded ? 'justify-start px-6' : 'justify-center px-0',
         )}
       >
         <Link
           href="/dashboard"
           className="flex items-center gap-3 overflow-hidden"
+          onClick={onLinkClick}
         >
           <div className="w-8 h-8 gradient-primary rounded-xl flex-shrink-0 flex items-center justify-center shadow-lg shadow-blue-500/25">
             <span className="text-white font-bold text-base">E</span>
           </div>
-          {sidebarOpen && (
+          {isExpanded && (
             <div className="flex flex-col">
               <span className="text-white font-bold text-sm tracking-tight">
                 Emotion PMS
@@ -101,6 +117,7 @@ export function Sidebar({
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={onLinkClick}
                 className={cn(
                   'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative',
                   active
@@ -119,7 +136,7 @@ export function Sidebar({
                       : 'text-slate-500 group-hover:text-white',
                   )}
                 />
-                {sidebarOpen && (
+                {isExpanded && (
                   <span
                     className={cn(
                       'text-sm font-medium truncate',
@@ -155,7 +172,7 @@ export function Sidebar({
                     : 'text-slate-500 group-hover:text-white',
                 )}
               />
-              {sidebarOpen && (
+              {isExpanded && (
                 <>
                   <span
                     className={cn(
@@ -176,7 +193,7 @@ export function Sidebar({
             </button>
 
             {/* 하위 프로젝트 목록 */}
-            {sidebarOpen && isTaskMenuOpen && (
+            {isExpanded && isTaskMenuOpen && (
               <div className="mt-1 ml-4 pl-4 border-l border-white/10 space-y-1">
                 {myProjects && myProjects.length > 0 ? (
                   myProjects.map((project) => {
@@ -185,6 +202,7 @@ export function Sidebar({
                       <Link
                         key={project.id}
                         href={`/tasks/${project.id}`}
+                        onClick={onLinkClick}
                         className={cn(
                           'flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all duration-200',
                           projectActive
@@ -218,6 +236,7 @@ export function Sidebar({
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={onLinkClick}
                 className={cn(
                   'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative',
                   active
@@ -236,7 +255,7 @@ export function Sidebar({
                       : 'text-slate-500 group-hover:text-white',
                   )}
                 />
-                {sidebarOpen && (
+                {isExpanded && (
                   <span
                     className={cn(
                       'text-sm font-medium truncate',
@@ -254,7 +273,7 @@ export function Sidebar({
         {/* Admin Section */}
         {(user?.role === 'SUPER_ADMIN' || user?.role === 'PM') && (
           <div className="mt-6 pt-6 border-t border-white/5">
-            {sidebarOpen && (
+            {isExpanded && (
               <p className="px-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-3">
                 관리자
               </p>
@@ -265,6 +284,7 @@ export function Sidebar({
                 <Link
                   key={item.href}
                   href={item.href}
+                  onClick={onLinkClick}
                   className={cn(
                     'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative',
                     active
@@ -283,7 +303,7 @@ export function Sidebar({
                         : 'text-slate-500 group-hover:text-white',
                     )}
                   />
-                  {sidebarOpen && (
+                  {isExpanded && (
                     <span
                       className={cn(
                         'text-sm font-medium truncate',
@@ -301,7 +321,7 @@ export function Sidebar({
       </nav>
 
       {/* Stats Card - CRM Style */}
-      {sidebarOpen && (
+      {isExpanded && (
         <div className="mx-3 mb-4 p-4 bg-gradient-to-br from-blue-500/10 to-blue-600/5 rounded-2xl border border-blue-500/10">
           <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
             진행중인 내 프로젝트
@@ -314,19 +334,19 @@ export function Sidebar({
 
       {/* User Profile */}
       <div
-        className={cn('border-t border-white/5', sidebarOpen ? 'p-2' : 'p-3')}
+        className={cn('border-t border-white/5', isExpanded ? 'p-2' : 'p-3')}
       >
         {user && (
           <div
             className={cn(
               'flex items-center gap-3 p-2 rounded-xl transition-colors',
-              sidebarOpen && 'hover:bg-white/5',
+              isExpanded && 'hover:bg-white/5',
             )}
           >
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
               {user.name.charAt(0)}
             </div>
-            {sidebarOpen && (
+            {isExpanded && (
               <div className="flex-1">
                 <p className="text-sm font-semibold text-white truncate">
                   {user.name}
@@ -341,7 +361,7 @@ export function Sidebar({
               onClick={logout}
               className={cn(
                 'p-2 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors',
-                sidebarOpen && 'w-full flex justify-center mt-2',
+                isExpanded && 'w-full flex justify-center mt-2',
               )}
               title="로그아웃"
             >
@@ -350,19 +370,45 @@ export function Sidebar({
           </div>
         )}
       </div>
+    </div>
+  );
 
-      {/* Collapse Toggle */}
-      <button
-        onClick={() => setSidebarOpen((prev: boolean) => !prev)}
-        className="absolute -right-3 top-20 w-6 h-6 bg-[#1e1f2e] border border-white/10 rounded-full flex items-center justify-center text-slate-500 hover:text-white transition-colors shadow-lg"
-        aria-label={sidebarOpen ? '사이드바 접기' : '사이드바 펼치기'}
-      >
-        {sidebarOpen ? (
-          <ChevronLeft className="h-3 w-3" />
-        ) : (
-          <ChevronRight className="h-3 w-3" />
+  return (
+    <>
+      {/* Desktop Sidebar - hidden on mobile */}
+      <aside
+        className={cn(
+          'fixed left-0 top-0 h-full bg-[#1e1f2e] transition-all duration-300 z-50 flex flex-col',
+          'hidden lg:flex',
+          sidebarOpen ? 'w-[240px]' : 'w-[72px]',
         )}
-      </button>
-    </aside>
+      >
+        {renderNavigation(sidebarOpen)}
+
+        {/* Collapse Toggle - desktop only */}
+        <button
+          onClick={() => setSidebarOpen((prev: boolean) => !prev)}
+          className="absolute -right-3 top-20 w-6 h-6 bg-[#1e1f2e] border border-white/10 rounded-full flex items-center justify-center text-slate-500 hover:text-white transition-colors shadow-lg"
+          aria-label={sidebarOpen ? '사이드바 접기' : '사이드바 펼치기'}
+        >
+          {sidebarOpen ? (
+            <ChevronLeft className="h-3 w-3" />
+          ) : (
+            <ChevronRight className="h-3 w-3" />
+          )}
+        </button>
+      </aside>
+
+      {/* Mobile Drawer - always renders labels (isExpanded = true) */}
+      <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+        <SheetContent
+          side="left"
+          className="w-full max-w-full p-0 bg-[#1e1f2e] border-none [&>button]:text-white [&>button]:hover:text-white/80"
+        >
+          <SheetTitle className="sr-only">네비게이션 메뉴</SheetTitle>
+          {renderNavigation(true, handleMobileLinkClick)}
+        </SheetContent>
+      </Sheet>
+    </>
   );
 }

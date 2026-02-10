@@ -43,7 +43,7 @@ export default function TeamSchedulesPage() {
       <div className="max-w-7xl mx-auto">
         <div className="space-y-6">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+            <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-slate-900">
               프로젝트 일정 관리
             </h1>
             <p className="text-muted-foreground mt-1">
@@ -70,7 +70,7 @@ export default function TeamSchedulesPage() {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-slate-900">
             프로젝트 일정 관리
           </h1>
           <p className="text-muted-foreground mt-1">

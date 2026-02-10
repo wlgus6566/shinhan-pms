@@ -1,6 +1,8 @@
 'use client';
 
+import React from 'react';
 import { usePathname } from 'next/navigation';
+import { Menu } from 'lucide-react';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -22,12 +24,27 @@ const pathMap: Record<string, string> = {
   edit: '수정',
 };
 
-export function Header() {
+export function Header({
+  mobileMenuOpen,
+  setMobileMenuOpen,
+}: {
+  mobileMenuOpen?: boolean;
+  setMobileMenuOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
   const pathname = usePathname();
   const paths = pathname?.split('/').filter(Boolean) || [];
 
   return (
-    <header className="h-16 flex items-center px-8 bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-slate-100">
+    <header className="h-16 flex items-center px-4 md:px-6 lg:px-8 bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-slate-100">
+      {/* Hamburger button - mobile only */}
+      <button
+        className="lg:hidden mr-3 p-2 rounded-lg hover:bg-slate-100 transition-colors"
+        onClick={() => setMobileMenuOpen?.(!mobileMenuOpen)}
+        aria-label="메뉴 열기"
+      >
+        <Menu className="h-5 w-5 text-slate-600" />
+      </button>
+
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -64,5 +81,3 @@ export function Header() {
     </header>
   );
 }
-
-import React from 'react';
