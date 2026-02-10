@@ -14,12 +14,17 @@ export function parsePaginationParams(params: {
       : params.pageNum ?? 1;
 
   // pageSize: 문자열 "0"도 0으로 파싱해야 함
+  // pageSize=0은 전체 조회 (달력 등), 그 외는 최대 100으로 제한
+  const MAX_PAGE_SIZE = 100;
   let pageSize: number;
   if (typeof params.pageSize === 'string') {
     const parsed = parseInt(params.pageSize, 10);
     pageSize = isNaN(parsed) ? 10 : parsed;
   } else {
     pageSize = params.pageSize ?? 10;
+  }
+  if (pageSize !== 0 && pageSize > MAX_PAGE_SIZE) {
+    pageSize = MAX_PAGE_SIZE;
   }
 
   const skip = (pageNum - 1) * pageSize;

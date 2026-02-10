@@ -18,6 +18,9 @@ describe('TasksService', () => {
     projectMember: {
       findFirst: jest.fn(),
     },
+    projectTaskType: {
+      findFirst: jest.fn(),
+    },
     task: {
       create: jest.fn(),
       findMany: jest.fn(),
@@ -59,6 +62,7 @@ describe('TasksService', () => {
         taskName: 'Test Task',
         description: 'Test Description',
         difficulty: 'MEDIUM',
+        taskTypeId: 1,
         planningAssigneeIds: [1, 2],
         designAssigneeIds: [3],
         frontendAssigneeIds: [],
@@ -67,6 +71,7 @@ describe('TasksService', () => {
 
       const mockProject = { id: projectId };
       const mockMember = { projectId, memberId: userId, role: 'PM' };
+      const mockTaskType = { id: BigInt(1), projectId, name: '프로젝트성 업무' };
       const mockTask = {
         id: BigInt(1),
         projectId,
@@ -140,6 +145,7 @@ describe('TasksService', () => {
           memberId: BigInt(5),
           workArea: 'BACKEND',
         }); // backend assignee 2
+      mockPrismaService.projectTaskType.findFirst.mockResolvedValue(mockTaskType);
       mockPrismaService.task.create.mockResolvedValue(mockTask);
 
       const result = await service.create(
@@ -180,7 +186,7 @@ describe('TasksService', () => {
       mockPrismaService.projectMember.findFirst.mockResolvedValue(null);
 
       await expect(
-        service.create(BigInt(1), BigInt(1), { taskName: 'Test' } as any),
+        service.create(BigInt(1), BigInt(1), { taskName: 'Test', taskTypeId: 1 } as any),
       ).rejects.toThrow(ForbiddenException);
     });
 
@@ -190,6 +196,7 @@ describe('TasksService', () => {
       const createTaskDto = {
         taskName: 'Test Task',
         difficulty: 'MEDIUM',
+        taskTypeId: 1,
         startDate: '2026-01-01',
         endDate: '2026-01-31',
         openDate: '2026-02-01',
@@ -197,6 +204,7 @@ describe('TasksService', () => {
 
       const mockProject = { id: projectId };
       const mockMember = { projectId, memberId: userId, role: 'PM' };
+      const mockTaskType = { id: BigInt(1), projectId, name: '프로젝트성 업무' };
       const mockTask = {
         id: BigInt(1),
         projectId,
@@ -210,6 +218,7 @@ describe('TasksService', () => {
 
       mockPrismaService.project.findUnique.mockResolvedValue(mockProject);
       mockPrismaService.projectMember.findFirst.mockResolvedValue(mockMember);
+      mockPrismaService.projectTaskType.findFirst.mockResolvedValue(mockTaskType);
       mockPrismaService.task.create.mockResolvedValue(mockTask);
 
       await service.create(projectId, userId, createTaskDto as any);
@@ -229,10 +238,12 @@ describe('TasksService', () => {
       const createTaskDto = {
         taskName: 'Test Task',
         difficulty: 'MEDIUM',
+        taskTypeId: 1,
       };
 
       const mockProject = { id: projectId };
       const mockMember = { projectId, memberId: userId, role: 'PM' };
+      const mockTaskType = { id: BigInt(1), projectId, name: '프로젝트성 업무' };
       const mockTask = {
         id: BigInt(1),
         openDate: null,
@@ -241,6 +252,7 @@ describe('TasksService', () => {
 
       mockPrismaService.project.findUnique.mockResolvedValue(mockProject);
       mockPrismaService.projectMember.findFirst.mockResolvedValue(mockMember);
+      mockPrismaService.projectTaskType.findFirst.mockResolvedValue(mockTaskType);
       mockPrismaService.task.create.mockResolvedValue(mockTask);
 
       await service.create(projectId, userId, createTaskDto as any);
@@ -278,9 +290,19 @@ describe('TasksService', () => {
       mockPrismaService.task.findUnique.mockResolvedValue(mockTask);
       mockPrismaService.projectMember.findFirst
         .mockResolvedValueOnce(mockMember)
-        .mockResolvedValue({
+        .mockResolvedValueOnce({
           projectId: BigInt(1),
           memberId: BigInt(1),
+          workArea: 'PLANNING',
+        })
+        .mockResolvedValueOnce({
+          projectId: BigInt(1),
+          memberId: BigInt(2),
+          workArea: 'PLANNING',
+        })
+        .mockResolvedValueOnce({
+          projectId: BigInt(1),
+          memberId: BigInt(3),
           workArea: 'PLANNING',
         });
       mockPrismaService.taskAssignee.deleteMany.mockResolvedValue({ count: 0 });

@@ -33,6 +33,16 @@ out/
 build
 dist
 
+# TypeScript in-place build output
+*.d.ts
+!next-env.d.ts
+*.d.ts.map
+apps/**/*.js
+!apps/*/*.config.js
+!apps/*/next.config.js
+!apps/*/postcss.config.js
+packages/**/*.js
+
 # IDEs and editors
 /.idea
 .project

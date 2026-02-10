@@ -236,12 +236,12 @@ async function main() {
   await prisma.projectMember.upsert({
     where: { projectId_memberId: { projectId: project3.id, memberId: admin.id } },
     update: {},
-    create: { projectId: project3.id, memberId: admin.id, role: 'PM', workArea: 'PROJECT_MANAGEMENT', notes: '총괄PM', createdBy: admin.id },
+    create: { projectId: project3.id, memberId: admin.id, role: 'PL', workArea: 'PROJECT_MANAGEMENT', createdBy: admin.id },
   });
   await prisma.projectMember.upsert({
     where: { projectId_memberId: { projectId: project3.id, memberId: kim.id } },
     update: {},
-    create: { projectId: project3.id, memberId: kim.id, role: 'PL', workArea: 'PLANNING', notes: '기획PL', createdBy: admin.id },
+    create: { projectId: project3.id, memberId: kim.id, role: 'PM', workArea: 'PROJECT_MANAGEMENT', notes: 'PM', createdBy: admin.id },
   });
   await prisma.projectMember.upsert({
     where: { projectId_memberId: { projectId: project3.id, memberId: jung.id } },

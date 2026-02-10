@@ -36,6 +36,8 @@ import { parsePaginationParams, createPaginationMeta } from '../common/helpers/p
 
 @ApiTags('Projects')
 @Controller('projects')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class ProjectsController {
   constructor(
     private readonly projectsService: ProjectsService,
@@ -43,8 +45,6 @@ export class ProjectsController {
   ) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @ResponseCode('SUC002')
   @ApiOperation({ summary: '프로젝트 생성' })
   @ApiResponse({
@@ -109,8 +109,6 @@ export class ProjectsController {
   }
 
   @Get('my')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: '내가 속한 프로젝트 목록 조회 (슈퍼관리자는 모든 프로젝트)' })
   @ApiQuery({ name: 'pageNum', required: false, description: '페이지 번호', type: Number })
   @ApiQuery({ name: 'pageSize', required: false, description: '페이지당 개수', type: Number })
@@ -153,8 +151,6 @@ export class ProjectsController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: '프로젝트 수정' })
   @ApiParam({ name: 'id', description: '프로젝트 ID' })
   @ApiResponse({
@@ -287,8 +283,6 @@ export class ProjectsController {
   }
 
   @Post(':id/members')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @ResponseCode('SUC002')
   @ApiOperation({ summary: '프로젝트 멤버 추가' })
   @ApiParam({ name: 'id', description: '프로젝트 ID' })
@@ -316,8 +310,6 @@ export class ProjectsController {
   }
 
   @Patch(':id/members/:memberId')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: '프로젝트 멤버 역할 수정' })
   @ApiParam({ name: 'id', description: '프로젝트 ID' })
   @ApiParam({ name: 'memberId', description: '멤버 ID' })
@@ -392,8 +384,6 @@ export class ProjectsController {
   // =============================================
 
   @Get(':id/schedules')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: '프로젝트 일정 목록 조회' })
   @ApiParam({ name: 'id', description: '프로젝트 ID' })
   @ApiQuery({
@@ -421,8 +411,6 @@ export class ProjectsController {
   }
 
   @Post(':id/schedules')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: '프로젝트 일정 생성' })
   @ApiParam({ name: 'id', description: '프로젝트 ID' })
   @ApiResponse({ status: 201, description: '일정이 생성되었습니다' })

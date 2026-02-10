@@ -214,7 +214,7 @@ export function Sidebar({
             {isExpanded && isTaskMenuOpen && (
               <div className="mt-1 ml-4 pl-4 border-l border-white/10 space-y-1">
                 {myProjects && myProjects.length > 0 ? (
-                  myProjects.map((project) => {
+                  myProjects.map((project: any) => {
                     const projectActive = pathname === `/tasks/${project.id}`;
                     return (
                       <Link

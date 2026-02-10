@@ -34,6 +34,9 @@ export class AnalyticsController {
     @Query('endDate') endDate: string,
     @Query('projectId') projectId?: string,
   ) {
+    if (!startDate || !endDate) {
+      throw new BadRequestException('startDate와 endDate는 필수입니다');
+    }
     const userId = req.user.userId;
     const stats = await this.analyticsService.getMyProductivity(
       userId,
@@ -55,6 +58,9 @@ export class AnalyticsController {
     @Query('endDate') endDate: string,
     @Query('projectId') projectId?: string,
   ) {
+    if (!startDate || !endDate) {
+      throw new BadRequestException('startDate와 endDate는 필수입니다');
+    }
     const memberWorkload = await this.analyticsService.getMemberWorkload(
       startDate,
       endDate,
@@ -84,6 +90,9 @@ export class AnalyticsController {
     @Query('projectId') projectId?: string,
     @Query('userId') userId?: string,
   ) {
+    if (!startDate || !endDate) {
+      throw new BadRequestException('startDate와 endDate는 필수입니다');
+    }
     // 일반 사용자는 자신의 데이터만, PM/SUPER_ADMIN은 특정 사용자 지정 가능
     const targetUserId =
       req.user.role === 'PM' || req.user.role === 'SUPER_ADMIN'
@@ -156,6 +165,9 @@ export class AnalyticsController {
     @Query('endDate') endDate: string,
     @Query('projectId') projectId?: string,
   ) {
+    if (!startDate || !endDate) {
+      throw new BadRequestException('startDate와 endDate는 필수입니다');
+    }
     const workload = await this.analyticsService.getMemberWorkload(
       startDate,
       endDate,

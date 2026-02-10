@@ -3,6 +3,7 @@ import { ClassSerializerInterceptor } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ZodValidationPipe, patchNestJsSwagger } from 'nestjs-zod';
 import * as cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 
 import { AppModule } from './app.module';
 
@@ -10,12 +11,31 @@ import { AppModule } from './app.module';
 patchNestJsSwagger();
 
 async function bootstrap() {
+  // 프로덕션 환경에서 JWT 시크릿 플레이스홀더 사용 차단
+  if (process.env.NODE_ENV === 'production') {
+    const placeholderPatterns = ['your-super-secret', 'change-in-production', 'your-secret-key'];
+    const secrets = [
+      { name: 'JWT_SECRET', value: process.env.JWT_SECRET },
+      { name: 'JWT_REFRESH_SECRET', value: process.env.JWT_REFRESH_SECRET },
+    ];
+
+    for (const secret of secrets) {
+      if (!secret.value || placeholderPatterns.some((p) => secret.value!.includes(p))) {
+        console.error(`❌ [SECURITY] ${secret.name}이 설정되지 않았거나 플레이스홀더 값입니다. 프로덕션 환경에서는 안전한 시크릿을 사용하세요.`);
+        process.exit(1);
+      }
+    }
+  }
+
   const app = await NestFactory.create(AppModule);
 
   // BigInt 직렬화 해결
   (BigInt.prototype as any).toJSON = function () {
     return this.toString();
   };
+
+  // 보안 헤더 설정 (X-Content-Type-Options, X-Frame-Options 등)
+  app.use(helmet());
 
   // Cookie Parser (MUST be before other middleware)
   app.use(cookieParser.default());

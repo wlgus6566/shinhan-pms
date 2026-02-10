@@ -48,6 +48,15 @@ export class UserResponseDto implements User {
   @Exclude()
   updatedBy?: bigint;
 
+  @Exclude()
+  refreshTokenHash?: string;
+
+  @Exclude()
+  refreshTokenVersion?: number;
+
+  @Exclude()
+  profileImage?: string;
+
   constructor(partial: Partial<UserResponseDto> | any) {
     if (partial.id && typeof partial.id === 'bigint') {
       partial.id = partial.id.toString();

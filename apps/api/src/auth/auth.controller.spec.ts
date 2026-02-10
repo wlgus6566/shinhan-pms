@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -20,21 +21,28 @@ describe('AuthController', () => {
     logout: jest.fn(),
   };
 
+  const mockConfigService = {
+    get: jest.fn((key: string) => {
+      if (key === 'COOKIE_SECURE') return 'false';
+      return undefined;
+    }),
+  };
+
   const mockUser: UserResponseDto = {
     id: '1',
     name: '김철수',
     email: 'kim@emotion.co.kr',
     role: 'PM',
-    department: '개발팀',
-    position: '과장',
+    department: 'DEVELOPMENT_1',
+    position: 'TEAM_MEMBER',
     grade: 'ADVANCED',
     isActive: true,
     requirePasswordChange: false,
-    passwordHash: '1234567890',
-    createdBy: 1n,
+    createdBy: BigInt(1),
+    passwordHash: 'password123',
     createdAt: '2024-01-01T00:00:00.000Z',
     updatedAt: '2024-01-01T00:00:00.000Z',
-  };
+  } as UserResponseDto;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -43,6 +51,10 @@ describe('AuthController', () => {
         {
           provide: AuthService,
           useValue: mockAuthService,
+        },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService,
         },
       ],
     }).compile();
@@ -142,7 +154,7 @@ describe('AuthController', () => {
       } as any;
 
       mockAuthService.login.mockRejectedValue(
-        new UnauthorizedException('비활성화된 계정입니다'),
+        new UnauthorizedException('계정이 비활성화되었습니다'),
       );
 
       await expect(controller.login(loginDto, mockRes)).rejects.toThrow(
@@ -200,7 +212,7 @@ describe('AuthController', () => {
       const result = await controller.updateProfile(mockUser, updateDto);
 
       expect(result).toEqual(updatedUser);
-      expect(result.position).toBe(mockUser.position); // position should remain unchanged
+      expect(result.department).toBe('DESIGN');
     });
   });
 
@@ -357,9 +369,9 @@ describe('AuthController', () => {
         new UnauthorizedException('유효하지 않은 Refresh Token입니다'),
       );
 
-      await expect(
-        controller.refresh(mockReq as any, mockRes),
-      ).rejects.toThrow(UnauthorizedException);
+      await expect(controller.refresh(mockReq as any, mockRes)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 

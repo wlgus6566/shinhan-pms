@@ -353,7 +353,6 @@ describe('WorkLogsService', () => {
           task: {
             include: {
               assignees: {
-                where: { isActive: true },
                 include: { user: true },
               },
             },
@@ -363,7 +362,6 @@ describe('WorkLogsService', () => {
         orderBy: [
           { task: { status: 'asc' } },
           { task: { taskName: 'asc' } },
-          { workDate: 'asc' },
         ],
       });
     });

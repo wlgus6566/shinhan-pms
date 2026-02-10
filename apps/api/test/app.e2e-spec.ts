@@ -53,11 +53,11 @@ describe('Auth API with HttpOnly Cookies (e2e)', () => {
       expect(response.body.data).not.toHaveProperty('refreshToken');
 
       // Verify refreshToken cookie is set
-      const cookies = response.headers['set-cookie'];
+      const cookies = response.headers['set-cookie'] as string[] | undefined;
       expect(cookies).toBeDefined();
       expect(Array.isArray(cookies)).toBe(true);
 
-      const refreshTokenCookie = cookies?.find((cookie: string) =>
+      const refreshTokenCookie = cookies?.find((cookie) =>
         cookie.startsWith('refreshToken=')
       );
       expect(refreshTokenCookie).toBeDefined();
@@ -79,8 +79,8 @@ describe('Auth API with HttpOnly Cookies (e2e)', () => {
       expect(response.status).toBe(401);
 
       // No cookie should be set on failed login
-      const cookies = response.headers['set-cookie'];
-      const refreshTokenCookie = cookies?.find((cookie: string) =>
+      const cookies = response.headers['set-cookie'] as string[] | undefined;
+      const refreshTokenCookie = cookies?.find((cookie) =>
         cookie.startsWith('refreshToken=')
       );
       expect(refreshTokenCookie).toBeUndefined();
@@ -97,8 +97,8 @@ describe('Auth API with HttpOnly Cookies (e2e)', () => {
           password: 'password123',
         });
 
-      const cookies = loginResponse.headers['set-cookie'];
-      const refreshTokenCookie = cookies?.find((cookie: string) =>
+      const cookies = loginResponse.headers['set-cookie'] as string[] | undefined;
+      const refreshTokenCookie = cookies?.find((cookie) =>
         cookie.startsWith('refreshToken=')
       );
 
@@ -117,8 +117,8 @@ describe('Auth API with HttpOnly Cookies (e2e)', () => {
       expect(refreshResponse.body.data).not.toHaveProperty('refreshToken');
 
       // Verify new cookie is set
-      const newCookies = refreshResponse.headers['set-cookie'];
-      const newRefreshTokenCookie = newCookies?.find((cookie: string) =>
+      const newCookies = refreshResponse.headers['set-cookie'] as string[] | undefined;
+      const newRefreshTokenCookie = newCookies?.find((cookie) =>
         cookie.startsWith('refreshToken=')
       );
       expect(newRefreshTokenCookie).toBeDefined();
@@ -155,8 +155,8 @@ describe('Auth API with HttpOnly Cookies (e2e)', () => {
       expect(logoutResponse.status).toBe(200);
 
       // Verify cookie is cleared
-      const cookies = logoutResponse.headers['set-cookie'];
-      const clearedCookie = cookies?.find((cookie: string) =>
+      const cookies = logoutResponse.headers['set-cookie'] as string[] | undefined;
+      const clearedCookie = cookies?.find((cookie) =>
         cookie.startsWith('refreshToken=')
       );
 

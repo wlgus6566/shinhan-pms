@@ -4,7 +4,10 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import type { CreateWorkLogRequest, UpdateWorkLogRequest } from '@repo/schema';
+import type {
+  CreateWorkLogRequest,
+  UpdateWorkLogRequest,
+} from '@/types/work-log';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -327,8 +330,7 @@ export function WorkLogDialog({
 
       const projectId =
         task?.projectId || workLog?.task?.projectId || 'unknown';
-      const projectName =
-        task?.project?.projectName || '프로젝트 미지정';
+      const projectName = task?.project?.projectName || '프로젝트 미지정';
 
       if (!projectMap.has(projectId)) {
         projectMap.set(projectId, groups.length);

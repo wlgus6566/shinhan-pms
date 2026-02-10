@@ -14,7 +14,12 @@ describe('ProjectsService', () => {
       findUnique: jest.fn(),
       findFirst: jest.fn(),
       update: jest.fn(),
+      count: jest.fn(),
     },
+    projectTaskType: {
+      createMany: jest.fn(),
+    },
+    $transaction: jest.fn((cb) => cb(mockPrismaService)),
   };
 
   beforeEach(async () => {
@@ -39,7 +44,8 @@ describe('ProjectsService', () => {
   describe('create', () => {
     it('프로젝트를 생성해야 함', async () => {
       const createDto = {
-        projectName: '테스트 프로젝트',
+        name: '테스트 프로젝트',
+        projectType: 'WEB',
         description: '설명',
         startDate: '2024-01-01',
         endDate: '2024-12-31',
@@ -47,7 +53,8 @@ describe('ProjectsService', () => {
       const userId = 1n;
       const mockProject = {
         id: 1n,
-        projectName: createDto.projectName,
+        projectName: createDto.name,
+        projectType: createDto.projectType,
         description: createDto.description,
         startDate: new Date('2024-01-01'),
         endDate: new Date('2024-12-31'),
@@ -55,34 +62,34 @@ describe('ProjectsService', () => {
         isActive: true,
         createdBy: userId,
         createdAt: new Date(),
-        updatedBy: null,
+        updatedBy: userId,
         updatedAt: null,
+      };
+      const mockProjectWithTaskTypes = {
+        ...mockProject,
+        taskTypes: [
+          { id: 1n, projectId: 1n, name: '프로젝트성 업무', description: '', isActive: true, createdBy: userId, createdAt: new Date(), updatedBy: userId, updatedAt: null },
+        ],
       };
 
       mockPrismaService.project.findFirst.mockResolvedValue(null);
       mockPrismaService.project.create.mockResolvedValue(mockProject);
+      mockPrismaService.projectTaskType.createMany.mockResolvedValue({ count: 4 });
+      mockPrismaService.project.findUnique.mockResolvedValue(mockProjectWithTaskTypes);
 
       const result = await service.create(createDto, userId);
 
-      expect(result).toEqual(mockProject);
+      expect(result).toEqual(mockProjectWithTaskTypes);
       expect(mockPrismaService.project.findFirst).toHaveBeenCalledWith({
-        where: { projectName: createDto.projectName },
+        where: { projectName: createDto.name, isActive: true },
       });
-      expect(mockPrismaService.project.create).toHaveBeenCalledWith({
-        data: {
-          projectName: createDto.projectName,
-          description: createDto.description,
-          startDate: new Date('2024-01-01'),
-          endDate: new Date('2024-12-31'),
-          createdBy: userId,
-        },
-      });
+      expect(mockPrismaService.$transaction).toHaveBeenCalled();
     });
 
     it('중복된 프로젝트명이면 BadRequestException을 발생시켜야 함', async () => {
-      const createDto = { projectName: '기존 프로젝트' };
+      const createDto = { name: '기존 프로젝트', projectType: 'WEB' };
       const userId = 1n;
-      
+
       mockPrismaService.project.findFirst.mockResolvedValue({ id: 1n });
 
       await expect(service.create(createDto, userId)).rejects.toThrow(
@@ -92,14 +99,17 @@ describe('ProjectsService', () => {
 
     it('종료일이 시작일보다 빠르면 BadRequestException을 발생시켜야 함', async () => {
       const createDto = {
-        projectName: '테스트 프로젝트',
+        name: '테스트 프로젝트',
+        projectType: 'WEB',
         startDate: '2024-12-31',
         endDate: '2024-01-01',
       };
       const userId = 1n;
 
+      mockPrismaService.project.findFirst.mockResolvedValue(null);
+
       await expect(service.create(createDto, userId)).rejects.toThrow(
-        new BadRequestException('종료일은 시작일 이후여야 합니다'),
+        new BadRequestException('종료일은 시작일보다 이후여야 합니다'),
       );
     });
   });
@@ -136,13 +146,19 @@ describe('ProjectsService', () => {
       ];
 
       mockPrismaService.project.findMany.mockResolvedValue(mockProjects);
+      mockPrismaService.project.count.mockResolvedValue(2);
 
       const result = await service.findAll();
 
-      expect(result).toEqual(mockProjects);
+      expect(result).toEqual({ list: mockProjects, totalCount: 2 });
       expect(mockPrismaService.project.findMany).toHaveBeenCalledWith({
         where: { isActive: true },
+        skip: 0,
+        take: 10,
         orderBy: { createdAt: 'desc' },
+      });
+      expect(mockPrismaService.project.count).toHaveBeenCalledWith({
+        where: { isActive: true },
       });
     });
 
@@ -165,16 +181,25 @@ describe('ProjectsService', () => {
       ];
 
       mockPrismaService.project.findMany.mockResolvedValue(mockProjects);
+      mockPrismaService.project.count.mockResolvedValue(1);
 
       const result = await service.findAll({ search });
 
-      expect(result).toEqual(mockProjects);
+      expect(result).toEqual({ list: mockProjects, totalCount: 1 });
       expect(mockPrismaService.project.findMany).toHaveBeenCalledWith({
         where: {
           isActive: true,
           projectName: { contains: search },
         },
+        skip: 0,
+        take: 10,
         orderBy: { createdAt: 'desc' },
+      });
+      expect(mockPrismaService.project.count).toHaveBeenCalledWith({
+        where: {
+          isActive: true,
+          projectName: { contains: search },
+        },
       });
     });
 
@@ -197,16 +222,25 @@ describe('ProjectsService', () => {
       ];
 
       mockPrismaService.project.findMany.mockResolvedValue(mockProjects);
+      mockPrismaService.project.count.mockResolvedValue(1);
 
       const result = await service.findAll({ status });
 
-      expect(result).toEqual(mockProjects);
+      expect(result).toEqual({ list: mockProjects, totalCount: 1 });
       expect(mockPrismaService.project.findMany).toHaveBeenCalledWith({
         where: {
           isActive: true,
           status: status,
         },
+        skip: 0,
+        take: 10,
         orderBy: { createdAt: 'desc' },
+      });
+      expect(mockPrismaService.project.count).toHaveBeenCalledWith({
+        where: {
+          isActive: true,
+          status: status,
+        },
       });
     });
   });
@@ -225,6 +259,9 @@ describe('ProjectsService', () => {
         createdAt: new Date(),
         updatedBy: null,
         updatedAt: null,
+        taskTypes: [
+          { id: 1n, projectId: 1n, name: '프로젝트성 업무', description: '', isActive: true, createdBy: 1n, createdAt: new Date(), updatedBy: 1n, updatedAt: null },
+        ],
       };
 
       mockPrismaService.project.findUnique.mockResolvedValue(mockProject);
@@ -234,6 +271,12 @@ describe('ProjectsService', () => {
       expect(result).toEqual(mockProject);
       expect(mockPrismaService.project.findUnique).toHaveBeenCalledWith({
         where: { id: 1n, isActive: true },
+        include: {
+          taskTypes: {
+            where: { isActive: true },
+            orderBy: { id: 'asc' },
+          },
+        },
       });
     });
 
@@ -249,7 +292,7 @@ describe('ProjectsService', () => {
   describe('update', () => {
     it('프로젝트를 수정해야 함', async () => {
       const updateDto = {
-        projectName: '수정된 프로젝트명',
+        name: '수정된 프로젝트명',
         status: 'COMPLETED',
       };
       const userId = 1n;
@@ -265,16 +308,28 @@ describe('ProjectsService', () => {
         createdAt: new Date(),
         updatedBy: null,
         updatedAt: null,
+        taskTypes: [],
       };
-      const updatedProject = { ...mockProject, ...updateDto, updatedBy: userId };
+      const updatedProject = {
+        ...mockProject,
+        projectName: updateDto.name,
+        status: updateDto.status,
+        updatedBy: userId,
+        taskTypes: [
+          { id: 1n, projectId: 1n, name: '프로젝트성 업무', description: '', isActive: true, createdBy: 1n, createdAt: new Date(), updatedBy: userId, updatedAt: null },
+        ],
+      };
 
-      mockPrismaService.project.findUnique.mockResolvedValue(mockProject);
+      mockPrismaService.project.findUnique
+        .mockResolvedValueOnce(mockProject)
+        .mockResolvedValueOnce(updatedProject);
       mockPrismaService.project.findFirst.mockResolvedValue(null);
       mockPrismaService.project.update.mockResolvedValue(updatedProject);
 
       const result = await service.update(1n, updateDto, userId);
 
       expect(result).toEqual(updatedProject);
+      expect(mockPrismaService.$transaction).toHaveBeenCalled();
     });
 
     it('프로젝트가 없으면 NotFoundException을 발생시켜야 함', async () => {
@@ -286,7 +341,7 @@ describe('ProjectsService', () => {
     });
 
     it('프로젝트명을 다른 프로젝트와 중복된 이름으로 변경하면 BadRequestException을 발생시켜야 함', async () => {
-      const updateDto = { projectName: '다른 프로젝트' };
+      const updateDto = { name: '다른 프로젝트' };
       const mockProject = {
         id: 1n,
         projectName: '기존 프로젝트명',
@@ -299,6 +354,7 @@ describe('ProjectsService', () => {
         createdAt: new Date(),
         updatedBy: null,
         updatedAt: null,
+        taskTypes: [],
       };
 
       mockPrismaService.project.findUnique.mockResolvedValue(mockProject);
@@ -324,6 +380,9 @@ describe('ProjectsService', () => {
         createdAt: new Date(),
         updatedBy: null,
         updatedAt: null,
+        taskTypes: [
+          { id: 1n, projectId: 1n, name: '프로젝트성 업무', description: '', isActive: true, createdBy: 1n, createdAt: new Date(), updatedBy: 1n, updatedAt: null },
+        ],
       };
       const deletedProject = { ...mockProject, isActive: false };
 

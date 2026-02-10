@@ -68,7 +68,7 @@ export class AuthService {
     });
 
     // JWT Refresh Token의 해시를 DB에 저장
-    const refreshTokenHash = await bcrypt.hash(refreshToken, 10);
+    const refreshTokenHash = await bcrypt.hash(refreshToken, 12);
 
     // 마지막 로그인 시간 및 Refresh Token 업데이트
     await this.prisma.user.update({
@@ -149,7 +149,7 @@ export class AuthService {
     // 새 비밀번호 해시
     const newPasswordHash = await bcrypt.hash(
       changePasswordDto.newPassword,
-      10,
+      12,
     );
 
     // 비밀번호 업데이트 및 requirePasswordChange를 false로 변경
@@ -216,7 +216,7 @@ export class AuthService {
     });
 
     // JWT Refresh Token의 해시를 DB에 저장
-    const newRefreshTokenHash = await bcrypt.hash(refreshToken, 10);
+    const newRefreshTokenHash = await bcrypt.hash(refreshToken, 12);
 
     // Refresh Token 업데이트
     await this.prisma.user.update({

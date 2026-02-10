@@ -29,7 +29,7 @@ export class UsersService {
     }
 
     // 초기 비밀번호 고정: password123
-    const passwordHash = await bcrypt.hash('password123', 10);
+    const passwordHash = await bcrypt.hash('password123', 12);
 
     // 사용자 생성
     const user = await this.prisma.user.create({

@@ -56,17 +56,12 @@ describe('AnalyticsService', () => {
         _max: {},
       } as any);
 
-      // Mock completed tasks count
-      jest.spyOn(prisma.task, 'count').mockResolvedValueOnce(12);
-
-      // Mock average progress
-      jest.spyOn(prisma.task, 'aggregate').mockResolvedValueOnce({
-        _avg: { progress: 75 },
-        _sum: {},
-        _count: 1,
-        _min: {},
-        _max: {},
-      } as any);
+      // Mock findMany for work logs with progress
+      jest.spyOn(prisma.workLog, 'findMany').mockResolvedValueOnce([
+        { taskId: BigInt(1), progress: 100, workDate: new Date('2026-01-15') },
+        { taskId: BigInt(2), progress: 100, workDate: new Date('2026-01-20') },
+        { taskId: BigInt(3), progress: 50, workDate: new Date('2026-01-25') },
+      ] as any);
 
       // Mock issue count
       jest.spyOn(prisma.workLog, 'count').mockResolvedValueOnce(3);
@@ -75,8 +70,8 @@ describe('AnalyticsService', () => {
 
       expect(result).toEqual({
         totalWorkHours: 160.5,
-        completedTasks: 12,
-        averageProgress: 75,
+        completedTasks: 2,
+        averageProgress: 83,
         issueCount: 3,
       });
     });
@@ -95,14 +90,10 @@ describe('AnalyticsService', () => {
         _max: {},
       } as any);
 
-      jest.spyOn(prisma.task, 'count').mockResolvedValue(5);
-      jest.spyOn(prisma.task, 'aggregate').mockResolvedValue({
-        _avg: { progress: 60 },
-        _sum: {},
-        _count: 1,
-        _min: {},
-        _max: {},
-      } as any);
+      jest.spyOn(prisma.workLog, 'findMany').mockResolvedValue([
+        { taskId: BigInt(1), progress: 100, workDate: new Date('2026-01-15') },
+      ] as any);
+
       jest.spyOn(prisma.workLog, 'count').mockResolvedValue(1);
 
       await service.getMyProductivity(userId, startDate, endDate, projectId);
@@ -233,12 +224,12 @@ describe('AnalyticsService', () => {
       const mockProjects = [
         {
           id: BigInt(1),
-          name: '프로젝트 A',
+          projectName: '프로젝트 A',
           tasks: [
-            { progress: 100 },
-            { progress: 100 },
-            { progress: 50 },
-            { progress: 0 },
+            { id: BigInt(1), workLogs: [{ progress: 100, workDate: new Date() }] },
+            { id: BigInt(2), workLogs: [{ progress: 100, workDate: new Date() }] },
+            { id: BigInt(3), workLogs: [{ progress: 50, workDate: new Date() }] },
+            { id: BigInt(4), workLogs: [{ progress: 0, workDate: new Date() }] },
           ],
         },
       ];

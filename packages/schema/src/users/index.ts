@@ -12,14 +12,3 @@ export * from './types';
 // Export Schemas
 export { CreateUserSchema, UpdateUserSchema };
 
-// Re-export enums for convenience
-export {
-  DepartmentEnum,
-  PositionEnum,
-  UserRoleEnum,
-  GradeEnum,
-  type Department,
-  type Position,
-  type UserRole,
-  type Grade,
-} from '../common/enums';
