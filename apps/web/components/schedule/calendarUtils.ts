@@ -60,7 +60,7 @@ export function transformScheduleToEvent(schedule: Schedule): EventInput {
   }
 
   return {
-    id: schedule.id,
+    id: schedule.instanceDate ? `${schedule.id}-${schedule.instanceDate}` : schedule.id,
     title: schedule.title,
     start: startDate,
     end: endDate,

@@ -66,7 +66,7 @@ export default function TeamSchedulesPage() {
   }
 
   return (
-    <div className="mx-auto page-animate">
+    <div className="mx-auto page-animate ">
       <div className="space-y-6">
         {/* Header */}
         <div>
@@ -102,7 +102,9 @@ export default function TeamSchedulesPage() {
               value={String(project.id)}
               className="space-y-6"
             >
-              <ProjectScheduleList projectId={String(project.id)} />
+              {activeTab === String(project.id) && (
+                <ProjectScheduleList projectId={String(project.id)} />
+              )}
             </TabsContent>
           ))}
         </Tabs>

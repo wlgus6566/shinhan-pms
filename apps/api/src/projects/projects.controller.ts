@@ -460,6 +460,7 @@ export class ProjectsController {
       isRecurring: schedule.isRecurring,
       recurrenceType: schedule.recurrenceType,
       recurrenceEndDate: schedule.recurrenceEndDate?.toISOString().split('T')[0],
+      recurrenceDaysOfWeek: schedule.recurrenceDaysOfWeek,
       originalScheduleId: schedule.originalScheduleId,
       instanceDate: schedule.instanceDate,
       participants:

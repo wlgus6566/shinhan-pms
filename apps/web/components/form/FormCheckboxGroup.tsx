@@ -118,7 +118,7 @@ const FormCheckboxGroup = ({
                       <h4 className="text-sm font-semibold text-slate-700 border-b pb-1">
                         {group.label}
                       </h4>
-                      <div className="space-y-2 pl-2">
+                      <div className="grid grid-cols-3 gap-2 pl-2">
                         {group.options.map((option) =>
                           renderCheckboxItem(option, field),
                         )}

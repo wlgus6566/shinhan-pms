@@ -64,7 +64,7 @@ export function SelectedDateScheduleList({
           <div className="space-y-3">
             {schedulesForDate.map((schedule) => (
               <div
-                key={schedule.id}
+                key={schedule.instanceDate ? `${schedule.id}-${schedule.instanceDate}` : schedule.id}
                 onClick={() => onScheduleClick?.(schedule)}
                 className="p-4 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
               >

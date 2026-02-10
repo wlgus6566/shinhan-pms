@@ -1,9 +1,10 @@
 'use client';
 
 import { useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { AlertCircle, Plus } from 'lucide-react';
+import { AlertCircle, Plus, PenLine } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { WorkLogCard } from './WorkLogCard';
 import type { WorkLog } from '@/types/work-log';
@@ -83,16 +84,19 @@ export function WorkLogList({
           </div>
         )}
       </div>
-      {/* Floating Action Button */}
-      {onCreate && (
-        <Button
-          onClick={onCreate}
-          className="gradient-primary border-none fixed bottom-8 right-8 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow z-50"
-          size="icon"
-        >
-          <Plus className="h-6 w-6" />
-        </Button>
-      )}
+      {/* Floating Action Button - Portal to body to escape transform context */}
+      {onCreate &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <Button
+            onClick={onCreate}
+            className="gradient-primary border-none fixed bottom-8 right-8 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow z-50"
+            size="icon"
+          >
+            <PenLine className="h-6 w-6" />
+          </Button>,
+          document.body,
+        )}
     </div>
   );
 }

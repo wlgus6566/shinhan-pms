@@ -8,6 +8,7 @@ export interface RecurrenceOptions {
   endDate: Date;
   recurrenceType: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
   recurrenceEndDate: Date;
+  recurrenceDaysOfWeek?: number[]; // 0=일, 1=월, 2=화, ..., 6=토
 }
 
 export interface ScheduleInstance {
@@ -26,27 +27,65 @@ export function generateRecurrenceInstances(
   options: RecurrenceOptions,
   maxInstances = 1000,
 ): ScheduleInstance[] {
-  const { startDate, endDate, recurrenceType, recurrenceEndDate } = options;
+  const { startDate, endDate, recurrenceType, recurrenceEndDate, recurrenceDaysOfWeek } = options;
   const instances: ScheduleInstance[] = [];
 
   // 일정 기간 계산 (밀리초)
   const duration = endDate.getTime() - startDate.getTime();
 
+  // WEEKLY + recurrenceDaysOfWeek: 지정된 요일마다 인스턴스 생성
+  if (recurrenceType === 'WEEKLY' && recurrenceDaysOfWeek && recurrenceDaysOfWeek.length > 0) {
+    // 시작일이 속한 주의 일요일(0)부터 탐색
+    const weekStart = new Date(startDate);
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay()); // 해당 주 일요일
+
+    let currentWeekStart = new Date(weekStart);
+    let iterationCount = 0;
+
+    while (currentWeekStart <= recurrenceEndDate && iterationCount < maxInstances) {
+      for (const dayOfWeek of recurrenceDaysOfWeek) {
+        const instanceStart = new Date(currentWeekStart);
+        instanceStart.setDate(instanceStart.getDate() + dayOfWeek);
+        // 시작 시간 설정 (원본 시간 유지)
+        instanceStart.setHours(startDate.getHours(), startDate.getMinutes(), startDate.getSeconds(), startDate.getMilliseconds());
+
+        // 시작일 이전이거나 종료일 이후이면 건너뛰기
+        if (instanceStart < startDate || instanceStart > recurrenceEndDate) {
+          continue;
+        }
+
+        const instanceEnd = new Date(instanceStart.getTime() + duration);
+
+        instances.push({
+          startDate: instanceStart,
+          endDate: instanceEnd,
+          instanceDate: instanceStart.toISOString().split('T')[0],
+        });
+        iterationCount++;
+      }
+      // 다음 주로 이동
+      currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+    }
+
+    // 날짜순 정렬
+    instances.sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
+    return instances;
+  }
+
+  // 기존 로직: DAILY, MONTHLY, YEARLY 및 recurrenceDaysOfWeek 없는 WEEKLY
   let currentDate = new Date(startDate);
   let iterationCount = 0;
 
   while (currentDate <= recurrenceEndDate && iterationCount < maxInstances) {
-    // 현재 인스턴스 추가
     const instanceStart = new Date(currentDate);
     const instanceEnd = new Date(currentDate.getTime() + duration);
 
     instances.push({
       startDate: instanceStart,
       endDate: instanceEnd,
-      instanceDate: instanceStart.toISOString().split('T')[0], // YYYY-MM-DD
+      instanceDate: instanceStart.toISOString().split('T')[0],
     });
 
-    // 다음 발생 날짜 계산
     currentDate = getNextOccurrence(currentDate, recurrenceType);
     iterationCount++;
   }

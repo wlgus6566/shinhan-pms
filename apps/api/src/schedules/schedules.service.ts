@@ -153,12 +153,57 @@ export class SchedulesService {
         continue;
       }
 
+      // 반복 일정에 필수 필드가 없으면 일반 일정으로 처리
+      if (!schedule.recurrenceType || !schedule.recurrenceEndDate) {
+        expandedSchedules.push(schedule);
+        continue;
+      }
+
+      const parsedStartDate = new Date(schedule.startDate);
+      const parsedEndDate = new Date(schedule.endDate);
+      const parsedRecurrenceEndDate = new Date(schedule.recurrenceEndDate);
+
+      // 날짜 파싱 실패 시 일반 일정으로 처리
+      if (isNaN(parsedStartDate.getTime()) || isNaN(parsedEndDate.getTime()) || isNaN(parsedRecurrenceEndDate.getTime())) {
+        expandedSchedules.push(schedule);
+        continue;
+      }
+
+      // recurrenceDaysOfWeek 파싱 (JSON 문자열 또는 쉼표 구분 문자열 → 숫자 배열)
+      const dayNameToNumber: Record<string, number> = {
+        SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6,
+      };
+      let daysOfWeek: number[] | undefined;
+      if (schedule.recurrenceDaysOfWeek) {
+        try {
+          let parsed: any;
+          if (typeof schedule.recurrenceDaysOfWeek === 'string') {
+            try {
+              parsed = JSON.parse(schedule.recurrenceDaysOfWeek);
+            } catch {
+              // JSON 파싱 실패 시 쉼표 구분 문자열로 처리
+              parsed = schedule.recurrenceDaysOfWeek.split(',').map((s: string) => s.trim());
+            }
+          } else {
+            parsed = schedule.recurrenceDaysOfWeek;
+          }
+          if (Array.isArray(parsed)) {
+            daysOfWeek = parsed.map((d: any) =>
+              typeof d === 'string' && d in dayNameToNumber ? dayNameToNumber[d] : Number(d)
+            ).filter((n: number) => !isNaN(n));
+          }
+        } catch {
+          daysOfWeek = undefined;
+        }
+      }
+
       // 정기 일정 규칙에 따라 인스턴스 생성
       const instances = generateRecurrenceInstances({
-        startDate: new Date(schedule.startDate),
-        endDate: new Date(schedule.endDate),
+        startDate: parsedStartDate,
+        endDate: parsedEndDate,
         recurrenceType: schedule.recurrenceType as 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY',
-        recurrenceEndDate: new Date(schedule.recurrenceEndDate),
+        recurrenceEndDate: parsedRecurrenceEndDate,
+        recurrenceDaysOfWeek: daysOfWeek,
       });
 
       // 조회 기간 필터링 (기간이 지정된 경우)
@@ -241,8 +286,9 @@ export class SchedulesService {
       orderBy: { startDate: 'asc' },
     });
 
-    // 정기 일정 확장
-    return this.expandRecurringSchedules(schedules, startDate, endDate);
+    // 정기 일정 확장 후 응답 형식 변환
+    return this.expandRecurringSchedules(schedules, startDate, endDate)
+      .map((s) => this.formatScheduleResponse(s));
   }
 
   /**
@@ -304,8 +350,9 @@ export class SchedulesService {
       orderBy: { startDate: 'asc' },
     });
 
-    // 정기 일정 확장
-    return this.expandRecurringSchedules(schedules, startDate, endDate);
+    // 정기 일정 확장 후 응답 형식 변환
+    return this.expandRecurringSchedules(schedules, startDate, endDate)
+      .map((s) => this.formatScheduleResponse(s));
   }
 
   /**
@@ -336,11 +383,18 @@ export class SchedulesService {
    * Schedule 응답 형식 변환 (JSON 문자열을 배열로 변환)
    */
   private formatScheduleResponse(schedule: any) {
+    let daysOfWeek = schedule.recurrenceDaysOfWeek;
+    if (typeof daysOfWeek === 'string') {
+      try {
+        daysOfWeek = JSON.parse(daysOfWeek);
+      } catch {
+        // JSON 파싱 실패 시 쉼표 구분 문자열로 처리 (seed 데이터 호환)
+        daysOfWeek = daysOfWeek.split(',').map((s: string) => s.trim());
+      }
+    }
     return {
       ...schedule,
-      recurrenceDaysOfWeek: schedule.recurrenceDaysOfWeek
-        ? JSON.parse(schedule.recurrenceDaysOfWeek)
-        : null,
+      recurrenceDaysOfWeek: Array.isArray(daysOfWeek) && daysOfWeek.length > 0 ? daysOfWeek : null,
     };
   }
 

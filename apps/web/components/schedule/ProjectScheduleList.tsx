@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, PenLine } from 'lucide-react';
 import { ScheduleCalendar } from './ScheduleCalendar';
 import { ScheduleCalendarSkeleton } from './skeleton/ScheduleCalendarSkeleton';
 import { ScheduleSidebarSkeleton } from './skeleton/ScheduleSidebarSkeleton';
@@ -208,14 +209,18 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
         onSuccess={handleSuccess}
       />
 
-      {/* Floating Action Button */}
-      <Button
-        onClick={handleCreateNew}
-        className="gradient-primary border-none fixed bottom-8 right-8 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow z-50"
-        size="icon"
-      >
-        <Plus className="h-6 w-6" />
-      </Button>
+      {/* Floating Action Button - Portal to body to escape transform context */}
+      {typeof document !== 'undefined' &&
+        createPortal(
+          <Button
+            onClick={handleCreateNew}
+            className="gradient-primary border-none fixed bottom-8 right-8 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow z-50"
+            size="icon"
+          >
+            <PenLine className="h-6 w-6" />
+          </Button>,
+          document.body,
+        )}
     </div>
   );
 }

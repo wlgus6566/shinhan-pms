@@ -38,13 +38,11 @@ export function useTabNavigation(
     searchParams.get(queryKey) || defaultTab,
   );
 
-  // URL 파라미터 변경 시 탭 동기화
+  // URL 파라미터 변경 시 탭 동기화 (브라우저 뒤로/앞으로 대응)
   useEffect(() => {
     const tabParam = searchParams.get(queryKey) || defaultTab;
-    if (tabParam !== activeTab) {
-      setActiveTab(tabParam);
-    }
-  }, [searchParams, activeTab, defaultTab, queryKey]);
+    setActiveTab(tabParam);
+  }, [searchParams, defaultTab, queryKey]);
 
   // 탭 변경 핸들러
   const handleTabChange = useCallback(

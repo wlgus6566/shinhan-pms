@@ -390,6 +390,9 @@ export class WorkLogsService {
     return await this.prisma.task.findMany({
       where: {
         isActive: true,
+        status: {
+          notIn: ['COMPLETED', 'SUSPENDED'],
+        },
         assignees: {
           some: {
             userId,

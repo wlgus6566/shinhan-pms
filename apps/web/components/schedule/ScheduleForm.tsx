@@ -17,7 +17,12 @@ import {
   FormDateTimePicker,
   FormDaysOfWeekPicker,
 } from '@/components/form';
-import type { Schedule, TeamScope, ScheduleType, HalfDayType } from '@/types/schedule';
+import type {
+  Schedule,
+  TeamScope,
+  ScheduleType,
+  HalfDayType,
+} from '@/types/schedule';
 import { SCHEDULE_TYPE_LABELS, TEAM_SCOPE_LABELS } from '@/types/schedule';
 import type { WorkArea } from '@/types/project';
 import { useProjectMembers } from '@/lib/api/projectMembers';
@@ -48,8 +53,8 @@ export function ScheduleForm({
   const isEditing = !!schedule;
 
   // Fetch project members using SWR hook
-  const { members: projectMembers = [], isLoading: loadingMembers } = useProjectMembers(projectId);
-
+  const { members: projectMembers = [], isLoading: loadingMembers } =
+    useProjectMembers(projectId);
 
   const form = useForm<ScheduleFormValues>({
     resolver: zodResolver(CreateScheduleSchema),
@@ -68,9 +73,15 @@ export function ScheduleForm({
           halfDayType: (schedule.halfDayType as HalfDayType) || undefined,
           usageDate: schedule.usageDate?.slice(0, 10) || '',
           isRecurring: schedule.isRecurring || false,
-          recurrenceType: (schedule.recurrenceType as 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY') || undefined,
+          recurrenceType:
+            (schedule.recurrenceType as
+              | 'DAILY'
+              | 'WEEKLY'
+              | 'MONTHLY'
+              | 'YEARLY') || undefined,
           recurrenceEndDate: schedule.recurrenceEndDate?.slice(0, 10) || '',
-          recurrenceDaysOfWeek: (schedule.recurrenceDaysOfWeek as DayOfWeek[]) || [],
+          recurrenceDaysOfWeek:
+            (schedule.recurrenceDaysOfWeek as DayOfWeek[]) || [],
         }
       : {
           title: '',
@@ -109,9 +120,15 @@ export function ScheduleForm({
         halfDayType: (schedule.halfDayType as HalfDayType) || undefined,
         usageDate: schedule.usageDate?.slice(0, 10) || '',
         isRecurring: schedule.isRecurring || false,
-        recurrenceType: (schedule.recurrenceType as 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY') || undefined,
+        recurrenceType:
+          (schedule.recurrenceType as
+            | 'DAILY'
+            | 'WEEKLY'
+            | 'MONTHLY'
+            | 'YEARLY') || undefined,
         recurrenceEndDate: schedule.recurrenceEndDate?.slice(0, 10) || '',
-        recurrenceDaysOfWeek: (schedule.recurrenceDaysOfWeek as DayOfWeek[]) || [],
+        recurrenceDaysOfWeek:
+          (schedule.recurrenceDaysOfWeek as DayOfWeek[]) || [],
       });
     } else {
       form.reset({
@@ -135,7 +152,6 @@ export function ScheduleForm({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [schedule, viewMode]);
-
 
   const handleSubmit = async (data: ScheduleFormValues) => {
     console.log('🔵 [ScheduleForm] handleSubmit called', { data, isEditing });
@@ -267,7 +283,10 @@ export function ScheduleForm({
     if (schedule) return;
 
     const currentDaysOfWeek = form.watch('recurrenceDaysOfWeek');
-    if (recurrenceType === 'WEEKLY' && (!currentDaysOfWeek || currentDaysOfWeek.length === 0)) {
+    if (
+      recurrenceType === 'WEEKLY' &&
+      (!currentDaysOfWeek || currentDaysOfWeek.length === 0)
+    ) {
       const today = new Date();
       const dayOfWeek = today.getDay(); // 0 (일요일) ~ 6 (토요일)
       const dayMap: Record<number, DayOfWeek> = {
@@ -345,7 +364,12 @@ export function ScheduleForm({
               }))}
             />
           ))}
-
+        <FormCheckbox
+          control={form.control}
+          name="isRecurring"
+          label="정기 일정으로 등록"
+          disabled={viewMode}
+        />
         {/* 연차/반차 시 사용일 필드 */}
         {isVacation ? (
           <>
@@ -388,7 +412,7 @@ export function ScheduleForm({
           </>
         ) : (
           /* 모든 일정: 시작 일시 + 종료 일시 */
-          <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
             <FormDateTimePicker
               control={form.control}
               name="startDate"
@@ -403,7 +427,11 @@ export function ScheduleForm({
               control={form.control}
               name="endDate"
               label={isRecurring ? '종료 시간 *' : '종료 일시 *'}
-              placeholder={isRecurring ? '종료 시간을 선택하세요' : '종료 날짜를 선택하세요'}
+              placeholder={
+                isRecurring
+                  ? '종료 시간을 선택하세요'
+                  : '종료 날짜를 선택하세요'
+              }
               disabled={viewMode}
               showAllDayCheckbox={!isRecurring}
               allDayCheckboxName="isAllDay"
@@ -414,15 +442,8 @@ export function ScheduleForm({
 
         {scheduleType !== 'VACATION' && scheduleType !== 'HALF_DAY' && (
           <>
-            <FormCheckbox
-              control={form.control}
-              name="isRecurring"
-              label="정기 일정으로 등록"
-              disabled={viewMode}
-            />
-
             {isRecurring && (
-              <div className="ml-6 space-y-4 rounded-md border border-gray-200 p-4">
+              <div className="space-y-4 rounded-md border border-gray-200 p-4">
                 <FormSelect
                   control={form.control}
                   name="recurrenceType"
