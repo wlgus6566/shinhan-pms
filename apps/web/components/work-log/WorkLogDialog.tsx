@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -8,7 +8,7 @@ import type { CreateWorkLogRequest, UpdateWorkLogRequest } from '@repo/schema';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { toast } from 'sonner';
-import { Loader2, CheckCircle2, History } from 'lucide-react';
+import { Loader2, CheckCircle2, History, FolderOpen } from 'lucide-react';
 import { BaseDialog } from '@/components/ui/base-dialog';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -311,6 +311,35 @@ export function WorkLogDialog({
     }
   };
 
+  // 프로젝트별 그룹핑
+  const projectGroups = useMemo(() => {
+    const groups: {
+      projectId: string;
+      projectName: string;
+      indices: number[];
+    }[] = [];
+    const projectMap = new Map<string, number>();
+
+    fields.forEach((_, index) => {
+      const taskId = multiForm.getValues(`entries.${index}.taskId`);
+      const task = myTasks.find((t) => t.id === taskId);
+      const workLog = mode === 'edit' ? workLogs[index] : null;
+
+      const projectId =
+        task?.projectId || workLog?.task?.projectId || 'unknown';
+      const projectName =
+        task?.project?.projectName || '프로젝트 미지정';
+
+      if (!projectMap.has(projectId)) {
+        projectMap.set(projectId, groups.length);
+        groups.push({ projectId, projectName, indices: [] });
+      }
+      groups[projectMap.get(projectId)!]!.indices.push(index);
+    });
+
+    return groups;
+  }, [fields, myTasks, workLogs, mode, multiForm]);
+
   // 작성할 업무가 없는 경우 (모든 업무일지가 작성된 경우)
   const noEntriesAvailable = mode === 'create' && fields.length === 0;
 
@@ -330,11 +359,6 @@ export function WorkLogDialog({
                   workLog?.task?.taskName ||
                   `업무 ${index + 1}`}
               </CardTitle>
-              {currentTask?.project && (
-                <span className="text-xs text-slate-500">
-                  {currentTask.project.projectName}
-                </span>
-              )}
             </div>
           </div>
         </CardHeader>
@@ -599,9 +623,27 @@ export function WorkLogDialog({
           <Form {...multiForm}>
             <form
               onSubmit={multiForm.handleSubmit(handleMultiFormSubmit)}
-              className="space-y-4"
+              className="space-y-6"
             >
-              {fields.map((_, index) => renderEntryCard(index))}
+              {projectGroups.map((group) => (
+                <div key={group.projectId} className="space-y-3">
+                  {/* 프로젝트 그룹 헤더 */}
+                  <div className="flex items-center gap-2 px-1">
+                    <FolderOpen className="h-4 w-4 text-indigo-500" />
+                    <h3 className="text-sm font-semibold text-slate-700">
+                      {group.projectName}
+                    </h3>
+                    <span className="text-xs text-slate-400">
+                      {group.indices.length}건
+                    </span>
+                    <div className="flex-1 border-t border-slate-200 ml-2" />
+                  </div>
+                  {/* 프로젝트 내 업무 카드 */}
+                  <div className="space-y-3 pl-2">
+                    {group.indices.map((index) => renderEntryCard(index))}
+                  </div>
+                </div>
+              ))}
             </form>
           </Form>
         )}

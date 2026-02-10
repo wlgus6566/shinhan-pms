@@ -305,6 +305,7 @@ export default function WorkLogsPage() {
               workLogs={filteredWorkLogs}
               currentUserId={user?.id.toString()}
               selectedDate={selectedDate}
+              myTasks={filteredTasks}
               onEdit={handleEditClick}
               onCreate={handleCreateClick}
             />

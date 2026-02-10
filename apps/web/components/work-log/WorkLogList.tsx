@@ -4,15 +4,16 @@ import { useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { AlertCircle, Plus, PenLine } from 'lucide-react';
+import { AlertCircle, Plus, PenLine, FolderOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { WorkLogCard } from './WorkLogCard';
-import type { WorkLog } from '@/types/work-log';
+import type { WorkLog, MyTask } from '@/types/work-log';
 
 interface WorkLogListProps {
   workLogs: WorkLog[];
   currentUserId?: string;
   selectedDate: Date;
+  myTasks?: MyTask[];
   onEdit?: (workLog: WorkLog) => void;
   onDelete?: (workLog: WorkLog) => void;
   onCreate?: () => void;
@@ -22,6 +23,7 @@ export function WorkLogList({
   workLogs,
   currentUserId,
   selectedDate,
+  myTasks = [],
   onEdit,
   onDelete,
   onCreate,
@@ -31,6 +33,40 @@ export function WorkLogList({
   const logsForSelectedDate = useMemo(() => {
     return workLogs.filter((log) => log.workDate === selectedDateStr);
   }, [workLogs, selectedDateStr]);
+
+  // 프로젝트별 그룹핑
+  const groupedByProject = useMemo(() => {
+    if (logsForSelectedDate.length === 0) return [];
+
+    // myTasks에서 projectId → projectName 매핑 생성
+    const projectNameMap = new Map<string, string>();
+    myTasks.forEach((task) => {
+      if (task.project?.projectName) {
+        projectNameMap.set(task.projectId, task.project.projectName);
+      }
+    });
+
+    const groups: {
+      projectId: string;
+      projectName: string;
+      logs: WorkLog[];
+    }[] = [];
+    const groupIndexMap = new Map<string, number>();
+
+    logsForSelectedDate.forEach((log) => {
+      const projectId = log.task?.projectId || 'unknown';
+      const projectName =
+        projectNameMap.get(projectId) || '프로젝트 미지정';
+
+      if (!groupIndexMap.has(projectId)) {
+        groupIndexMap.set(projectId, groups.length);
+        groups.push({ projectId, projectName, logs: [] });
+      }
+      groups[groupIndexMap.get(projectId)!]!.logs.push(log);
+    });
+
+    return groups;
+  }, [logsForSelectedDate, myTasks]);
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -70,7 +106,34 @@ export function WorkLogList({
               </Button>
             )}
           </div>
+        ) : groupedByProject.length > 1 ? (
+          /* 프로젝트가 2개 이상일 때만 그룹핑 표시 */
+          <div className="space-y-4">
+            {groupedByProject.map((group) => (
+              <div key={group.projectId} className="space-y-2">
+                <div className="flex items-center gap-2 px-1">
+                  <FolderOpen className="h-3.5 w-3.5 text-indigo-500" />
+                  <span className="text-xs font-semibold text-slate-600">
+                    {group.projectName}
+                  </span>
+                  <div className="flex-1 border-t border-slate-100 ml-1" />
+                </div>
+                <div className="space-y-2">
+                  {group.logs.map((log) => (
+                    <WorkLogCard
+                      key={log.id}
+                      workLog={log}
+                      isOwner={currentUserId === log.userId}
+                      onEdit={onEdit ? () => onEdit(log) : undefined}
+                      onDelete={onDelete ? () => onDelete(log) : undefined}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         ) : (
+          /* 프로젝트가 1개일 때는 기존처럼 플랫 리스트 */
           <div className="space-y-3">
             {logsForSelectedDate.map((log) => (
               <WorkLogCard

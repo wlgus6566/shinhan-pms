@@ -60,7 +60,7 @@ export default function LoginPage() {
         {/* Tagline */}
         <div className="relative z-10 space-y-6">
           <h2 className="text-3xl font-bold text-white leading-tight">
-            이모션의
+            이모션
             <br />
             <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
               프로젝트 관리 시스템
