@@ -37,7 +37,8 @@ jobs:
 
             echo "=== Build shared schema ==="
             cd packages/schema
-            npx tsc -b
+            rm -rf dist
+            npx tsc -b --force
             cd ~/pms
 
             echo "=== Build & Deploy API ==="
