@@ -36,6 +36,7 @@ export const SCHEDULE_TYPE_LABELS: Record<ScheduleType, string> = {
   SCRUM: '스크럼',
   VACATION: '연차',
   HALF_DAY: '반차',
+  HOLIDAY: '공휴일',
   OTHER: '기타',
 };
 
@@ -45,6 +46,7 @@ export const SCHEDULE_TYPE_COLORS: Record<ScheduleType, string> = {
   SCRUM: 'bg-indigo-100 text-indigo-700 border-indigo-200',
   VACATION: 'bg-emerald-100 text-emerald-700 border-emerald-200',
   HALF_DAY: 'bg-teal-100 text-teal-700 border-teal-200',
+  HOLIDAY: 'bg-red-100 text-red-700 border-red-200',
   OTHER: 'bg-slate-100 text-slate-700 border-slate-200',
 };
 
@@ -54,6 +56,7 @@ export const SCHEDULE_TYPE_CALENDAR_COLORS: Record<ScheduleType, string> = {
   SCRUM: '#6366f1', // indigo-500
   VACATION: '#abe3c3',
   HALF_DAY: '#abe3c3',
+  HOLIDAY: '#ef4444', // red-500
   OTHER: '#64748b', // slate-500
 };
 

@@ -238,11 +238,11 @@ export const POSITION_OPTIONS = Object.entries(POSITION_LABELS).map(
 
 // Schedule Related Enums
 export const ScheduleTypeEnum = z.enum(
-  ['MEETING', 'SCRUM', 'VACATION', 'HALF_DAY', 'OTHER'],
+  ['MEETING', 'SCRUM', 'VACATION', 'HALF_DAY', 'HOLIDAY', 'OTHER'],
   {
     errorMap: () => ({
       message:
-        '일정 유형은 MEETING, SCRUM, VACATION, HALF_DAY, OTHER 중 하나여야 합니다',
+        '일정 유형은 MEETING, SCRUM, VACATION, HALF_DAY, HOLIDAY, OTHER 중 하나여야 합니다',
     }),
   },
 );

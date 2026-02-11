@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { useMyProjects } from '@/lib/api/projects';
+import { useProjectContext } from '@/context/ProjectContext';
 import {
   useMyProductivity,
   useWorkAreaDistribution,
@@ -29,7 +29,7 @@ export default function AnalyticsPage() {
   >();
 
   // 내 프로젝트 목록 조회
-  const { projects, isLoading: projectsLoading } = useMyProjects();
+  const { myProjects: projects, isLoading: projectsLoading } = useProjectContext();
 
   // 선택된 프로젝트의 통계 조회
   const { productivity, isLoading: productivityLoading } = useMyProductivity(

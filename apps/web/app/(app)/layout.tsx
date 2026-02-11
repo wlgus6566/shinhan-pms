@@ -3,6 +3,7 @@
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 import { useAuth } from '@/context/AuthContext';
+import { ProjectProvider } from '@/context/ProjectContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -33,6 +34,7 @@ export default function DashboardLayout({
   }
 
   return (
+    <ProjectProvider>
     <div className="min-h-screen bg-emotion-lightgray">
       {/* 사이드바 (데스크톱: 고정, 모바일: 드로어) */}
       <Sidebar
@@ -65,5 +67,6 @@ export default function DashboardLayout({
       {/* Toast 알림 */}
       <Toaster />
     </div>
+    </ProjectProvider>
   );
 }

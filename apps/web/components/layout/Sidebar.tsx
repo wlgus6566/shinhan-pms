@@ -3,7 +3,7 @@
 import { Link } from 'next-view-transitions';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { useMyProjects } from '@/lib/api/projects';
+import { useProjectContext } from '@/context/ProjectContext';
 import { cn } from '@/lib/utils';
 import {
   LayoutDashboard,
@@ -54,7 +54,7 @@ export function Sidebar({
 }) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
-  const { projects: myProjects } = useMyProjects();
+  const { myProjects } = useProjectContext();
   const [isTaskMenuOpen, setIsTaskMenuOpen] = useState(
     pathname?.startsWith('/tasks') || false,
   );

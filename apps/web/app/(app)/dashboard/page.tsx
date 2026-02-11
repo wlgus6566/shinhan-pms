@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useDashboardStats, useDashboardTimeline } from '@/lib/api/dashboard';
-import { useMyProjects } from '@/lib/api/projects';
+import { useProjectContext } from '@/context/ProjectContext';
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -225,7 +225,7 @@ export default function DashboardPage() {
   const { user } = useAuth();
   const { stats, isLoading: statsLoading } = useDashboardStats();
   const { timeline, isLoading: timelineLoading } = useDashboardTimeline();
-  const { projects } = useMyProjects();
+  const { myProjects: projects } = useProjectContext();
 
   // PM 프로젝트 조회 및 필터링
   const pmProjects = useMemo(

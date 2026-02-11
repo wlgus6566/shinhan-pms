@@ -69,7 +69,10 @@ export function ScheduleDialog({
     try {
       if (internalMode === 'edit' && schedule) {
         // Update
-        await updateSchedule(schedule.id, data);
+        await updateSchedule(schedule.id, {
+          ...data,
+          title: data.title ?? undefined,
+        });
       } else {
         // Create: 연차/반차는 글로벌 일정으로 생성 (projectId 없이)
         const isGlobalLeave =

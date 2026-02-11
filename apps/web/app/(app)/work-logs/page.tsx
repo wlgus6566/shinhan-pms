@@ -5,6 +5,7 @@ import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { FileText, Loader2 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/context/AuthContext';
+import { useProjectContext } from '@/context/ProjectContext';
 import { useMyWorkLogs, useMyTasks } from '@/lib/api/workLogs';
 import { useTabNavigation } from '@/hooks/useTabNavigation';
 import {
@@ -27,6 +28,7 @@ import type {
 
 export default function WorkLogsPage() {
   const { user } = useAuth();
+  const { selectedProjectId: globalProjectId, setSelectedProjectId: setGlobalProjectId } = useProjectContext();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [currentMonth, setCurrentMonth] = useState<Date>(
     startOfMonth(new Date()),
@@ -36,14 +38,21 @@ export default function WorkLogsPage() {
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
   const [editingWorkLogs, setEditingWorkLogs] = useState<WorkLog[]>([]);
 
-  // 프로젝트 필터 탭 (URL 동기화)
+  // 프로젝트 필터 탭 (URL 동기화 + 글로벌 상태 반영)
   const {
     activeTab: selectedProjectId,
     handleTabChange: setSelectedProjectId,
   } = useTabNavigation('/work-logs', {
-    defaultTab: 'all',
+    defaultTab: globalProjectId || 'all',
     queryKey: 'project',
   });
+
+  // 탭 변경 시 글로벌 상태 동기화 ('all'은 제외)
+  useEffect(() => {
+    if (selectedProjectId && selectedProjectId !== 'all' && selectedProjectId !== globalProjectId) {
+      setGlobalProjectId(selectedProjectId);
+    }
+  }, [selectedProjectId]);
 
   // 날짜 범위 계산
   const dateRange = useMemo(() => {

@@ -8,7 +8,10 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateWorkLogDto } from './dto/create-work-log.dto';
 import { UpdateWorkLogDto } from './dto/update-work-log.dto';
-import { Decimal, PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import {
+  Decimal,
+  PrismaClientKnownRequestError,
+} from '@prisma/client/runtime/library';
 import { parsePaginationParams } from '../common/helpers/pagination.helper';
 import * as ExcelJS from 'exceljs';
 import { TASK_STATUS_METADATA } from '@repo/schema';
@@ -55,10 +58,14 @@ export class WorkLogsService {
 
     // 오늘 날짜도 UTC 기준으로 계산
     const now = new Date();
-    const todayUTC = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+    const todayUTC = new Date(
+      Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()),
+    );
 
     if (workDate > todayUTC) {
-      throw new BadRequestException('미래 날짜의 업무일지는 작성할 수 없습니다');
+      throw new BadRequestException(
+        '미래 날짜의 업무일지는 작성할 수 없습니다',
+      );
     }
 
     // 5. 동일 날짜에 일지가 있는지 확인 (soft delete 포함)
@@ -320,7 +327,9 @@ export class WorkLogsService {
     // 날짜 변경 시 중복 체크 (UTC 기준으로 날짜 처리)
     let newWorkDate: Date | undefined;
     if (updateWorkLogDto.workDate) {
-      const [year, month, day] = updateWorkLogDto.workDate.split('-').map(Number);
+      const [year, month, day] = updateWorkLogDto.workDate
+        .split('-')
+        .map(Number);
       newWorkDate = new Date(Date.UTC(year, month - 1, day));
       const existingLog = await this.prisma.workLog.findFirst({
         where: {
@@ -411,7 +420,11 @@ export class WorkLogsService {
    * 해당 업무의 과거 작업 내용을 중복 제거하여 최근 사용순으로 반환
    * 현재 사용자가 작성한 작업 내용만 조회
    */
-  async findContentSuggestions(taskId: bigint, userId: bigint, limit: number = 10) {
+  async findContentSuggestions(
+    taskId: bigint,
+    userId: bigint,
+    limit: number = 10,
+  ) {
     // Prisma는 groupBy에서 직접 max(workDate)를 지원하지 않으므로,
     // raw query를 사용하여 content별 최신 날짜와 사용 횟수를 조회
     const suggestions = await this.prisma.$queryRaw<
@@ -816,6 +829,7 @@ export class WorkLogsService {
       };
 
       const workAreaMap: Record<string, string> = {
+        PROJECT_MANAGEMENT: '총괄',
         PLANNING: '기획',
         DESIGN: '디자인',
         FRONTEND: '프론트엔드',
@@ -931,7 +945,7 @@ export class WorkLogsService {
           }
 
           const weekNum = getWeekOfMonth(new Date(vacation.usageDate));
-          const hours = vacation.scheduleType === 'HALF_DAY' ? 4 : 8;
+          const hours = 8; // 연차는 항상 8시간
           const vacationData = userTaskMap.get(vacationKey)!;
           vacationData.weeklyHours[
             `week${weekNum}` as keyof typeof vacationData.weeklyHours
@@ -952,17 +966,108 @@ export class WorkLogsService {
         }
       }
 
-      // 업무가 없는 멤버 제외
+      // PM은 "프로젝트 전체 관리"로 고정 (주차별 영업일 × 8시간 - 휴가시간)
+      // 공휴일 조회 (프로젝트 일정에서 HOLIDAY 타입)
+      const holidays = await this.prisma.schedule.findMany({
+        where: {
+          scheduleType: 'HOLIDAY',
+          isActive: true,
+          projectId,
+          startDate: { lte: lastDay },
+          endDate: { gte: firstDay },
+        },
+      });
+
+      // 공휴일 날짜 Set 생성 (startDate~endDate 범위의 모든 날짜)
+      const holidayDates = new Set<string>();
+      for (const holiday of holidays) {
+        const start = new Date(holiday.startDate);
+        const end = new Date(holiday.endDate);
+        const d = new Date(start);
+        while (d <= end) {
+          if (d >= firstDay && d <= lastDay) {
+            holidayDates.add(d.toISOString().split('T')[0]);
+          }
+          d.setDate(d.getDate() + 1);
+        }
+      }
+
+      // 주차별 영업일 수 계산 (주말 + 공휴일 제외)
+      const weeklyBusinessDays = { week1: 0, week2: 0, week3: 0, week4: 0 };
+      const tempDate = new Date(firstDay);
+      while (tempDate <= lastDay) {
+        const dayOfWeek = tempDate.getDay();
+        const dateStr = tempDate.toISOString().split('T')[0];
+        if (dayOfWeek !== 0 && dayOfWeek !== 6 && !holidayDates.has(dateStr)) {
+          const week = getWeekOfMonth(tempDate);
+          weeklyBusinessDays[`week${week}` as keyof typeof weeklyBusinessDays]++;
+        }
+        tempDate.setDate(tempDate.getDate() + 1);
+      }
+
+      for (const [, employee] of employeeMap) {
+        if (employee.role === 'PM') {
+          const vacationTasks = employee.tasks.filter(
+            (t) => t.taskName === '휴가',
+          );
+
+          // 휴가 주차별 시간
+          const vacHours = vacationTasks.length > 0
+            ? vacationTasks[0].weeklyHours
+            : { week1: 0, week2: 0, week3: 0, week4: 0 };
+
+          // 주차별 가용 시간 = 영업일 × 8 - 휴가 시간
+          const mergedTask: EmployeeTask = {
+            taskName: '프로젝트 전체 관리',
+            difficulty: '상',
+            details: [],
+            weeklyHours: {
+              week1: weeklyBusinessDays.week1 * 8 - vacHours.week1,
+              week2: weeklyBusinessDays.week2 * 8 - vacHours.week2,
+              week3: weeklyBusinessDays.week3 * 8 - vacHours.week3,
+              week4: weeklyBusinessDays.week4 * 8 - vacHours.week4,
+            },
+            totalHours: 0,
+          };
+          mergedTask.totalHours =
+            mergedTask.weeklyHours.week1 +
+            mergedTask.weeklyHours.week2 +
+            mergedTask.weeklyHours.week3 +
+            mergedTask.weeklyHours.week4;
+
+          employee.tasks = [mergedTask, ...vacationTasks];
+          employee.department = '총괄';
+          employee.totalMonthlyHours = employee.tasks.reduce(
+            (sum, t) => sum + t.totalHours,
+            0,
+          );
+        }
+      }
+
+      // 업무가 없는 멤버 제외 (PM은 항상 포함)
       const employees = Array.from(employeeMap.values()).filter(
-        (e) => e.tasks.length > 0,
+        (e) => e.tasks.length > 0 || e.role === 'PM',
       );
 
-      // 역할 순서에 따라 정렬 (PM → PL → PA)
+      // 담당업무별로 그룹화 후 역할 순서에 따라 정렬
+      const deptOrder = [
+        '총괄',
+        '기획',
+        '디자인',
+        '퍼블리싱',
+        '프론트엔드',
+        '백엔드',
+      ];
       const roleOrder = ['PM', 'PL', 'PA'];
       employees.sort((a, b) => {
-        const aOrder = roleOrder.indexOf(a.role);
-        const bOrder = roleOrder.indexOf(b.role);
-        return aOrder - bOrder;
+        const aDeptIdx = deptOrder.indexOf(a.department);
+        const bDeptIdx = deptOrder.indexOf(b.department);
+        const aDept = aDeptIdx === -1 ? 999 : aDeptIdx;
+        const bDept = bDeptIdx === -1 ? 999 : bDeptIdx;
+        if (aDept !== bDept) return aDept - bDept;
+        const aRole = roleOrder.indexOf(a.role);
+        const bRole = roleOrder.indexOf(b.role);
+        return aRole - bRole;
       });
 
       // 8. ExcelJS로 파일 생성
@@ -1005,8 +1110,8 @@ export class WorkLogsService {
 
       // 3행: 정상근무 시간
       const normalHoursRow = worksheet.addRow([]);
-      normalHoursRow.getCell(13).value = '정상근무 160시간';
-      normalHoursRow.getCell(13).font = { name: 'Arial', size: 11, bold: true };
+      normalHoursRow.getCell(14).value = '정상근무 160시간';
+      normalHoursRow.getCell(14).font = { name: 'Arial', size: 11, bold: true };
 
       // 4행: 컬럼 헤더
       const headers = [
@@ -1054,10 +1159,25 @@ export class WorkLogsService {
 
       // 데이터 행 생성
       let currentRow = 5;
+      const deptRowRanges = new Map<
+        string,
+        { startRow: number; endRow: number }
+      >();
 
       for (const employee of employees) {
         const startRow = currentRow;
         const taskCount = employee.tasks.length;
+
+        // 담당업무별 행 범위 추적
+        if (!deptRowRanges.has(employee.department)) {
+          deptRowRanges.set(employee.department, {
+            startRow,
+            endRow: startRow + taskCount - 1,
+          });
+        } else {
+          deptRowRanges.get(employee.department)!.endRow =
+            startRow + taskCount - 1;
+        }
 
         for (let i = 0; i < taskCount; i++) {
           const task = employee.tasks[i];
@@ -1098,14 +1218,21 @@ export class WorkLogsService {
               bottom: { style: 'thin' },
               right: { style: 'thin' },
             };
+            // 휴가 행은 회색 배경
+            if (task.taskName === '휴가') {
+              cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FFD9D9D9' },
+              };
+            }
           });
 
           currentRow++;
         }
 
-        // 셀 병합 (직원이 여러 업무를 수행한 경우)
+        // 셀 병합 (직원이 여러 업무를 수행한 경우, 담당업무는 담당업무 그룹 단위로 병합)
         if (taskCount > 1) {
-          worksheet.mergeCells(startRow, 1, startRow + taskCount - 1, 1); // 담당업무
           worksheet.mergeCells(startRow, 2, startRow + taskCount - 1, 2); // 역할
           worksheet.mergeCells(startRow, 3, startRow + taskCount - 1, 3); // 이름
           worksheet.mergeCells(startRow, 4, startRow + taskCount - 1, 4); // 등급
@@ -1113,12 +1240,19 @@ export class WorkLogsService {
           worksheet.mergeCells(startRow, 14, startRow + taskCount - 1, 14); // 일평균
 
           // 병합된 셀 정렬
-          [1, 2, 3, 4, 13, 14].forEach((col) => {
+          [2, 3, 4, 13, 14].forEach((col) => {
             const cell = worksheet.getCell(startRow, col);
             cell.alignment = { horizontal: 'center', vertical: 'middle' };
           });
         }
       }
+
+      // 담당업무별 A열 병합
+      deptRowRanges.forEach((range) => {
+        worksheet.mergeCells(range.startRow, 1, range.endRow, 1);
+        const cell = worksheet.getCell(range.startRow, 1);
+        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      });
 
       // Buffer 반환
       const arrayBuffer = await workbook.xlsx.writeBuffer();
@@ -1231,7 +1365,12 @@ export class WorkLogsService {
       workArea: string;
       grade: string;
       details: string[];
-      weeklyHours: { week1: number; week2: number; week3: number; week4: number };
+      weeklyHours: {
+        week1: number;
+        week2: number;
+        week3: number;
+        week4: number;
+      };
       totalHours: number;
     }
 
@@ -1315,7 +1454,9 @@ export class WorkLogsService {
 
       const assigneeData = taskData.assignees.get(userKey)!;
       if (log.content) assigneeData.details.push(log.content);
-      assigneeData.weeklyHours[`week${weekNum}` as keyof typeof assigneeData.weeklyHours] += hours;
+      assigneeData.weeklyHours[
+        `week${weekNum}` as keyof typeof assigneeData.weeklyHours
+      ] += hours;
       assigneeData.totalHours += hours;
       taskData.totalHours += hours;
     }
@@ -1344,18 +1485,18 @@ export class WorkLogsService {
     // 열 너비 설정
     worksheet.columns = [
       { width: 15 }, // A: 업무 구분
-      { width: 8 },  // B: 난이도
+      { width: 8 }, // B: 난이도
       { width: 30 }, // C: 진행 업무
       { width: 12 }, // D: 진행 상태
       { width: 12 }, // E: 파트
       { width: 10 }, // F: 이름
-      { width: 8 },  // G: 등급
-      { width: 6 },  // H: 인원
+      { width: 8 }, // G: 등급
+      { width: 6 }, // H: 인원
       { width: 40 }, // I: 비고(작업상세 이력)
-      { width: 8 },  // J: 1주차
-      { width: 8 },  // K: 2주차
-      { width: 8 },  // L: 3주차
-      { width: 8 },  // M: 4주차
+      { width: 8 }, // J: 1주차
+      { width: 8 }, // K: 2주차
+      { width: 8 }, // L: 3주차
+      { width: 8 }, // M: 4주차
       { width: 10 }, // N: 투입시간
       { width: 15 }, // O: 공수 합계(m/h)
     ];
@@ -1376,7 +1517,10 @@ export class WorkLogsService {
     const titleRow = worksheet.addRow([`${month}월 업무별 공수 투입 현황`]);
     worksheet.mergeCells(2, 1, 2, 15);
     titleRow.getCell(1).font = { name: 'Arial', size: 16, bold: true };
-    titleRow.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+    titleRow.getCell(1).alignment = {
+      horizontal: 'center',
+      vertical: 'middle',
+    };
 
     // 3행: 기준일
     const dateRangeRow = worksheet.addRow([
@@ -1384,7 +1528,10 @@ export class WorkLogsService {
     ]);
     worksheet.mergeCells(3, 1, 3, 15);
     dateRangeRow.getCell(1).font = { name: 'Arial', size: 11 };
-    dateRangeRow.getCell(1).alignment = { horizontal: 'left', vertical: 'middle' };
+    dateRangeRow.getCell(1).alignment = {
+      horizontal: 'left',
+      vertical: 'middle',
+    };
 
     // 4행: 빈 행
     worksheet.addRow([]);
@@ -1411,13 +1558,22 @@ export class WorkLogsService {
     const headerRow = worksheet.addRow(headers);
     headerRow.height = 30;
     headerRow.eachCell((cell) => {
-      cell.font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.font = {
+        name: 'Arial',
+        size: 11,
+        bold: true,
+        color: { argb: 'FFFFFFFF' },
+      };
       cell.fill = {
         type: 'pattern',
         pattern: 'solid',
         fgColor: { argb: 'FF000000' },
       };
-      cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+      cell.alignment = {
+        vertical: 'middle',
+        horizontal: 'center',
+        wrapText: true,
+      };
       cell.border = {
         top: { style: 'thin' },
         left: { style: 'thin' },
@@ -1451,7 +1607,11 @@ export class WorkLogsService {
             assigneeData.workArea,
             assigneeData.userName,
             assigneeData.grade,
-            isFirstAssignee && assigneeCount > 0 ? assigneeCount : (isFirstAssignee ? 1 : ''),
+            isFirstAssignee && assigneeCount > 0
+              ? assigneeCount
+              : isFirstAssignee
+                ? 1
+                : '',
             assigneeData.details.join('\n'),
             assigneeData.weeklyHours.week1 || '',
             assigneeData.weeklyHours.week2 || '',
@@ -1485,9 +1645,18 @@ export class WorkLogsService {
         if (assigneeCount > 1) {
           // 난이도, 진행 업무, 진행 상태, 인원, 공수 합계 컬럼 병합 (업무 구분은 섹션 단위로 병합)
           [2, 3, 4, 8, 15].forEach((col) => {
-            worksheet.mergeCells(taskStartRow, col, taskStartRow + assigneeCount - 1, col);
+            worksheet.mergeCells(
+              taskStartRow,
+              col,
+              taskStartRow + assigneeCount - 1,
+              col,
+            );
             const cell = worksheet.getCell(taskStartRow, col);
-            cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+            cell.alignment = {
+              horizontal: 'center',
+              vertical: 'middle',
+              wrapText: true,
+            };
           });
         }
       }
@@ -1497,14 +1666,28 @@ export class WorkLogsService {
       if (sectionEndRow > sectionStartRow) {
         worksheet.mergeCells(sectionStartRow, 1, sectionEndRow, 1);
         const cell = worksheet.getCell(sectionStartRow, 1);
-        cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+        cell.alignment = {
+          horizontal: 'center',
+          vertical: 'middle',
+          wrapText: true,
+        };
       }
 
       // 소계행 추가
       const subtotalRow = worksheet.addRow([
         `${taskTypeData.taskTypeName} : ${taskTypeData.taskCount}건`,
-        '', '', '', '', '', '', '', '',
-        '', '', '', '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
         `총 ${taskTypeData.totalHours}시간 소요`,
         '',
       ]);
@@ -1527,8 +1710,14 @@ export class WorkLogsService {
           right: { style: 'thin' },
         };
       });
-      subtotalRow.getCell(1).alignment = { horizontal: 'left', vertical: 'middle' };
-      subtotalRow.getCell(14).alignment = { horizontal: 'right', vertical: 'middle' };
+      subtotalRow.getCell(1).alignment = {
+        horizontal: 'left',
+        vertical: 'middle',
+      };
+      subtotalRow.getCell(14).alignment = {
+        horizontal: 'right',
+        vertical: 'middle',
+      };
 
       currentRow++;
     }
@@ -1543,8 +1732,18 @@ export class WorkLogsService {
 
     const totalRow = worksheet.addRow([
       `전체 합계 : ${grandTotalTasks}건`,
-      '', '', '', '', '', '', '', '',
-      '', '', '', '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
       `총 ${grandTotalHours}시간 소요`,
       '',
     ]);
@@ -1568,7 +1767,10 @@ export class WorkLogsService {
       };
     });
     totalRow.getCell(1).alignment = { horizontal: 'left', vertical: 'middle' };
-    totalRow.getCell(14).alignment = { horizontal: 'right', vertical: 'middle' };
+    totalRow.getCell(14).alignment = {
+      horizontal: 'right',
+      vertical: 'middle',
+    };
 
     // Buffer 반환
     const arrayBuffer = await workbook.xlsx.writeBuffer();

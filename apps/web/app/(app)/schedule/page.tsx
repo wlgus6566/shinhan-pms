@@ -1,23 +1,35 @@
 'use client';
 
+import { useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useMyProjects } from '@/lib/api/projects';
 import { useTabNavigation } from '@/hooks/useTabNavigation';
+import { useProjectContext } from '@/context/ProjectContext';
 import { ProjectScheduleList } from '@/components/schedule/ProjectScheduleList';
 import { SchedulePageSkeleton } from '@/components/schedule/skeleton/SchedulePageSkeleton';
 import { Calendar } from 'lucide-react';
 
 export default function TeamSchedulesPage() {
-  const { projects, isLoading, error } = useMyProjects();
+  const { myProjects: projects, isLoading, error, selectedProjectId: globalProjectId, setSelectedProjectId: setGlobalProjectId } = useProjectContext();
 
-  // 첫 번째 프로젝트 ID를 기본값으로 사용
-  const defaultProjectId =
-    projects && projects.length > 0 ? String(projects[0]?.id) : '';
+  // 글로벌 선택값이 있고, 현재 프로젝트 목록에 존재하면 그것을 기본값으로 사용
+  const defaultProjectId = (() => {
+    if (globalProjectId && projects?.some((p) => String(p.id) === globalProjectId)) {
+      return globalProjectId;
+    }
+    return projects && projects.length > 0 ? String(projects[0]?.id) : '';
+  })();
 
   const { activeTab, handleTabChange } = useTabNavigation('/schedule', {
     defaultTab: defaultProjectId,
     queryKey: 'project',
   });
+
+  // 탭 변경 시 글로벌 상태 동기화
+  useEffect(() => {
+    if (activeTab && activeTab !== globalProjectId) {
+      setGlobalProjectId(activeTab);
+    }
+  }, [activeTab]);
 
   if (isLoading) {
     return <SchedulePageSkeleton />;
