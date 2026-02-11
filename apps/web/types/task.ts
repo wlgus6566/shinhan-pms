@@ -42,3 +42,15 @@ export const DIFFICULTY_LABELS = Object.fromEntries(
 export const DIFFICULTY_COLORS = Object.fromEntries(
   Object.entries(TASK_DIFFICULTY_METADATA).map(([k, v]) => [k, v.color])
 ) as Record<TaskDifficulty, string>;
+
+// 상태 필터용 도트 컬러 (hex - inline style로 사용하여 Tailwind purge 이슈 방지)
+export const STATUS_DOT_COLORS: Record<TaskStatus, string> = {
+  WAITING: '#9ca3af',
+  IN_PROGRESS: '#3b82f6',
+  WORK_COMPLETED: '#22c55e',
+  TESTING: '#a855f7',
+  OPEN_WAITING: '#f59e0b',
+  OPEN_RESPONDING: '#f97316',
+  COMPLETED: '#10b981',
+  SUSPENDED: '#ef4444',
+};

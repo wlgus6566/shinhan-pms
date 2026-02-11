@@ -272,6 +272,25 @@ async function main() {
   await prisma.schedule.deleteMany({});
   await prisma.workLog.deleteMany({});
   await prisma.task.deleteMany({});
+  await prisma.projectTaskType.deleteMany({});
+
+  // 업무 구분(ProjectTaskType) 생성
+  // --- Project 1 ---
+  const p1TypePlanning = await prisma.projectTaskType.create({ data: { projectId: project1.id, name: '기획', createdBy: admin.id } });
+  const p1TypeDesign = await prisma.projectTaskType.create({ data: { projectId: project1.id, name: '디자인', createdBy: admin.id } });
+  const p1TypeDev = await prisma.projectTaskType.create({ data: { projectId: project1.id, name: '개발', createdBy: admin.id } });
+  const p1TypeData = await prisma.projectTaskType.create({ data: { projectId: project1.id, name: '데이터', createdBy: admin.id } });
+  // --- Project 2 ---
+  const p2TypePlanning = await prisma.projectTaskType.create({ data: { projectId: project2.id, name: '기획', createdBy: admin.id } });
+  const p2TypeDesign = await prisma.projectTaskType.create({ data: { projectId: project2.id, name: '디자인', createdBy: admin.id } });
+  const p2TypeDev = await prisma.projectTaskType.create({ data: { projectId: project2.id, name: '개발', createdBy: admin.id } });
+  const p2TypeQA = await prisma.projectTaskType.create({ data: { projectId: project2.id, name: 'QA', createdBy: admin.id } });
+  // --- Project 3 ---
+  const p3TypePlanning = await prisma.projectTaskType.create({ data: { projectId: project3.id, name: '기획', createdBy: admin.id } });
+  const p3TypeDesign = await prisma.projectTaskType.create({ data: { projectId: project3.id, name: '디자인', createdBy: admin.id } });
+  const p3TypeDev = await prisma.projectTaskType.create({ data: { projectId: project3.id, name: '개발', createdBy: admin.id } });
+  const p3TypeQA = await prisma.projectTaskType.create({ data: { projectId: project3.id, name: 'QA', createdBy: admin.id } });
+  console.log('✅ 업무 구분(ProjectTaskType) 생성 완료');
 
   // ============================================================
   // Project 1: 이모션 차세대 ERP 구축
@@ -286,6 +305,8 @@ async function main() {
       status: 'WORK_COMPLETED',
       startDate: new Date('2026-01-02'),
       endDate: new Date('2026-02-15'),
+      clientName: '홍길동',
+      taskTypeId: p1TypePlanning.id,
       createdBy: admin.id,
       assignees: { create: [{ userId: kim.id, workArea: 'PLANNING' }] },
     },
@@ -300,6 +321,8 @@ async function main() {
       status: 'IN_PROGRESS',
       startDate: new Date('2026-01-06'),
       endDate: new Date('2026-03-31'),
+      clientName: '강미래',
+      taskTypeId: p1TypeDesign.id,
       createdBy: admin.id,
       assignees: {
         create: [
@@ -319,6 +342,8 @@ async function main() {
       status: 'IN_PROGRESS',
       startDate: new Date('2026-01-10'),
       endDate: new Date('2026-04-30'),
+      clientName: '홍길동',
+      taskTypeId: p1TypeDev.id,
       createdBy: admin.id,
       assignees: { create: [{ userId: lee.id, workArea: 'BACKEND' }] },
     },
@@ -333,6 +358,9 @@ async function main() {
       status: 'OPEN_WAITING',
       startDate: new Date('2026-01-03'),
       endDate: new Date('2026-01-31'),
+      openDate: new Date('2026-02-20'),
+      clientName: '홍길동',
+      taskTypeId: p1TypeData.id,
       createdBy: admin.id,
       assignees: { create: [{ userId: lee.id, workArea: 'BACKEND' }] },
     },
@@ -347,6 +375,8 @@ async function main() {
       status: 'TESTING',
       startDate: new Date('2026-01-15'),
       endDate: new Date('2026-03-15'),
+      clientName: '강미래',
+      taskTypeId: p1TypePlanning.id,
       createdBy: admin.id,
       assignees: {
         create: [
@@ -366,6 +396,9 @@ async function main() {
       status: 'COMPLETED',
       startDate: new Date('2025-12-15'),
       endDate: new Date('2026-01-02'),
+      openDate: new Date('2026-01-05'),
+      clientName: '홍길동',
+      taskTypeId: p1TypePlanning.id,
       createdBy: admin.id,
       assignees: { create: [{ userId: kim.id, workArea: 'PLANNING' }] },
     },
@@ -380,6 +413,8 @@ async function main() {
       status: 'SUSPENDED',
       startDate: new Date('2026-01-20'),
       endDate: new Date('2026-03-31'),
+      clientName: '강미래',
+      taskTypeId: p1TypeData.id,
       createdBy: admin.id,
       assignees: { create: [{ userId: lee.id, workArea: 'BACKEND' }] },
     },
@@ -398,6 +433,8 @@ async function main() {
       status: 'IN_PROGRESS',
       startDate: new Date('2026-01-02'),
       endDate: new Date('2026-03-15'),
+      clientName: '강미래',
+      taskTypeId: p2TypePlanning.id,
       createdBy: admin.id,
       assignees: { create: [{ userId: kim.id, workArea: 'PLANNING' }] },
     },
@@ -412,6 +449,8 @@ async function main() {
       status: 'WORK_COMPLETED',
       startDate: new Date('2026-01-08'),
       endDate: new Date('2026-02-28'),
+      clientName: '강미래',
+      taskTypeId: p2TypeDesign.id,
       createdBy: admin.id,
       assignees: { create: [{ userId: jung.id, workArea: 'DESIGN' }] },
     },
@@ -426,6 +465,8 @@ async function main() {
       status: 'TESTING',
       startDate: new Date('2026-01-15'),
       endDate: new Date('2026-03-10'),
+      clientName: '홍길동',
+      taskTypeId: p2TypeDev.id,
       createdBy: admin.id,
       assignees: { create: [{ userId: lee.id, workArea: 'BACKEND' }] },
     },
@@ -440,6 +481,8 @@ async function main() {
       status: 'WAITING',
       startDate: new Date('2026-02-15'),
       endDate: new Date('2026-04-15'),
+      clientName: '유재석',
+      taskTypeId: p2TypePlanning.id,
       createdBy: admin.id,
       assignees: { create: [{ userId: park.id, workArea: 'PLANNING' }] },
     },
@@ -454,6 +497,9 @@ async function main() {
       status: 'OPEN_RESPONDING',
       startDate: new Date('2026-01-10'),
       endDate: new Date('2026-02-28'),
+      openDate: new Date('2026-02-01'),
+      clientName: '홍길동',
+      taskTypeId: p2TypeDev.id,
       createdBy: admin.id,
       assignees: { create: [{ userId: lee.id, workArea: 'BACKEND' }] },
     },
@@ -468,6 +514,9 @@ async function main() {
       status: 'COMPLETED',
       startDate: new Date('2025-12-01'),
       endDate: new Date('2026-01-10'),
+      openDate: new Date('2026-01-15'),
+      clientName: '유재석',
+      taskTypeId: p2TypePlanning.id,
       createdBy: admin.id,
       assignees: { create: [{ userId: kim.id, workArea: 'PLANNING' }] },
     },
@@ -486,8 +535,10 @@ async function main() {
       status: 'IN_PROGRESS',
       startDate: new Date('2026-01-13'),
       endDate: new Date('2026-03-31'),
+      clientName: '이정훈',
+      taskTypeId: p3TypePlanning.id,
       createdBy: admin.id,
-      assignees: { create: [{ userId: kim.id, workArea: 'PLANNING' }] },
+      assignees: { create: [{ userId: park.id, workArea: 'PLANNING' }] },
     },
   });
 
@@ -500,6 +551,9 @@ async function main() {
       status: 'TESTING',
       startDate: new Date('2026-01-06'),
       endDate: new Date('2026-02-20'),
+      openDate: new Date('2026-02-25'),
+      clientName: '한소영',
+      taskTypeId: p3TypeQA.id,
       createdBy: admin.id,
       assignees: { create: [{ userId: choi.id, workArea: 'DESIGN' }] },
     },
@@ -514,6 +568,9 @@ async function main() {
       status: 'OPEN_WAITING',
       startDate: new Date('2026-01-15'),
       endDate: new Date('2026-02-28'),
+      openDate: new Date('2026-03-01'),
+      clientName: '이정훈',
+      taskTypeId: p3TypeDev.id,
       createdBy: admin.id,
       assignees: { create: [{ userId: jung.id, workArea: 'DESIGN' }] },
     },
@@ -528,6 +585,8 @@ async function main() {
       status: 'WAITING',
       startDate: new Date('2026-02-15'),
       endDate: new Date('2026-04-30'),
+      clientName: '이정훈',
+      taskTypeId: p3TypeDev.id,
       createdBy: admin.id,
       assignees: { create: [{ userId: lee.id, workArea: 'BACKEND' }] },
     },
@@ -542,6 +601,9 @@ async function main() {
       status: 'OPEN_RESPONDING',
       startDate: new Date('2026-01-06'),
       endDate: new Date('2026-02-15'),
+      openDate: new Date('2026-02-05'),
+      clientName: '한소영',
+      taskTypeId: p3TypeDesign.id,
       createdBy: admin.id,
       assignees: { create: [{ userId: jung.id, workArea: 'DESIGN' }] },
     },
@@ -556,8 +618,11 @@ async function main() {
       status: 'COMPLETED',
       startDate: new Date('2025-10-01'),
       endDate: new Date('2025-12-31'),
+      openDate: new Date('2025-12-20'),
+      clientName: '이정훈',
+      taskTypeId: p3TypePlanning.id,
       createdBy: admin.id,
-      assignees: { create: [{ userId: kim.id, workArea: 'PLANNING' }] },
+      assignees: { create: [{ userId: park.id, workArea: 'PLANNING' }] },
     },
   });
 
@@ -570,12 +635,171 @@ async function main() {
       status: 'SUSPENDED',
       startDate: new Date('2026-01-20'),
       endDate: new Date('2026-06-30'),
+      clientName: '한소영',
+      taskTypeId: p3TypeDev.id,
       createdBy: admin.id,
       assignees: { create: [{ userId: park.id, workArea: 'PLANNING' }] },
     },
   });
 
-  console.log('✅ 업무 생성 완료 (3개 프로젝트, 20개 업무)');
+  // WAITING +1
+  const p3_task8 = await prisma.task.create({
+    data: {
+      projectId: project3.id,
+      taskName: '앱 푸시 마케팅 자동화 개발',
+      description: '마케팅 푸시 알림 자동 발송 시스템 개발 대기',
+      difficulty: 'MEDIUM',
+      status: 'WAITING',
+      startDate: new Date('2026-02-17'),
+      endDate: new Date('2026-04-30'),
+      clientName: '이정훈',
+      taskTypeId: p3TypeDev.id,
+      createdBy: admin.id,
+      assignees: { create: [{ userId: park.id, workArea: 'PLANNING' }] },
+    },
+  });
+
+  // IN_PROGRESS +1
+  const p3_task9 = await prisma.task.create({
+    data: {
+      projectId: project3.id,
+      taskName: '멤버십 포인트 시스템 기획',
+      description: '파리바게트 멤버십 포인트 적립/사용/등급 체계 기획',
+      difficulty: 'HIGH',
+      status: 'IN_PROGRESS',
+      startDate: new Date('2026-01-20'),
+      endDate: new Date('2026-03-15'),
+      clientName: '한소영',
+      taskTypeId: p3TypePlanning.id,
+      createdBy: admin.id,
+      assignees: { create: [{ userId: park.id, workArea: 'PLANNING' }] },
+    },
+  });
+
+  // WORK_COMPLETED +2
+  const p3_task10 = await prisma.task.create({
+    data: {
+      projectId: project3.id,
+      taskName: '앱 UI 스타일가이드 제작',
+      description: '파리바게트 CI 기반 앱 UI 스타일가이드 제작 완료',
+      difficulty: 'MEDIUM',
+      status: 'WORK_COMPLETED',
+      startDate: new Date('2026-01-06'),
+      endDate: new Date('2026-02-10'),
+      openDate: new Date('2026-02-15'),
+      clientName: '한소영',
+      taskTypeId: p3TypeDesign.id,
+      createdBy: admin.id,
+      assignees: { create: [{ userId: jung.id, workArea: 'DESIGN' }] },
+    },
+  });
+
+  const p3_task11 = await prisma.task.create({
+    data: {
+      projectId: project3.id,
+      taskName: '메인 화면 퍼블리싱',
+      description: '파리바게트 앱 메인/홈 화면 퍼블리싱 작업 완료',
+      difficulty: 'MEDIUM',
+      status: 'WORK_COMPLETED',
+      startDate: new Date('2026-01-13'),
+      endDate: new Date('2026-02-10'),
+      openDate: new Date('2026-02-15'),
+      clientName: '이정훈',
+      taskTypeId: p3TypeDesign.id,
+      createdBy: admin.id,
+      assignees: { create: [{ userId: choi.id, workArea: 'DESIGN' }] },
+    },
+  });
+
+  // TESTING +1
+  const p3_task12 = await prisma.task.create({
+    data: {
+      projectId: project3.id,
+      taskName: '회원가입/로그인 API 개발',
+      description: '소셜 로그인 포함 회원 인증 API 개발 후 테스트 진행 중',
+      difficulty: 'HIGH',
+      status: 'TESTING',
+      startDate: new Date('2026-01-10'),
+      endDate: new Date('2026-02-28'),
+      clientName: '이정훈',
+      taskTypeId: p3TypeDev.id,
+      createdBy: admin.id,
+      assignees: { create: [{ userId: lee.id, workArea: 'BACKEND' }] },
+    },
+  });
+
+  // OPEN_WAITING +1
+  const p3_task13 = await prisma.task.create({
+    data: {
+      projectId: project3.id,
+      taskName: '매장 찾기 API 개발',
+      description: 'GPS 기반 매장 검색 및 매장 상세 정보 API 개발 완료, 오픈 대기',
+      difficulty: 'MEDIUM',
+      status: 'OPEN_WAITING',
+      startDate: new Date('2026-01-06'),
+      endDate: new Date('2026-02-15'),
+      openDate: new Date('2026-02-20'),
+      clientName: '한소영',
+      taskTypeId: p3TypeDev.id,
+      createdBy: admin.id,
+      assignees: { create: [{ userId: lee.id, workArea: 'BACKEND' }] },
+    },
+  });
+
+  // OPEN_RESPONDING +1
+  const p3_task14 = await prisma.task.create({
+    data: {
+      projectId: project3.id,
+      taskName: '홈 화면 디자인 오픈 대응',
+      description: '앱 홈 화면 디자인 오픈 후 사용자 피드백 기반 수정 대응',
+      difficulty: 'MEDIUM',
+      status: 'OPEN_RESPONDING',
+      startDate: new Date('2026-01-06'),
+      endDate: new Date('2026-02-15'),
+      openDate: new Date('2026-01-25'),
+      clientName: '이정훈',
+      taskTypeId: p3TypeDesign.id,
+      createdBy: admin.id,
+      assignees: { create: [{ userId: choi.id, workArea: 'DESIGN' }] },
+    },
+  });
+
+  // COMPLETED +1
+  const p3_task15 = await prisma.task.create({
+    data: {
+      projectId: project3.id,
+      taskName: '앱 IA(정보구조) 설계',
+      description: '파리바게트 앱 전체 메뉴 구조 및 화면 플로우 설계 완료',
+      difficulty: 'MEDIUM',
+      status: 'COMPLETED',
+      startDate: new Date('2025-11-01'),
+      endDate: new Date('2026-01-31'),
+      openDate: new Date('2026-01-20'),
+      clientName: '한소영',
+      taskTypeId: p3TypePlanning.id,
+      createdBy: admin.id,
+      assignees: { create: [{ userId: park.id, workArea: 'PLANNING' }] },
+    },
+  });
+
+  // SUSPENDED +1
+  const p3_task16 = await prisma.task.create({
+    data: {
+      projectId: project3.id,
+      taskName: '음성 주문 기능 연구',
+      description: '음성 인식 기반 주문 기능 R&D - 기술 검토 후 보류',
+      difficulty: 'HIGH',
+      status: 'SUSPENDED',
+      startDate: new Date('2026-01-20'),
+      endDate: new Date('2026-06-30'),
+      clientName: '이정훈',
+      taskTypeId: p3TypeDev.id,
+      createdBy: admin.id,
+      assignees: { create: [{ userId: lee.id, workArea: 'BACKEND' }] },
+    },
+  });
+
+  console.log('✅ 업무 생성 완료 (3개 프로젝트, 29개 업무)');
 
   // ============================================================
   // 6. 1월 업무일지 (간략 - 히스토리용)
@@ -674,6 +898,156 @@ async function main() {
     janWorkLogs.push({ taskId: p2_task2.id, userId: jung.id, workDate: new Date(log.date), content: log.content, workHours: log.hours, progress: log.progress });
   }
 
+  // ---- 파리바게트 앱 구축 (P3) 1월 업무일지 ----
+
+  // 박기호 - P3 주문 기능 기획 (1월, IN_PROGRESS)
+  const parkJanP3T1 = [
+    { date: '2026-01-13', content: '파리바게트 앱 주문 기능 리서치 시작\n- 경쟁사 앱(스타벅스, 배민) 주문 플로우 분석', hours: 6, progress: 5 },
+    { date: '2026-01-14', content: '파리바게트 현행 주문 프로세스 파악\n- 오프라인 매장 방문 조사 결과 정리', hours: 7, progress: 12 },
+    { date: '2026-01-15', content: '주문 기능 요구사항 정의\n- 사전주문/픽업 기능 범위 확정', hours: 8, progress: 20 },
+    { date: '2026-01-16', content: '주문 화면 플로우 초안 작성\n- 메뉴 선택→장바구니→결제 흐름 설계', hours: 7, progress: 28 },
+    { date: '2026-01-20', content: '클라이언트 미팅 준비 및 주문 기능 방향 정리\n- 파리바게트 운영팀 요구사항 수렴', hours: 6, progress: 35 },
+  ];
+  for (const log of parkJanP3T1) {
+    janWorkLogs.push({ taskId: p3_task1.id, userId: park.id, workDate: new Date(log.date), content: log.content, workHours: log.hours, progress: log.progress });
+  }
+
+  // 최승민 - P3 매장 찾기 기능 테스트 (1월, TESTING)
+  const choiJanP3T2 = [
+    { date: '2026-01-06', content: '매장 찾기 기능 QA 테스트 계획 수립\n- 테스트 항목 목록화', hours: 5, progress: 5 },
+    { date: '2026-01-07', content: '테스트 환경 세팅 및 테스트 케이스 작성\n- iOS/Android 디바이스별 테스트 케이스', hours: 7, progress: 12 },
+    { date: '2026-01-08', content: 'GPS 기반 매장 검색 기능 테스트 시작\n- 실내/실외 위치 정확도 테스트', hours: 8, progress: 20 },
+    { date: '2026-01-09', content: '매장 목록 정렬/필터 기능 테스트\n- 거리순/인기순 정렬 검증', hours: 7, progress: 28 },
+    { date: '2026-01-13', content: '매장 상세 정보 표시 테스트\n- 영업시간, 주소, 전화번호 노출 확인', hours: 8, progress: 35 },
+    { date: '2026-01-14', content: '지도 연동 기능 테스트\n- 핀 표시, 경로 안내 연동 확인', hours: 7, progress: 42, issues: '일부 매장 좌표 데이터 오류 발견' },
+    { date: '2026-01-15', content: '매장 영업시간/재고 표시 테스트\n- 실시간 데이터 갱신 주기 확인', hours: 8, progress: 50 },
+    { date: '2026-01-16', content: '크로스 플랫폼 테스트 (iOS/Android)\n- 기기별 UI 깨짐 확인', hours: 7, progress: 57 },
+    { date: '2026-01-20', content: '1차 테스트 이슈 리포트 정리\n- 발견 이슈 12건 분류 및 버그 리포트 작성', hours: 8, progress: 65 },
+  ];
+  for (const log of choiJanP3T2) {
+    janWorkLogs.push({ taskId: p3_task2.id, userId: choi.id, workDate: new Date(log.date), content: log.content, workHours: log.hours, progress: log.progress, issues: (log as any).issues });
+  }
+
+  // 정서영 - P3 푸시 알림 기능 개발 (1월, OPEN_WAITING)
+  const jungJanP3T3 = [
+    { date: '2026-01-15', content: '푸시 알림 UI 디자인 시작\n- 알림 유형별 디자인 방향 수립', hours: 5, progress: 10 },
+    { date: '2026-01-16', content: '알림 센터 화면 레이아웃 설계\n- 읽음/안읽음 상태 표시 디자인', hours: 7, progress: 25 },
+    { date: '2026-01-17', content: '알림 유형별 템플릿 디자인\n- 프로모션/주문상태/이벤트 알림', hours: 6, progress: 40 },
+    { date: '2026-01-20', content: '푸시 알림 인터랙션 디자인\n- 스와이프 삭제, 탭 이동 동작 정의', hours: 7, progress: 55 },
+  ];
+  for (const log of jungJanP3T3) {
+    janWorkLogs.push({ taskId: p3_task3.id, userId: jung.id, workDate: new Date(log.date), content: log.content, workHours: log.hours, progress: log.progress });
+  }
+
+  // 정서영 - P3 멤버십 화면 디자인 (1월, OPEN_RESPONDING)
+  const jungJanP3T5 = [
+    { date: '2026-01-06', content: '멤버십 화면 벤치마킹 리서치\n- 스타벅스, 배민, 쿠팡 멤버십 UI 분석', hours: 5, progress: 8 },
+    { date: '2026-01-07', content: '포인트 적립/사용 내역 화면 와이어프레임\n- 리스트 구조 및 필터 UI 설계', hours: 7, progress: 18 },
+    { date: '2026-01-08', content: '쿠폰 목록/상세 화면 디자인\n- 쿠폰 카드 레이아웃 및 만료일 표시', hours: 6, progress: 28 },
+    { date: '2026-01-09', content: '등급 체계 표시 화면 디자인\n- 등급 진행바, 혜택 목록 UI', hours: 7, progress: 40 },
+    { date: '2026-01-13', content: '멤버십 카드 UI 디자인\n- 바코드/QR 표시 영역 설계', hours: 6, progress: 52 },
+    { date: '2026-01-14', content: '멤버십 화면 프로토타입 제작\n- Figma 인터랙티브 프로토타입', hours: 8, progress: 65 },
+    { date: '2026-01-15', content: '클라이언트 리뷰용 디자인 시안 정리\n- 주요 화면 시안 패키징', hours: 4, progress: 72 },
+    { date: '2026-01-16', content: '멤버십 화면 디자인 피드백 반영\n- 등급 UI 색상 변경, 쿠폰 레이아웃 수정', hours: 7, progress: 82 },
+    { date: '2026-01-20', content: '멤버십 화면 디자인 최종 확정 및 핸드오프\n- 개발팀 전달 완료', hours: 6, progress: 92 },
+  ];
+  for (const log of jungJanP3T5) {
+    janWorkLogs.push({ taskId: p3_task5.id, userId: jung.id, workDate: new Date(log.date), content: log.content, workHours: log.hours, progress: log.progress });
+  }
+
+  // 박기호 - P3 멤버십 포인트 시스템 기획 (1월, IN_PROGRESS)
+  const parkJanP3T9 = [
+    { date: '2026-01-20', content: '멤버십 포인트 시스템 벤치마킹 조사 시작\n- 스타벅스/배민/CJ ONE 포인트 정책 분석', hours: 7, progress: 8 },
+  ];
+  for (const log of parkJanP3T9) {
+    janWorkLogs.push({ taskId: p3_task9.id, userId: park.id, workDate: new Date(log.date), content: log.content, workHours: log.hours, progress: log.progress });
+  }
+
+  // 정서영 - P3 앱 UI 스타일가이드 (1월, WORK_COMPLETED)
+  const jungJanP3T10 = [
+    { date: '2026-01-06', content: '파리바게트 CI 가이드 분석\n- 앱 디자인 방향 수립', hours: 4, progress: 8 },
+    { date: '2026-01-07', content: '컬러 팔레트 정의\n- Primary(#E8590C)/Secondary/Accent 색상 확정', hours: 5, progress: 18 },
+    { date: '2026-01-08', content: '타이포그래피 스케일 및 아이콘 세트 정의\n- Pretendard 폰트 스케일 설정', hours: 5, progress: 28 },
+    { date: '2026-01-09', content: '버튼/입력폼 등 기본 컴포넌트 스타일 정의\n- 상태별(default/hover/disabled) 스타일', hours: 6, progress: 40 },
+    { date: '2026-01-13', content: '카드/리스트/모달 등 복합 컴포넌트 스타일\n- 간격/그림자/모서리 규칙 정의', hours: 6, progress: 52 },
+    { date: '2026-01-14', content: '다크모드 컬러 팔레트 정의\n- 라이트/다크 모드 토글 규칙', hours: 5, progress: 62 },
+    { date: '2026-01-16', content: '스타일가이드 문서화 시작\n- Figma 컴포넌트 라이브러리 구축', hours: 5, progress: 72 },
+    { date: '2026-01-20', content: '스타일가이드 1차 완료 및 팀 리뷰\n- 피드백 수렴 후 수정 계획 수립', hours: 5, progress: 80 },
+  ];
+  for (const log of jungJanP3T10) {
+    janWorkLogs.push({ taskId: p3_task10.id, userId: jung.id, workDate: new Date(log.date), content: log.content, workHours: log.hours, progress: log.progress });
+  }
+
+  // 최승민 - P3 메인 화면 퍼블리싱 (1월, WORK_COMPLETED)
+  const choiJanP3T11 = [
+    { date: '2026-01-13', content: '메인 화면 레이아웃 퍼블리싱 시작\n- 스타일가이드 기반 기본 구조 마크업', hours: 7, progress: 10 },
+    { date: '2026-01-14', content: '메인 배너 슬라이더 구현\n- Swiper 라이브러리 연동', hours: 8, progress: 22 },
+    { date: '2026-01-15', content: '카테고리 메뉴 그리드 구현\n- 빵/케이크/음료/세트 아이콘 그리드', hours: 7, progress: 35 },
+    { date: '2026-01-16', content: '추천 상품 목록 컴포넌트 구현\n- 가로 스크롤 상품 카드 리스트', hours: 8, progress: 48 },
+    { date: '2026-01-20', content: '하단 네비게이션 바 구현\n- 홈/주문/매장/멤버십/마이 탭 구현', hours: 7, progress: 60 },
+  ];
+  for (const log of choiJanP3T11) {
+    janWorkLogs.push({ taskId: p3_task11.id, userId: choi.id, workDate: new Date(log.date), content: log.content, workHours: log.hours, progress: log.progress });
+  }
+
+  // 이남규 - P3 회원가입/로그인 API (1월, TESTING)
+  const leeJanP3T12 = [
+    { date: '2026-01-10', content: '회원 DB 스키마 설계 및 API 아키텍처 수립\n- 인증 모듈 구조 설계', hours: 8, progress: 8 },
+    { date: '2026-01-13', content: '이메일 회원가입 API 개발\n- 입력값 검증 및 비밀번호 암호화', hours: 7, progress: 18 },
+    { date: '2026-01-14', content: '로그인/로그아웃 API 개발\n- JWT 액세스/리프레시 토큰 발급', hours: 8, progress: 30 },
+    { date: '2026-01-15', content: '카카오 소셜 로그인 연동 개발\n- OAuth 2.0 플로우 구현', hours: 8, progress: 42 },
+    { date: '2026-01-16', content: '네이버/애플 소셜 로그인 연동\n- 플랫폼별 SDK 연동', hours: 7, progress: 55 },
+    { date: '2026-01-20', content: '비밀번호 찾기/변경 API 개발\n- 이메일 인증 코드 발송 로직', hours: 8, progress: 65 },
+  ];
+  for (const log of leeJanP3T12) {
+    janWorkLogs.push({ taskId: p3_task12.id, userId: lee.id, workDate: new Date(log.date), content: log.content, workHours: log.hours, progress: log.progress });
+  }
+
+  // 이남규 - P3 매장 찾기 API (1월, OPEN_WAITING)
+  const leeJanP3T13 = [
+    { date: '2026-01-06', content: '매장 데이터 모델 설계\n- 매장 테이블 구조 및 위치 데이터 인덱싱 전략', hours: 4, progress: 8 },
+    { date: '2026-01-07', content: '매장 목록 조회 API 개발\n- 위치 기반 거리순 정렬 (PostGIS 활용)', hours: 6, progress: 20 },
+    { date: '2026-01-08', content: '매장 상세 정보 API 개발\n- 영업시간/메뉴/이벤트 정보 조회', hours: 5, progress: 32 },
+    { date: '2026-01-09', content: '매장 검색 API 개발\n- 키워드/지역명 기반 검색 구현', hours: 6, progress: 45 },
+    { date: '2026-01-13', content: '영업시간/재고 연동 API 개발\n- 외부 POS 시스템 데이터 연동', hours: 5, progress: 58 },
+    { date: '2026-01-14', content: '매장 즐겨찾기 API 개발\n- 사용자별 즐겨찾기 CRUD', hours: 4, progress: 68 },
+    { date: '2026-01-15', content: 'API 통합 테스트 작성\n- Jest 기반 e2e 테스트 30건', hours: 6, progress: 80 },
+    { date: '2026-01-16', content: '매장 찾기 API 성능 최적화\n- 쿼리 인덱싱 및 Redis 캐싱 적용', hours: 5, progress: 90 },
+    { date: '2026-01-20', content: 'API 코드 리뷰 및 문서화 완료\n- Swagger 문서 업데이트', hours: 4, progress: 98 },
+  ];
+  for (const log of leeJanP3T13) {
+    janWorkLogs.push({ taskId: p3_task13.id, userId: lee.id, workDate: new Date(log.date), content: log.content, workHours: log.hours, progress: log.progress });
+  }
+
+  // 최승민 - P3 홈 화면 디자인 오픈 대응 (1월, OPEN_RESPONDING)
+  const choiJanP3T14 = [
+    { date: '2026-01-06', content: '홈 화면 디자인 시안 작업 시작\n- 메인 비주얼 레이아웃 설계', hours: 5, progress: 8 },
+    { date: '2026-01-07', content: '홈 화면 메인 비주얼 디자인\n- 배너/프로모션 영역 디자인', hours: 7, progress: 20 },
+    { date: '2026-01-08', content: '카테고리/추천 섹션 디자인\n- 상품 카드 레이아웃', hours: 8, progress: 35 },
+    { date: '2026-01-09', content: '프로모션 배너 영역 디자인\n- 슬라이드 배너 애니메이션 정의', hours: 6, progress: 48 },
+    { date: '2026-01-13', content: '홈 화면 디자인 완료 및 퍼블리싱 전달\n- Figma 핸드오프 완료', hours: 7, progress: 62 },
+    { date: '2026-01-14', content: '퍼블리싱 결과 확인 및 수정 요청\n- 간격/폰트 미세 수정 5건', hours: 5, progress: 72 },
+    { date: '2026-01-15', content: '오픈 전 최종 디자인 검수\n- QA 체크리스트 기반 검수', hours: 6, progress: 85 },
+    { date: '2026-01-16', content: '홈 화면 오픈 완료\n- 운영 환경 배포 확인', hours: 3, progress: 90 },
+    { date: '2026-01-20', content: '오픈 후 사용자 피드백 수집 시작\n- 피드백 분류 및 우선순위 정리', hours: 4, progress: 92 },
+  ];
+  for (const log of choiJanP3T14) {
+    janWorkLogs.push({ taskId: p3_task14.id, userId: choi.id, workDate: new Date(log.date), content: log.content, workHours: log.hours, progress: log.progress });
+  }
+
+  // 박기호 - P3 앱 IA 설계 (1월, COMPLETED)
+  const parkJanP3T15 = [
+    { date: '2026-01-02', content: 'IA 설계 2차 리뷰\n- 주문/멤버십 플로우 상세 확인', hours: 7, progress: 82 },
+    { date: '2026-01-05', content: '화면 흐름도 최종 수정 및 문서화\n- 전체 화면 맵 업데이트', hours: 8, progress: 88 },
+    { date: '2026-01-06', content: 'IA 설계 내부 검토 회의\n- PM/디자인팀 피드백 수렴', hours: 6, progress: 92 },
+    { date: '2026-01-07', content: '클라이언트 리뷰 피드백 반영\n- 메뉴 구조 일부 변경', hours: 7, progress: 95 },
+    { date: '2026-01-08', content: 'IA 설계 문서 최종본 작성\n- 화면 번호 체계 확정', hours: 8, progress: 98 },
+    { date: '2026-01-09', content: 'IA 설계 최종 승인 및 배포\n- 전체 팀 공유 완료', hours: 4, progress: 100 },
+  ];
+  for (const log of parkJanP3T15) {
+    janWorkLogs.push({ taskId: p3_task15.id, userId: park.id, workDate: new Date(log.date), content: log.content, workHours: log.hours, progress: log.progress });
+  }
+
   // 1월 업무일지 일괄 생성
   for (const logData of janWorkLogs) {
     await prisma.workLog.create({ data: logData });
@@ -746,28 +1120,18 @@ async function main() {
     febWorkLogs.push({ taskId: p2_task1.id, userId: kim.id, workDate: new Date(log.date), content: log.content, workHours: log.hours, progress: log.progress });
   }
 
-  // P3 주문 기능 기획 (IN_PROGRESS) - 신규 프로젝트
-  const kimFebP3T1 = [
-    { date: '2026-02-03', content: '파리바게트 주문 프로세스 분석\n- 현행 오프라인 주문 플로우 조사\n- 경쟁사 앱 사전주문 기능 분석', hours: 5, progress: 8 },
-    { date: '2026-02-04', content: '사전주문 기능 정의\n- 메뉴 선택 → 매장 선택 → 픽업 시간 선택 플로우\n- 주문 가능 시간대 정책 정의', hours: 6, progress: 15 },
-    { date: '2026-02-05', content: '메뉴 카테고리 구조 설계\n- 빵류/케이크/음료/세트 분류 체계\n- 메뉴 상세 화면 기획', hours: 5, progress: 22 },
-    { date: '2026-02-06', content: '장바구니 기능 기획\n- 수량 변경, 옵션 선택\n- 쿠폰/포인트 적용 로직', hours: 5, progress: 28 },
-    { date: '2026-02-09', content: '주문 결제 플로우 기획\n- 결제 수단 (카드/간편결제/포인트)\n- 주문 확인 화면', hours: 5, progress: 35 },
-    { date: '2026-02-11', content: '주문 상태 추적 기획\n- 주문접수 → 제조중 → 픽업가능 상태 플로우\n- 실시간 알림 정의', hours: 4, progress: 40 },
-    { date: '2026-02-12', content: '매장 찾기 연동 기획\n- GPS 기반 근처 매장 리스트\n- 매장별 주문 가능 여부 표시', hours: 5, progress: 45, issues: '매장 영업시간 데이터 연동 방식 확인 필요' },
-    { date: '2026-02-13', content: '취소/환불 프로세스 기획\n- 주문 취소 정책 정의\n- 환불 처리 플로우', hours: 4, progress: 50 },
-    { date: '2026-02-17', content: '재주문 기능 기획\n- 이전 주문 내역 기반 빠른 재주문\n- 자주 주문하는 메뉴 관리', hours: 4, progress: 55 },
-    { date: '2026-02-18', content: '예약 주문 기획\n- 케이크/세트 예약 주문 프로세스\n- 예약 가능 일시 선택 UI', hours: 5, progress: 60 },
-    { date: '2026-02-19', content: '주문 기능 기획서 중간 리뷰\n- PM 및 클라이언트 피드백\n- 수정 요청 사항 정리', hours: 3, progress: 63 },
-    { date: '2026-02-20', content: '피드백 반영 및 기획서 수정\n- 주문 수량 제한 정책 추가\n- 매장별 커스텀 메뉴 처리', hours: 5, progress: 68 },
-    { date: '2026-02-23', content: '그룹 주문 기획\n- 단체 주문 기능 설계\n- 주문 공유 링크 생성 기획', hours: 5, progress: 73 },
-    { date: '2026-02-24', content: '주문 알림 기획\n- 주문 단계별 푸시 알림\n- SMS/카카오톡 알림 연동', hours: 4, progress: 77 },
-    { date: '2026-02-25', content: '주문 통계 대시보드 기획\n- 매장 관리자용 주문 현황 화면\n- 일별/주별 통계 차트', hours: 5, progress: 82 },
-    { date: '2026-02-26', content: '주문 기능 화면 정의서 작성\n- 전체 화면 목록 확정\n- 화면별 인터랙션 정의', hours: 5, progress: 86 },
-    { date: '2026-02-27', content: '주문 기능 기획서 2차 리뷰\n- 개발 가능성 검토 피드백 반영\n- API 명세 초안 협의', hours: 4, progress: 90 },
+  // 박기호 - P3 주문 기능 기획 (2월, IN_PROGRESS)
+  const parkFebP3T1 = [
+    { date: '2026-02-02', content: '주문 기능 요구사항 정리 및 우선순위 분류\n- MoSCoW 기법으로 기능 우선순위 정의\n- 1차 스프린트 범위 확정', hours: 5, progress: 38 },
+    { date: '2026-02-03', content: '파리바게트 주문 프로세스 상세 분석\n- 현행 오프라인 주문 플로우 조사\n- 경쟁사 앱 사전주문 기능 분석', hours: 5, progress: 42 },
+    { date: '2026-02-04', content: '사전주문 기능 정의\n- 메뉴 선택 → 매장 선택 → 픽업 시간 선택 플로우\n- 주문 가능 시간대 정책 정의', hours: 6, progress: 48 },
+    { date: '2026-02-05', content: '메뉴 카테고리 구조 설계\n- 빵류/케이크/음료/세트 분류 체계\n- 메뉴 상세 화면 기획', hours: 5, progress: 53 },
+    { date: '2026-02-06', content: '장바구니 기능 기획\n- 수량 변경, 옵션 선택\n- 쿠폰/포인트 적용 로직', hours: 5, progress: 58 },
+    { date: '2026-02-09', content: '주문 결제 플로우 기획\n- 결제 수단 (카드/간편결제/포인트)\n- 주문 확인 화면', hours: 5, progress: 63 },
+    { date: '2026-02-10', content: '주문 상태 추적 기획\n- 주문접수 → 제조중 → 픽업가능 상태 플로우\n- 실시간 알림 정의', hours: 5, progress: 68, issues: '매장 영업시간 데이터 연동 방식 확인 필요' },
   ];
-  for (const log of kimFebP3T1) {
-    febWorkLogs.push({ taskId: p3_task1.id, userId: kim.id, workDate: new Date(log.date), content: log.content, workHours: log.hours, progress: log.progress, issues: (log as any).issues });
+  for (const log of parkFebP3T1) {
+    febWorkLogs.push({ taskId: p3_task1.id, userId: park.id, workDate: new Date(log.date), content: log.content, workHours: log.hours, progress: log.progress, issues: (log as any).issues });
   }
 
   // ---- 기타 멤버 2월 업무일지 (간략) ----
@@ -818,6 +1182,127 @@ async function main() {
   ];
   for (const log of parkFebP1T5) {
     febWorkLogs.push({ taskId: p1_task5.id, userId: park.id, workDate: new Date(log.date), content: log.content, workHours: log.hours, progress: log.progress });
+  }
+
+  // ---- 파리바게트 앱 구축 (P3) 2월 업무일지 ----
+
+  // 최승민 - P3 매장 찾기 기능 테스트 (2월, TESTING)
+  const choiFebP3T2 = [
+    { date: '2026-02-02', content: '매장 찾기 기능 2차 테스트 시작\n- 1차 이슈 수정 확인 테스트\n- 좌표 데이터 오류 수정 검증', hours: 7, progress: 70 },
+    { date: '2026-02-03', content: '위치 권한 및 GPS 정확도 테스트\n- 실내/실외 GPS 수신율 비교\n- 권한 거부 시 대체 플로우 확인', hours: 8, progress: 75 },
+    { date: '2026-02-04', content: '매장 상세 정보 로딩 속도 테스트\n- 매장 200개 이상 목록 로딩 성능\n- 이미지 로딩 최적화 확인', hours: 7, progress: 78 },
+    { date: '2026-02-05', content: '지도 줌인/줌아웃 시 매장 핀 표시 테스트\n- 클러스터링 동작 확인\n- 핀 탭 인터랙션 검증', hours: 8, progress: 82 },
+    { date: '2026-02-06', content: '매장 즐겨찾기 기능 테스트\n- 즐겨찾기 추가/삭제 동작\n- 오프라인 모드 동기화 확인', hours: 7, progress: 85, issues: '즐겨찾기 동기화 지연 이슈 발견 - 3초 이상 소요' },
+    { date: '2026-02-09', content: '테스트 결과 보고서 작성\n- 전체 테스트 항목 42건 결과 정리\n- 잔여 이슈 5건 분류', hours: 8, progress: 90 },
+    { date: '2026-02-10', content: '잔여 이슈 재테스트 및 최종 리포트\n- Critical 이슈 0건 확인\n- Minor 이슈 3건 개발팀 전달', hours: 7, progress: 93 },
+  ];
+  for (const log of choiFebP3T2) {
+    febWorkLogs.push({ taskId: p3_task2.id, userId: choi.id, workDate: new Date(log.date), content: log.content, workHours: log.hours, progress: log.progress, issues: (log as any).issues });
+  }
+
+  // 정서영 - P3 푸시 알림 기능 개발 (2월, OPEN_WAITING)
+  const jungFebP3T3 = [
+    { date: '2026-02-02', content: '푸시 알림 UI 개발 결과 디자인 QA\n- 알림 목록 화면 레이아웃 검수\n- 읽음/안읽음 상태 표시 확인', hours: 6, progress: 62 },
+    { date: '2026-02-03', content: '알림 수신 시 뱃지 표시 UI 검수\n- iOS/Android 뱃지 카운트 동작 확인\n- 알림 팝업 디자인 검증', hours: 7, progress: 70 },
+    { date: '2026-02-04', content: '알림 설정 화면 디자인 보완\n- 알림 유형별 on/off 토글 UI\n- 야간 수신 설정 화면 추가', hours: 5, progress: 76 },
+    { date: '2026-02-05', content: 'FCM 연동 테스트 및 알림 표시 확인\n- 프로모션/주문/이벤트 알림별 테스트\n- 알림 딥링크 동작 확인', hours: 7, progress: 83 },
+    { date: '2026-02-06', content: '푸시 알림 기능 최종 디자인 검수 완료\n- 전체 알림 시나리오 Walk-through\n- 개발팀 최종 수정 요청 3건', hours: 6, progress: 90 },
+    { date: '2026-02-09', content: '오픈 전 최종 점검\n- 알림 유형별 수신 테스트 완료\n- 알림 센터 UI 최종 확인', hours: 5, progress: 96 },
+    { date: '2026-02-10', content: '푸시 알림 기능 개발 완료 확인\n- 전체 기능 검수 완료\n- 오픈 대기 전환 승인', hours: 4, progress: 100 },
+  ];
+  for (const log of jungFebP3T3) {
+    febWorkLogs.push({ taskId: p3_task3.id, userId: jung.id, workDate: new Date(log.date), content: log.content, workHours: log.hours, progress: log.progress });
+  }
+
+  // 정서영 - P3 멤버십 화면 디자인 (2월, OPEN_RESPONDING)
+  const jungFebP3T5 = [
+    { date: '2026-02-02', content: '멤버십 화면 오픈 후 사용자 피드백 분석\n- 고객센터 접수 피드백 15건 분류\n- 개선 우선순위 선정', hours: 4, progress: 93 },
+    { date: '2026-02-03', content: '포인트 내역 화면 가독성 개선 디자인\n- 글씨 크기 확대, 적립/사용 색상 구분 강화', hours: 5, progress: 94 },
+    { date: '2026-02-04', content: '쿠폰 만료 알림 UI 수정\n- 만료 임박 쿠폰 뱃지 추가\n- D-day 카운트 표시', hours: 4, progress: 95 },
+    { date: '2026-02-05', content: '등급 진행바 표시 오류 수정 디자인\n- 진행률 계산 표시 개선\n- 다음 등급까지 남은 금액 표시', hours: 3, progress: 96 },
+    { date: '2026-02-09', content: '멤버십 카드 디자인 미세 조정\n- 바코드 영역 밝기 개선\n- 카드 이미지 해상도 최적화', hours: 4, progress: 97 },
+    { date: '2026-02-10', content: '사용자 피드백 기반 추가 수정 대응\n- 쿠폰 사용처 표시 추가\n- 등급 혜택 안내 팝업 디자인', hours: 5, progress: 98 },
+  ];
+  for (const log of jungFebP3T5) {
+    febWorkLogs.push({ taskId: p3_task5.id, userId: jung.id, workDate: new Date(log.date), content: log.content, workHours: log.hours, progress: log.progress });
+  }
+
+  // 박기호 - P3 멤버십 포인트 시스템 기획 (2월, IN_PROGRESS)
+  const parkFebP3T9 = [
+    { date: '2026-02-02', content: '경쟁사 멤버십 프로그램 벤치마킹 완료\n- 스타벅스/배민/CJ ONE 비교표 작성\n- 파리바게트 차별화 포인트 도출', hours: 8, progress: 15 },
+    { date: '2026-02-03', content: '포인트 적립 정책 초안 수립\n- 구매금액 대비 적립률 정의 (1%~5%)\n- 이벤트 추가 적립 정책', hours: 7, progress: 22 },
+    { date: '2026-02-04', content: '포인트 사용 정책 기획\n- 최소 사용 단위 1,000P\n- 사용 제한 조건 (할인 상품 제외 등)', hours: 8, progress: 30 },
+    { date: '2026-02-05', content: '등급 체계 설계\n- 4단계 (일반/실버/골드/VIP)\n- 등급별 혜택 및 승급 조건 정의', hours: 7, progress: 38 },
+    { date: '2026-02-06', content: '쿠폰 시스템 기획\n- 쿠폰 유형 (할인/증정/무료배송)\n- 발급/사용/만료 정책', hours: 8, progress: 45, issues: '등급별 할인율 기준 클라이언트 확인 필요' },
+    { date: '2026-02-09', content: '이벤트 포인트 기획\n- 출석체크/미션/생일 포인트\n- 시즌 이벤트 포인트 정책', hours: 7, progress: 52 },
+    { date: '2026-02-10', content: '멤버십 가입 플로우 기획\n- 본인인증/약관동의 절차\n- 기존 고객 데이터 마이그레이션 방안', hours: 8, progress: 58 },
+  ];
+  for (const log of parkFebP3T9) {
+    febWorkLogs.push({ taskId: p3_task9.id, userId: park.id, workDate: new Date(log.date), content: log.content, workHours: log.hours, progress: log.progress, issues: (log as any).issues });
+  }
+
+  // 정서영 - P3 앱 UI 스타일가이드 (2월, WORK_COMPLETED)
+  const jungFebP3T10 = [
+    { date: '2026-02-02', content: '스타일가이드 피드백 반영\n- 컬러 팔레트 미세 조정 (#E8590C → #E85A0C)\n- 보조 색상 대비 개선', hours: 5, progress: 85 },
+    { date: '2026-02-03', content: '반응형 브레이크포인트 가이드 추가\n- 모바일/태블릿/데스크탑 기준점\n- 그리드 시스템 정의', hours: 6, progress: 88 },
+    { date: '2026-02-04', content: '애니메이션/트랜지션 가이드 추가\n- 페이지 전환 효과 정의\n- 마이크로 인터랙션 규칙', hours: 5, progress: 91 },
+    { date: '2026-02-05', content: '접근성 가이드라인 추가\n- WCAG 2.1 기준 색상 대비\n- 스크린리더 대응 규칙', hours: 6, progress: 94 },
+    { date: '2026-02-06', content: '스타일가이드 내부 최종 리뷰\n- 디자인팀/개발팀 합동 리뷰\n- 수정 사항 3건 반영', hours: 4, progress: 96 },
+    { date: '2026-02-09', content: '클라이언트 피드백 최종 반영\n- 브랜드 로고 사용 규칙 보완\n- 서브 브랜드 컬러 추가', hours: 5, progress: 98 },
+    { date: '2026-02-10', content: '앱 UI 스타일가이드 최종 완료 및 배포\n- Figma 라이브러리 퍼블리시\n- 개발팀 가이드 문서 전달', hours: 4, progress: 100 },
+  ];
+  for (const log of jungFebP3T10) {
+    febWorkLogs.push({ taskId: p3_task10.id, userId: jung.id, workDate: new Date(log.date), content: log.content, workHours: log.hours, progress: log.progress });
+  }
+
+  // 최승민 - P3 메인 화면 퍼블리싱 (2월, WORK_COMPLETED)
+  const choiFebP3T11 = [
+    { date: '2026-02-02', content: '이벤트 배너 영역 퍼블리싱\n- 자동 슬라이드 기능 구현\n- 배너 인디케이터 UI', hours: 8, progress: 68 },
+    { date: '2026-02-03', content: '빠른 주문 바로가기 섹션 구현\n- 최근 주문 메뉴 표시\n- 원탭 재주문 버튼', hours: 7, progress: 75 },
+    { date: '2026-02-04', content: '실시간 인기 메뉴 목록 구현\n- 랭킹 뱃지 표시\n- 실시간 업데이트 로직', hours: 8, progress: 82 },
+    { date: '2026-02-05', content: '반응형 레이아웃 테스트 및 수정\n- iPhone SE ~ Pro Max 대응\n- Android 다양한 해상도 테스트', hours: 7, progress: 88, issues: 'iOS Safari에서 배너 슬라이드 터치 이벤트 이슈' },
+    { date: '2026-02-06', content: '크로스 브라우저 테스트\n- iOS Safari/Chrome, Android Chrome\n- 터치 이벤트 이슈 수정', hours: 8, progress: 93 },
+    { date: '2026-02-09', content: '최종 디자인 QA 및 수정 완료\n- 스타일가이드 준수 확인\n- 간격/폰트 미세 수정', hours: 7, progress: 100 },
+  ];
+  for (const log of choiFebP3T11) {
+    febWorkLogs.push({ taskId: p3_task11.id, userId: choi.id, workDate: new Date(log.date), content: log.content, workHours: log.hours, progress: log.progress, issues: (log as any).issues });
+  }
+
+  // 이남규 - P3 회원가입/로그인 API (2월, TESTING)
+  const leeFebP3T12 = [
+    { date: '2026-02-02', content: '토큰 갱신 API 개발 및 보안 강화\n- Refresh Token Rotation 구현\n- 토큰 블랙리스트 관리', hours: 8, progress: 72 },
+    { date: '2026-02-03', content: '회원 프로필 조회/수정 API 개발\n- 프로필 이미지 업로드 (S3 연동)\n- 닉네임 중복 체크', hours: 7, progress: 78 },
+    { date: '2026-02-04', content: 'API 통합 테스트 작성\n- 회원가입/로그인 시나리오 e2e 테스트\n- 소셜 로그인 모킹 테스트', hours: 8, progress: 83 },
+    { date: '2026-02-05', content: '소셜 로그인 엣지 케이스 처리\n- 이메일 미제공 소셜 계정 처리\n- 중복 이메일 연동 정책 구현', hours: 7, progress: 87 },
+    { date: '2026-02-06', content: 'QA팀 테스트 환경 배포 및 가이드\n- Staging 서버 배포\n- API 테스트 가이드 문서 작성', hours: 8, progress: 90, issues: '카카오 로그인 콜백 URL 설정 이슈 - 도메인 화이트리스트 필요' },
+    { date: '2026-02-09', content: 'QA 1차 이슈 수정\n- 토큰 만료 후 자동 갱신 오류 수정\n- 로그아웃 시 세션 정리 로직 보완', hours: 7, progress: 93 },
+    { date: '2026-02-10', content: 'QA 테스트 지원 및 추가 이슈 대응\n- 비밀번호 규칙 에러 메시지 개선\n- 소셜 로그인 실패 시 안내 화면 추가', hours: 8, progress: 95 },
+  ];
+  for (const log of leeFebP3T12) {
+    febWorkLogs.push({ taskId: p3_task12.id, userId: lee.id, workDate: new Date(log.date), content: log.content, workHours: log.hours, progress: log.progress, issues: (log as any).issues });
+  }
+
+  // 이남규 - P3 매장 찾기 API (2월, OPEN_WAITING)
+  const leeFebP3T13 = [
+    { date: '2026-02-02', content: '매장 찾기 API 최종 성능 테스트\n- 동시 접속 1,000명 부하 테스트\n- 응답 시간 200ms 이내 확인', hours: 4, progress: 99 },
+    { date: '2026-02-03', content: 'API 문서 최종 정리 및 프론트엔드 연동 가이드\n- Swagger 문서 최종 업데이트\n- 프론트엔드 개발자 인수인계 완료', hours: 3, progress: 100 },
+  ];
+  for (const log of leeFebP3T13) {
+    febWorkLogs.push({ taskId: p3_task13.id, userId: lee.id, workDate: new Date(log.date), content: log.content, workHours: log.hours, progress: log.progress });
+  }
+
+  // 최승민 - P3 홈 화면 디자인 오픈 대응 (2월, OPEN_RESPONDING)
+  const choiFebP3T14 = [
+    { date: '2026-02-02', content: '홈 화면 오픈 후 모니터링\n- 사용자 행동 분석 (히트맵 확인)\n- 주요 이탈 구간 파악', hours: 5, progress: 93 },
+    { date: '2026-02-03', content: '배너 클릭률 저조 개선\n- 배너 디자인 A/B 테스트안 제작\n- CTA 버튼 위치/색상 변경', hours: 7, progress: 94 },
+    { date: '2026-02-04', content: '카테고리 아이콘 가시성 개선 작업\n- 아이콘 크기 20% 확대\n- 아이콘 하단 텍스트 폰트 조정', hours: 6, progress: 95 },
+    { date: '2026-02-05', content: '사용자 피드백 기반 폰트 크기 조정\n- 상품명/가격 폰트 2pt 확대\n- 할인율 강조 색상 변경', hours: 5, progress: 96 },
+    { date: '2026-02-06', content: '추천 섹션 레이아웃 변경 디자인\n- 2열 → 1열 레이아웃 변경안\n- 상품 이미지 확대 표시', hours: 7, progress: 97, issues: '추천 섹션 로딩 지연 시 UI 깨짐 이슈 발견' },
+    { date: '2026-02-09', content: '수정 디자인 적용 확인 및 추가 피드백 대응\n- A/B 테스트 결과 분석\n- 최종 디자인 확정', hours: 6, progress: 98 },
+    { date: '2026-02-10', content: '홈 화면 2차 피드백 수집 및 분석\n- 개선 후 클릭률 15% 상승 확인\n- 추가 개선 포인트 3건 정리', hours: 5, progress: 98 },
+  ];
+  for (const log of choiFebP3T14) {
+    febWorkLogs.push({ taskId: p3_task14.id, userId: choi.id, workDate: new Date(log.date), content: log.content, workHours: log.hours, progress: log.progress, issues: (log as any).issues });
   }
 
   // 2월 업무일지 일괄 생성

@@ -62,6 +62,55 @@ export function transformWorkLogToEvent(
 }
 
 /**
+ * WorkLog 배열을 사용자+날짜별로 그룹화하여 단일 이벤트로 변환 (팀 업무일지용)
+ * 한 사람이 같은 날짜에 여러 업무일지를 작성해도 달력에서 한 줄로 표시
+ */
+function transformWorkLogsToGroupedByUser(
+  workLogs: WorkLog[],
+): EventInput[] {
+  // userId + workDate 기준으로 그룹화
+  const grouped = new Map<string, WorkLog[]>();
+  for (const log of workLogs) {
+    const key = `${log.userId}_${log.workDate}`;
+    const existing = grouped.get(key);
+    if (existing) {
+      existing.push(log);
+    } else {
+      grouped.set(key, [log]);
+    }
+  }
+
+  return Array.from(grouped.values()).map((logs) => {
+    const first = logs[0]!;
+    const { bg, text } = getColorById(first.userId);
+    const userName = first.user?.name || '알 수 없음';
+    const logCount = logs.length;
+    const totalHours = logs.reduce((sum, l) => sum + (l.workHours || 0), 0);
+
+    return {
+      id: `${first.userId}_${first.workDate}`,
+      title: logCount === 1
+        ? `${userName} - ${first.task?.taskName || '업무일지'}`
+        : `${userName} (${logCount}건)`,
+      start: first.workDate,
+      end: first.workDate,
+      allDay: true,
+      backgroundColor: bg,
+      borderColor: 'transparent',
+      textColor: text,
+      extendedProps: {
+        workLog: first,
+        workLogs: logs,
+        userName,
+        logCount,
+        totalHours,
+        isGrouped: logCount > 1,
+      },
+    };
+  });
+}
+
+/**
  * WorkLog 배열을 FullCalendar EventInput 배열로 변환
  * @param colorBy - 'task': 업무별 색상 (내 업무일지), 'user': 작성자별 색상 (팀 업무일지)
  */
@@ -69,5 +118,8 @@ export function transformWorkLogsToEvents(
   workLogs: WorkLog[],
   colorBy: ColorBy = 'task',
 ): EventInput[] {
+  if (colorBy === 'user') {
+    return transformWorkLogsToGroupedByUser(workLogs);
+  }
   return workLogs.map((log) => transformWorkLogToEvent(log, colorBy));
 }

@@ -2,13 +2,12 @@
 
 import type { MyTask } from '@/types/work-log';
 import {
-  DIFFICULTY_COLORS,
-  DIFFICULTY_LABELS,
   STATUS_LABELS,
   STATUS_COLORS,
   type TaskStatus,
   type TaskDifficulty,
 } from '@/types/task';
+import { DifficultyIndicator } from '@/components/ui/difficulty-indicator';
 import { cn } from '@/lib/utils';
 
 interface MyTaskListProps {
@@ -59,14 +58,9 @@ export function MyTaskList({ tasks }: MyTaskListProps) {
                       {STATUS_LABELS[task.status as TaskStatus]}
                     </span>
                     {task.difficulty && (
-                      <span
-                        className={cn(
-                          'px-2 py-0.5 text-xs font-medium rounded-full',
-                          DIFFICULTY_COLORS[task.difficulty as TaskDifficulty],
-                        )}
-                      >
-                        {DIFFICULTY_LABELS[task.difficulty as TaskDifficulty]}
-                      </span>
+                      <DifficultyIndicator
+                        difficulty={task.difficulty as TaskDifficulty}
+                      />
                     )}
                   </div>
                 </div>

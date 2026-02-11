@@ -12,12 +12,11 @@ import { Badge } from '@/components/ui/badge';
 import {
   STATUS_LABELS,
   STATUS_COLORS,
-  DIFFICULTY_LABELS,
-  DIFFICULTY_COLORS,
   type Task,
   type TaskDifficulty,
   type TaskStatus,
 } from '@/types/task';
+import { DifficultyIndicator } from '@/components/ui/difficulty-indicator';
 import { Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
@@ -99,13 +98,10 @@ export function TaskTable({
                   {task.taskType?.name || '-'}
                 </TableCell>
                 <TableCell>
-                  <Badge
-                    className={
-                      DIFFICULTY_COLORS[task.difficulty as TaskDifficulty]
-                    }
-                  >
-                    {DIFFICULTY_LABELS[task.difficulty as TaskDifficulty]}
-                  </Badge>
+                  <DifficultyIndicator
+                    difficulty={task.difficulty as TaskDifficulty}
+                    size="md"
+                  />
                 </TableCell>
                 <TableCell>
                   <Badge className={STATUS_COLORS[task.status as TaskStatus]}>

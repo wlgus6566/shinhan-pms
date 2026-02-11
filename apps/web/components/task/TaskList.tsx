@@ -101,6 +101,19 @@ export function TaskList({
     mutate: mutateTasks,
   } = useTasks(projectId, apiParams);
 
+  // Fetch all tasks (unfiltered) for status counts
+  const { tasks: allTasks } = useTasks(projectId, { pageSize: 0 });
+
+  const statusCounts = useMemo(() => {
+    if (!allTasks) return undefined;
+    const counts: Partial<Record<TaskStatus, number>> = {};
+    allTasks.forEach((task) => {
+      const status = task.status as TaskStatus;
+      counts[status] = (counts[status] || 0) + 1;
+    });
+    return counts;
+  }, [allTasks]);
+
   // Filter handlers
   const handleStatusToggle = useCallback(
     (status: TaskStatus) => {
@@ -206,6 +219,7 @@ export function TaskList({
                 onDifficultyToggle={handleDifficultyToggle}
                 projectMembers={projectMembers || []}
                 resetFilters={resetFilters}
+                statusCounts={statusCounts}
               />
               <TaskTable
                 tasks={tasks || []}

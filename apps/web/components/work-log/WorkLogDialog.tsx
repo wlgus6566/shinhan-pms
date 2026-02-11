@@ -204,16 +204,36 @@ export function WorkLogDialog({
 
   // 다중 제출 핸들러 (생성/수정 모드 통합)
   const handleMultiFormSubmit = async (data: MultiWorkLogFormValues) => {
-    // 입력값이 있는 엔트리만 필터링 (content가 있거나 progress/workHours가 있는 경우)
+    // 작업 내용이 있는 엔트리만 필터링
     const filledEntries = data.entries.filter(
-      (entry) =>
-        entry.content?.trim() ||
-        entry.workHours !== undefined ||
-        entry.progress !== undefined,
+      (entry) => entry.content?.trim(),
     );
 
     if (filledEntries.length === 0) {
       toast.warning('최소 1개 이상의 업무일지를 작성해주세요.');
+      return;
+    }
+
+    // 작성된 엔트리에 대해 작업시간/진행률 필수 검증
+    let hasValidationError = false;
+    data.entries.forEach((entry, index) => {
+      if (entry.content?.trim()) {
+        if (entry.workHours === undefined || entry.workHours === null) {
+          multiForm.setError(`entries.${index}.workHours`, {
+            message: '작업 시간을 입력해주세요',
+          });
+          hasValidationError = true;
+        }
+        if (entry.progress === undefined || entry.progress === null) {
+          multiForm.setError(`entries.${index}.progress`, {
+            message: '진행률을 선택해주세요',
+          });
+          hasValidationError = true;
+        }
+      }
+    });
+
+    if (hasValidationError) {
       return;
     }
 
@@ -255,8 +275,8 @@ export function WorkLogDialog({
           data: {
             workDate: data.workDate,
             content: entry.content,
-            workHours: entry.workHours,
-            progress: entry.progress,
+            workHours: entry.workHours!,
+            progress: entry.progress!,
             issues: entry.issues,
           },
         }));
@@ -432,7 +452,7 @@ export function WorkLogDialog({
                 <FormInput
                   control={multiForm.control}
                   name={`entries.${index}.workHours`}
-                  label="작업 시간"
+                  label="작업 시간 *"
                   placeholder="시간"
                   type="number"
                   step={0.5}
@@ -472,7 +492,7 @@ export function WorkLogDialog({
             render={({ field: formField }) => (
               <FormItem>
                 <div className="flex items-center justify-between mb-2">
-                  <FormLabel>진행률</FormLabel>
+                  <FormLabel>진행률 *</FormLabel>
                   <span className="text-sm font-semibold text-slate-700">
                     {formField.value ?? 0}%
                   </span>

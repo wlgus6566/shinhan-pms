@@ -23,12 +23,11 @@ import { Separator } from '@/components/ui/separator';
 import {
   STATUS_LABELS,
   STATUS_COLORS,
-  DIFFICULTY_LABELS,
-  DIFFICULTY_COLORS,
   type Task,
   type TaskDifficulty,
   type TaskStatus,
 } from '@/types/task';
+import { DifficultyIndicator } from '@/components/ui/difficulty-indicator';
 import { POSITION_LABELS, type Position } from '@/lib/constants/roles';
 import {
   Calendar,
@@ -120,12 +119,14 @@ export function TaskDetailSheet({
             </SheetTitle>
           </div>
 
-          <div className="flex gap-2">
-            <Badge
-              className={DIFFICULTY_COLORS[task.difficulty as TaskDifficulty]}
-            >
-              난이도: {DIFFICULTY_LABELS[task.difficulty as TaskDifficulty]}
-            </Badge>
+          <div className="flex items-center gap-3">
+            <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+              난이도:
+              <DifficultyIndicator
+                difficulty={task.difficulty as TaskDifficulty}
+                size="md"
+              />
+            </span>
             <Badge className={STATUS_COLORS[task.status as TaskStatus]}>
               {STATUS_LABELS[task.status as TaskStatus]}
             </Badge>

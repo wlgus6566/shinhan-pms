@@ -1,7 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -12,12 +11,11 @@ import {
 import { Check, RefreshCcw } from 'lucide-react';
 import {
   STATUS_LABELS,
-  STATUS_COLORS,
-  DIFFICULTY_LABELS,
-  DIFFICULTY_COLORS,
+  STATUS_DOT_COLORS,
   type TaskStatus,
   type TaskDifficulty,
 } from '@/types/task';
+import { DifficultyIndicator } from '@/components/ui/difficulty-indicator';
 import type { ProjectMember } from '@/types/project';
 import { cn } from '@/lib/utils';
 import { useMemo } from 'react';
@@ -36,6 +34,7 @@ interface TeamWorkLogFiltersProps {
   difficultyFilter: TaskDifficulty[];
   setDifficultyFilter: (difficulties: TaskDifficulty[]) => void;
   resetFilters: () => void;
+  statusCounts?: Partial<Record<TaskStatus, number>>;
 }
 
 export function TeamWorkLogFilters({
@@ -50,6 +49,7 @@ export function TeamWorkLogFilters({
   difficultyFilter,
   setDifficultyFilter,
   resetFilters,
+  statusCounts,
 }: TeamWorkLogFiltersProps) {
   const toggleStatus = (status: TaskStatus) => {
     if (statusFilter.includes(status)) {
@@ -136,26 +136,35 @@ export function TeamWorkLogFilters({
         {/* 상태 필터 */}
         <div className="w-full sm:w-[60%]">
           <div className="text-xs sm:text-sm font-medium mb-1.5 sm:mb-2">상태</div>
-          <div className="flex flex-wrap gap-1.5 sm:gap-2">
+          <div className="flex flex-wrap gap-1.5">
             {(Object.keys(STATUS_LABELS) as TaskStatus[]).map((status) => {
               const isSelected = statusFilter.includes(status);
               return (
-                <Badge
+                <button
                   key={status}
+                  type="button"
                   className={cn(
-                    'cursor-pointer transition-all border-2 flex items-center gap-1 text-[11px] sm:text-xs px-2 py-0.5 sm:px-2.5 sm:py-1',
-                    STATUS_COLORS[status],
-                    isSelected && 'opacity-100 font-semibold',
+                    'inline-flex items-center gap-1.5 rounded-md border px-2 py-1 sm:px-2.5 sm:py-1.5 text-[11px] sm:text-xs transition-all cursor-pointer',
+                    isSelected
+                      ? 'border-primary bg-primary/5 ring-1 ring-primary/20 font-semibold text-slate-800'
+                      : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-600',
                   )}
                   onClick={() => toggleStatus(status)}
                 >
-                  {isSelected && (
-                    <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-primary flex items-center justify-center">
-                      <Check className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" strokeWidth={3} />
-                    </div>
-                  )}
+                  <span
+                    className="h-2 w-2 rounded-full shrink-0"
+                    style={{ backgroundColor: STATUS_DOT_COLORS[status] }}
+                  />
                   {STATUS_LABELS[status]}
-                </Badge>
+                  {statusCounts && (
+                    <span className="text-slate-400 font-normal">
+                      {statusCounts[status] ?? 0}
+                    </span>
+                  )}
+                  {isSelected && (
+                    <Check className="h-3 w-3 text-primary ml-0.5" strokeWidth={3} />
+                  )}
+                </button>
               );
             })}
           </div>
@@ -165,22 +174,30 @@ export function TeamWorkLogFilters({
         <div className="w-full sm:w-[30%]">
           <div className="text-xs sm:text-sm font-medium mb-1.5 sm:mb-2">난이도</div>
           <div className="flex flex-wrap gap-1.5 sm:gap-2">
-            {(Object.keys(DIFFICULTY_LABELS) as TaskDifficulty[]).map(
+            {(['HIGH', 'MEDIUM', 'LOW'] as TaskDifficulty[]).map(
               (difficulty) => {
                 const isSelected = difficultyFilter.includes(difficulty);
                 return (
-                  <Badge
+                  <button
                     key={difficulty}
+                    type="button"
                     className={cn(
-                      'cursor-pointer transition-all border-2 flex items-center gap-1 text-[11px] sm:text-xs px-2 py-0.5 sm:px-2.5 sm:py-1',
-                      DIFFICULTY_COLORS[difficulty],
-                      isSelected &&
-                        'bg-primary border-primary text-primary-foreground',
+                      'inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 sm:px-3 sm:py-1.5 text-xs transition-all cursor-pointer',
+                      isSelected
+                        ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
+                        : 'border-slate-200 bg-white hover:bg-slate-50',
                     )}
                     onClick={() => toggleDifficulty(difficulty)}
                   >
-                    {DIFFICULTY_LABELS[difficulty]}
-                  </Badge>
+                    <DifficultyIndicator
+                      difficulty={difficulty}
+                      showLabel={true}
+                      size="sm"
+                    />
+                    {isSelected && (
+                      <Check className="h-3 w-3 text-primary" strokeWidth={3} />
+                    )}
+                  </button>
                 );
               },
             )}

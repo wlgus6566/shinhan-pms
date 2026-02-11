@@ -151,6 +151,26 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
     return Array.from(areas).sort();
   }, [members]);
 
+  // 전체 workLogs에서 고유 태스크 기준 상태별 카운트 계산 (필터 적용 전)
+  const statusCounts = useMemo(() => {
+    const tasksByStatus = new Map<string, Set<string>>();
+    workLogs.forEach((log) => {
+      const status = log.task?.status as TaskStatus | undefined;
+      const taskId = log.task?.id;
+      if (status && taskId) {
+        if (!tasksByStatus.has(status)) {
+          tasksByStatus.set(status, new Set());
+        }
+        tasksByStatus.get(status)!.add(taskId);
+      }
+    });
+    const counts: Partial<Record<TaskStatus, number>> = {};
+    tasksByStatus.forEach((taskIds, status) => {
+      counts[status as TaskStatus] = taskIds.size;
+    });
+    return counts;
+  }, [workLogs]);
+
   const [exportOpen, setExportOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
 
@@ -245,6 +265,7 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
           difficultyFilter={difficultyFilter}
           setDifficultyFilter={setDifficultyFilter}
           resetFilters={resetFilters}
+          statusCounts={statusCounts}
         />
       </div>
 
@@ -281,6 +302,7 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
           difficultyFilter={difficultyFilter}
           setDifficultyFilter={setDifficultyFilter}
           resetFilters={resetFilters}
+          statusCounts={statusCounts}
         />
       </div>
 

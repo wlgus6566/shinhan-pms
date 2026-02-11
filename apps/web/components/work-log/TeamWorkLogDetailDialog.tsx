@@ -7,17 +7,16 @@ import { BaseDialog } from '@/components/ui/base-dialog';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { User, Clock, AlertCircle, FileText } from 'lucide-react';
+import { Clock, AlertCircle, FileText } from 'lucide-react';
 import type { WorkLog } from '@/types/work-log';
 import type { ProjectMember } from '@/types/project';
 import {
   STATUS_LABELS,
   STATUS_COLORS,
-  DIFFICULTY_LABELS,
-  DIFFICULTY_COLORS,
   type TaskStatus,
   type TaskDifficulty,
 } from '@/types/task';
+import { DifficultyIndicator } from '@/components/ui/difficulty-indicator';
 import { cn } from '@/lib/utils';
 
 interface TeamWorkLogDetailDialogProps {
@@ -157,20 +156,9 @@ export function TeamWorkLogDetailDialog({
                           </Badge>
                         )}
                         {log.task?.difficulty && (
-                          <Badge
-                            className={cn(
-                              'text-xs',
-                              DIFFICULTY_COLORS[
-                                log.task.difficulty as TaskDifficulty
-                              ],
-                            )}
-                          >
-                            {
-                              DIFFICULTY_LABELS[
-                                log.task.difficulty as TaskDifficulty
-                              ]
-                            }
-                          </Badge>
+                          <DifficultyIndicator
+                            difficulty={log.task.difficulty as TaskDifficulty}
+                          />
                         )}
                       </div>
                     </div>

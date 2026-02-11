@@ -108,9 +108,8 @@ const StatsCard = memo(function StatsCard({
   const colorClass = colorClassesMap[color];
 
   // 숫자 부분만 추출하여 카운트업 적용
-  const numericValue = typeof value === 'number'
-    ? value
-    : parseFloat(value) || 0;
+  const numericValue =
+    typeof value === 'number' ? value : parseFloat(value) || 0;
   const suffix = typeof value === 'string' ? value.replace(/[\d.]/g, '') : '';
   const animatedValue = useCountUp(isLoading ? 0 : numericValue);
 
@@ -119,7 +118,9 @@ const StatsCard = memo(function StatsCard({
     : animatedValue;
 
   return (
-    <div className={`relative bg-gradient-to-br ${colorClass.cardBg} bg-white rounded-2xl border border-slate-100 overflow-hidden hover:shadow-lg transition-all duration-200`}>
+    <div
+      className={`relative bg-gradient-to-br ${colorClass.cardBg} bg-white rounded-2xl border border-slate-100 overflow-hidden hover:shadow-lg transition-all duration-200`}
+    >
       {/* Left gradient bar */}
       <div
         className={`absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b ${colorClass.bar}`}
@@ -250,7 +251,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 xl:grid-cols-[320px_1fr] gap-4 xl:gap-6">
         <Card className="p-6 border-slate-100 shadow-sm flex flex-col align-center justify-center">
           {/* Profile Section */}
-          <div className="flex flex-col items-center text-center mb-6">
+          <div className="flex flex-col items-center text-center mb-3">
             <Avatar className="h-20 w-20 mb-3 border-2 border-slate-200">
               {user?.profileImage && (
                 <AvatarImage src={user.profileImage} alt={user.name} />

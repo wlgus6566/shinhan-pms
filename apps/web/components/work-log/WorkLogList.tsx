@@ -4,7 +4,13 @@ import { useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { AlertCircle, Plus, PenLine, FolderOpen } from 'lucide-react';
+import {
+  AlertCircle,
+  Plus,
+  PenLine,
+  FolderOpen,
+  CheckCircle2,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { WorkLogCard } from './WorkLogCard';
 import type { WorkLog, MyTask } from '@/types/work-log';
@@ -55,8 +61,7 @@ export function WorkLogList({
 
     logsForSelectedDate.forEach((log) => {
       const projectId = log.task?.projectId || 'unknown';
-      const projectName =
-        projectNameMap.get(projectId) || '프로젝트 미지정';
+      const projectName = projectNameMap.get(projectId) || '프로젝트 미지정';
 
       if (!groupIndexMap.has(projectId)) {
         groupIndexMap.set(projectId, groups.length);
@@ -67,6 +72,13 @@ export function WorkLogList({
 
     return groups;
   }, [logsForSelectedDate, myTasks]);
+
+  // 모든 업무에 대한 일지가 작성되었는지 체크
+  const allTasksLogged = useMemo(() => {
+    if (myTasks.length === 0) return false;
+    const loggedTaskIds = new Set(logsForSelectedDate.map((log) => log.taskId));
+    return myTasks.every((task) => loggedTaskIds.has(task.id));
+  }, [myTasks, logsForSelectedDate]);
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -89,6 +101,17 @@ export function WorkLogList({
 
       {/* 일지 목록 */}
       <div className="max-h-[500px] overflow-y-auto p-4">
+        {/* 모든 업무일지 작성 완료 배너 */}
+        {allTasksLogged && logsForSelectedDate.length > 0 && (
+          <div className="mb-4 flex items-center gap-2.5 rounded-xl bg-emerald-50 border border-emerald-200/60 px-4 py-3">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+            </div>
+            <p className="text-sm font-medium text-emerald-700">
+              오늘의 모든 업무일지를 작성했어요!
+            </p>
+          </div>
+        )}
         {logsForSelectedDate.length === 0 ? (
           <div className="py-4 text-center">
             <AlertCircle className="w-8 h-8 text-red-500 mx-auto mb-3" />

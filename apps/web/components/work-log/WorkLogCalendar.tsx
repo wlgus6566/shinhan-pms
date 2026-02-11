@@ -132,9 +132,39 @@ export function WorkLogCalendar({
 
   // Custom event rendering
   const renderEventContent = (eventInfo: EventContentArg) => {
-    const workLog = eventInfo.event.extendedProps.workLog as WorkLog;
     const bgColor = eventInfo.event.backgroundColor;
     const textColor = eventInfo.event.textColor;
+    const isGrouped = eventInfo.event.extendedProps.isGrouped as boolean;
+
+    // 팀 업무일지: 사용자별 그룹화된 이벤트
+    if (showUserName && isGrouped) {
+      const userName = eventInfo.event.extendedProps.userName as string;
+      const logCount = eventInfo.event.extendedProps.logCount as number;
+      const totalHours = eventInfo.event.extendedProps.totalHours as number;
+
+      return (
+        <div
+          className="flex justify-between items-center w-full px-1.5 py-0.5 cursor-pointer transition-colors rounded"
+          style={{ backgroundColor: bgColor }}
+        >
+          <span
+            className="text-[12px] font-medium truncate"
+            style={{ color: textColor }}
+          >
+            {userName}
+          </span>
+          <span
+            className="text-[10px] opacity-80 shrink-0 ml-1"
+            style={{ color: textColor }}
+          >
+            {logCount}건{totalHours > 0 ? ` · ${totalHours}h` : ''}
+          </span>
+        </div>
+      );
+    }
+
+    // 개별 이벤트 (내 업무일지 또는 팀 업무일지 1건)
+    const workLog = eventInfo.event.extendedProps.workLog as WorkLog;
 
     return (
       <div

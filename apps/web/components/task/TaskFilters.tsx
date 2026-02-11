@@ -2,16 +2,14 @@
 
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { X, Search, Check } from 'lucide-react';
 import {
   STATUS_LABELS,
-  STATUS_COLORS,
-  DIFFICULTY_LABELS,
-  DIFFICULTY_COLORS,
+  STATUS_DOT_COLORS,
   type TaskStatus,
   type TaskDifficulty,
 } from '@/types/task';
+import { DifficultyIndicator } from '@/components/ui/difficulty-indicator';
 import type { ProjectMember } from '@/types/project';
 import { cn } from '@/lib/utils';
 
@@ -26,7 +24,7 @@ interface TaskFiltersProps {
   onDifficultyToggle: (difficulty: TaskDifficulty) => void;
   projectMembers: ProjectMember[];
   resetFilters: () => void;
-  statusCounts?: Record<TaskStatus, number>;
+  statusCounts?: Partial<Record<TaskStatus, number>>;
 }
 
 export function TaskFilters({
@@ -76,30 +74,37 @@ export function TaskFilters({
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">
-        <div className="w-full sm:w-[50%]">
+        <div className="w-full sm:w-[60%]">
           <div className="text-sm font-medium mb-2">상태</div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1.5">
             {(Object.keys(STATUS_LABELS) as TaskStatus[]).map((status) => {
-              const count = statusCounts?.[status] ?? 0;
+              const isSelected = statusFilter.includes(status);
               return (
-                <Badge
+                <button
                   key={status}
+                  type="button"
                   className={cn(
-                    STATUS_COLORS[status],
-                    'cursor-pointer transition-all border-2 flex items-center gap-1.5',
-                    statusFilter.includes(status)
-                      ? 'opacity-100 font-semibold'
-                      : '',
+                    'inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs transition-all cursor-pointer',
+                    isSelected
+                      ? 'border-primary bg-primary/5 ring-1 ring-primary/20 font-semibold text-slate-800'
+                      : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-600',
                   )}
                   onClick={() => onStatusToggle(status)}
                 >
-                  {statusFilter.includes(status) && (
-                    <div className="w-4 h-4 rounded-full bg-primary flex items-center justify-center">
-                      <Check className="h-3 w-3 text-white" strokeWidth={3} />
-                    </div>
+                  <span
+                    className="h-2 w-2 rounded-full shrink-0"
+                    style={{ backgroundColor: STATUS_DOT_COLORS[status] }}
+                  />
+                  {STATUS_LABELS[status]}
+                  {statusCounts && (
+                    <span className="text-slate-400 font-normal">
+                      {statusCounts[status] ?? 0}
+                    </span>
                   )}
-                  {STATUS_LABELS[status]} ({count})
-                </Badge>
+                  {isSelected && (
+                    <Check className="h-3 w-3 text-primary ml-0.5" strokeWidth={3} />
+                  )}
+                </button>
               );
             })}
           </div>
@@ -108,22 +113,32 @@ export function TaskFilters({
         <div>
           <div className="text-sm font-medium mb-2">난이도</div>
           <div className="flex flex-wrap gap-2">
-            {(Object.keys(DIFFICULTY_LABELS) as TaskDifficulty[]).map(
-              (difficulty) => (
-                <Badge
-                  key={difficulty}
-                  className={cn(
-                    DIFFICULTY_COLORS[difficulty],
-                    'cursor-pointer transition-opacity',
-                    difficultyFilter.includes(difficulty)
-                      ? 'bg-primary border-primary text-primary-foreground'
-                      : '',
-                  )}
-                  onClick={() => onDifficultyToggle(difficulty)}
-                >
-                  {DIFFICULTY_LABELS[difficulty]}
-                </Badge>
-              ),
+            {(['HIGH', 'MEDIUM', 'LOW'] as TaskDifficulty[]).map(
+              (difficulty) => {
+                const isSelected = difficultyFilter.includes(difficulty);
+                return (
+                  <button
+                    key={difficulty}
+                    type="button"
+                    className={cn(
+                      'inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs transition-all cursor-pointer',
+                      isSelected
+                        ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
+                        : 'border-slate-200 bg-white hover:bg-slate-50',
+                    )}
+                    onClick={() => onDifficultyToggle(difficulty)}
+                  >
+                    <DifficultyIndicator
+                      difficulty={difficulty}
+                      showLabel={true}
+                      size="sm"
+                    />
+                    {isSelected && (
+                      <Check className="h-3 w-3 text-primary" strokeWidth={3} />
+                    )}
+                  </button>
+                );
+              },
             )}
           </div>
         </div>
