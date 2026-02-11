@@ -59,12 +59,12 @@ export function ProductivityStats({
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-5 sm:mt-0">
       {statItems.map((item) => {
         const Icon = item.icon;
         return (
           <Card key={item.label}>
-            <CardContent className="p-6">
+            <CardContent className="sm:p-6 p-4">
               <div className="flex items-center gap-4">
                 <div
                   className={`p-3 rounded-full ${item.bgColor} ${item.color}`}

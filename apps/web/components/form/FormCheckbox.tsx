@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   FormControl,
@@ -7,9 +7,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Checkbox } from "@/components/ui/checkbox";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/form';
+import { Checkbox } from '@/components/ui/checkbox';
+import { cn } from '@/lib/utils';
 
 interface FormCheckboxProps {
   control: any;
@@ -29,7 +29,7 @@ const FormCheckbox = ({
   label,
   className,
   errorMessage = true,
-  description = "",
+  description = '',
   disabled = false,
   wrapClassName,
   ...props
@@ -41,8 +41,8 @@ const FormCheckbox = ({
       render={({ field, fieldState }) => (
         <FormItem
           className={cn(
-            "flex flex-row items-start space-x-3 space-y-0",
-            wrapClassName
+            'flex flex-row items-start space-x-3 space-y-0 items-center h-5',
+            wrapClassName,
           )}
         >
           <FormControl>

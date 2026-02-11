@@ -346,7 +346,9 @@ export function ScheduleForm({
         {isVacation && !viewMode && (
           <div className="flex items-start gap-2 p-3 bg-blue-50 border border-blue-200 rounded-md text-sm text-blue-700">
             <Info className="h-4 w-4 mt-0.5 shrink-0" />
-            <span>연차/반차는 참여 중인 모든 프로젝트에 자동으로 적용됩니다.</span>
+            <span>
+              연차/반차는 참여 중인 모든 프로젝트에 자동으로 적용됩니다.
+            </span>
           </div>
         )}
 
@@ -436,7 +438,7 @@ export function ScheduleForm({
           </>
         ) : (
           /* 모든 일정: 시작 일시 + 종료 일시 */
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormDateTimePicker
               control={form.control}
               name="startDate"

@@ -84,7 +84,7 @@ export default function AnalyticsPage() {
 
   return (
     <div className="space-y-6 page-animate">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-star justify-between gap-4">
         <h1 className="text-2xl lg:text-3xl font-bold">프로젝트 리포트</h1>
         <MonthPicker value={selectedMonth} onChange={setSelectedMonth} />
       </div>

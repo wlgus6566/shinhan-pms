@@ -10,11 +10,11 @@ import { ScheduleCalendar } from './ScheduleCalendar';
 import { ScheduleDialog } from './ScheduleDialog';
 import { SelectedDateScheduleList } from './SelectedDateScheduleList';
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer';
 import type { Schedule, TeamScope } from '@/types/schedule';
 import { TEAM_SCOPE_LABELS, TEAM_SCOPE_FILTER_COLORS } from '@/types/schedule';
 import { getProjectSchedules } from '@/lib/api/schedules';
@@ -201,47 +201,16 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
               />
             </div>
 
-            {/* 모바일 Bottom Sheet */}
-            <Sheet open={bottomSheetOpen} onOpenChange={setBottomSheetOpen}>
-              <SheetContent
-                side="bottom"
-                className="max-h-[70vh] rounded-t-2xl px-4 pb-6 pt-0 lg:hidden"
-              >
-                <SheetHeader className="py-4 sticky top-0 bg-background z-10">
+            {/* 모바일 Bottom Sheet (스와이프 다운으로 닫기 지원) */}
+            <Drawer open={bottomSheetOpen} onOpenChange={setBottomSheetOpen}>
+              <DrawerContent className="max-h-[70vh] px-4 pb-6 pt-0 lg:hidden">
+                <DrawerHeader className="py-4 sticky top-0 bg-background z-10">
                   <div className="mx-auto w-12 h-1.5 rounded-full bg-slate-300 mb-2" />
-                  <SheetTitle className="text-left text-base">
+                  <DrawerTitle className="text-left text-base">
                     일정 목록
-                  </SheetTitle>
-                </SheetHeader>
-                <div className="overflow-y-auto max-h-[calc(70vh-80px)] space-y-4">
-                  {/* Team Filter */}
-                  {availableTeamScopes.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {availableTeamScopes.map((teamScope) => (
-                        <button
-                          key={teamScope}
-                          type="button"
-                          onClick={() => toggleTeamFilter(teamScope)}
-                          className={cn(
-                            'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm border transition-colors',
-                            selectedTeams.includes(teamScope)
-                              ? 'bg-slate-900 text-white border-slate-900'
-                              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50',
-                          )}
-                        >
-                          <span
-                            className="w-2 h-2 rounded-full"
-                            style={{
-                              backgroundColor: TEAM_SCOPE_FILTER_COLORS[
-                                teamScope
-                              ] as string,
-                            }}
-                          />
-                          {TEAM_SCOPE_LABELS[teamScope]}
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                  </DrawerTitle>
+                </DrawerHeader>
+                <div className="overflow-y-auto max-h-[calc(70vh-80px)] space-y-4 px-0">
                   {/* Schedule List */}
                   <SelectedDateScheduleList
                     schedules={filteredSchedules}
@@ -252,8 +221,8 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
                     }}
                   />
                 </div>
-              </SheetContent>
-            </Sheet>
+              </DrawerContent>
+            </Drawer>
           </>
         )}
       </div>
