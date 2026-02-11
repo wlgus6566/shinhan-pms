@@ -49,7 +49,11 @@ export default function LoginPage() {
 
         {/* Logo */}
         <div className="relative z-10 flex items-center gap-3">
-          <img src="/logo.png" alt="Emotion PMS" className="w-10 h-10 rounded-xl shadow-lg shadow-blue-500/25" />
+          <img
+            src="/logo.png"
+            alt="Emotion PMS"
+            className="w-24 h-24 rounded-xl"
+          />
           <span className="text-white font-bold text-lg tracking-tight">
             Emotion PMS
           </span>
@@ -82,7 +86,11 @@ export default function LoginPage() {
         <div className="w-full max-w-md animate-[fadeIn_0.4s_ease-out]">
           {/* Mobile Logo */}
           <div className="flex items-center justify-center gap-3 mb-10 lg:hidden">
-            <img src="/logo.png" alt="Emotion PMS" className="w-10 h-10 rounded-xl shadow-lg shadow-blue-500/25" />
+            <img
+              src="/logo.png"
+              alt="Emotion PMS"
+              className="w-12 h-12 rounded-xl"
+            />
             <div>
               <h1 className="text-slate-900 font-bold text-lg tracking-tight">
                 Emotion PMS

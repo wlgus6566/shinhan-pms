@@ -88,224 +88,39 @@ export function Sidebar({
    */
   const renderNavigation = (isExpanded: boolean, onLinkClick?: () => void) => (
     <TooltipProvider>
-    <div className="flex flex-col h-full">
-      {/* Logo Area */}
-      <div
-        className={cn(
-          'h-16 flex items-center border-b border-white/5',
-          isExpanded ? 'justify-start px-6' : 'justify-center px-0',
-        )}
-      >
-        <Link
-          href="/dashboard"
-          className="flex items-center gap-3 overflow-hidden"
-          onClick={onLinkClick}
-        >
-          <img src="/logo.png" alt="Emotion PMS" className="w-8 h-8 flex-shrink-0 rounded-xl shadow-lg shadow-blue-500/25" />
-          {isExpanded && (
-            <div className="flex flex-col">
-              <span className="text-white font-bold text-sm tracking-tight">
-                Emotion PMS
-              </span>
-            </div>
+      <div className="flex flex-col h-full">
+        {/* Logo Area */}
+        <div
+          className={cn(
+            'h-16 flex items-center border-b border-white/5',
+            isExpanded ? 'justify-start px-6' : 'justify-center px-0',
           )}
-        </Link>
-      </div>
-
-      {/* Navigation */}
-      <nav className="flex-1 py-4 px-3 overflow-y-auto scrollbar-thin">
-        <div className="space-y-1">
-          {/* 일반 메뉴 아이템 - 프로젝트까지 */}
-          {menuItems.slice(0, 2).map((item) => {
-            const active = isActive(item.href);
-            const linkEl = (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={onLinkClick}
-                className={cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative',
-                  active
-                    ? 'bg-blue-500/15 text-blue-400'
-                    : 'text-white hover:bg-white/5',
-                )}
-              >
-                {active && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-blue-500 rounded-r-full" />
-                )}
-                <item.icon
-                  className={cn(
-                    'h-5 w-5 flex-shrink-0 transition-colors',
-                    active
-                      ? 'text-blue-400'
-                      : 'text-slate-500 group-hover:text-white',
-                  )}
-                />
-                {isExpanded && (
-                  <span
-                    className={cn(
-                      'text-sm font-medium truncate animate-[fadeIn_0.2s_ease-out]',
-                      active && 'font-semibold',
-                    )}
-                  >
-                    {item.label}
-                  </span>
-                )}
-              </Link>
-            );
-            if (!isExpanded) {
-              return (
-                <Tooltip key={item.href} delayDuration={0}>
-                  <TooltipTrigger asChild>{linkEl}</TooltipTrigger>
-                  <TooltipContent side="right" className="font-medium">
-                    {item.label}
-                  </TooltipContent>
-                </Tooltip>
-              );
-            }
-            return linkEl;
-          })}
-
-          {/* 업무 관리 드롭다운 메뉴 */}
-          <div>
-            <button
-              onClick={toggleTaskMenu}
-              className={cn(
-                'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative',
-                isTasksActive
-                  ? 'bg-blue-500/15 text-blue-400'
-                  : 'text-slate-400 hover:bg-white/5 hover:text-white',
-              )}
-            >
-              {isTasksActive && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-blue-500 rounded-r-full" />
-              )}
-              <ClipboardList
-                className={cn(
-                  'h-5 w-5 flex-shrink-0 transition-colors',
-                  isTasksActive
-                    ? 'text-blue-400'
-                    : 'text-slate-500 group-hover:text-white',
-                )}
-              />
-              {isExpanded && (
-                <>
-                  <span
-                    className={cn(
-                      'text-sm font-medium truncate flex-1 text-left',
-                      isTasksActive && 'font-semibold',
-                    )}
-                  >
-                    업무 관리
-                  </span>
-                  <ChevronDown
-                    className={cn(
-                      'h-4 w-4 transition-transform duration-200',
-                      isTaskMenuOpen && 'rotate-180',
-                    )}
-                  />
-                </>
-              )}
-            </button>
-
-            {/* 하위 프로젝트 목록 */}
-            {isExpanded && isTaskMenuOpen && (
-              <div className="mt-1 ml-4 pl-4 border-l border-white/10 space-y-1">
-                {myProjects && myProjects.length > 0 ? (
-                  myProjects.map((project: any) => {
-                    const projectActive = pathname === `/tasks/${project.id}`;
-                    return (
-                      <Link
-                        key={project.id}
-                        href={`/tasks/${project.id}`}
-                        onClick={onLinkClick}
-                        className={cn(
-                          'flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all duration-200',
-                          projectActive
-                            ? 'bg-blue-500/10 text-blue-400 font-medium'
-                            : 'text-slate-500 hover:bg-white/5 hover:text-slate-300',
-                        )}
-                      >
-                        <div
-                          className={cn(
-                            'w-1.5 h-1.5 rounded-full flex-shrink-0',
-                            projectActive ? 'bg-blue-400' : 'bg-slate-600',
-                          )}
-                        />
-                        <span className="truncate">{project.name}</span>
-                      </Link>
-                    );
-                  })
-                ) : (
-                  <p className="px-3 py-2 text-xs text-slate-600">
-                    참여 중인 프로젝트가 없습니다
-                  </p>
-                )}
+        >
+          <Link
+            href="/dashboard"
+            className="flex items-center  overflow-hidden"
+            onClick={onLinkClick}
+          >
+            <img
+              src="/logo.png"
+              alt="Emotion PMS"
+              className="w-16 h-16 flex-shrink-0 rounded-xl"
+            />
+            {isExpanded && (
+              <div className="flex flex-col">
+                <span className="text-white font-bold text-sm tracking-tight">
+                  Emotion PMS
+                </span>
               </div>
             )}
-          </div>
-
-          {/* 나머지 메뉴 아이템 */}
-          {menuItems.slice(2).map((item) => {
-            const active = isActive(item.href);
-            const linkEl = (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={onLinkClick}
-                className={cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative',
-                  active
-                    ? 'bg-blue-500/15 text-blue-400'
-                    : 'text-slate-400 hover:bg-white/5 hover:text-white',
-                )}
-              >
-                {active && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-blue-500 rounded-r-full" />
-                )}
-                <item.icon
-                  className={cn(
-                    'h-5 w-5 flex-shrink-0 transition-colors',
-                    active
-                      ? 'text-blue-400'
-                      : 'text-slate-500 group-hover:text-white',
-                  )}
-                />
-                {isExpanded && (
-                  <span
-                    className={cn(
-                      'text-sm font-medium truncate animate-[fadeIn_0.2s_ease-out]',
-                      active && 'font-semibold',
-                    )}
-                  >
-                    {item.label}
-                  </span>
-                )}
-              </Link>
-            );
-            if (!isExpanded) {
-              return (
-                <Tooltip key={item.href} delayDuration={0}>
-                  <TooltipTrigger asChild>{linkEl}</TooltipTrigger>
-                  <TooltipContent side="right" className="font-medium">
-                    {item.label}
-                  </TooltipContent>
-                </Tooltip>
-              );
-            }
-            return linkEl;
-          })}
+          </Link>
         </div>
 
-        {/* Admin Section */}
-        {(user?.role === 'SUPER_ADMIN' || user?.role === 'PM') && (
-          <div className="mt-6 pt-6 border-t border-white/5">
-            {isExpanded && (
-              <p className="px-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-3">
-                관리자
-              </p>
-            )}
-            {adminMenuItems.map((item) => {
+        {/* Navigation */}
+        <nav className="flex-1 py-4 px-3 overflow-y-auto scrollbar-thin">
+          <div className="space-y-1">
+            {/* 일반 메뉴 아이템 - 프로젝트까지 */}
+            {menuItems.slice(0, 2).map((item) => {
               const active = isActive(item.href);
               const linkEl = (
                 <Link
@@ -315,18 +130,148 @@ export function Sidebar({
                   className={cn(
                     'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative',
                     active
-                      ? 'bg-amber-500/15 text-amber-400'
-                      : 'text-slate-400 hover:bg-white/5 hover:text-white',
+                      ? 'bg-blue-500/15 text-blue-400'
+                      : 'text-white hover:bg-white/5',
                   )}
                 >
                   {active && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-amber-500 rounded-r-full" />
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-blue-500 rounded-r-full" />
                   )}
                   <item.icon
                     className={cn(
                       'h-5 w-5 flex-shrink-0 transition-colors',
                       active
-                        ? 'text-amber-400'
+                        ? 'text-blue-400'
+                        : 'text-slate-500 group-hover:text-white',
+                    )}
+                  />
+                  {isExpanded && (
+                    <span
+                      className={cn(
+                        'text-sm font-medium truncate animate-[fadeIn_0.2s_ease-out]',
+                        active && 'font-semibold',
+                      )}
+                    >
+                      {item.label}
+                    </span>
+                  )}
+                </Link>
+              );
+              if (!isExpanded) {
+                return (
+                  <Tooltip key={item.href} delayDuration={0}>
+                    <TooltipTrigger asChild>{linkEl}</TooltipTrigger>
+                    <TooltipContent side="right" className="font-medium">
+                      {item.label}
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              }
+              return linkEl;
+            })}
+
+            {/* 업무 관리 드롭다운 메뉴 */}
+            <div>
+              <button
+                onClick={toggleTaskMenu}
+                className={cn(
+                  'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative',
+                  isTasksActive
+                    ? 'bg-blue-500/15 text-blue-400'
+                    : 'text-slate-400 hover:bg-white/5 hover:text-white',
+                )}
+              >
+                {isTasksActive && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-blue-500 rounded-r-full" />
+                )}
+                <ClipboardList
+                  className={cn(
+                    'h-5 w-5 flex-shrink-0 transition-colors',
+                    isTasksActive
+                      ? 'text-blue-400'
+                      : 'text-slate-500 group-hover:text-white',
+                  )}
+                />
+                {isExpanded && (
+                  <>
+                    <span
+                      className={cn(
+                        'text-sm font-medium truncate flex-1 text-left',
+                        isTasksActive && 'font-semibold',
+                      )}
+                    >
+                      업무 관리
+                    </span>
+                    <ChevronDown
+                      className={cn(
+                        'h-4 w-4 transition-transform duration-200',
+                        isTaskMenuOpen && 'rotate-180',
+                      )}
+                    />
+                  </>
+                )}
+              </button>
+
+              {/* 하위 프로젝트 목록 */}
+              {isExpanded && isTaskMenuOpen && (
+                <div className="mt-1 ml-4 pl-4 border-l border-white/10 space-y-1">
+                  {myProjects && myProjects.length > 0 ? (
+                    myProjects.map((project: any) => {
+                      const projectActive = pathname === `/tasks/${project.id}`;
+                      return (
+                        <Link
+                          key={project.id}
+                          href={`/tasks/${project.id}`}
+                          onClick={onLinkClick}
+                          className={cn(
+                            'flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all duration-200',
+                            projectActive
+                              ? 'bg-blue-500/10 text-blue-400 font-medium'
+                              : 'text-slate-500 hover:bg-white/5 hover:text-slate-300',
+                          )}
+                        >
+                          <div
+                            className={cn(
+                              'w-1.5 h-1.5 rounded-full flex-shrink-0',
+                              projectActive ? 'bg-blue-400' : 'bg-slate-600',
+                            )}
+                          />
+                          <span className="truncate">{project.name}</span>
+                        </Link>
+                      );
+                    })
+                  ) : (
+                    <p className="px-3 py-2 text-xs text-slate-600">
+                      참여 중인 프로젝트가 없습니다
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* 나머지 메뉴 아이템 */}
+            {menuItems.slice(2).map((item) => {
+              const active = isActive(item.href);
+              const linkEl = (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={onLinkClick}
+                  className={cn(
+                    'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative',
+                    active
+                      ? 'bg-blue-500/15 text-blue-400'
+                      : 'text-slate-400 hover:bg-white/5 hover:text-white',
+                  )}
+                >
+                  {active && (
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-blue-500 rounded-r-full" />
+                  )}
+                  <item.icon
+                    className={cn(
+                      'h-5 w-5 flex-shrink-0 transition-colors',
+                      active
+                        ? 'text-blue-400'
                         : 'text-slate-500 group-hover:text-white',
                     )}
                   />
@@ -355,60 +300,119 @@ export function Sidebar({
               return linkEl;
             })}
           </div>
-        )}
-      </nav>
 
-      {/* Stats Card - CRM Style */}
-      {isExpanded && (
-        <div className="mx-3 mb-4 p-4 bg-gradient-to-br from-blue-500/10 to-blue-600/5 rounded-2xl border border-blue-500/10">
-          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
-            진행중인 내 프로젝트
-          </p>
-          <p className="text-2xl font-bold text-white">
-            {myProjects?.length || 0}
-          </p>
-        </div>
-      )}
-
-      {/* User Profile */}
-      <div
-        className={cn('border-t border-white/5', isExpanded ? 'p-2' : 'p-3')}
-      >
-        {user && (
-          <div
-            className={cn(
-              'flex items-center gap-3 p-2 rounded-xl transition-colors',
-              isExpanded && 'hover:bg-white/5',
-            )}
-          >
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
-              {user.name.charAt(0)}
-            </div>
-            {isExpanded && (
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-white truncate">
-                  {user.name}
+          {/* Admin Section */}
+          {(user?.role === 'SUPER_ADMIN' || user?.role === 'PM') && (
+            <div className="mt-6 pt-6 border-t border-white/5">
+              {isExpanded && (
+                <p className="px-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-3">
+                  관리자
                 </p>
-                <p className="text-[11px] text-slate-500 truncate">
-                  {DEPARTMENT_LABELS[user.department as Department] ||
-                    user.department}
-                </p>
-              </div>
-            )}
-            <button
-              onClick={logout}
-              className={cn(
-                'p-2 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors',
-                isExpanded && 'w-full flex justify-center mt-2',
               )}
-              title="로그아웃"
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
+              {adminMenuItems.map((item) => {
+                const active = isActive(item.href);
+                const linkEl = (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={onLinkClick}
+                    className={cn(
+                      'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative',
+                      active
+                        ? 'bg-amber-500/15 text-amber-400'
+                        : 'text-slate-400 hover:bg-white/5 hover:text-white',
+                    )}
+                  >
+                    {active && (
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-amber-500 rounded-r-full" />
+                    )}
+                    <item.icon
+                      className={cn(
+                        'h-5 w-5 flex-shrink-0 transition-colors',
+                        active
+                          ? 'text-amber-400'
+                          : 'text-slate-500 group-hover:text-white',
+                      )}
+                    />
+                    {isExpanded && (
+                      <span
+                        className={cn(
+                          'text-sm font-medium truncate animate-[fadeIn_0.2s_ease-out]',
+                          active && 'font-semibold',
+                        )}
+                      >
+                        {item.label}
+                      </span>
+                    )}
+                  </Link>
+                );
+                if (!isExpanded) {
+                  return (
+                    <Tooltip key={item.href} delayDuration={0}>
+                      <TooltipTrigger asChild>{linkEl}</TooltipTrigger>
+                      <TooltipContent side="right" className="font-medium">
+                        {item.label}
+                      </TooltipContent>
+                    </Tooltip>
+                  );
+                }
+                return linkEl;
+              })}
+            </div>
+          )}
+        </nav>
+
+        {/* Stats Card - CRM Style */}
+        {isExpanded && (
+          <div className="mx-3 mb-4 p-4 bg-gradient-to-br from-blue-500/10 to-blue-600/5 rounded-2xl border border-blue-500/10">
+            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+              진행중인 내 프로젝트
+            </p>
+            <p className="text-2xl font-bold text-white">
+              {myProjects?.length || 0}
+            </p>
           </div>
         )}
+
+        {/* User Profile */}
+        <div
+          className={cn('border-t border-white/5', isExpanded ? 'p-2' : 'p-3')}
+        >
+          {user && (
+            <div
+              className={cn(
+                'flex items-center gap-3 p-2 rounded-xl transition-colors',
+                isExpanded && 'hover:bg-white/5',
+              )}
+            >
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
+                {user.name.charAt(0)}
+              </div>
+              {isExpanded && (
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-white truncate">
+                    {user.name}
+                  </p>
+                  <p className="text-[11px] text-slate-500 truncate">
+                    {DEPARTMENT_LABELS[user.department as Department] ||
+                      user.department}
+                  </p>
+                </div>
+              )}
+              <button
+                onClick={logout}
+                className={cn(
+                  'p-2 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors',
+                  isExpanded && 'w-full flex justify-center mt-2',
+                )}
+                title="로그아웃"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
     </TooltipProvider>
   );
 
