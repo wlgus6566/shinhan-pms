@@ -21,6 +21,7 @@ import {
   AlertCircle,
   Loader2,
   FileText,
+  TrendingUp,
 } from 'lucide-react';
 import { useDashboardStats, useDashboardTimeline } from '@/lib/api/dashboard';
 import { useMyProjects } from '@/lib/api/projects';
@@ -33,6 +34,7 @@ import {
   type Position,
   type Department,
 } from '@repo/schema';
+import { cn } from '@/lib/utils';
 
 // Hoist static data outside component (rendering-hoist-jsx)
 const colorClassesMap = {
@@ -91,6 +93,28 @@ const actionColorClasses = {
   },
 } as const;
 
+const taskSegments = [
+  { key: 'inProgress' as const, color: 'bg-violet-500', label: '진행중' },
+  { key: 'waiting' as const, color: 'bg-cyan-400', label: '대기' },
+  { key: 'completed' as const, color: 'bg-emerald-400', label: '완료' },
+] as const;
+
+const scheduleTypeLabels: Record<string, string> = {
+  MEETING: '회의',
+  SCRUM: '스크럼',
+  VACATION: '휴가',
+  HALF_DAY: '반차',
+  OTHER: '기타',
+};
+
+const scheduleTypeColors: Record<string, string> = {
+  MEETING: 'bg-blue-500',
+  SCRUM: 'bg-emerald-500',
+  VACATION: 'bg-amber-500',
+  HALF_DAY: 'bg-rose-500',
+  OTHER: 'bg-slate-500',
+};
+
 // Stats Card Component (memoized for re-render optimization)
 const StatsCard = memo(function StatsCard({
   label,
@@ -125,7 +149,7 @@ const StatsCard = memo(function StatsCard({
       <div
         className={`absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b ${colorClass.bar}`}
       />
-      <div className="pl-5 pr-4 py-8">
+      <div className="pl-5 pr-2 py-4 sm:pr-4 sm:py-8">
         <div className="flex items-center gap-3">
           {/* Icon in circle */}
           <div
@@ -194,22 +218,6 @@ const QuickActionCard = memo(function QuickActionCard({
   );
 });
 
-const scheduleTypeLabels: Record<string, string> = {
-  MEETING: '회의',
-  SCRUM: '스크럼',
-  VACATION: '휴가',
-  HALF_DAY: '반차',
-  OTHER: '기타',
-};
-
-const scheduleTypeColors: Record<string, string> = {
-  MEETING: 'bg-blue-500',
-  SCRUM: 'bg-emerald-500',
-  VACATION: 'bg-amber-500',
-  HALF_DAY: 'bg-rose-500',
-  OTHER: 'bg-slate-500',
-};
-
 export default function DashboardPage() {
   const { user } = useAuth();
   const { stats, isLoading: statsLoading } = useDashboardStats();
@@ -233,6 +241,10 @@ export default function DashboardPage() {
       }),
     [],
   );
+
+  const taskWaiting = stats?.myTasks.waiting ?? 0;
+  const taskInProgress = stats?.myTasks.inProgress ?? 0;
+  const taskCompleted = stats?.myTasks.completed ?? 0;
 
   return (
     <div className="space-y-8 page-animate">
@@ -370,122 +382,325 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Recent Activity & Upcoming Schedules */}
-      <section className="grid gap-6 lg:grid-cols-2">
-        {/* Recent Activity */}
-        <Card className="border-slate-100">
-          <CardHeader>
-            <CardTitle className="text-base font-semibold">팀 활동</CardTitle>
-            <CardDescription>최근 업무일지 및 업무 생성 내역</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {timelineLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-slate-300" />
+      {/* Recent Activity + Task Distribution & Upcoming Schedules */}
+      <section className="grid gap-6 grid-cols-1 lg:grid-cols-2">
+        {/* Left column — Recent Activity + My Projects stacked */}
+        <div className="space-y-6">
+          <Card className="border-slate-100">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-base font-semibold">
+                    팀 활동
+                  </CardTitle>
+                  <CardDescription>
+                    최근 업무일지 및 업무 생성 내역
+                  </CardDescription>
+                </div>
+                <Link
+                  href="/work-logs"
+                  className="text-xs text-slate-400 hover:text-blue-500 transition-colors"
+                >
+                  전체보기
+                </Link>
               </div>
-            ) : timeline?.recentActivities &&
-              timeline.recentActivities.length > 0 ? (
-              <div className="space-y-4">
-                {timeline.recentActivities.slice(0, 5).map((activity) => (
-                  <div
-                    key={`${activity.type}-${activity.id}`}
-                    className="flex items-start gap-3"
-                  >
-                    <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
-                      {activity.type === 'worklog' ? (
-                        <FileText className="h-4 w-4" />
-                      ) : (
-                        <ClipboardList className="h-4 w-4" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-slate-900 truncate">
-                        <span className="font-medium">
-                          {activity.user.name}
-                        </span>
-                        <span className="text-slate-500">
-                          {' '}
-                          - {activity.title}
-                        </span>
-                      </p>
-                      {activity.project && (
-                        <p className="text-xs text-slate-400 truncate">
-                          {activity.project.name}
-                        </p>
-                      )}
-                      <p className="text-xs text-slate-400">
-                        {formatDistanceToNow(new Date(activity.createdAt), {
-                          addSuffix: true,
-                          locale: ko,
-                        })}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-slate-400 text-center py-8">
-                최근 활동이 없습니다
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Upcoming Schedules */}
-        <Card className="border-slate-100">
-          <CardHeader>
-            <CardTitle className="text-base font-semibold">
-              다가오는 일정
-            </CardTitle>
-            <CardDescription>예정된 일정과 마일스톤입니다</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {timelineLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-slate-300" />
-              </div>
-            ) : timeline?.upcomingSchedules &&
-              timeline.upcomingSchedules.length > 0 ? (
-              <div className="space-y-3">
-                {timeline.upcomingSchedules.map((schedule) => (
-                  <div
-                    key={schedule.id}
-                    className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors"
-                  >
+            </CardHeader>
+            <CardContent>
+              {timelineLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-slate-300" />
+                </div>
+              ) : timeline?.recentActivities &&
+                timeline.recentActivities.length > 0 ? (
+                <div className="space-y-6">
+                  {timeline.recentActivities.slice(0, 5).map((activity) => (
                     <div
-                      className={`w-1.5 h-8 rounded-full ${
-                        scheduleTypeColors[schedule.scheduleType] ||
-                        'bg-slate-500'
-                      }`}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-slate-900 truncate">
-                        {schedule.title || '제목 없음'}
-                      </p>
-                      <p className="text-xs text-slate-400">
-                        {scheduleTypeLabels[schedule.scheduleType] ||
-                          schedule.scheduleType}
-                        {' · '}
-                        {new Date(schedule.startDate).toLocaleDateString(
-                          'ko-KR',
-                          {
-                            month: 'short',
-                            day: 'numeric',
-                          },
+                      key={`${activity.type}-${activity.id}`}
+                      className="flex items-center gap-3 rounded-xl"
+                    >
+                      <div
+                        className={cn(
+                          'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0',
+                          activity.type === 'worklog'
+                            ? 'bg-blue-50 text-blue-500'
+                            : 'bg-emerald-50 text-emerald-500',
                         )}
-                      </p>
+                      >
+                        {activity.type === 'worklog' ? (
+                          <FileText className="h-4 w-4" />
+                        ) : (
+                          <ClipboardList className="h-4 w-4" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-slate-900 truncate">
+                          <span className="font-semibold">
+                            {activity.user.name}
+                          </span>
+                          <span className="text-slate-500">
+                            {' '}
+                            - {activity.title}
+                          </span>
+                        </p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          {activity.project && (
+                            <>
+                              <span className="text-xs text-slate-400 truncate">
+                                {activity.project.name}
+                              </span>
+                              <span className="text-slate-200">·</span>
+                            </>
+                          )}
+                          <span className="text-xs text-slate-400 flex-shrink-0">
+                            {formatDistanceToNow(new Date(activity.createdAt), {
+                              addSuffix: true,
+                              locale: ko,
+                            })}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <Calendar className="h-4 w-4 text-slate-400 flex-shrink-0" />
-                  </div>
-                ))}
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-slate-400 text-center py-8">
+                  최근 활동이 없습니다
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* My Projects */}
+          <Card className="border-slate-100">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-base font-semibold">
+                    내 프로젝트
+                  </CardTitle>
+                </div>
+                <Link
+                  href="/projects"
+                  className="text-xs text-slate-400 hover:text-blue-500 transition-colors"
+                >
+                  전체보기
+                </Link>
               </div>
-            ) : (
-              <p className="text-sm text-slate-400 text-center py-8">
-                예정된 일정이 없습니다
-              </p>
-            )}
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent>
+              {!projects || projects.length === 0 ? (
+                <p className="text-sm text-slate-400 text-center py-8">
+                  참여 중인 프로젝트가 없습니다
+                </p>
+              ) : (
+                <div className="grid grid-cols-3 gap-3">
+                  {projects.slice(0, 4).map((project, idx) => {
+                    const start = project.startDate
+                      ? new Date(project.startDate)
+                      : null;
+                    const end = project.endDate
+                      ? new Date(project.endDate)
+                      : null;
+                    const colorSet = [
+                      { icon: 'bg-blue-100 text-blue-600', dot: 'bg-blue-500' },
+                      {
+                        icon: 'bg-violet-100 text-violet-600',
+                        dot: 'bg-violet-500',
+                      },
+                      {
+                        icon: 'bg-amber-100 text-amber-600',
+                        dot: 'bg-amber-500',
+                      },
+                      {
+                        icon: 'bg-emerald-100 text-emerald-600',
+                        dot: 'bg-emerald-500',
+                      },
+                    ][idx % 4];
+                    const statusLabel =
+                      project.status === 'ACTIVE'
+                        ? '진행중'
+                        : project.status === 'COMPLETED'
+                          ? '완료'
+                          : '중단';
+                    const roleLabel =
+                      project.myRole === 'PM'
+                        ? 'PM'
+                        : project.myRole === 'PL'
+                          ? 'PL'
+                          : 'PA';
+
+                    return (
+                      <Link
+                        key={project.id}
+                        href={`/projects/${project.id}`}
+                        className="flex flex-col p-3.5 rounded-xl border border-slate-100 hover:border-slate-200 hover:shadow-md transition-all group"
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <div
+                            className={cn(
+                              'w-8 h-8 rounded-lg flex items-center justify-center',
+                              colorSet?.icon || '',
+                            )}
+                          >
+                            <FolderKanban className="h-4 w-4" />
+                          </div>
+                          <span className="text-[10px] font-semibold text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded">
+                            {roleLabel}
+                          </span>
+                        </div>
+                        <p className="text-sm font-semibold text-slate-900 truncate group-hover:text-blue-600 transition-colors mb-1">
+                          {project.name}
+                        </p>
+                        <div className="flex items-center gap-1.5 mt-auto">
+                          <span
+                            className={cn(
+                              'w-1.5 h-1.5 rounded-full',
+                              colorSet?.dot || '',
+                            )}
+                          />
+                          <span className="text-[11px] text-slate-500">
+                            {statusLabel}
+                          </span>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right column — Task Distribution (compact) + Upcoming Schedules stacked */}
+        <div className="space-y-6">
+          {/* Task Distribution */}
+          <Card className="border-slate-100">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base font-semibold">
+                  업무 분포
+                </CardTitle>
+                <TrendingUp className="h-4 w-4 text-slate-300" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              {statsLoading ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="h-5 w-5 animate-spin text-slate-300" />
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {taskSegments.map((seg) => {
+                    const val = {
+                      inProgress: taskInProgress,
+                      waiting: taskWaiting,
+                      completed: taskCompleted,
+                    }[seg.key];
+                    const total = taskInProgress + taskWaiting + taskCompleted;
+                    const pct = total > 0 ? Math.round((val / total) * 100) : 0;
+                    return (
+                      <div key={seg.key}>
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-1.5">
+                            <span
+                              className={cn('w-2 h-2 rounded-full', seg.color)}
+                            />
+                            <span className="text-xs text-slate-500">
+                              {seg.label}
+                            </span>
+                          </div>
+                          <span className="text-xs font-semibold text-slate-700 tabular-nums">
+                            {val}
+                            <span className="text-slate-400 font-normal ml-1">
+                              {pct}%
+                            </span>
+                          </span>
+                        </div>
+                        <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                          <div
+                            className={cn(
+                              seg.color,
+                              'h-full rounded-full transition-all duration-700 ease-out',
+                            )}
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Upcoming Schedules */}
+          <Card className="border-slate-100">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-base font-semibold">
+                    다가오는 일정
+                  </CardTitle>
+                  <CardDescription>
+                    예정된 일정과 마일스톤입니다
+                  </CardDescription>
+                </div>
+                <Link
+                  href="/schedule"
+                  className="text-xs text-slate-400 hover:text-blue-500 transition-colors"
+                >
+                  전체보기
+                </Link>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {timelineLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-slate-300" />
+                </div>
+              ) : timeline?.upcomingSchedules &&
+                timeline.upcomingSchedules.length > 0 ? (
+                <div className="space-y-3">
+                  {timeline.upcomingSchedules.map((schedule) => (
+                    <div
+                      key={schedule.id}
+                      className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors"
+                    >
+                      <div
+                        className={`w-1.5 h-8 rounded-full ${
+                          scheduleTypeColors[schedule.scheduleType] ||
+                          'bg-slate-500'
+                        }`}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-slate-900 truncate">
+                          {schedule.title || '제목 없음'}
+                        </p>
+                        <p className="text-xs text-slate-400">
+                          {scheduleTypeLabels[schedule.scheduleType] ||
+                            schedule.scheduleType}
+                          {' · '}
+                          {new Date(schedule.startDate).toLocaleDateString(
+                            'ko-KR',
+                            {
+                              month: 'short',
+                              day: 'numeric',
+                            },
+                          )}
+                        </p>
+                      </div>
+                      <Calendar className="h-4 w-4 text-slate-400 flex-shrink-0" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-slate-400 text-center py-8">
+                  예정된 일정이 없습니다
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </section>
     </div>
   );
