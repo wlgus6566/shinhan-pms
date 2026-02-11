@@ -19,10 +19,10 @@ import {
   CheckCircle2,
   Clock,
   AlertCircle,
-  Loader2,
   FileText,
   TrendingUp,
 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useDashboardStats, useDashboardTimeline } from '@/lib/api/dashboard';
 import { useMyProjects } from '@/lib/api/projects';
 import { formatDistanceToNow } from 'date-fns';
@@ -160,7 +160,10 @@ const StatsCard = memo(function StatsCard({
           {/* Value and label */}
           <div className="flex-1 min-w-0">
             {isLoading ? (
-              <Loader2 className="h-6 w-6 animate-spin text-slate-300" />
+              <>
+                <Skeleton className="h-7 w-12" />
+                <Skeleton className="h-3 w-20 mt-1.5" />
+              </>
             ) : (
               <>
                 <p className="text-2xl font-bold text-slate-900 leading-none tabular-nums">
@@ -407,8 +410,16 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               {timelineLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-slate-300" />
+                <div className="space-y-6">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <Skeleton className="w-9 h-9 rounded-lg flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <Skeleton className="h-4 w-3/4" />
+                        <Skeleton className="h-3 w-1/3 mt-1.5" />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : timeline?.recentActivities &&
                 timeline.recentActivities.length > 0 ? (
@@ -585,8 +596,19 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               {statsLoading ? (
-                <div className="flex items-center justify-center py-4">
-                  <Loader2 className="h-5 w-5 animate-spin text-slate-300" />
+                <div className="space-y-3">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i}>
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-1.5">
+                          <Skeleton className="w-2 h-2 rounded-full" />
+                          <Skeleton className="h-3 w-10" />
+                        </div>
+                        <Skeleton className="h-3 w-12" />
+                      </div>
+                      <Skeleton className="h-1.5 w-full rounded-full" />
+                    </div>
+                  ))}
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -655,8 +677,20 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               {timelineLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-slate-300" />
+                <div className="space-y-3">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-3 p-3 rounded-xl bg-slate-50"
+                    >
+                      <Skeleton className="w-1.5 h-8 rounded-full" />
+                      <div className="flex-1 min-w-0">
+                        <Skeleton className="h-4 w-2/3" />
+                        <Skeleton className="h-3 w-1/3 mt-1.5" />
+                      </div>
+                      <Skeleton className="h-4 w-4 rounded flex-shrink-0" />
+                    </div>
+                  ))}
                 </div>
               ) : timeline?.upcomingSchedules &&
                 timeline.upcomingSchedules.length > 0 ? (

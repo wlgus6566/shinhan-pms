@@ -42,7 +42,8 @@ function convertUTCToLocalIgnoringTimezone(utcString: string): string {
  * Transforms a Schedule object to FullCalendar EventInput format
  */
 export function transformScheduleToEvent(schedule: Schedule): EventInput {
-  const isMultiDay = isMultiDaySchedule(schedule);
+  // 연차/반차(usageDate 있음)는 항상 단일일 이벤트로 처리
+  const isMultiDay = schedule.usageDate ? false : isMultiDaySchedule(schedule);
   const color = getScheduleColor(schedule);
 
   // 연차/반차의 경우 usageDate를 기준으로 표시

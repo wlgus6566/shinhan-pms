@@ -124,29 +124,29 @@ export class SchedulesController {
     return this.transformSchedule(schedule);
   }
 
-  // @Get('projects/:projectId/schedules')
-  // @ApiOperation({ summary: '프로젝트 일정 목록 조회' })
-  // @ApiParam({ name: 'projectId', description: '프로젝트 ID' })
-  // @ApiQuery({ name: 'startDate', required: false, description: '시작일 (ISO 8601)' })
-  // @ApiQuery({ name: 'endDate', required: false, description: '종료일 (ISO 8601)' })
-  // @ApiResponse({
-  //   status: 200,
-  //   description: '프로젝트 일정 목록',
-  //   type: [ScheduleResponseDto],
-  // })
-  // async findProjectSchedules(
-  //   @Param('projectId') projectId: string,
-  //   @Query('startDate') startDate?: string,
-  //   @Query('endDate') endDate?: string,
-  // ) {
-  //   const schedules = await this.schedulesService.findByProject(
-  //     BigInt(projectId),
-  //     startDate,
-  //     endDate,
-  //   );
+  @Get('projects/:projectId/schedules')
+  @ApiOperation({ summary: '프로젝트 일정 목록 조회 (글로벌 연차/반차 포함)' })
+  @ApiParam({ name: 'projectId', description: '프로젝트 ID' })
+  @ApiQuery({ name: 'startDate', required: false, description: '시작일 (ISO 8601)' })
+  @ApiQuery({ name: 'endDate', required: false, description: '종료일 (ISO 8601)' })
+  @ApiResponse({
+    status: 200,
+    description: '프로젝트 일정 목록',
+    type: [ScheduleResponseDto],
+  })
+  async findProjectSchedules(
+    @Param('projectId') projectId: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    const schedules = await this.schedulesService.findByProject(
+      BigInt(projectId),
+      startDate,
+      endDate,
+    );
 
-  //   return schedules.map((schedule) => this.transformSchedule(schedule));
-  // }
+    return schedules.map((schedule) => this.transformSchedule(schedule));
+  }
 
   @Delete('schedules/:id')
   @HttpCode(HttpStatus.OK)

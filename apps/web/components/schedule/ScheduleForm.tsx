@@ -6,6 +6,7 @@ import { CreateScheduleSchema, RECURRENCE_TYPE_OPTIONS } from '@repo/schema';
 import type { CreateScheduleRequest, DayOfWeek } from '@repo/schema';
 import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
+import { Info } from 'lucide-react';
 import { Form } from '@/components/ui/form';
 import {
   FormInput,
@@ -60,7 +61,7 @@ export function ScheduleForm({
     resolver: zodResolver(CreateScheduleSchema),
     defaultValues: schedule
       ? {
-          title: schedule.title,
+          title: schedule.title ?? '',
           description: schedule.description || '',
           scheduleType: schedule.scheduleType as ScheduleType,
           startDate: schedule.startDate || '',
@@ -107,7 +108,7 @@ export function ScheduleForm({
   useEffect(() => {
     if (schedule) {
       form.reset({
-        title: schedule.title,
+        title: schedule.title ?? '',
         description: schedule.description || '',
         scheduleType: schedule.scheduleType as ScheduleType,
         startDate: schedule.startDate || '',
@@ -340,6 +341,13 @@ export function ScheduleForm({
               ([value, label]) => ({ value, label }),
             )}
           />
+        )}
+
+        {isVacation && !viewMode && (
+          <div className="flex items-start gap-2 p-3 bg-blue-50 border border-blue-200 rounded-md text-sm text-blue-700">
+            <Info className="h-4 w-4 mt-0.5 shrink-0" />
+            <span>연차/반차는 참여 중인 모든 프로젝트에 자동으로 적용됩니다.</span>
+          </div>
         )}
 
         {!isVacation && (

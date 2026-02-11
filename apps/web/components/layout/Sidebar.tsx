@@ -101,9 +101,7 @@ export function Sidebar({
           className="flex items-center gap-3 overflow-hidden"
           onClick={onLinkClick}
         >
-          <div className="w-8 h-8 gradient-primary rounded-xl flex-shrink-0 flex items-center justify-center shadow-lg shadow-blue-500/25">
-            <span className="text-white font-bold text-base">E</span>
-          </div>
+          <img src="/logo.png" alt="Emotion PMS" className="w-8 h-8 flex-shrink-0 rounded-xl shadow-lg shadow-blue-500/25" />
           {isExpanded && (
             <div className="flex flex-col">
               <span className="text-white font-bold text-sm tracking-tight">

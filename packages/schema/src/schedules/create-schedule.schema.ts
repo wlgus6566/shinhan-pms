@@ -6,9 +6,9 @@ export const CreateScheduleSchema = z
     projectId: z.string().optional(),
     title: z
       .string()
-      .min(1, '제목을 입력해주세요')
       .max(100, '제목은 100자 이하여야 합니다')
-      .optional(), // VACATION/HALF_DAY에서 선택적
+      .nullable()
+      .optional(), // VACATION/HALF_DAY에서 선택적 (필수 검증은 refine에서 처리)
     description: z.string().optional(),
     scheduleType: ScheduleTypeEnum,
     startDate: z.string().optional(),
@@ -116,7 +116,7 @@ export const CreateScheduleSchema = z
   .refine(
     (data) => {
       if (data.scheduleType !== 'VACATION' && data.scheduleType !== 'HALF_DAY') {
-        return data.title !== undefined && data.title.trim().length > 0;
+        return !!data.title && data.title.trim().length > 0;
       }
       return true;
     },

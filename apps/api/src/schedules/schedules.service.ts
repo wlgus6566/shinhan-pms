@@ -27,6 +27,15 @@ export class SchedulesService {
       throw new BadRequestException('종료일은 시작일보다 이후여야 합니다');
     }
 
+    // 연차/반차는 글로벌 일정으로 저장 (projectId = null)
+    const isGlobalLeave =
+      scheduleData.scheduleType === 'VACATION' ||
+      scheduleData.scheduleType === 'HALF_DAY';
+
+    if (isGlobalLeave) {
+      scheduleData.projectId = undefined;
+    }
+
     // 프로젝트 존재 확인 (projectId가 있는 경우)
     if (scheduleData.projectId) {
       const projectId = BigInt(scheduleData.projectId);
@@ -240,36 +249,57 @@ export class SchedulesService {
 
   /**
    * 프로젝트의 일정 목록 조회
+   * - 해당 프로젝트의 일정 + 프로젝트 멤버의 글로벌 연차/반차를 함께 조회
    */
   async findByProject(projectId: bigint, startDate?: string, endDate?: string) {
-    const where: any = {
-      projectId,
-      isActive: true,
+    // 프로젝트 멤버 ID 목록 조회 (글로벌 연차/반차 병합용)
+    const projectMembers = await this.prisma.projectMember.findMany({
+      where: { projectId },
+      select: { memberId: true },
+    });
+    const memberIds = projectMembers.map((m) => m.memberId);
+
+    // 소스 필터: 프로젝트 일정 OR 멤버의 글로벌 연차/반차
+    const sourceFilter: any = {
+      OR: [
+        { projectId },
+        {
+          projectId: null,
+          scheduleType: { in: ['VACATION', 'HALF_DAY'] },
+          createdBy: { in: memberIds },
+        },
+      ],
     };
 
-    if (startDate || endDate) {
-      where.OR = [];
+    const where: any = {
+      isActive: true,
+      ...sourceFilter,
+    };
 
-      // 기간 내에 시작하는 일정
-      if (startDate && endDate) {
-        where.OR.push({
-          startDate: {
-            gte: new Date(startDate),
-            lte: new Date(endDate),
-          },
-        });
-        // 기간을 걸치는 일정
-        where.OR.push({
-          AND: [
-            { startDate: { lte: new Date(startDate) } },
-            { endDate: { gte: new Date(startDate) } },
+    // 날짜 필터
+    if (startDate && endDate) {
+      where.AND = [
+        {
+          OR: [
+            {
+              startDate: {
+                gte: new Date(startDate),
+                lte: new Date(endDate),
+              },
+            },
+            {
+              AND: [
+                { startDate: { lte: new Date(startDate) } },
+                { endDate: { gte: new Date(startDate) } },
+              ],
+            },
           ],
-        });
-      } else if (startDate) {
-        where.startDate = { gte: new Date(startDate) };
-      } else if (endDate) {
-        where.endDate = { lte: new Date(endDate) };
-      }
+        },
+      ];
+    } else if (startDate) {
+      where.startDate = { gte: new Date(startDate) };
+    } else if (endDate) {
+      where.endDate = { lte: new Date(endDate) };
     }
 
     const schedules = await this.prisma.schedule.findMany({

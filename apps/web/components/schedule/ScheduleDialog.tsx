@@ -7,6 +7,7 @@ import { ScheduleForm } from './ScheduleForm';
 import type { Schedule, CreateScheduleRequest } from '@/types/schedule';
 import {
   createProjectSchedule,
+  createSchedule,
   updateSchedule,
   deleteSchedule,
 } from '@/lib/api/schedules';
@@ -70,8 +71,14 @@ export function ScheduleDialog({
         // Update
         await updateSchedule(schedule.id, data);
       } else {
-        // Create
-        await createProjectSchedule(projectId, data);
+        // Create: 연차/반차는 글로벌 일정으로 생성 (projectId 없이)
+        const isGlobalLeave =
+          data.scheduleType === 'VACATION' || data.scheduleType === 'HALF_DAY';
+        if (isGlobalLeave) {
+          await createSchedule(data);
+        } else {
+          await createProjectSchedule(projectId, data);
+        }
       }
 
       onSuccess();
