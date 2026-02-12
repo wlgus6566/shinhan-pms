@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useRef } from 'react';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import {
   ChevronLeft,
@@ -41,10 +41,9 @@ interface ScheduleCalendarProps {
   onScheduleClick?: (schedule: Schedule) => void;
 }
 
-// UTC 시간 문자열을 로컬 시간으로 변환 (타임존 무시)
+// UTC 시간 문자열을 로컬 시간 Date 객체로 변환
 const parseUTCAsLocal = (utcString: string) => {
-  // 'Z'를 제거하여 타임존 정보 제거한 후 파싱
-  return parseISO(utcString.replace('Z', ''));
+  return new Date(utcString);
 };
 
 export function ScheduleCalendar({

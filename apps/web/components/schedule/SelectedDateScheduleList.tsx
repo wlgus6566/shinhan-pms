@@ -8,6 +8,7 @@ import type { Schedule, ScheduleType } from '@/types/schedule';
 import { SCHEDULE_TYPE_LABELS, SCHEDULE_TYPE_COLORS } from '@/types/schedule';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { utcToLocalDateStr } from './calendarUtils';
 
 interface SelectedDateScheduleListProps {
   schedules: Schedule[];
@@ -30,9 +31,9 @@ export function SelectedDateScheduleList({
           return schedule.usageDate === selectedDateStr;
         }
 
-        // 일반 일정: 날짜 범위 체크 (startDate <= selectedDate <= endDate)
-        const rangeStart = schedule.startDate.split('T')[0];
-        const rangeEnd = schedule.endDate.split('T')[0];
+        // 일반 일정: 날짜 범위 체크 (로컬 타임존 기준)
+        const rangeStart = utcToLocalDateStr(schedule.startDate);
+        const rangeEnd = utcToLocalDateStr(schedule.endDate);
         return (
           selectedDateStr >= (rangeStart ?? '') &&
           selectedDateStr <= (rangeEnd ?? '')

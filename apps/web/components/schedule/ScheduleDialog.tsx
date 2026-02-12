@@ -130,7 +130,7 @@ export function ScheduleDialog({
       title={getDialogTitle()}
       footer={
         internalMode === 'view' ? (
-          <>
+          <div key="view-footer" className="flex gap-2">
             {isCreator && (
               <Button type="button" variant="destructive" onClick={() => setShowDeleteConfirm(true)}>
                 삭제
@@ -144,9 +144,9 @@ export function ScheduleDialog({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               닫기
             </Button>
-          </>
+          </div>
         ) : (
-          <>
+          <div key="edit-footer" className="flex gap-2">
             <Button
               type="button"
               variant="outline"
@@ -162,7 +162,7 @@ export function ScheduleDialog({
             >
               {isSubmitting ? '저장 중...' : internalMode === 'edit' ? '수정' : '생성'}
             </Button>
-          </>
+          </div>
         )
       }
     >

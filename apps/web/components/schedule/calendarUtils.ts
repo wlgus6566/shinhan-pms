@@ -21,21 +21,38 @@ export function getScheduleColor(schedule: Schedule): string {
 }
 
 /**
- * Checks if a schedule spans multiple days
+ * UTC 시간 문자열을 로컬 시간 문자열로 변환
+ * "2026-02-15T15:00:00.000Z" -> KST "2026-02-16T00:00:00"
  */
-export function isMultiDaySchedule(schedule: Schedule): boolean {
-  const start = schedule.startDate.slice(0, 10); // YYYY-MM-DD
-  const end = schedule.endDate.slice(0, 10);
-  return start !== end;
+function convertUTCToLocalString(utcString: string): string {
+  const date = new Date(utcString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
 }
 
 /**
- * UTC 시간 문자열을 로컬 시간으로 변환 (타임존 무시)
- * "2026-01-21T20:50:00.000Z" -> "2026-01-21T20:50:00"
+ * UTC 시간 문자열에서 로컬 날짜(YYYY-MM-DD)만 추출
  */
-function convertUTCToLocalIgnoringTimezone(utcString: string): string {
-  // 'Z'를 제거하여 타임존 정보 제거
-  return utcString.replace('Z', '');
+export function utcToLocalDateStr(utcString: string): string {
+  const date = new Date(utcString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Checks if a schedule spans multiple days (로컬 타임존 기준)
+ */
+export function isMultiDaySchedule(schedule: Schedule): boolean {
+  const start = utcToLocalDateStr(schedule.startDate);
+  const end = utcToLocalDateStr(schedule.endDate);
+  return start !== end;
 }
 
 /**
@@ -56,8 +73,8 @@ export function transformScheduleToEvent(schedule: Schedule): EventInput {
     endDate = schedule.usageDate;
   } else {
     // 일반 일정은 기존 로직 사용
-    startDate = convertUTCToLocalIgnoringTimezone(schedule.startDate);
-    endDate = convertUTCToLocalIgnoringTimezone(schedule.endDate);
+    startDate = convertUTCToLocalString(schedule.startDate);
+    endDate = convertUTCToLocalString(schedule.endDate);
   }
 
   return {
