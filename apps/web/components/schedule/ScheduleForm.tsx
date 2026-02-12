@@ -4,8 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CreateScheduleSchema, RECURRENCE_TYPE_OPTIONS } from '@repo/schema';
 import type { CreateScheduleRequest, DayOfWeek } from '@repo/schema';
-import { useState, useEffect, useMemo } from 'react';
-import { Button } from '@/components/ui/button';
+import { useEffect, useMemo } from 'react';
 import { Info } from 'lucide-react';
 import { Form } from '@/components/ui/form';
 import {
@@ -37,8 +36,6 @@ interface ScheduleFormProps {
   onCancel: () => void;
   isLoading?: boolean;
   viewMode?: boolean;
-  onEdit?: () => void;
-  onDelete?: () => void;
   defaultDate?: Date;
 }
 
@@ -49,8 +46,6 @@ export function ScheduleForm({
   onCancel,
   isLoading = false,
   viewMode = false,
-  onEdit,
-  onDelete,
   defaultDate,
 }: ScheduleFormProps) {
   const isEditing = !!schedule;
@@ -333,7 +328,7 @@ export function ScheduleForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form id="schedule-form" onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         {viewMode ? (
           <FormInput
             control={form.control}
@@ -549,58 +544,16 @@ export function ScheduleForm({
           disabled={viewMode}
         />
 
-        {viewMode ? (
-          <div className="flex justify-end gap-2">
-            {onDelete && (
-              <Button type="button" variant="destructive" onClick={onDelete}>
-                삭제
-              </Button>
-            )}
-            {onEdit && (
-              <Button type="button" onClick={onEdit}>
-                수정
-              </Button>
-            )}
-            <Button type="button" variant="outline" onClick={onCancel}>
-              닫기
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {/* 디버깅: 폼 에러 표시 */}
-            {Object.keys(form.formState.errors).length > 0 && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
-                <p className="font-semibold mb-1">폼 검증 오류:</p>
-                <ul className="list-disc list-inside space-y-0.5">
-                  {Object.entries(form.formState.errors).map(([key, error]) => (
-                    <li key={key}>
-                      {key}: {error.message}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onCancel}
-                disabled={isLoading || form.formState.isSubmitting}
-              >
-                취소
-              </Button>
-              <Button
-                type="submit"
-                disabled={isLoading || form.formState.isSubmitting}
-              >
-                {isLoading || form.formState.isSubmitting
-                  ? '저장 중...'
-                  : isEditing
-                    ? '수정'
-                    : '생성'}
-              </Button>
-            </div>
+        {!viewMode && Object.keys(form.formState.errors).length > 0 && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+            <p className="font-semibold mb-1">폼 검증 오류:</p>
+            <ul className="list-disc list-inside space-y-0.5">
+              {Object.entries(form.formState.errors).map(([key, error]) => (
+                <li key={key}>
+                  {key}: {error.message}
+                </li>
+              ))}
+            </ul>
           </div>
         )}
       </form>

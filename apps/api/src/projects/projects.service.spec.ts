@@ -45,7 +45,7 @@ describe('ProjectsService', () => {
     it('프로젝트를 생성해야 함', async () => {
       const createDto = {
         name: '테스트 프로젝트',
-        projectType: 'WEB',
+        projectType: 'BUILD' as const,
         description: '설명',
         startDate: '2024-01-01',
         endDate: '2024-12-31',
@@ -87,7 +87,7 @@ describe('ProjectsService', () => {
     });
 
     it('중복된 프로젝트명이면 BadRequestException을 발생시켜야 함', async () => {
-      const createDto = { name: '기존 프로젝트', projectType: 'WEB' };
+      const createDto = { name: '기존 프로젝트', projectType: 'BUILD' as const, startDate: '2024-01-01', endDate: '2024-12-31' };
       const userId = 1n;
 
       mockPrismaService.project.findFirst.mockResolvedValue({ id: 1n });
@@ -100,7 +100,7 @@ describe('ProjectsService', () => {
     it('종료일이 시작일보다 빠르면 BadRequestException을 발생시켜야 함', async () => {
       const createDto = {
         name: '테스트 프로젝트',
-        projectType: 'WEB',
+        projectType: 'BUILD' as const,
         startDate: '2024-12-31',
         endDate: '2024-01-01',
       };
@@ -293,7 +293,7 @@ describe('ProjectsService', () => {
     it('프로젝트를 수정해야 함', async () => {
       const updateDto = {
         name: '수정된 프로젝트명',
-        status: 'COMPLETED',
+        status: 'COMPLETED' as const,
       };
       const userId = 1n;
       const mockProject = {

@@ -9,15 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { FormInput } from '@/components/form';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { AlertCircle, Loader2, CheckCircle2 } from 'lucide-react';
+import { BaseDialog } from '@/components/ui/base-dialog';
+import { AlertCircle, Loader2 } from 'lucide-react';
 import { z } from 'zod';
 
 type ChangePasswordValues = z.infer<typeof ChangePasswordSchema>;
@@ -59,57 +52,59 @@ export function ChangePasswordDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>비밀번호 변경</DialogTitle>
-          <DialogDescription>
-            보안을 위해 비밀번호를 변경해주세요. 비밀번호는 영문, 숫자, 특수문자를 포함하여 8자 이상이어야 합니다.
-          </DialogDescription>
-        </DialogHeader>
+    <BaseDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      size="sm"
+      title="비밀번호 변경"
+      description="보안을 위해 비밀번호를 변경해주세요. 비밀번호는 영문, 숫자, 특수문자를 포함하여 8자 이상이어야 합니다."
+      footer={
+        <>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isLoading}
+          >
+            취소
+          </Button>
+          <Button
+            type="submit"
+            form="change-password-form"
+            disabled={isLoading}
+          >
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            변경
+          </Button>
+        </>
+      }
+    >
+      <Form {...form}>
+        <form id="change-password-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {error && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
+          <FormInput
+            control={form.control}
+            name="currentPassword"
+            label="현재 비밀번호"
+            type="password"
+            placeholder="••••••••"
+          />
 
-            <FormInput
-              control={form.control}
-              name="currentPassword"
-              label="현재 비밀번호"
-              type="password"
-              placeholder="••••••••"
-            />
-
-            <FormInput
-              control={form.control}
-              name="newPassword"
-              label="새 비밀번호"
-              type="password"
-              placeholder="••••••••"
-            />
-
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                disabled={isLoading}
-              >
-                취소
-              </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                변경
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+          <FormInput
+            control={form.control}
+            name="newPassword"
+            label="새 비밀번호"
+            type="password"
+            placeholder="••••••••"
+          />
+        </form>
+      </Form>
+    </BaseDialog>
   );
 }

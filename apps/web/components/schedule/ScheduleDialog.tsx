@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { BaseDialog } from '@/components/ui/base-dialog';
+import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ScheduleForm } from './ScheduleForm';
 import type { Schedule, CreateScheduleRequest } from '@/types/schedule';
@@ -127,6 +128,43 @@ export function ScheduleDialog({
       onOpenChange={onOpenChange}
       size="lg"
       title={getDialogTitle()}
+      footer={
+        internalMode === 'view' ? (
+          <>
+            {isCreator && (
+              <Button type="button" variant="destructive" onClick={() => setShowDeleteConfirm(true)}>
+                삭제
+              </Button>
+            )}
+            {isCreator && (
+              <Button type="button" onClick={handleEdit}>
+                수정
+              </Button>
+            )}
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              닫기
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={internalMode === 'edit' ? handleCancelEdit : () => onOpenChange(false)}
+              disabled={isSubmitting}
+            >
+              취소
+            </Button>
+            <Button
+              type="submit"
+              form="schedule-form"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? '저장 중...' : internalMode === 'edit' ? '수정' : '생성'}
+            </Button>
+          </>
+        )
+      }
     >
       <ScheduleForm
         schedule={internalMode === 'create' ? null : schedule}
@@ -139,8 +177,6 @@ export function ScheduleDialog({
         }
         isLoading={isSubmitting}
         viewMode={internalMode === 'view'}
-        onEdit={internalMode === 'view' && isCreator ? handleEdit : undefined}
-        onDelete={internalMode === 'view' && isCreator ? () => setShowDeleteConfirm(true) : undefined}
         defaultDate={internalMode === 'create' ? defaultDate : undefined}
       />
     </BaseDialog>
