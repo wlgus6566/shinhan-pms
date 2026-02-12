@@ -26,7 +26,7 @@ interface ProjectScheduleListProps {
 
 type DialogState =
   | { open: false }
-  | { open: true; mode: 'create' }
+  | { open: true; mode: 'create'; defaultDate?: Date }
   | { open: true; mode: 'view' | 'edit'; schedule: Schedule };
 
 export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
@@ -106,6 +106,8 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
     if (typeof window !== 'undefined' && window.innerWidth < 1024) {
       setBottomSheetOpen(true);
     }
+    // 클릭한 날짜로 일정 추가 다이얼로그 열기
+    setDialogState({ open: true, mode: 'create', defaultDate: date });
   };
 
   const handleMonthChange = (date: Date) => {
@@ -239,6 +241,11 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
         }
         projectId={projectId}
         onSuccess={handleSuccess}
+        defaultDate={
+          dialogState.open && 'defaultDate' in dialogState
+            ? dialogState.defaultDate
+            : undefined
+        }
       />
 
       {/* Floating Action Button - Portal to body to escape transform context */}

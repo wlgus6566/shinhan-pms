@@ -41,8 +41,9 @@ export function useTabNavigation(
   // URL 파라미터 변경 시 탭 동기화 (브라우저 뒤로/앞으로 대응)
   useEffect(() => {
     const tabParam = searchParams.get(queryKey) || defaultTab;
-    setActiveTab(tabParam);
-  }, [searchParams, defaultTab, queryKey]);
+    setActiveTab((prev) => (prev !== tabParam ? tabParam : prev));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, queryKey]);
 
   // 탭 변경 핸들러
   const handleTabChange = useCallback(

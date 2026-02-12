@@ -20,6 +20,7 @@ interface ScheduleDialogProps {
   schedule?: Schedule | null;
   projectId: string;
   onSuccess: () => void;
+  defaultDate?: Date;
 }
 
 export function ScheduleDialog({
@@ -29,6 +30,7 @@ export function ScheduleDialog({
   schedule,
   projectId,
   onSuccess,
+  defaultDate,
 }: ScheduleDialogProps) {
   const { user } = useAuth();
   const [internalMode, setInternalMode] = useState<typeof mode>(mode);
@@ -139,6 +141,7 @@ export function ScheduleDialog({
         viewMode={internalMode === 'view'}
         onEdit={internalMode === 'view' && isCreator ? handleEdit : undefined}
         onDelete={internalMode === 'view' && isCreator ? () => setShowDeleteConfirm(true) : undefined}
+        defaultDate={internalMode === 'create' ? defaultDate : undefined}
       />
     </BaseDialog>
     <ConfirmDialog

@@ -15,6 +15,7 @@ import {
 
 interface WeeklyReportExportButtonProps {
   projectId: string;
+  projectName: string;
   defaultDate?: Date;
   defaultStartDate?: string;
   defaultEndDate?: string;
@@ -22,6 +23,7 @@ interface WeeklyReportExportButtonProps {
 
 export function WeeklyReportExportButton({
   projectId,
+  projectName,
   defaultDate = new Date(),
 }: WeeklyReportExportButtonProps) {
   const [selectedDate, setSelectedDate] = useState<Date>(defaultDate);
@@ -50,7 +52,7 @@ export function WeeklyReportExportButton({
       setIsExporting(true);
       const startDate = format(monday, 'yyyy-MM-dd');
       const endDate = format(sunday, 'yyyy-MM-dd');
-      await exportWeeklyReport(projectId, startDate, endDate, weekInfo);
+      await exportWeeklyReport(projectId, startDate, endDate, weekInfo, projectName);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (error) {

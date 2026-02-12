@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { useProjectContext } from '@/context/ProjectContext';
+import { useTabNavigation } from '@/hooks/useTabNavigation';
 import {
   useMyProductivity,
   useWorkAreaDistribution,
@@ -24,12 +25,32 @@ export default function AnalyticsPage() {
   const [selectedMonth, setSelectedMonth] = useState(
     format(new Date(), 'yyyy-MM'),
   );
-  const [selectedProjectId, setSelectedProjectId] = useState<
-    string | undefined
-  >();
 
   // 내 프로젝트 목록 조회
-  const { myProjects: projects, isLoading: projectsLoading } = useProjectContext();
+  const { myProjects: projects, isLoading: projectsLoading, selectedProjectId: globalProjectId, setSelectedProjectId: setGlobalProjectId } = useProjectContext();
+
+  // 글로벌 선택값이 있고, 현재 프로젝트 목록에 존재하면 그것을 기본값으로 사용
+  const defaultProjectId = (() => {
+    if (globalProjectId && projects?.some((p) => String(p.id) === globalProjectId)) {
+      return globalProjectId;
+    }
+    return projects && projects.length > 0 ? String(projects[0]?.id) : '';
+  })();
+
+  const {
+    activeTab: selectedProjectId,
+    handleTabChange: setSelectedProjectId,
+  } = useTabNavigation('/analytics', {
+    defaultTab: defaultProjectId,
+    queryKey: 'project',
+  });
+
+  // 탭 변경 시 글로벌 상태 동기화
+  useEffect(() => {
+    if (selectedProjectId && selectedProjectId !== globalProjectId) {
+      setGlobalProjectId(selectedProjectId);
+    }
+  }, [selectedProjectId]);
 
   // 선택된 프로젝트의 통계 조회
   const { productivity, isLoading: productivityLoading } = useMyProductivity(
@@ -48,17 +69,6 @@ export default function AnalyticsPage() {
 
   const { data: taskStatusCountData, isLoading: statusCountLoading } =
     useTaskStatusCount(selectedProjectId, selectedMonth);
-
-  const handleProjectChange = (projectId: string) => {
-    setSelectedProjectId(projectId);
-  };
-
-  // 첫 번째 프로젝트 자동 선택
-  useEffect(() => {
-    if (projects && projects.length > 0 && !selectedProjectId) {
-      setSelectedProjectId(projects[0]?.id);
-    }
-  }, [projects, selectedProjectId]);
 
   if (projectsLoading) {
     return (
@@ -89,7 +99,7 @@ export default function AnalyticsPage() {
         <MonthPicker value={selectedMonth} onChange={setSelectedMonth} />
       </div>
 
-      <Tabs value={selectedProjectId} onValueChange={handleProjectChange}>
+      <Tabs value={selectedProjectId} onValueChange={setSelectedProjectId}>
         <TabsList className="w-full justify-start overflow-x-auto">
           {projects.map((project) => (
             <TabsTrigger key={project.id} value={project.id}>

@@ -4,5 +4,9 @@
     "baseUrl": "./",
     "outDir": "./dist",
     "types": ["node", "jest"]
-  }
+  },
+  "exclude": [
+    "prisma/seed-jan-addition.ts",
+    "prisma/seed-feb-addition.ts"
+  ]
 }

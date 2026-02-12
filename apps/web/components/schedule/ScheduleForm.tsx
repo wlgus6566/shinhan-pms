@@ -39,6 +39,7 @@ interface ScheduleFormProps {
   viewMode?: boolean;
   onEdit?: () => void;
   onDelete?: () => void;
+  defaultDate?: Date;
 }
 
 export function ScheduleForm({
@@ -50,6 +51,7 @@ export function ScheduleForm({
   viewMode = false,
   onEdit,
   onDelete,
+  defaultDate,
 }: ScheduleFormProps) {
   const isEditing = !!schedule;
 
@@ -88,8 +90,8 @@ export function ScheduleForm({
           title: '',
           description: '',
           scheduleType: 'MEETING',
-          startDate: '',
-          endDate: '',
+          startDate: defaultDate ? defaultDate.toISOString() : '',
+          endDate: defaultDate ? defaultDate.toISOString() : '',
           location: '',
           isAllDay: false,
           color: '',
@@ -136,8 +138,8 @@ export function ScheduleForm({
         title: '',
         description: '',
         scheduleType: 'MEETING',
-        startDate: '',
-        endDate: '',
+        startDate: defaultDate ? defaultDate.toISOString() : '',
+        endDate: defaultDate ? defaultDate.toISOString() : '',
         location: '',
         isAllDay: false,
         color: '',
@@ -156,6 +158,15 @@ export function ScheduleForm({
 
   const handleSubmit = async (data: ScheduleFormValues) => {
     console.log('🔵 [ScheduleForm] handleSubmit called', { data, isEditing });
+
+    // 회의/스크럼일 때 팀 범위 필수 검증
+    if (
+      (data.scheduleType === 'MEETING' || data.scheduleType === 'SCRUM') &&
+      !data.teamScope
+    ) {
+      form.setError('teamScope', { message: '팀 범위를 선택해주세요' });
+      return;
+    }
 
     let submitData: CreateScheduleRequest;
 
@@ -447,6 +458,8 @@ export function ScheduleForm({
               disabled={viewMode}
               showAllDayCheckbox={!isRecurring}
               allDayCheckboxName="isAllDay"
+              minTime="08:00"
+              maxTime="19:00"
             />
 
             <FormDateTimePicker
@@ -462,6 +475,8 @@ export function ScheduleForm({
               showAllDayCheckbox={!isRecurring}
               allDayCheckboxName="isAllDay"
               timeOnly={isRecurring}
+              minTime="08:00"
+              maxTime="19:00"
             />
           </div>
         )}

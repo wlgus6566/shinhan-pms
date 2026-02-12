@@ -81,6 +81,7 @@ export async function exportWeeklyReport(
   startDate: string,
   endDate: string,
   weekInfo: WeekInfo,
+  projectName: string,
 ): Promise<void> {
   const params = new URLSearchParams();
   params.append('startDate', startDate);
@@ -112,8 +113,8 @@ export async function exportWeeklyReport(
   const downloadUrl = window.URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = downloadUrl;
-  // 파일명: Weekly_Report_2026_01_Week2.xlsx
-  const filename = `Weekly_Report_${weekInfo.year}_${String(weekInfo.month).padStart(2, '0')}_Week${weekInfo.weekNumber}.xlsx`;
+  // 파일명: [프로젝트명]_주간업무일지_2026년01월_2주차.xlsx
+  const filename = `${projectName}_주간업무일지_${weekInfo.year}년${String(weekInfo.month).padStart(2, '0')}월_${weekInfo.weekNumber}주차.xlsx`;
   link.setAttribute('download', filename);
   document.body.appendChild(link);
   link.click();
@@ -128,6 +129,7 @@ export async function exportMonthlyStaffReport(
   projectId: string,
   year: number,
   month: number,
+  projectName: string,
 ): Promise<void> {
   const params = new URLSearchParams();
   params.append('year', year.toString());
@@ -154,8 +156,8 @@ export async function exportMonthlyStaffReport(
   const downloadUrl = window.URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = downloadUrl;
-  // 파일명: 1월_투입인력별상세업무현황.xlsx
-  const filename = `${month}월_투입인력별상세업무현황.xlsx`;
+  // 파일명: [프로젝트명]_투입인력별상세업무현황_2026년01월.xlsx
+  const filename = `${projectName}_투입인력별상세업무현황_${year}년${String(month).padStart(2, '0')}월.xlsx`;
   link.setAttribute('download', filename);
   document.body.appendChild(link);
   link.click();
@@ -170,6 +172,7 @@ export async function exportMonthlyTaskReport(
   projectId: string,
   year: number,
   month: number,
+  projectName: string,
 ): Promise<void> {
   const params = new URLSearchParams();
   params.append('year', year.toString());
@@ -196,8 +199,8 @@ export async function exportMonthlyTaskReport(
   const downloadUrl = window.URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = downloadUrl;
-  // 파일명: 1월_업무별공수투입현황.xlsx
-  const filename = `${month}월_업무별공수투입현황.xlsx`;
+  // 파일명: [프로젝트명]_업무별공수투입현황_2026년01월.xlsx
+  const filename = `${projectName}_업무별공수투입현황_${year}년${String(month).padStart(2, '0')}월.xlsx`;
   link.setAttribute('download', filename);
   document.body.appendChild(link);
   link.click();

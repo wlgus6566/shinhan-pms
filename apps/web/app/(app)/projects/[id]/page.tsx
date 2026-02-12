@@ -134,7 +134,7 @@ export default function ProjectDetailPage() {
         </TabsContent>
 
         <TabsContent value="team-logs">
-          <TeamWorkLogList projectId={projectId} members={members || []} />
+          <TeamWorkLogList projectId={projectId} projectName={project.name} members={members || []} />
         </TabsContent>
       </Tabs>
     </div>

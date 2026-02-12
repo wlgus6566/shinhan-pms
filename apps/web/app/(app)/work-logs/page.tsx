@@ -47,9 +47,13 @@ export default function WorkLogsPage() {
     queryKey: 'project',
   });
 
-  // 탭 변경 시 글로벌 상태 동기화 ('all'은 제외)
+  // 탭 변경 시 글로벌 상태 동기화
   useEffect(() => {
-    if (selectedProjectId && selectedProjectId !== 'all' && selectedProjectId !== globalProjectId) {
+    if (selectedProjectId === 'all') {
+      if (globalProjectId !== null) {
+        setGlobalProjectId(null);
+      }
+    } else if (selectedProjectId && selectedProjectId !== globalProjectId) {
       setGlobalProjectId(selectedProjectId);
     }
   }, [selectedProjectId]);
@@ -90,6 +94,14 @@ export default function WorkLogsPage() {
       a.projectName.localeCompare(b.projectName, 'ko'),
     );
   }, [myTasks]);
+
+  // 탭 값이 유효하지 않으면 'all'로 리셋
+  useEffect(() => {
+    if (!selectedProjectId || selectedProjectId === 'all') return;
+    if (uniqueProjects.length > 0 && !uniqueProjects.some((p) => p.id === selectedProjectId)) {
+      setSelectedProjectId('all');
+    }
+  }, [selectedProjectId, uniqueProjects, setSelectedProjectId]);
 
   // 프로젝트별 필터링된 업무 목록
   const filteredTasks = useMemo(() => {

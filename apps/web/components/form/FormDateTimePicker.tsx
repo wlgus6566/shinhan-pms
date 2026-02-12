@@ -25,6 +25,8 @@ interface FormDateTimePickerProps {
   showAllDayCheckbox?: boolean;
   allDayCheckboxName?: string;
   timeOnly?: boolean;
+  minTime?: string;
+  maxTime?: string;
 }
 
 const FormDateTimePicker = ({
@@ -40,6 +42,8 @@ const FormDateTimePicker = ({
   showAllDayCheckbox = false,
   allDayCheckboxName = 'isAllDay',
   timeOnly = false,
+  minTime,
+  maxTime,
 }: FormDateTimePickerProps) => {
   return (
     <FormField
@@ -94,6 +98,8 @@ const FormDateTimePicker = ({
                 timeOnly={timeOnly}
                 placeholder={placeholder}
                 className={cn('mt-2', className)}
+                minTime={minTime}
+                maxTime={maxTime}
               />
             </FormControl>
 

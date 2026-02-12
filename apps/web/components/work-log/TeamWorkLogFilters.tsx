@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
@@ -81,6 +83,19 @@ export function TeamWorkLogFilters({
     return '담당자 전체';
   }, [selectedWorkArea]);
 
+  // Group assignees by work area
+  const groupedAssignees = useMemo(() => {
+    const groups = new Map<string, ProjectMember[]>();
+    for (const member of filteredAssignees) {
+      const area = member.workArea || 'UNKNOWN';
+      if (!groups.has(area)) {
+        groups.set(area, []);
+      }
+      groups.get(area)!.push(member);
+    }
+    return groups;
+  }, [filteredAssignees]);
+
   return (
     <Card className="p-3 sm:p-4 shadow-none flex flex-col gap-3 sm:gap-4 hover:shadow-none">
       {/* 첫 번째 줄: 담당 분야, 담당자, 초기화 */}
@@ -112,13 +127,20 @@ export function TeamWorkLogFilters({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{assigneeDropdownLabel}</SelectItem>
-              {filteredAssignees.map((member) => (
-                <SelectItem
-                  key={member.memberId}
-                  value={member.memberId.toString()}
-                >
-                  {member.member?.name || '알 수 없음'}
-                </SelectItem>
+              {Array.from(groupedAssignees.entries()).map(([area, areaMembers]) => (
+                <SelectGroup key={area}>
+                  <SelectLabel className="text-[11px] text-slate-400 font-medium px-3 pt-2 pb-1">
+                    {WORK_AREA_LABELS[area] || area}
+                  </SelectLabel>
+                  {areaMembers.map((member) => (
+                    <SelectItem
+                      key={member.memberId}
+                      value={member.memberId.toString()}
+                    >
+                      {member.member?.name || '알 수 없음'}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
               ))}
             </SelectContent>
           </Select>

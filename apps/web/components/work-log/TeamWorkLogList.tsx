@@ -19,10 +19,11 @@ import { cn } from '@/lib/utils';
 
 interface TeamWorkLogListProps {
   projectId: string;
+  projectName: string;
   members: ProjectMember[];
 }
 
-export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
+export function TeamWorkLogList({ projectId, projectName, members }: TeamWorkLogListProps) {
   const [workLogs, setWorkLogs] = useState<WorkLog[]>([]);
   const [selectedWorkArea, setSelectedWorkArea] = useState<string>('all');
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
@@ -232,17 +233,20 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
         <Card className="p-3 space-y-3 shadow-none">
           <WeeklyReportExportButton
             projectId={projectId}
+            projectName={projectName}
             defaultStartDate={format(startOfMonth(currentMonth), 'yyyy-MM-dd')}
             defaultEndDate={format(endOfMonth(currentMonth), 'yyyy-MM-dd')}
           />
           <div className="border-t border-slate-100" />
           <MonthlyStaffReportExportButton
             projectId={projectId}
+            projectName={projectName}
             defaultDate={currentMonth}
           />
           <div className="border-t border-slate-100" />
           <MonthlyTaskReportExportButton
             projectId={projectId}
+            projectName={projectName}
             defaultDate={currentMonth}
           />
         </Card>
@@ -273,16 +277,19 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
       <div className="hidden sm:flex flex-row flex-wrap justify-end gap-2">
         <WeeklyReportExportButton
           projectId={projectId}
+          projectName={projectName}
           defaultStartDate={format(startOfMonth(currentMonth), 'yyyy-MM-dd')}
           defaultEndDate={format(endOfMonth(currentMonth), 'yyyy-MM-dd')}
         />
         <div className="flex flex-row flex-wrap gap-2">
           <MonthlyStaffReportExportButton
             projectId={projectId}
+            projectName={projectName}
             defaultDate={currentMonth}
           />
           <MonthlyTaskReportExportButton
             projectId={projectId}
+            projectName={projectName}
             defaultDate={currentMonth}
           />
         </div>
@@ -328,6 +335,7 @@ export function TeamWorkLogList({ projectId, members }: TeamWorkLogListProps) {
         selectedDate={selectedDate}
         workLogs={selectedDateLogs}
         memberMap={memberMap}
+        members={members}
       />
     </div>
   );

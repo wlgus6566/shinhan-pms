@@ -9,11 +9,13 @@ import { exportMonthlyTaskReport } from '@/lib/api/workLogs';
 
 interface MonthlyTaskReportExportButtonProps {
   projectId: string;
+  projectName: string;
   defaultDate?: Date;
 }
 
 export function MonthlyTaskReportExportButton({
   projectId,
+  projectName,
   defaultDate = new Date(),
 }: MonthlyTaskReportExportButtonProps) {
   const [selectedDate, setSelectedDate] = useState<Date>(defaultDate);
@@ -37,7 +39,7 @@ export function MonthlyTaskReportExportButton({
 
     try {
       setIsExporting(true);
-      await exportMonthlyTaskReport(projectId, year, month);
+      await exportMonthlyTaskReport(projectId, year, month, projectName);
     } catch (err) {
       console.error('Export error:', err);
       setError('다운로드에 실패했습니다. 다시 시도해주세요.');

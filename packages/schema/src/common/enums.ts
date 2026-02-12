@@ -119,6 +119,25 @@ export const WorkAreaEnum = z.enum(
 
 export type WorkArea = z.infer<typeof WorkAreaEnum>;
 
+export const WORK_AREA_LABELS: Record<WorkArea, string> = {
+  PROJECT_MANAGEMENT: '총괄',
+  PLANNING: '기획',
+  DESIGN: '디자인',
+  FRONTEND: '프론트엔드',
+  BACKEND: '백엔드',
+};
+
+export const WORK_AREA_OPTIONS = Object.entries(WORK_AREA_LABELS).map(
+  ([value, label]) => ({ value, label }),
+);
+
+// Task Difficulty Labels (simple string map)
+export const TASK_DIFFICULTY_LABELS: Record<TaskDifficulty, string> = {
+  HIGH: '상',
+  MEDIUM: '중',
+  LOW: '하',
+};
+
 // User Related Enums
 export const DepartmentEnum = z.enum(
   [

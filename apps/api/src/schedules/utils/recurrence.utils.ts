@@ -32,9 +32,9 @@ export function generateRecurrenceInstances(
 
   // WEEKLY + recurrenceDaysOfWeek: 지정된 요일마다 인스턴스 생성
   if (recurrenceType === 'WEEKLY' && recurrenceDaysOfWeek && recurrenceDaysOfWeek.length > 0) {
-    // 시작일이 속한 주의 일요일(0)부터 탐색
+    // 시작일이 속한 주의 일요일(0)부터 탐색 (UTC 기준)
     const weekStart = new Date(startDate);
-    weekStart.setDate(weekStart.getDate() - weekStart.getDay()); // 해당 주 일요일
+    weekStart.setUTCDate(weekStart.getUTCDate() - weekStart.getUTCDay()); // 해당 주 일요일
 
     let currentWeekStart = new Date(weekStart);
     let iterationCount = 0;
@@ -42,9 +42,9 @@ export function generateRecurrenceInstances(
     while (currentWeekStart <= recurrenceEndDate && iterationCount < maxInstances) {
       for (const dayOfWeek of recurrenceDaysOfWeek) {
         const instanceStart = new Date(currentWeekStart);
-        instanceStart.setDate(instanceStart.getDate() + dayOfWeek);
-        // 시작 시간 설정 (원본 시간 유지)
-        instanceStart.setHours(startDate.getHours(), startDate.getMinutes(), startDate.getSeconds(), startDate.getMilliseconds());
+        instanceStart.setUTCDate(instanceStart.getUTCDate() + dayOfWeek);
+        // 시작 시간 설정 (원본 UTC 시간 유지)
+        instanceStart.setUTCHours(startDate.getUTCHours(), startDate.getUTCMinutes(), startDate.getUTCSeconds(), startDate.getUTCMilliseconds());
 
         // 시작일 이전이거나 종료일 이후이면 건너뛰기
         if (instanceStart < startDate || instanceStart > recurrenceEndDate) {
@@ -61,7 +61,7 @@ export function generateRecurrenceInstances(
         iterationCount++;
       }
       // 다음 주로 이동
-      currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+      currentWeekStart.setUTCDate(currentWeekStart.getUTCDate() + 7);
     }
 
     // 날짜순 정렬
@@ -70,6 +70,7 @@ export function generateRecurrenceInstances(
   }
 
   // 기존 로직: DAILY, MONTHLY, YEARLY 및 recurrenceDaysOfWeek 없는 WEEKLY
+  // UTC 메서드를 사용하여 toISOString()과 일관성 유지
   let currentDate = new Date(startDate);
   let iterationCount = 0;
 
@@ -104,30 +105,30 @@ function getNextOccurrence(
 
   switch (recurrenceType) {
     case 'DAILY':
-      nextDate.setDate(nextDate.getDate() + 1);
+      nextDate.setUTCDate(nextDate.getUTCDate() + 1);
       break;
 
     case 'WEEKLY':
-      nextDate.setDate(nextDate.getDate() + 7);
+      nextDate.setUTCDate(nextDate.getUTCDate() + 7);
       break;
 
     case 'MONTHLY':
-      nextDate.setMonth(nextDate.getMonth() + 1);
+      nextDate.setUTCMonth(nextDate.getUTCMonth() + 1);
       // 월말 처리 (예: 1월 31일 → 2월 28일)
-      if (nextDate.getDate() !== currentDate.getDate()) {
-        nextDate.setDate(0); // 이전 달의 마지막 날
+      if (nextDate.getUTCDate() !== currentDate.getUTCDate()) {
+        nextDate.setUTCDate(0); // 이전 달의 마지막 날
       }
       break;
 
     case 'YEARLY':
-      nextDate.setFullYear(nextDate.getFullYear() + 1);
-      // 윤년 처리: setFullYear이 2월 29일 → 3월 1일로 롤오버하므로 월+일 함께 설정
+      nextDate.setUTCFullYear(nextDate.getUTCFullYear() + 1);
+      // 윤년 처리: setUTCFullYear이 2월 29일 → 3월 1일로 롤오버하므로 월+일 함께 설정
       if (
-        currentDate.getMonth() === 1 &&
-        currentDate.getDate() === 29 &&
-        !isLeapYear(nextDate.getFullYear())
+        currentDate.getUTCMonth() === 1 &&
+        currentDate.getUTCDate() === 29 &&
+        !isLeapYear(nextDate.getUTCFullYear())
       ) {
-        nextDate.setMonth(1, 28); // 2월 28일
+        nextDate.setUTCMonth(1, 28); // 2월 28일
       }
       break;
   }
@@ -144,10 +145,10 @@ function getNextOccurrence(
  */
 function calculateInstanceEnd(instanceStart: Date, endDate: Date): Date {
   const instanceEnd = new Date(instanceStart);
-  instanceEnd.setHours(endDate.getHours(), endDate.getMinutes(), endDate.getSeconds(), endDate.getMilliseconds());
+  instanceEnd.setUTCHours(endDate.getUTCHours(), endDate.getUTCMinutes(), endDate.getUTCSeconds(), endDate.getUTCMilliseconds());
   // endTime이 startTime보다 이전이면 다음 날로 처리 (야간 일정)
   if (instanceEnd < instanceStart) {
-    instanceEnd.setDate(instanceEnd.getDate() + 1);
+    instanceEnd.setUTCDate(instanceEnd.getUTCDate() + 1);
   }
   return instanceEnd;
 }

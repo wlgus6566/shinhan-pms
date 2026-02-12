@@ -345,19 +345,23 @@ export class WorkLogsController {
       weekNumber: parseInt(weekNumber, 10),
     };
 
-    const buffer = await this.workLogsService.generateWeeklyReport(
-      BigInt(projectId),
-      startDate,
-      endDate,
-    );
+    const [buffer, projectName] = await Promise.all([
+      this.workLogsService.generateWeeklyReport(
+        BigInt(projectId),
+        startDate,
+        endDate,
+      ),
+      this.workLogsService.getProjectName(BigInt(projectId)),
+    ]);
 
-    // 파일명: Weekly_Report_2026_01_Week2.xlsx
-    const filename = `Weekly_Report_${weekInfo.year}_${String(weekInfo.month).padStart(2, '0')}_Week${weekInfo.weekNumber}.xlsx`;
+    // 파일명: [프로젝트명]_주간업무일지_2026년01월_2주차.xlsx
+    const filename = `${projectName}_주간업무일지_${weekInfo.year}년${String(weekInfo.month).padStart(2, '0')}월_${weekInfo.weekNumber}주차.xlsx`;
+    const asciiFilename = `weekly_report_${weekInfo.year}_${String(weekInfo.month).padStart(2, '0')}_week${weekInfo.weekNumber}.xlsx`;
     const encodedFilename = encodeURIComponent(filename);
 
     return new StreamableFile(buffer, {
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      disposition: `attachment; filename="${filename}"; filename*=UTF-8''${encodedFilename}`,
+      disposition: `attachment; filename="${asciiFilename}"; filename*=UTF-8''${encodedFilename}`,
     });
   }
 
@@ -381,24 +385,24 @@ export class WorkLogsController {
     const yearNum = parseInt(year, 10);
     const monthNum = parseInt(month, 10);
 
-    const buffer = await this.workLogsService.generateMonthlyStaffReport(
-      BigInt(projectId),
-      yearNum,
-      monthNum,
-    );
+    const [buffer, projectName] = await Promise.all([
+      this.workLogsService.generateMonthlyStaffReport(
+        BigInt(projectId),
+        yearNum,
+        monthNum,
+      ),
+      this.workLogsService.getProjectName(BigInt(projectId)),
+    ]);
 
-    // 파일명: 1월_투입인력별상세업무현황.xlsx
-    // HTTP 헤더에 한글 직접 사용 불가 - ASCII 폴백 필요
-    const filename = `${monthNum}월_투입인력별상세업무현황.xlsx`;
+    // 파일명: [프로젝트명]_투입인력별상세업무현황_2026년01월.xlsx
+    const filename = `${projectName}_투입인력별상세업무현황_${yearNum}년${String(monthNum).padStart(2, '0')}월.xlsx`;
     const asciiFilename = `monthly_staff_report_${yearNum}_${String(monthNum).padStart(2, '0')}.xlsx`;
     const encodedFilename = encodeURIComponent(filename);
 
-    const streamableFile = new StreamableFile(buffer, {
+    return new StreamableFile(buffer, {
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       disposition: `attachment; filename="${asciiFilename}"; filename*=UTF-8''${encodedFilename}`,
     });
-
-    return streamableFile;
   }
 
   @Get('projects/:projectId/work-logs/export-monthly-task')
@@ -421,14 +425,17 @@ export class WorkLogsController {
     const yearNum = parseInt(year, 10);
     const monthNum = parseInt(month, 10);
 
-    const buffer = await this.workLogsService.generateMonthlyTaskReport(
-      BigInt(projectId),
-      yearNum,
-      monthNum,
-    );
+    const [buffer, projectName] = await Promise.all([
+      this.workLogsService.generateMonthlyTaskReport(
+        BigInt(projectId),
+        yearNum,
+        monthNum,
+      ),
+      this.workLogsService.getProjectName(BigInt(projectId)),
+    ]);
 
-    // 파일명: 1월_업무별공수투입현황.xlsx
-    const filename = `${monthNum}월_업무별공수투입현황.xlsx`;
+    // 파일명: [프로젝트명]_업무별공수투입현황_2026년01월.xlsx
+    const filename = `${projectName}_업무별공수투입현황_${yearNum}년${String(monthNum).padStart(2, '0')}월.xlsx`;
     const asciiFilename = `monthly_task_report_${yearNum}_${String(monthNum).padStart(2, '0')}.xlsx`;
     const encodedFilename = encodeURIComponent(filename);
 

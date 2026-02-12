@@ -14,11 +14,27 @@ import {
 } from '@prisma/client/runtime/library';
 import { parsePaginationParams } from '../common/helpers/pagination.helper';
 import * as ExcelJS from 'exceljs';
-import { TASK_STATUS_METADATA } from '@repo/schema';
+import {
+  TASK_STATUS_METADATA,
+  GRADE_LABELS,
+  TASK_DIFFICULTY_LABELS,
+  WORK_AREA_LABELS,
+} from '@repo/schema';
 
 @Injectable()
 export class WorkLogsService {
   constructor(private readonly prisma: PrismaService) {}
+
+  /**
+   * 프로젝트명 조회
+   */
+  async getProjectName(projectId: bigint): Promise<string> {
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      select: { projectName: true },
+    });
+    return project?.projectName ?? '';
+  }
 
   /**
    * 업무일지 생성
@@ -715,15 +731,21 @@ export class WorkLogsService {
         issuesText, // 10. 비고
       ]);
 
-      dataRow.eachCell((cell) => {
-        cell.alignment = { vertical: 'middle', wrapText: true };
+      // 모든 셀에 테두리 및 기본 정렬 적용
+      for (let col = 1; col <= 10; col++) {
+        const cell = dataRow.getCell(col);
+        cell.alignment = {
+          vertical: 'middle',
+          horizontal: col <= 8 ? 'center' : 'left',
+          wrapText: true,
+        };
         cell.border = {
           top: { style: 'thin' },
           left: { style: 'thin' },
           bottom: { style: 'thin' },
           right: { style: 'thin' },
         };
-      });
+      }
 
       currentExcelRow++;
     });
@@ -733,19 +755,19 @@ export class WorkLogsService {
     const columnsToMerge = [1, 2, 3, 4];
 
     taskRowRanges.forEach((range) => {
-      if (range.startRow < range.endRow) {
-        // 2개 이상의 행이 있는 경우에만 병합
-        columnsToMerge.forEach((colNum) => {
+      columnsToMerge.forEach((colNum) => {
+        if (range.startRow < range.endRow) {
+          // 2개 이상의 행이 있는 경우 병합
           worksheet.mergeCells(range.startRow, colNum, range.endRow, colNum);
-          // 병합된 셀의 정렬을 중앙으로
-          const cell = worksheet.getCell(range.startRow, colNum);
-          cell.alignment = {
-            horizontal: 'center',
-            vertical: 'middle',
-            wrapText: true,
-          };
-        });
-      }
+        }
+        // 병합 여부와 관계없이 항상 중앙 정렬 적용
+        const cell = worksheet.getCell(range.startRow, colNum);
+        cell.alignment = {
+          horizontal: 'center',
+          vertical: 'middle',
+          wrapText: true,
+        };
+      });
     });
 
     // 7. 컬럼 너비 설정
@@ -755,7 +777,17 @@ export class WorkLogsService {
       worksheet.getColumn(i + 1).width = width;
     });
 
-    // 7. Buffer 반환
+    // 7-1. 최종 정렬 강제 적용 (모든 데이터 행의 1-4 컬럼 - cell.style 전체 재할당)
+    for (let rowNum = dataStartRow; rowNum < currentExcelRow; rowNum++) {
+      for (const colNum of columnsToMerge) {
+        const cell = worksheet.getCell(rowNum, colNum);
+        cell.style = Object.assign({}, cell.style, {
+          alignment: { horizontal: 'center', vertical: 'middle', wrapText: true },
+        });
+      }
+    }
+
+    // 8. Buffer 반환
     const arrayBuffer = await workbook.xlsx.writeBuffer();
     return Buffer.from(arrayBuffer);
   }
@@ -814,27 +846,8 @@ export class WorkLogsService {
         });
       }
 
-      // 5. 한글 변환 맵
-      const gradeMap: Record<string, string> = {
-        EXPERT: '특급',
-        ADVANCED: '고급',
-        INTERMEDIATE: '중급',
-        BEGINNER: '초급',
-      };
-
-      const difficultyMap: Record<string, string> = {
-        HIGH: '상',
-        MEDIUM: '중',
-        LOW: '하',
-      };
-
-      const workAreaMap: Record<string, string> = {
-        PROJECT_MANAGEMENT: '총괄',
-        PLANNING: '기획',
-        DESIGN: '디자인',
-        FRONTEND: '프론트엔드',
-        BACKEND: '백엔드',
-      };
+      // 5. 한글 변환 맵 → @repo/schema 공통 상수 사용
+      // GRADE_LABELS, TASK_DIFFICULTY_LABELS, WORK_AREA_LABELS
 
       // 6. 주차 계산 함수
       const getWeekOfMonth = (date: Date): number => {
@@ -875,10 +888,10 @@ export class WorkLogsService {
         const userId = pm.memberId.toString();
         if (!employeeMap.has(userId)) {
           employeeMap.set(userId, {
-            department: workAreaMap[pm.workArea] || pm.workArea,
+            department: WORK_AREA_LABELS[pm.workArea] || pm.workArea,
             role: pm.role,
             name: pm.member.name,
-            grade: gradeMap[pm.member.grade] || pm.member.grade,
+            grade: GRADE_LABELS[pm.member.grade] || pm.member.grade,
             tasks: [],
             totalMonthlyHours: 0,
           });
@@ -902,7 +915,7 @@ export class WorkLogsService {
         if (!userTaskMap.has(taskId)) {
           userTaskMap.set(taskId, {
             taskName: log.task.taskName,
-            difficulty: difficultyMap[log.task.difficulty] || '-',
+            difficulty: TASK_DIFFICULTY_LABELS[log.task.difficulty] || '-',
             details: [],
             weeklyHours: { week1: 0, week2: 0, week3: 0, week4: 0 },
             totalHours: 0,
@@ -1429,7 +1442,7 @@ export class WorkLogsService {
         taskTypeData.tasks.set(taskKey, {
           taskId: taskKey,
           taskName: log.task.taskName,
-          difficulty: difficultyMap[log.task.difficulty] || '-',
+          difficulty: TASK_DIFFICULTY_LABELS[log.task.difficulty] || '-',
           status: statusMap[log.task.status] || log.task.status,
           assignees: new Map(),
           totalHours: 0,
@@ -1444,8 +1457,8 @@ export class WorkLogsService {
         taskData.assignees.set(userKey, {
           userId: userKey,
           userName: log.user.name,
-          workArea: workAreaMap[memberWorkArea] || memberWorkArea,
-          grade: gradeMap[log.user.grade] || log.user.grade,
+          workArea: WORK_AREA_LABELS[memberWorkArea] || memberWorkArea,
+          grade: GRADE_LABELS[log.user.grade] || log.user.grade,
           details: [],
           weeklyHours: { week1: 0, week2: 0, week3: 0, week4: 0 },
           totalHours: 0,

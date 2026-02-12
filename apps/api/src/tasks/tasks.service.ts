@@ -353,10 +353,10 @@ export class TasksService {
     backendAssigneeIds?: number[],
   ): Promise<void> {
     const assignees = [
-      { ids: planningAssigneeIds, workArea: 'PLANNING', name: '기획' },
-      { ids: designAssigneeIds, workArea: 'DESIGN', name: '디자인' },
-      { ids: frontendAssigneeIds, workArea: 'FRONTEND', name: '프론트엔드' },
-      { ids: backendAssigneeIds, workArea: 'BACKEND', name: '백엔드' },
+      { ids: planningAssigneeIds, name: '기획' },
+      { ids: designAssigneeIds, name: '디자인' },
+      { ids: frontendAssigneeIds, name: '프론트엔드' },
+      { ids: backendAssigneeIds, name: '백엔드' },
     ];
 
     for (const assignee of assignees) {
@@ -372,12 +372,6 @@ export class TasksService {
           if (!member) {
             throw new BadRequestException(
               `${assignee.name} 담당자가 프로젝트 멤버가 아닙니다`,
-            );
-          }
-
-          if (member.workArea !== assignee.workArea) {
-            throw new BadRequestException(
-              `${assignee.name} 담당자의 작업 영역이 일치하지 않습니다`,
             );
           }
         }

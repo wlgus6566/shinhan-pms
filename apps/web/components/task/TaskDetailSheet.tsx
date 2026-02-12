@@ -29,6 +29,7 @@ import {
 } from '@/types/task';
 import { DifficultyIndicator } from '@/components/ui/difficulty-indicator';
 import { POSITION_LABELS, type Position } from '@/lib/constants/roles';
+import { WORK_AREA_COLORS } from '@/lib/constants/project';
 import {
   Calendar,
   User,
@@ -209,11 +210,16 @@ export function TaskDetailSheet({
                       {/* 그룹 헤더 */}
                       <div className="mb-2 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          {/* 팀 컬러 포인트 (원하면 label별 색 매핑해서 className 바꾸면 됨) */}
                           <span
-                            className={cn(
-                              'h-4 w-1.5 rounded-full bg-slate-400',
-                            )}
+                            className="h-4 w-1.5 rounded-full"
+                            style={{
+                              backgroundColor:
+                                label === '기획 담당자' ? WORK_AREA_COLORS.PLANNING
+                                : label === '디자인 담당자' ? WORK_AREA_COLORS.DESIGN
+                                : label === '프론트엔드 담당자' ? WORK_AREA_COLORS.FRONTEND
+                                : label === '백엔드 담당자' ? WORK_AREA_COLORS.BACKEND
+                                : '#94a3b8',
+                            }}
                           />
                           <span className="text-sm font-semibold">{label}</span>
                         </div>
