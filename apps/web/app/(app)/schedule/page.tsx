@@ -24,6 +24,16 @@ export default function TeamSchedulesPage() {
     queryKey: 'project',
   });
 
+  // 프로젝트 로딩 완료 후 유효한 탭이 없으면 첫 번째 프로젝트 선택
+  useEffect(() => {
+    if (!isLoading && projects && projects.length > 0) {
+      const isValidTab = activeTab && projects.some((p) => String(p.id) === activeTab);
+      if (!isValidTab) {
+        handleTabChange(defaultProjectId);
+      }
+    }
+  }, [isLoading, projects]);
+
   // 탭 변경 시 글로벌 상태 동기화
   useEffect(() => {
     if (activeTab && activeTab !== globalProjectId) {
