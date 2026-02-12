@@ -216,8 +216,7 @@ export function Sidebar({
                   {myProjects && myProjects.length > 0 ? (
                     myProjects.map((project: any, index: number) => {
                       const projectActive =
-                        pathname === `/tasks/${project.id}` ||
-                        (!isTasksActive && index === 0);
+                        pathname === `/tasks/${project.id}`;
                       return (
                         <Link
                           key={project.id}
