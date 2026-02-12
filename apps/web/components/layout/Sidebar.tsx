@@ -55,9 +55,7 @@ export function Sidebar({
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { myProjects } = useProjectContext();
-  const [isTaskMenuOpen, setIsTaskMenuOpen] = useState(
-    pathname?.startsWith('/tasks') || false,
-  );
+  const [isTaskMenuOpen, setIsTaskMenuOpen] = useState(true);
 
   // Memoize isActive check to avoid recreating on every render
   const isActive = useCallback(
@@ -216,8 +214,10 @@ export function Sidebar({
               {isExpanded && isTaskMenuOpen && (
                 <div className="mt-1 ml-4 pl-4 border-l border-white/10 space-y-1">
                   {myProjects && myProjects.length > 0 ? (
-                    myProjects.map((project: any) => {
-                      const projectActive = pathname === `/tasks/${project.id}`;
+                    myProjects.map((project: any, index: number) => {
+                      const projectActive =
+                        pathname === `/tasks/${project.id}` ||
+                        (!isTasksActive && index === 0);
                       return (
                         <Link
                           key={project.id}

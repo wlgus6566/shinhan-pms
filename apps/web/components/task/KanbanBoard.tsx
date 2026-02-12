@@ -11,7 +11,6 @@ import {
   useSensors,
   closestCenter,
 } from '@dnd-kit/core';
-import { toast } from 'sonner';
 import { KanbanColumn } from './KanbanColumn';
 import { updateTask } from '@/lib/api/tasks';
 import type { Task, TaskStatus } from '@/types/task';
@@ -22,7 +21,6 @@ interface KanbanBoardProps {
   isValidating?: boolean;
   onRefresh: () => void;
   statusFilter?: string[];
-  isPM: boolean;
 }
 
 const ALL_STATUSES: TaskStatus[] = [
@@ -41,7 +39,6 @@ export function KanbanBoard({
   onTaskClick,
   onRefresh,
   statusFilter,
-  isPM,
 }: KanbanBoardProps) {
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -104,12 +101,6 @@ export function KanbanBoard({
     const { active, over } = event;
 
     if (!over || active.id === over.id) return;
-
-    // PM이 아니면 상태 변경 불가
-    if (!isPM) {
-      toast.error('프로젝트 PM만 업무 상태를 변경할 수 있습니다');
-      return;
-    }
 
     const taskId = active.id as string;
     const newStatus = over.id as TaskStatus;

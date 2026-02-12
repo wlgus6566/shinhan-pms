@@ -45,7 +45,6 @@ interface TaskDetailSheetProps {
   task: Task | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  isPM?: boolean;
   onEdit?: (task: Task) => void;
   onDelete?: (taskId: string) => void;
 }
@@ -65,7 +64,6 @@ export function TaskDetailSheet({
   task,
   open,
   onOpenChange,
-  isPM = false,
   onEdit,
   onDelete,
 }: TaskDetailSheetProps) {
@@ -338,19 +336,17 @@ export function TaskDetailSheet({
             </div>
           </div>
         </div>
-        {isPM && (
-          <div className="flex justify-end gap-2 mt-4">
-            <Button variant="outline" onClick={handleEdit}>
-              수정
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => setDeleteDialogOpen(true)}
-            >
-              삭제
-            </Button>
-          </div>
-        )}
+        <div className="flex justify-end gap-2 mt-4">
+          <Button variant="outline" onClick={handleEdit}>
+            수정
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={() => setDeleteDialogOpen(true)}
+          >
+            삭제
+          </Button>
+        </div>
       </SheetContent>
 
       {/* 삭제 확인 다이얼로그 */}

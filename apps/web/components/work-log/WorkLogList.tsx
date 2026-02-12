@@ -88,7 +88,7 @@ export function WorkLogList({
           {format(selectedDate, 'M월 d일 (EEEE)', { locale: ko })}
         </h3>
         <p className="text-sm text-slate-500 mt-0.5">
-          <span className="font-bold">{logsForSelectedDate.length}</span>건의
+          <span className="font-bold">{logsForSelectedDate.length}</span>건의 내
           업무일지
         </p>
         {/* {onCreate && (

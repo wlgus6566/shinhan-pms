@@ -22,7 +22,6 @@ interface TaskListProps {
   error: Error | null;
   isLoading: boolean;
   projectId: string;
-  isPM: boolean;
   projectMembers: ProjectMember[];
 }
 
@@ -53,7 +52,6 @@ export function TaskList({
   error: projectError,
   isLoading,
   projectId,
-  isPM,
   projectMembers,
 }: TaskListProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -188,12 +186,10 @@ export function TaskList({
           </TabsList>
         </Tabs>
 
-        {isPM && (
-          <Button onClick={() => setDialogOpen(true)} className="hidden sm:inline-flex">
-            <Plus className="h-4 w-4 mr-2" />
-            업무 추가
-          </Button>
-        )}
+        <Button onClick={() => setDialogOpen(true)} className="hidden sm:inline-flex">
+          <Plus className="h-4 w-4 mr-2" />
+          업무 추가
+        </Button>
       </div>
 
       {projectError && <ErrorState />}
@@ -234,7 +230,6 @@ export function TaskList({
               isValidating={isValidating}
               onRefresh={handleSuccess}
               statusFilter={statusFilter}
-              isPM={isPM}
             />
           )}
         </>
@@ -252,7 +247,7 @@ export function TaskList({
           />
         )}
 
-      {isPM && projectMembers && (
+      {projectMembers && (
         <AddTaskDialog
           projectId={projectId}
           projectMembers={projectMembers}
@@ -266,12 +261,11 @@ export function TaskList({
         task={selectedTask}
         open={sheetOpen}
         onOpenChange={setSheetOpen}
-        isPM={isPM}
         onEdit={handleEdit}
         onDelete={handleDelete}
       />
 
-      {isPM && editingTask && projectMembers && (
+      {editingTask && projectMembers && (
         <EditTaskDialog
           task={editingTask}
           projectMembers={projectMembers}
@@ -282,8 +276,7 @@ export function TaskList({
       )}
 
       {/* Mobile FAB */}
-      {isPM &&
-        createPortal(
+      {createPortal(
           <Button
             onClick={() => setDialogOpen(true)}
             className="gradient-primary border-none fixed bottom-8 right-8 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow z-50 sm:hidden"

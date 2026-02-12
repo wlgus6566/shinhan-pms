@@ -27,8 +27,8 @@ export class ProjectTaskTypesService {
       throw new NotFoundException('프로젝트를 찾을 수 없습니다');
     }
 
-    // 2. PM 권한 확인
-    await this.checkPMPermission(projectId, userId);
+    // 2. 프로젝트 멤버 권한 확인
+    await this.checkMemberPermission(projectId, userId);
 
     // 3. 업무 구분명 중복 체크
     const existing = await this.prisma.projectTaskType.findFirst({
@@ -105,8 +105,8 @@ export class ProjectTaskTypesService {
     // 1. 업무 구분 존재 확인
     await this.findOne(id, projectId);
 
-    // 2. PM 권한 확인
-    await this.checkPMPermission(projectId, userId);
+    // 2. 프로젝트 멤버 권한 확인
+    await this.checkMemberPermission(projectId, userId);
 
     // 3. 업무 구분명 중복 체크 (변경하려는 경우)
     if (updateDto.name) {
@@ -138,8 +138,8 @@ export class ProjectTaskTypesService {
     // 1. 업무 구분 존재 확인
     await this.findOne(id, projectId);
 
-    // 2. PM 권한 확인
-    await this.checkPMPermission(projectId, userId);
+    // 2. 프로젝트 멤버 권한 확인
+    await this.checkMemberPermission(projectId, userId);
 
     // 3. 관련 업무들의 taskTypeId를 null로 변경 (이미 DB에서 onDelete: SetNull 처리됨)
     // 4. Soft delete
@@ -152,18 +152,17 @@ export class ProjectTaskTypesService {
     });
   }
 
-  // PM 권한 확인
-  private async checkPMPermission(projectId: bigint, userId: bigint) {
+  // 프로젝트 멤버 권한 확인
+  private async checkMemberPermission(projectId: bigint, userId: bigint) {
     const member = await this.prisma.projectMember.findFirst({
       where: {
         projectId,
         memberId: userId,
-        role: 'PM',
       },
     });
 
     if (!member) {
-      throw new ForbiddenException('PM 권한이 필요합니다');
+      throw new ForbiddenException('프로젝트 멤버만 업무 구분을 관리할 수 있습니다');
     }
   }
 }

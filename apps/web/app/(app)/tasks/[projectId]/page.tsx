@@ -1,9 +1,7 @@
 'use client';
 
-import { useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext';
 import { useProject } from '@/lib/api/projects';
 import { useProjectMembers } from '@/lib/api/projectMembers';
 import { TaskList } from '@/components/task/TaskList';
@@ -20,20 +18,10 @@ import {
 export default function TaskManagementPage() {
   const params = useParams();
   const router = useRouter();
-  const { user } = useAuth();
   const projectId = params.projectId as string;
 
   const { project, isLoading, error } = useProject(projectId);
-  const { members, isLoading: membersLoading } = useProjectMembers(projectId);
-
-  // Check if current user is PM of this project
-  const isPM = useMemo(() => {
-    if (!user || !members || members.length === 0) return false;
-    // Convert both to string for comparison to handle type mismatches
-    return members.some(
-      (m) => String(m.memberId) === String(user.id) && m.role === 'PM',
-    );
-  }, [user, members]);
+  const { members } = useProjectMembers(projectId);
 
   const statusConfig = {
     label:
@@ -78,7 +66,6 @@ export default function TaskManagementPage() {
             error={error}
             isLoading={isLoading}
             projectId={projectId}
-            isPM={isPM}
             projectMembers={members ?? []}
           />
         </CardContent>
