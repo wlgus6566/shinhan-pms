@@ -23,7 +23,7 @@ export class ProjectsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createProjectDto: CreateProjectDto, userId: bigint) {
-    // 1. 프로젝트명 중복 체크
+    // 1. 프로젝트명 중복 체크 (활성 프로젝트만)
     const existingProject = await this.prisma.project.findFirst({
       where: {
         projectName: createProjectDto.name,
@@ -49,6 +49,17 @@ export class ProjectsService {
 
     // 4. 트랜잭션으로 프로젝트 + 업무 구분 생성
     const project = await this.prisma.$transaction(async (tx) => {
+      // 소프트 삭제된 동명 프로젝트가 있으면 이름 변경 (unique 제약조건 충돌 방지)
+      await tx.project.updateMany({
+        where: {
+          projectName: createProjectDto.name,
+          isActive: false,
+        },
+        data: {
+          projectName: `${createProjectDto.name}_deleted_${Date.now()}`,
+        },
+      });
+
       // 프로젝트 생성
       const newProject = await tx.project.create({
         data: {
@@ -241,6 +252,19 @@ export class ProjectsService {
 
     // 4. 트랜잭션으로 프로젝트 + 업무 구분 업데이트
     await this.prisma.$transaction(async (tx) => {
+      // 소프트 삭제된 동명 프로젝트가 있으면 이름 변경 (unique 제약조건 충돌 방지)
+      if (updateProjectDto.name && updateProjectDto.name !== existingProject.projectName) {
+        await tx.project.updateMany({
+          where: {
+            projectName: updateProjectDto.name,
+            isActive: false,
+          },
+          data: {
+            projectName: `${updateProjectDto.name}_deleted_${Date.now()}`,
+          },
+        });
+      }
+
       // 프로젝트 업데이트
       await tx.project.update({
         where: { id },

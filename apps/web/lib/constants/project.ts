@@ -78,6 +78,7 @@ export const WORK_AREA_LABELS_STRICT: Record<WorkArea, string> = {
   PROJECT_MANAGEMENT: '프로젝트 관리',
   PLANNING: '기획',
   DESIGN: '디자인',
+  PUBLISHING: '퍼블리싱',
   FRONTEND: '프론트엔드',
   BACKEND: '백엔드',
 } as const;
@@ -99,6 +100,7 @@ export const WORK_AREA_LABELS: Record<string, string> = {
   PROJECT_MANAGEMENT: 'PM',
   PLANNING: '기획',
   DESIGN: '디자인',
+  PUBLISHING: '퍼블리싱',
   FRONTEND: '프론트엔드',
   BACKEND: '백엔드',
 } as const;
@@ -108,6 +110,7 @@ export const WORK_AREA_COLORS: Record<WorkArea, string> = {
   PROJECT_MANAGEMENT: '#64748B', // 인디고
   PLANNING: '#6366F1', // 파란색
   DESIGN: '#0EA5E9', // 초록색
+  PUBLISHING: '#F59E0B', // 앰버
   FRONTEND: '#2563EB', // 주황색
   BACKEND: '#EC4899', // 빨간색
 } as const;

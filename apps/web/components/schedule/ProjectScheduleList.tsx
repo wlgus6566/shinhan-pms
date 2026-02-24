@@ -107,7 +107,7 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
       setBottomSheetOpen(true);
     }
     // 클릭한 날짜로 일정 추가 다이얼로그 열기
-    setDialogState({ open: true, mode: 'create', defaultDate: date });
+    // setDialogState({ open: true, mode: 'create', defaultDate: date });
   };
 
   const handleMonthChange = (date: Date) => {

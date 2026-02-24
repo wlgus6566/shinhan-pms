@@ -36,7 +36,7 @@ export class ProjectMemberResponseDto implements ProjectMember {
 
   @ApiProperty({
     description: '담당 분야',
-    enum: ['PROJECT_MANAGEMENT', 'PLANNING', 'DESIGN', 'FRONTEND', 'BACKEND'],
+    enum: ['PROJECT_MANAGEMENT', 'PLANNING', 'DESIGN', 'PUBLISHING', 'FRONTEND', 'BACKEND'],
   })
   workArea: string;
 

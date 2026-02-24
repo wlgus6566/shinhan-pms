@@ -31,11 +31,12 @@ import {
   WORK_AREA_OPTIONS,
   PROJECT_ROLE_OPTIONS,
 } from '@/lib/constants/project';
+import { WorkAreaEnum, MemberRoleEnum } from '@repo/schema';
 
 const addMemberSchema = z.object({
   memberId: z.string().min(1, '멤버를 선택하세요'),
-  role: z.enum(['PM', 'PL', 'PA'] as const),
-  workArea: z.enum(['PROJECT_MANAGEMENT', 'PLANNING', 'DESIGN', 'FRONTEND', 'BACKEND'] as const),
+  role: MemberRoleEnum,
+  workArea: WorkAreaEnum,
   notes: z.string().optional(),
 });
 

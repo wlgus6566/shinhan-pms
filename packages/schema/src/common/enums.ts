@@ -108,11 +108,11 @@ export const MemberRoleEnum = z.enum(['PM', 'PL', 'PA'], {
 export type MemberRole = z.infer<typeof MemberRoleEnum>;
 
 export const WorkAreaEnum = z.enum(
-  ['PROJECT_MANAGEMENT', 'PLANNING', 'DESIGN', 'FRONTEND', 'BACKEND'],
+  ['PROJECT_MANAGEMENT', 'PLANNING', 'DESIGN', 'PUBLISHING', 'FRONTEND', 'BACKEND'],
   {
     errorMap: () => ({
       message:
-        '담당 분야는 PROJECT_MANAGEMENT, PLANNING, DESIGN, FRONTEND, BACKEND 중 하나여야 합니다',
+        '담당 분야는 PROJECT_MANAGEMENT, PLANNING, DESIGN, PUBLISHING, FRONTEND, BACKEND 중 하나여야 합니다',
     }),
   },
 );
@@ -123,6 +123,7 @@ export const WORK_AREA_LABELS: Record<WorkArea, string> = {
   PROJECT_MANAGEMENT: '총괄',
   PLANNING: '기획',
   DESIGN: '디자인',
+  PUBLISHING: '퍼블리싱',
   FRONTEND: '프론트엔드',
   BACKEND: '백엔드',
 };
