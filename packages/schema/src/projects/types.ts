@@ -55,6 +55,9 @@ export interface ProjectMember {
   memberId: string;
   role: string;
   workArea: string;
+  grade: string;
+  joinDate?: string;
+  leaveDate?: string;
   notes?: string;
   member?: UserDetailInfo;
   createdAt: string;
@@ -68,6 +71,9 @@ export const ProjectMemberSchema = z
     memberId: z.string(),
     role: z.string(),
     workArea: z.string(),
+    grade: z.string(),
+    joinDate: z.string().optional(),
+    leaveDate: z.string().optional(),
     notes: z.string().optional(),
     member: UserDetailInfoSchema.optional(),
   })

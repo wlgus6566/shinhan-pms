@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { Plus, PenLine } from 'lucide-react';
+import { PenLine } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScheduleCalendar } from './ScheduleCalendar';
 import { ScheduleDialog } from './ScheduleDialog';
@@ -19,6 +19,13 @@ import type { Schedule, TeamScope } from '@/types/schedule';
 import { TEAM_SCOPE_LABELS, TEAM_SCOPE_FILTER_COLORS } from '@/types/schedule';
 import { getProjectSchedules } from '@/lib/api/schedules';
 import { useProjectMembers } from '@/lib/api/projectMembers';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface ProjectScheduleListProps {
   projectId: string;
@@ -39,6 +46,7 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
 
   // Filter state
   const [selectedTeams, setSelectedTeams] = useState<TeamScope[]>([]);
+  const [selectedMember, setSelectedMember] = useState<string>('all');
 
   // Fetch project members using SWR hook
   const { members: projectMembers = [] } = useProjectMembers(projectId);
@@ -94,11 +102,20 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
       );
     }
 
-    // 2. Sort by start date (ascending - earliest first)
+    // 2. Filter by member (참여자 또는 생성자 기준)
+    if (selectedMember !== 'all') {
+      result = result.filter(
+        (schedule) =>
+          schedule.createdBy === selectedMember ||
+          schedule.participants.some((p) => p.id === selectedMember),
+      );
+    }
+
+    // 3. Sort by start date (ascending - earliest first)
     result.sort((a, b) => a.startDate.localeCompare(b.startDate));
 
     return result;
-  }, [schedules, selectedTeams]);
+  }, [schedules, selectedTeams, selectedMember]);
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
@@ -137,6 +154,8 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
       prev.includes(team) ? prev.filter((t) => t !== team) : [...prev, team],
     );
   };
+
+
 
   return (
     <div className="relative">
@@ -181,6 +200,25 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
                       </label>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {/* Member Filter */}
+              {projectMembers.length > 0 && (
+                <div className="bg-white rounded-lg border p-4">
+                  <Select value={selectedMember} onValueChange={setSelectedMember}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="멤버 선택" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">전체 멤버</SelectItem>
+                      {projectMembers.map((pm) => (
+                        <SelectItem key={pm.memberId} value={pm.memberId}>
+                          {pm.member?.name ?? '알 수 없음'}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
 

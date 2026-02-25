@@ -414,6 +414,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '1',
     role: 'PM',
     workArea: 'PROJECT_MANAGEMENT',
+    grade: 'EXPERT',
     member: {
       id: '1',
       name: '김철수',
@@ -430,6 +431,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '3',
     role: 'PL',
     workArea: 'DESIGN',
+    grade: 'ADVANCED',
     member: {
       id: '3',
       name: '박민수',
@@ -446,6 +448,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '4',
     role: 'PA',
     workArea: 'BACKEND',
+    grade: 'INTERMEDIATE',
     member: {
       id: '4',
       name: '정수진',
@@ -462,6 +465,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '8',
     role: 'PA',
     workArea: 'FRONTEND',
+    grade: 'BEGINNER',
     member: {
       id: '8',
       name: '임지훈',
@@ -479,6 +483,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '2',
     role: 'PM',
     workArea: 'PROJECT_MANAGEMENT',
+    grade: 'EXPERT',
     member: {
       id: '2',
       name: '이영희',
@@ -495,6 +500,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '5',
     role: 'PL',
     workArea: 'FRONTEND',
+    grade: 'ADVANCED',
     member: {
       id: '5',
       name: '최동욱',
@@ -511,6 +517,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '1',
     role: 'PA',
     workArea: 'BACKEND',
+    grade: 'INTERMEDIATE',
     member: {
       id: '1',
       name: '김철수',
@@ -527,6 +534,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '4',
     role: 'PA',
     workArea: 'BACKEND',
+    grade: 'BEGINNER',
     member: {
       id: '4',
       name: '정수진',
@@ -544,6 +552,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '1',
     role: 'PM',
     workArea: 'PROJECT_MANAGEMENT',
+    grade: 'EXPERT',
     member: {
       id: '1',
       name: '김철수',
@@ -560,6 +569,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '8',
     role: 'PA',
     workArea: 'FRONTEND',
+    grade: 'ADVANCED',
     member: {
       id: '8',
       name: '임지훈',
@@ -577,6 +587,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '3',
     role: 'PM',
     workArea: 'PROJECT_MANAGEMENT',
+    grade: 'INTERMEDIATE',
     member: {
       id: '3',
       name: '박민수',
@@ -593,6 +604,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '6',
     role: 'PL',
     workArea: 'PLANNING',
+    grade: 'BEGINNER',
     member: {
       id: '6',
       name: '강미영',
@@ -610,6 +622,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '4',
     role: 'PM',
     workArea: 'PROJECT_MANAGEMENT',
+    grade: 'EXPERT',
     member: {
       id: '4',
       name: '정수진',
@@ -626,6 +639,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '7',
     role: 'PA',
     workArea: 'DESIGN',
+    grade: 'ADVANCED',
     member: {
       id: '7',
       name: '윤서준',
@@ -643,6 +657,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '1',
     role: 'PM',
     workArea: 'PROJECT_MANAGEMENT',
+    grade: 'INTERMEDIATE',
     member: {
       id: '1',
       name: '김철수',
@@ -659,6 +674,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '4',
     role: 'PA',
     workArea: 'BACKEND',
+    grade: 'BEGINNER',
     member: {
       id: '4',
       name: '정수진',
@@ -675,6 +691,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '5',
     role: 'PA',
     workArea: 'FRONTEND',
+    grade: 'EXPERT',
     member: {
       id: '5',
       name: '최동욱',
@@ -692,6 +709,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '4',
     role: 'PM',
     workArea: 'PROJECT_MANAGEMENT',
+    grade: 'ADVANCED',
     member: {
       id: '4',
       name: '정수진',
@@ -708,6 +726,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '1',
     role: 'PA',
     workArea: 'BACKEND',
+    grade: 'INTERMEDIATE',
     member: {
       id: '1',
       name: '김철수',
@@ -724,6 +743,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '8',
     role: 'PA',
     workArea: 'FRONTEND',
+    grade: 'BEGINNER',
     member: {
       id: '8',
       name: '임지훈',
@@ -741,6 +761,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '1',
     role: 'PM',
     workArea: 'PROJECT_MANAGEMENT',
+    grade: 'EXPERT',
     member: {
       id: '1',
       name: '김철수',
@@ -757,6 +778,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '9',
     role: 'PA',
     workArea: 'BACKEND',
+    grade: 'ADVANCED',
     member: {
       id: '9',
       name: '한지민',
@@ -773,6 +795,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '12',
     role: 'PA',
     workArea: 'BACKEND',
+    grade: 'INTERMEDIATE',
     member: {
       id: '12',
       name: '신지영',
@@ -789,6 +812,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '10',
     role: 'PA',
     workArea: 'DESIGN',
+    grade: 'BEGINNER',
     member: {
       id: '10',
       name: '송하늘',
@@ -805,6 +829,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '14',
     role: 'PA',
     workArea: 'FRONTEND',
+    grade: 'EXPERT',
     member: {
       id: '14',
       name: '황인규',
@@ -822,6 +847,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '2',
     role: 'PM',
     workArea: 'PROJECT_MANAGEMENT',
+    grade: 'ADVANCED',
     member: {
       id: '2',
       name: '이영희',
@@ -838,6 +864,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '11',
     role: 'PL',
     workArea: 'PLANNING',
+    grade: 'INTERMEDIATE',
     member: {
       id: '11',
       name: '오세훈',
@@ -854,6 +881,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '4',
     role: 'PA',
     workArea: 'BACKEND',
+    grade: 'BEGINNER',
     member: {
       id: '4',
       name: '정수진',
@@ -870,6 +898,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '5',
     role: 'PA',
     workArea: 'FRONTEND',
+    grade: 'EXPERT',
     member: {
       id: '5',
       name: '최동욱',
@@ -886,6 +915,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '13',
     role: 'PA',
     workArea: 'PROJECT_MANAGEMENT',
+    grade: 'ADVANCED',
     member: {
       id: '13',
       name: '배수지',
@@ -903,6 +933,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '3',
     role: 'PM',
     workArea: 'PROJECT_MANAGEMENT',
+    grade: 'INTERMEDIATE',
     member: {
       id: '3',
       name: '박민수',
@@ -919,6 +950,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '15',
     role: 'PA',
     workArea: 'DESIGN',
+    grade: 'BEGINNER',
     member: {
       id: '15',
       name: '권나래',
@@ -935,6 +967,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '8',
     role: 'PA',
     workArea: 'FRONTEND',
+    grade: 'EXPERT',
     member: {
       id: '8',
       name: '임지훈',
@@ -951,6 +984,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '12',
     role: 'PA',
     workArea: 'BACKEND',
+    grade: 'ADVANCED',
     member: {
       id: '12',
       name: '신지영',
@@ -968,6 +1002,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '4',
     role: 'PM',
     workArea: 'PROJECT_MANAGEMENT',
+    grade: 'INTERMEDIATE',
     member: {
       id: '4',
       name: '정수진',
@@ -984,6 +1019,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '9',
     role: 'PA',
     workArea: 'BACKEND',
+    grade: 'BEGINNER',
     member: {
       id: '9',
       name: '한지민',
@@ -1000,6 +1036,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '14',
     role: 'PA',
     workArea: 'FRONTEND',
+    grade: 'EXPERT',
     member: {
       id: '14',
       name: '황인규',
@@ -1016,6 +1053,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '7',
     role: 'PA',
     workArea: 'DESIGN',
+    grade: 'ADVANCED',
     member: {
       id: '7',
       name: '윤서준',
@@ -1033,6 +1071,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '16',
     role: 'PA',
     workArea: 'PLANNING',
+    grade: 'INTERMEDIATE',
     member: {
       id: '16',
       name: '서민지',
@@ -1049,6 +1088,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '20',
     role: 'PA',
     workArea: 'FRONTEND',
+    grade: 'BEGINNER',
     member: {
       id: '20',
       name: '이승우',
@@ -1066,6 +1106,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '17',
     role: 'PA',
     workArea: 'PLANNING',
+    grade: 'EXPERT',
     member: {
       id: '17',
       name: '조영준',
@@ -1082,6 +1123,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '18',
     role: 'PA',
     workArea: 'DESIGN',
+    grade: 'ADVANCED',
     member: {
       id: '18',
       name: '김예은',
@@ -1098,6 +1140,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '21',
     role: 'PA',
     workArea: 'FRONTEND',
+    grade: 'INTERMEDIATE',
     member: {
       id: '21',
       name: '정민아',
@@ -1114,6 +1157,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '23',
     role: 'PA',
     workArea: 'BACKEND',
+    grade: 'BEGINNER',
     member: {
       id: '23',
       name: '윤재혁',
@@ -1131,6 +1175,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '22',
     role: 'PA',
     workArea: 'FRONTEND',
+    grade: 'EXPERT',
     member: {
       id: '22',
       name: '강태민',
@@ -1147,6 +1192,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '24',
     role: 'PA',
     workArea: 'BACKEND',
+    grade: 'ADVANCED',
     member: {
       id: '24',
       name: '홍수아',
@@ -1164,6 +1210,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '20',
     role: 'PA',
     workArea: 'FRONTEND',
+    grade: 'INTERMEDIATE',
     member: {
       id: '20',
       name: '이승우',
@@ -1180,6 +1227,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '25',
     role: 'PA',
     workArea: 'BACKEND',
+    grade: 'BEGINNER',
     member: {
       id: '25',
       name: '최현준',
@@ -1197,6 +1245,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '19',
     role: 'PA',
     workArea: 'DESIGN',
+    grade: 'EXPERT',
     member: {
       id: '19',
       name: '박지훈',
@@ -1213,6 +1262,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '21',
     role: 'PA',
     workArea: 'FRONTEND',
+    grade: 'ADVANCED',
     member: {
       id: '21',
       name: '정민아',
@@ -1229,6 +1279,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '23',
     role: 'PA',
     workArea: 'BACKEND',
+    grade: 'INTERMEDIATE',
     member: {
       id: '23',
       name: '윤재혁',
@@ -1246,6 +1297,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '18',
     role: 'PA',
     workArea: 'DESIGN',
+    grade: 'BEGINNER',
     member: {
       id: '18',
       name: '김예은',
@@ -1262,6 +1314,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '22',
     role: 'PA',
     workArea: 'FRONTEND',
+    grade: 'EXPERT',
     member: {
       id: '22',
       name: '강태민',
@@ -1278,6 +1331,7 @@ export const mockProjectMembers: ProjectMember[] = [
     memberId: '25',
     role: 'PA',
     workArea: 'BACKEND',
+    grade: 'ADVANCED',
     member: {
       id: '25',
       name: '최현준',

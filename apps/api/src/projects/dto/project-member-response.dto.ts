@@ -40,6 +40,18 @@ export class ProjectMemberResponseDto implements ProjectMember {
   })
   workArea: string;
 
+  @ApiProperty({
+    description: '등급',
+    enum: ['EXPERT', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
+  })
+  grade: string;
+
+  @ApiProperty({ description: '투입일', required: false })
+  joinDate?: string;
+
+  @ApiProperty({ description: '철수일', required: false })
+  leaveDate?: string;
+
   @ApiProperty({ description: '비고', required: false })
   notes?: string;
 

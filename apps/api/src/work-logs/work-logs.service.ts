@@ -537,6 +537,7 @@ export class WorkLogsService {
             assignees: {
               include: { user: true },
             },
+            taskType: true,
           },
         },
         user: true,
@@ -547,6 +548,7 @@ export class WorkLogsService {
     // 2. Task × Role × Assignee 조합으로 행 생성
     interface ExcelRow {
       taskId: bigint;
+      taskTypeName: string; // 업무 구분
       status: string;
       taskName: string;
       rmName: string | null;
@@ -583,6 +585,7 @@ export class WorkLogsService {
 
         rowsMap.set(key, {
           taskId: workLog.taskId,
+          taskTypeName: workLog.task.taskType?.name || '',
           status: workLog.task.status,
           taskName: workLog.task.taskName,
           rmName: workLog.task.clientName,
@@ -634,7 +637,7 @@ export class WorkLogsService {
     const titleRow = worksheet.addRow([
       `${projectName} 주간 업무 보고서 (${startDate} ~ ${endDate})`,
     ]);
-    worksheet.mergeCells(1, 1, 1, 10);
+    worksheet.mergeCells(1, 1, 1, 11);
     titleRow.getCell(1).font = { bold: true, size: 14 };
     titleRow.getCell(1).alignment = {
       horizontal: 'center',
@@ -647,6 +650,7 @@ export class WorkLogsService {
 
     // 헤더 행 3: 컬럼 헤더
     const headers = [
+      '업무 구분',
       '진행 상태',
       '업무명',
       '담당RM',
@@ -701,7 +705,8 @@ export class WorkLogsService {
         range.endRow = currentExcelRow;
       }
 
-      // 상태, 업무명, RM, 오픈일은 첫 번째 행에만 값 입력 (병합 후 표시)
+      // 업무구분, 상태, 업무명, RM, 오픈일은 첫 번째 행에만 값 입력 (병합 후 표시)
+      const taskTypeName = isFirstRowOfTask ? row.taskTypeName : '';
       const statusLabel = isFirstRowOfTask
         ? TASK_STATUS_METADATA[row.status]?.label || row.status
         : '';
@@ -719,24 +724,25 @@ export class WorkLogsService {
       const issuesText = row.issues.join('\n');
 
       const dataRow = worksheet.addRow([
-        statusLabel, // 1. 진행 상태 (병합 대상)
-        taskName, // 2. 업무명 (병합 대상)
-        rmName, // 3. 담당RM (병합 대상)
-        openDateText, // 4. 오픈일 (병합 대상)
-        row.role, // 5. 투입현황
-        row.assigneeName, // 6. 작업자
-        startDateText, // 7. 작업시작일
-        row.workHours || '', // 8. 금주작업 시간
-        contentText, // 9. 금주 작업 내용
-        issuesText, // 10. 비고
+        taskTypeName, // 1. 업무 구분 (병합 대상)
+        statusLabel, // 2. 진행 상태 (병합 대상)
+        taskName, // 3. 업무명 (병합 대상)
+        rmName, // 4. 담당RM (병합 대상)
+        openDateText, // 5. 오픈일 (병합 대상)
+        row.role, // 6. 투입현황
+        row.assigneeName, // 7. 작업자
+        startDateText, // 8. 작업시작일
+        row.workHours || '', // 9. 금주작업 시간
+        contentText, // 10. 금주 작업 내용
+        issuesText, // 11. 비고
       ]);
 
       // 모든 셀에 테두리 및 기본 정렬 적용
-      for (let col = 1; col <= 10; col++) {
+      for (let col = 1; col <= 11; col++) {
         const cell = dataRow.getCell(col);
         cell.alignment = {
           vertical: 'middle',
-          horizontal: col <= 8 ? 'center' : 'left',
+          horizontal: col <= 9 ? 'center' : 'left',
           wrapText: true,
         };
         cell.border = {
@@ -751,8 +757,8 @@ export class WorkLogsService {
     });
 
     // 6. 같은 업무에 속하는 행들의 셀 병합 (진행상태, 업무명, 담당RM, 오픈일)
-    // 병합 대상 컬럼: 1(진행상태), 2(업무명), 3(담당RM), 4(오픈일)
-    const columnsToMerge = [1, 2, 3, 4];
+    // 병합 대상 컬럼: 1(업무구분), 2(진행상태), 3(업무명), 4(담당RM), 5(오픈일)
+    const columnsToMerge = [1, 2, 3, 4, 5];
 
     taskRowRanges.forEach((range) => {
       columnsToMerge.forEach((colNum) => {
@@ -771,8 +777,8 @@ export class WorkLogsService {
     });
 
     // 7. 컬럼 너비 설정
-    // [진행상태, 업무명, 담당RM, 오픈일, 투입현황, 작업자, 작업시작일, 금주작업시간, 금주작업내용, 비고]
-    const columnWidths = [12, 35, 12, 14, 10, 10, 14, 14, 40, 30];
+    // [업무구분, 진행상태, 업무명, 담당RM, 오픈일, 투입현황, 작업자, 작업시작일, 금주작업시간, 금주작업내용, 비고]
+    const columnWidths = [12, 12, 35, 12, 14, 10, 10, 14, 14, 40, 30];
     columnWidths.forEach((width, i) => {
       worksheet.getColumn(i + 1).width = width;
     });

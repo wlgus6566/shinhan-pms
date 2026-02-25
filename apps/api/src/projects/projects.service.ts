@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   ConflictException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProjectDto } from './dto/create-project.dto';
@@ -343,6 +344,31 @@ export class ProjectsService {
   // =============================================
 
   /**
+   * 멤버 관리 권한 확인 (SUPER_ADMIN, 시스템 PM, 프로젝트 PM만 허용)
+   */
+  private async checkMemberManagePermission(
+    projectId: bigint,
+    userId: bigint,
+    userRole: string,
+  ): Promise<void> {
+    // 시스템 관리자 또는 시스템 PM은 허용
+    if (userRole === 'SUPER_ADMIN' || userRole === 'PM') {
+      return;
+    }
+
+    // 프로젝트 내 PM 역할인지 확인
+    const projectMember = await this.prisma.projectMember.findFirst({
+      where: { projectId, memberId: userId },
+    });
+
+    if (projectMember?.role === 'PM') {
+      return;
+    }
+
+    throw new ForbiddenException('멤버 관리 권한이 없습니다');
+  }
+
+  /**
    * 프로젝트 멤버 목록 조회
    */
   async getProjectMembers(
@@ -418,9 +444,13 @@ export class ProjectsService {
     projectId: bigint,
     addMemberDto: AddProjectMemberDto,
     userId: bigint,
+    userRole: string,
   ) {
     // 프로젝트 존재 확인
     await this.findOne(projectId);
+
+    // 권한 확인
+    await this.checkMemberManagePermission(projectId, userId, userRole);
 
     // 멤버 존재 확인
     const member = await this.prisma.user.findUnique({
@@ -450,6 +480,9 @@ export class ProjectsService {
         memberId: BigInt(addMemberDto.memberId),
         role: addMemberDto.role,
         workArea: addMemberDto.workArea,
+        grade: addMemberDto.grade,
+        joinDate: addMemberDto.joinDate ? new Date(addMemberDto.joinDate) : undefined,
+        leaveDate: addMemberDto.leaveDate ? new Date(addMemberDto.leaveDate) : undefined,
         notes: addMemberDto.notes,
         createdBy: userId,
       },
@@ -476,9 +509,13 @@ export class ProjectsService {
     memberId: bigint,
     updateRoleDto: UpdateProjectMemberRoleDto,
     userId: bigint,
+    userRole: string,
   ) {
     // 프로젝트 존재 확인
     await this.findOne(projectId);
+
+    // 권한 확인
+    await this.checkMemberManagePermission(projectId, userId, userRole);
 
     // 프로젝트 멤버 존재 확인
     const projectMember = await this.prisma.projectMember.findFirst({
@@ -516,9 +553,17 @@ export class ProjectsService {
   /**
    * 프로젝트에서 멤버 제거
    */
-  async removeProjectMember(projectId: bigint, memberId: bigint) {
+  async removeProjectMember(
+    projectId: bigint,
+    memberId: bigint,
+    userId: bigint,
+    userRole: string,
+  ) {
     // 프로젝트 존재 확인
     await this.findOne(projectId);
+
+    // 권한 확인
+    await this.checkMemberManagePermission(projectId, userId, userRole);
 
     // 프로젝트 멤버 존재 확인
     const projectMember = await this.prisma.projectMember.findFirst({

@@ -3,7 +3,7 @@
 import { useState, useMemo, useRef } from 'react';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Calendar, List } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, List, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { WorkLog } from '@/types/work-log';
@@ -367,12 +367,31 @@ export function WorkLogCalendar({
                 className="border-b border-slate-100 last:border-b-0"
               >
                 <div className="px-6 py-3 bg-slate-50 sticky top-0">
-                  <span className="font-semibold text-slate-700">
-                    {format(new Date(date), 'M월 d일 (EEEE)', { locale: ko })}
-                  </span>
-                  <span className="ml-2 text-sm text-slate-500">
-                    {logs.length}건
-                  </span>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="font-semibold text-slate-700">
+                        {format(new Date(date), 'M월 d일 (EEEE)', { locale: ko })}
+                      </span>
+                      <span className="ml-2 text-sm text-slate-500">
+                        {logs.length}건
+                      </span>
+                    </div>
+                    {(() => {
+                      const dayTotal = logs.reduce((sum, l) => sum + (l.workHours || 0), 0);
+                      const isShort = dayTotal < 8;
+                      return (
+                        <div className={cn(
+                          'flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full',
+                          isShort
+                            ? 'bg-amber-100 text-amber-700'
+                            : 'bg-emerald-100 text-emerald-700',
+                        )}>
+                          <Clock className="h-3 w-3" />
+                          <span>{dayTotal}h / 8h</span>
+                        </div>
+                      );
+                    })()}
+                  </div>
                 </div>
                 <div className="divide-y divide-slate-100">
                   {logs.map((log) => (

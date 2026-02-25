@@ -97,3 +97,33 @@ export function useUser(id: string | number | null) {
     mutate,
   };
 }
+
+export interface UserProjectAssignment {
+  id: string;
+  projectId: string;
+  projectName: string;
+  projectType: string;
+  status: string;
+  client: string | null;
+  role: string;
+  workArea: string;
+  startDate: string | null;
+  endDate: string | null;
+  createdAt: string;
+}
+
+/**
+ * SWR hook for fetching a user's project assignments
+ * @param userId - User ID (null to skip fetching)
+ */
+export function useUserProjects(userId: string | number | null) {
+  const { data, error, isLoading } = useSWR<UserProjectAssignment[]>(
+    userId ? `/api/users/${userId}/projects` : null
+  );
+
+  return {
+    projects: data,
+    isLoading,
+    error,
+  };
+}

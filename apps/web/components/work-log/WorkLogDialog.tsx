@@ -11,7 +11,7 @@ import type {
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { toast } from 'sonner';
-import { Loader2, CheckCircle2, History, FolderOpen } from 'lucide-react';
+import { Loader2, CheckCircle2, History, FolderOpen, Plus, X } from 'lucide-react';
 import { BaseDialog } from '@/components/ui/base-dialog';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -25,6 +25,13 @@ import {
 } from '@/components/ui/form';
 import { FormInput, FormTextarea } from '@/components/form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import type { WorkLog, MyTask } from '@/types/work-log';
 import { WorkLogSuggestions } from './WorkLogSuggestions';
@@ -126,10 +133,13 @@ export function WorkLogDialog({
     },
   });
 
-  const { fields } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control: multiForm.control,
     name: 'entries',
   });
+
+  // 생성 모드: 업무 추가용 select 상태
+  const [selectedTaskToAdd, setSelectedTaskToAdd] = useState<string>('');
 
   // 폼 초기화
   useEffect(() => {
@@ -151,27 +161,39 @@ export function WorkLogDialog({
           entries,
         });
       } else {
-        // 생성 모드: 해당 날짜에 미작성된 업무만 엔트리로 생성 (전체 표시)
+        // 생성 모드: 미작성 업무 중 첫 번째를 자동 추가
         const existingTaskIds = new Set(
           existingWorkLogs
             ?.filter((log) => log.workDate === dateStr)
             .map((log) => log.taskId) || [],
         );
 
-        const entries = myTasks
-          .filter((task) => !existingTaskIds.has(task.id))
-          .map((task) => ({
-            taskId: task.id,
-            content: '',
-            workHours: undefined,
-            progress: undefined,
-            issues: '',
-          }));
+        const unloggedTasks = myTasks.filter(
+          (task) => !existingTaskIds.has(task.id),
+        );
+
+        // selectedTaskId가 있으면 해당 업무를 우선, 없으면 첫 번째 미작성 업무
+        const firstTask = selectedTaskId
+          ? unloggedTasks.find((t) => t.id === selectedTaskId) || unloggedTasks[0]
+          : unloggedTasks[0];
+
+        const initialEntries = firstTask
+          ? [
+              {
+                taskId: firstTask.id,
+                content: '',
+                workHours: undefined as number | undefined,
+                progress: undefined as number | undefined,
+                issues: '',
+              },
+            ]
+          : [];
 
         multiForm.reset({
           workDate: dateStr,
-          entries: entries.length > 0 ? entries : [],
+          entries: initialEntries,
         });
+        setSelectedTaskToAdd('');
       }
     }
   }, [open, mode, workLogs, existingWorkLogs, myTasks, selectedDate]);
@@ -362,8 +384,47 @@ export function WorkLogDialog({
     return groups;
   }, [fields, myTasks, workLogs, mode, multiForm]);
 
-  // 작성할 업무가 없는 경우 (모든 업무일지가 작성된 경우)
-  const noEntriesAvailable = mode === 'create' && fields.length === 0;
+  // 생성 모드: 추가 가능한 업무 목록 (이미 추가된 업무 + 기존 작성된 업무 제외)
+  const availableTasks = useMemo(() => {
+    if (mode !== 'create') return [];
+
+    const dateStr = format(selectedDate, 'yyyy-MM-dd');
+    const existingTaskIds = new Set(
+      existingWorkLogs
+        ?.filter((log) => log.workDate === dateStr)
+        .map((log) => log.taskId) || [],
+    );
+
+    const addedTaskIds = new Set(
+      fields.map((_, index) => multiForm.getValues(`entries.${index}.taskId`)),
+    );
+
+    return myTasks.filter(
+      (task) => !existingTaskIds.has(task.id) && !addedTaskIds.has(task.id),
+    );
+  }, [mode, myTasks, existingWorkLogs, selectedDate, fields, multiForm]);
+
+  // 업무 추가 핸들러
+  const handleAddTask = () => {
+    if (!selectedTaskToAdd) return;
+
+    append({
+      taskId: selectedTaskToAdd,
+      content: '',
+      workHours: undefined,
+      progress: undefined,
+      issues: '',
+    });
+    setSelectedTaskToAdd('');
+  };
+
+  // 업무 제거 핸들러
+  const handleRemoveEntry = (index: number) => {
+    remove(index);
+  };
+
+  // 모든 업무일지가 이미 작성된 경우
+  const allTasksLogged = mode === 'create' && availableTasks.length === 0 && fields.length === 0;
 
   // 공통 엔트리 렌더링 함수
   const renderEntryCard = (index: number) => {
@@ -382,6 +443,17 @@ export function WorkLogDialog({
                   `업무 ${index + 1}`}
               </CardTitle>
             </div>
+            {mode === 'create' && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0 text-slate-400 hover:text-red-500"
+                onClick={() => handleRemoveEntry(index)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -589,7 +661,7 @@ export function WorkLogDialog({
           locale: ko,
         })}
         footer={
-          noEntriesAvailable ? (
+          allTasksLogged ? (
             <Button
               type="button"
               variant="outline"
@@ -620,7 +692,7 @@ export function WorkLogDialog({
               )}
               <Button
                 onClick={multiForm.handleSubmit(handleMultiFormSubmit)}
-                disabled={isSubmitting || isDeleting}
+                disabled={isSubmitting || isDeleting || fields.length === 0}
               >
                 {isSubmitting && (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -631,7 +703,7 @@ export function WorkLogDialog({
           )
         }
       >
-        {noEntriesAvailable ? (
+        {allTasksLogged ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <CheckCircle2 className="h-16 w-16 text-emerald-500 mb-4" />
             <h3 className="text-lg font-semibold text-slate-800 mb-2">
@@ -647,6 +719,45 @@ export function WorkLogDialog({
               onSubmit={multiForm.handleSubmit(handleMultiFormSubmit)}
               className="space-y-6"
             >
+              {/* 생성 모드: 업무 추가 셀렉터 */}
+              {mode === 'create' && availableTasks.length > 0 && (
+                <div className="flex items-end gap-2">
+                  <div className="flex-1">
+                    <label className="text-sm font-medium text-slate-700 mb-1.5 block">
+                      업무 선택
+                    </label>
+                    <Select
+                      value={selectedTaskToAdd}
+                      onValueChange={setSelectedTaskToAdd}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="작성할 업무를 선택하세요" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableTasks.map((task) => (
+                          <SelectItem key={task.id} value={task.id}>
+                            <span className="text-xs text-muted-foreground mr-1">
+                              [{task.project?.projectName || '프로젝트 미지정'}]
+                            </span>
+                            {task.taskName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleAddTask}
+                    disabled={!selectedTaskToAdd}
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    추가
+                  </Button>
+                </div>
+              )}
+
+              {/* 프로젝트별 그룹핑된 업무 카드 */}
               {projectGroups.map((group) => (
                 <div key={group.projectId} className="space-y-3">
                   {/* 프로젝트 그룹 헤더 */}

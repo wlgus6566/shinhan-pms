@@ -1,0 +1,8 @@
+{
+  "active": true,
+  "started_at": "2026-02-25T06:24:46.750Z",
+  "original_prompt": "/oh-my-claudecode:ultrawork  멤버를 등록할 때 등급을 등록하는 게 아니라 http://localhost:3001/projects/4?tab=members 에서 멤버 추가팝업에서 특급, 고급, 중급,\n  초급으로 등급을 등록할 수 있게 되어야해.",
+  "session_id": "d6ff8d4f-915d-4267-bcc2-4ce9e9247f27",
+  "reinforcement_count": 1,
+  "last_checked_at": "2026-02-25T06:33:32.897Z"
+}

@@ -134,6 +134,7 @@ emotion-pms/
 - [명명 규칙](./docs/development/naming-conventions.md)
 - [개발 패턴](./docs/development/patterns.md)
 - [타입 시스템](./docs/development/type-system.md)
+- [권한 체계](./docs/development/permissions.md)
 - [주요 명령어](./docs/development/commands.md)
 
 ### 에이전트

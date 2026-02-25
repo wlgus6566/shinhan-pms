@@ -305,6 +305,7 @@ export class ProjectsController {
       BigInt(id),
       addMemberDto,
       BigInt(user.id),
+      user.role,
     );
     return this.transformProjectMember(member);
   }
@@ -330,6 +331,7 @@ export class ProjectsController {
       BigInt(memberId),
       updateRoleDto,
       BigInt(user.id),
+      user.role,
     );
     return this.transformProjectMember(member);
   }
@@ -343,12 +345,15 @@ export class ProjectsController {
   @ApiResponse({ status: 200, description: '멤버가 제거되었습니다' })
   @ApiResponse({ status: 404, description: '프로젝트 멤버를 찾을 수 없습니다' })
   async removeProjectMember(
+    @CurrentUser() user: any,
     @Param('id') id: string,
     @Param('memberId', ParseIntPipe) memberId: number,
   ) {
     await this.projectsService.removeProjectMember(
       BigInt(id),
       BigInt(memberId),
+      BigInt(user.id),
+      user.role,
     );
     return null;
   }
@@ -362,6 +367,9 @@ export class ProjectsController {
       projectId: projectMember.projectId.toString(),
       memberId: projectMember.memberId.toString(),
       role: projectMember.role,
+      grade: projectMember.grade,
+      joinDate: projectMember.joinDate?.toISOString().split('T')[0],
+      leaveDate: projectMember.leaveDate?.toISOString().split('T')[0],
       workArea: projectMember.workArea,
       notes: projectMember.notes,
       member: projectMember.member

@@ -8,7 +8,7 @@ import { useAvailableMembers, addProjectMember } from '@/lib/api/projectMembers'
 import { Button } from '@/components/ui/button';
 import { BaseDialog } from '@/components/ui/base-dialog';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { FormTextarea } from '@/components/form';
+import { FormTextarea, FormInput } from '@/components/form';
 import {
   Command,
   CommandEmpty,
@@ -31,12 +31,15 @@ import {
   WORK_AREA_OPTIONS,
   PROJECT_ROLE_OPTIONS,
 } from '@/lib/constants/project';
-import { WorkAreaEnum, MemberRoleEnum } from '@repo/schema';
+import { WorkAreaEnum, MemberRoleEnum, GradeEnum, GRADE_OPTIONS } from '@repo/schema';
 
 const addMemberSchema = z.object({
   memberId: z.string().min(1, '멤버를 선택하세요'),
   role: MemberRoleEnum,
   workArea: WorkAreaEnum,
+  grade: GradeEnum,
+  joinDate: z.string().optional(),
+  leaveDate: z.string().optional(),
   notes: z.string().optional(),
 });
 
@@ -71,6 +74,9 @@ export function AddMemberDialog({ projectId, open, onOpenChange, onSuccess }: Ad
       memberId: '',
       role: 'PA',
       workArea: 'PLANNING',
+      grade: 'BEGINNER',
+      joinDate: '',
+      leaveDate: '',
       notes: '',
     },
   });
@@ -247,6 +253,29 @@ export function AddMemberDialog({ projectId, open, onOpenChange, onSuccess }: Ad
               placeholder="프로젝트 역할을 선택하세요"
               options={PROJECT_ROLE_OPTIONS}
             />
+
+            <FormSelect
+              control={form.control}
+              name="grade"
+              label="등급 *"
+              placeholder="등급을 선택하세요"
+              options={GRADE_OPTIONS}
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormInput
+                control={form.control}
+                name="joinDate"
+                label="투입일"
+                type="date"
+              />
+              <FormInput
+                control={form.control}
+                name="leaveDate"
+                label="철수일"
+                type="date"
+              />
+            </div>
 
             <FormTextarea
               control={form.control}

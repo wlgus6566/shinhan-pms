@@ -31,7 +31,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Loader2, UserPlus, Trash2 } from 'lucide-react';
+import {
+  Loader2,
+  UserPlus,
+  Trash2,
+  Info,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
 import { AddMemberDialog } from './AddMemberDialog';
 import type {
   ProjectMember,
@@ -44,7 +51,7 @@ import {
   WORK_AREA_LABELS_STRICT,
   PROJECT_ROLE_VARIANTS,
 } from '@/lib/constants/project';
-import { DEPARTMENT_LABELS } from '@repo/schema';
+import { DEPARTMENT_LABELS, GRADE_LABELS, type Grade } from '@repo/schema';
 
 interface ProjectMembersTableProps {
   projectId: string;
@@ -57,6 +64,7 @@ export function ProjectMembersTable({
 }: ProjectMembersTableProps) {
   const { user } = useAuth();
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [showPermissions, setShowPermissions] = useState(false);
   const [memberToRemove, setMemberToRemove] = useState<ProjectMember | null>(
     null,
   );
@@ -66,10 +74,9 @@ export function ProjectMembersTable({
   const { members, isLoading: loading, mutate } = useProjectMembers(projectId);
 
   const canManage =
+    user?.role === 'SUPER_ADMIN' ||
     user?.role === 'PM' ||
-    members?.find(
-      (m) => m.memberId === user?.id && (m.role === 'PM' || m.role === 'PL'),
-    );
+    members?.find((m) => m.memberId === user?.id && m.role === 'PM');
 
   const handleRemove = async () => {
     if (!memberToRemove) return;
@@ -107,7 +114,23 @@ export function ProjectMembersTable({
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">멤버 목록</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-lg font-semibold">멤버 목록</h3>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-muted-foreground hover:text-foreground"
+            onClick={() => setShowPermissions((v) => !v)}
+          >
+            <Info className="h-4 w-4 mr-1" />
+            <span className="text-xs">역할별 권한</span>
+            {showPermissions ? (
+              <ChevronUp className="h-3 w-3 ml-1" />
+            ) : (
+              <ChevronDown className="h-3 w-3 ml-1" />
+            )}
+          </Button>
+        </div>
         {canManage && (
           <Button
             onClick={() => setAddDialogOpen(true)}
@@ -120,6 +143,89 @@ export function ProjectMembersTable({
         )}
       </div>
 
+      {showPermissions && (
+        <div className="rounded-lg border bg-slate-50 p-4 text-sm">
+          <h4 className="font-semibold text-slate-800 mb-3">
+            역할별 권한 안내
+          </h4>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b">
+                  <th className="pb-2 pr-4 font-medium text-slate-600">기능</th>
+                  <th className="pb-2 px-3 font-medium text-slate-600 text-center">
+                    시스템 관리자
+                  </th>
+                  <th className="pb-2 px-3 font-medium text-slate-600 text-center">
+                    PM
+                  </th>
+                  <th className="pb-2 px-3 font-medium text-slate-600 text-center">
+                    PL
+                  </th>
+                  <th className="pb-2 px-3 font-medium text-slate-600 text-center">
+                    PA
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="text-slate-700">
+                <tr className="border-b border-slate-200">
+                  <td className="py-2 pr-4">멤버 추가/수정/제거</td>
+                  <td className="py-2 px-3 text-center text-emerald-600 font-medium">
+                    O
+                  </td>
+                  <td className="py-2 px-3 text-center text-emerald-600 font-medium">
+                    O
+                  </td>
+                  <td className="py-2 px-3 text-center text-slate-400">-</td>
+                  <td className="py-2 px-3 text-center text-slate-400">-</td>
+                </tr>
+                <tr className="border-b border-slate-200">
+                  <td className="py-2 pr-4">업무 생성/수정/삭제</td>
+                  <td className="py-2 px-3 text-center text-emerald-600 font-medium">
+                    O
+                  </td>
+                  <td className="py-2 px-3 text-center text-emerald-600 font-medium">
+                    O
+                  </td>
+                  <td className="py-2 px-3 text-center text-emerald-600 font-medium">
+                    O
+                  </td>
+                  <td className="py-2 px-3 text-center text-emerald-600 font-medium">
+                    O
+                  </td>
+                </tr>
+                <tr className="border-b border-slate-200">
+                  <td className="py-2 pr-4">업무일지 작성</td>
+                  <td className="py-2 px-3 text-center text-slate-400">-</td>
+                  <td className="py-2 px-3 text-center text-slate-400">-</td>
+                  <td className="py-2 px-3 text-center text-emerald-600 font-medium">
+                    O
+                  </td>
+                  <td className="py-2 px-3 text-center text-emerald-600 font-medium">
+                    O
+                  </td>
+                </tr>
+                <tr>
+                  <td className="py-2 pr-4">프로젝트 일정 생성</td>
+                  <td className="py-2 px-3 text-center text-emerald-600 font-medium">
+                    O
+                  </td>
+                  <td className="py-2 px-3 text-center text-emerald-600 font-medium">
+                    O
+                  </td>
+                  <td className="py-2 px-3 text-center text-emerald-600 font-medium">
+                    O
+                  </td>
+                  <td className="py-2 px-3 text-center text-emerald-600 font-medium">
+                    O
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -129,6 +235,9 @@ export function ProjectMembersTable({
               <TableHead>본부</TableHead>
               <TableHead>담당 분야</TableHead>
               <TableHead>역할</TableHead>
+              <TableHead>등급</TableHead>
+              <TableHead>투입일</TableHead>
+              <TableHead>철수일</TableHead>
               <TableHead>비고</TableHead>
               {canManage && <TableHead className="text-right">작업</TableHead>}
             </TableRow>
@@ -137,7 +246,7 @@ export function ProjectMembersTable({
             {loading ? (
               <TableRow>
                 <TableCell
-                  colSpan={canManage ? 7 : 6}
+                  colSpan={canManage ? 10 : 9}
                   className="h-24 text-center"
                 >
                   <Loader2 className="h-6 w-6 animate-spin mx-auto" />
@@ -146,7 +255,7 @@ export function ProjectMembersTable({
             ) : !members || members.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={canManage ? 7 : 6}
+                  colSpan={canManage ? 10 : 9}
                   className="h-24 text-center"
                 >
                   멤버가 없습니다
@@ -193,6 +302,25 @@ export function ProjectMembersTable({
                     >
                       {member.role}
                     </Badge>
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {member.grade ? (
+                      <Badge variant="outline">
+                        {GRADE_LABELS[member.grade as Grade] || member.grade}
+                      </Badge>
+                    ) : (
+                      <span className="text-sm text-slate-500">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    <span className="text-sm text-slate-600">
+                      {member.joinDate || '-'}
+                    </span>
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    <span className="text-sm text-slate-600">
+                      {member.leaveDate || '-'}
+                    </span>
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
                     <span className="text-sm text-slate-600">

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { format, startOfMonth, endOfMonth } from 'date-fns';
+import { format, startOfMonth, endOfMonth, addMonths, subMonths } from 'date-fns';
+import { ko } from 'date-fns/locale';
 import { WorkLogCalendar } from './WorkLogCalendar';
 import { TeamWorkLogFilters } from './TeamWorkLogFilters';
 import { WeeklyReportExportButton } from './WeeklyReportExportButton';
@@ -14,7 +15,7 @@ import type { TaskStatus, TaskDifficulty } from '@/types/task';
 import { getProjectWorkLogs } from '@/lib/api/workLogs';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Download, SlidersHorizontal, ChevronDown } from 'lucide-react';
+import { Download, SlidersHorizontal, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface TeamWorkLogListProps {
@@ -172,6 +173,12 @@ export function TeamWorkLogList({ projectId, projectName, members }: TeamWorkLog
     return counts;
   }, [workLogs]);
 
+  // Shared monthly export date
+  const [monthlyExportDate, setMonthlyExportDate] = useState<Date>(new Date());
+  const exportYear = monthlyExportDate.getFullYear();
+  const exportMonth = monthlyExportDate.getMonth() + 1;
+  const exportMonthDisplay = format(monthlyExportDate, 'yyyy년 M월', { locale: ko });
+
   const [exportOpen, setExportOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
 
@@ -238,16 +245,40 @@ export function TeamWorkLogList({ projectId, projectName, members }: TeamWorkLog
             defaultEndDate={format(endOfMonth(currentMonth), 'yyyy-MM-dd')}
           />
           <div className="border-t border-slate-100" />
+          <div className="flex items-center justify-center gap-1">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8 shrink-0"
+              onClick={() => setMonthlyExportDate((prev) => subMonths(prev, 1))}
+              aria-label="이전 월"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="text-xs font-medium text-center whitespace-nowrap w-[90px]">
+              {exportMonthDisplay}
+            </span>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8 shrink-0"
+              onClick={() => setMonthlyExportDate((prev) => addMonths(prev, 1))}
+              aria-label="다음 월"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
           <MonthlyStaffReportExportButton
             projectId={projectId}
             projectName={projectName}
-            defaultDate={currentMonth}
+            year={exportYear}
+            month={exportMonth}
           />
-          <div className="border-t border-slate-100" />
           <MonthlyTaskReportExportButton
             projectId={projectId}
             projectName={projectName}
-            defaultDate={currentMonth}
+            year={exportYear}
+            month={exportMonth}
           />
         </Card>
       </div>
@@ -273,26 +304,49 @@ export function TeamWorkLogList({ projectId, projectName, members }: TeamWorkLog
         />
       </div>
 
-      {/* Desktop: Export buttons (unchanged layout) */}
-      <div className="hidden sm:flex flex-row flex-wrap justify-end gap-2">
+      {/* Desktop: Export buttons */}
+      <div className="hidden sm:flex flex-row flex-wrap justify-end items-center gap-2">
         <WeeklyReportExportButton
           projectId={projectId}
           projectName={projectName}
           defaultStartDate={format(startOfMonth(currentMonth), 'yyyy-MM-dd')}
           defaultEndDate={format(endOfMonth(currentMonth), 'yyyy-MM-dd')}
         />
-        <div className="flex flex-row flex-wrap gap-2">
-          <MonthlyStaffReportExportButton
-            projectId={projectId}
-            projectName={projectName}
-            defaultDate={currentMonth}
-          />
-          <MonthlyTaskReportExportButton
-            projectId={projectId}
-            projectName={projectName}
-            defaultDate={currentMonth}
-          />
+        <div className="flex items-center gap-1">
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8 shrink-0"
+            onClick={() => setMonthlyExportDate((prev) => subMonths(prev, 1))}
+            aria-label="이전 월"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span className="text-xs font-medium text-center whitespace-nowrap w-[90px]">
+            {exportMonthDisplay}
+          </span>
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8 shrink-0"
+            onClick={() => setMonthlyExportDate((prev) => addMonths(prev, 1))}
+            aria-label="다음 월"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
+        <MonthlyStaffReportExportButton
+          projectId={projectId}
+          projectName={projectName}
+          year={exportYear}
+          month={exportMonth}
+        />
+        <MonthlyTaskReportExportButton
+          projectId={projectId}
+          projectName={projectName}
+          year={exportYear}
+          month={exportMonth}
+        />
       </div>
 
       {/* Desktop: Filters (always visible) */}

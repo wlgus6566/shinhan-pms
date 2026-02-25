@@ -115,6 +115,30 @@ export class UsersService {
     };
   }
 
+  async findUserProjects(userId: bigint) {
+    const members = await this.prisma.projectMember.findMany({
+      where: { memberId: userId },
+      include: {
+        project: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return members.map((pm) => ({
+      id: pm.id.toString(),
+      projectId: pm.project.id.toString(),
+      projectName: pm.project.projectName,
+      projectType: pm.project.projectType,
+      status: pm.project.status,
+      client: pm.project.client || null,
+      role: pm.role,
+      workArea: pm.workArea,
+      startDate: pm.project.startDate?.toISOString() || null,
+      endDate: pm.project.endDate?.toISOString() || null,
+      createdAt: pm.createdAt.toISOString(),
+    }));
+  }
+
   async findOne(id: bigint): Promise<UserResponseDto> {
     const user = await this.prisma.user.findUnique({
       where: { id },

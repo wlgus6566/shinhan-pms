@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import {
   AlertCircle,
+  Clock,
   Plus,
   PenLine,
   FolderOpen,
@@ -73,6 +74,18 @@ export function WorkLogList({
     return groups;
   }, [logsForSelectedDate, myTasks]);
 
+  // 선택된 날짜의 총 근무시간 계산
+  const totalHours = useMemo(() => {
+    return logsForSelectedDate.reduce(
+      (sum, log) => sum + (log.workHours || 0),
+      0,
+    );
+  }, [logsForSelectedDate]);
+
+  const REQUIRED_HOURS = 8;
+  const remainingHours = REQUIRED_HOURS - totalHours;
+  const isHoursShort = logsForSelectedDate.length > 0 && remainingHours > 0;
+
   // 모든 업무에 대한 일지가 작성되었는지 체크
   const allTasksLogged = useMemo(() => {
     if (myTasks.length === 0) return false;
@@ -87,10 +100,17 @@ export function WorkLogList({
         <h3 className="font-bold text-slate-800">
           {format(selectedDate, 'M월 d일 (EEEE)', { locale: ko })}
         </h3>
-        <p className="text-sm text-slate-500 mt-0.5">
-          <span className="font-bold">{logsForSelectedDate.length}</span>건의 내
-          업무일지
-        </p>
+        <div className="text-right">
+          <p className="text-sm text-slate-500">
+            <span className="font-bold">{logsForSelectedDate.length}</span>건의 내
+            업무일지
+          </p>
+          {logsForSelectedDate.length > 0 && (
+            <p className={`text-xs mt-0.5 font-medium ${isHoursShort ? 'text-amber-600' : 'text-emerald-600'}`}>
+              총 {totalHours}h / {REQUIRED_HOURS}h
+            </p>
+          )}
+        </div>
         {/* {onCreate && (
           <Button onClick={onCreate} size="sm">
             <Plus className="h-4 w-4 mr-1" />
@@ -110,6 +130,22 @@ export function WorkLogList({
             <p className="text-sm font-medium text-emerald-700">
               오늘의 모든 업무일지를 작성했어요!
             </p>
+          </div>
+        )}
+        {/* 8시간 미달 경고 배너 */}
+        {isHoursShort && (
+          <div className="mb-4 flex items-center gap-2.5 rounded-xl bg-amber-50 border border-amber-200/60 px-4 py-3">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-100">
+              <Clock className="h-4 w-4 text-amber-600" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-amber-700">
+                근무시간이 {remainingHours}시간 부족해요
+              </p>
+              <p className="text-xs text-amber-600/80 mt-0.5">
+                현재 {totalHours}시간 / 필요 {REQUIRED_HOURS}시간
+              </p>
+            </div>
           </div>
         )}
         {logsForSelectedDate.length === 0 ? (

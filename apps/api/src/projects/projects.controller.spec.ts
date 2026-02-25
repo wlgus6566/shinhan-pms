@@ -218,6 +218,7 @@ describe('ProjectsController', () => {
         memberId: '2',
         role: 'PA' as const,
         workArea: 'BACKEND' as const,
+        grade: 'BEGINNER' as const,
       };
       const mockMember = {
         id: 1n,
@@ -237,6 +238,7 @@ describe('ProjectsController', () => {
         BigInt(1),
         addMemberDto,
         BigInt(1),
+        'PM',
       );
     });
   });
@@ -271,6 +273,7 @@ describe('ProjectsController', () => {
         BigInt(2),
         updateRoleDto,
         BigInt(1),
+        'PM',
       );
     });
   });

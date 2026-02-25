@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { UserForm } from '@/components/admin/UserForm';
+import { UserProjectsTable } from '@/components/admin/UserProjectsTable';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,7 +22,7 @@ export default function UserEditPage() {
   const canEdit = user?.role === 'SUPER_ADMIN';
 
   return (
-    <div className="max-w-4xl page-animate">
+    <div className="max-w-7xl page-animate">
       <Button
         variant="ghost"
         className="mb-6 -ml-2 text-slate-500 hover:text-blue-600"
@@ -44,6 +45,18 @@ export default function UserEditPage() {
 
       <Card className="rounded-2xl border-none shadow-md p-4 overflow-hidden">
         <UserForm mode="edit" userId={id as string} />
+      </Card>
+
+      <Card className="rounded-2xl border-none shadow-md p-4 overflow-hidden mt-8">
+        <CardHeader>
+          <CardTitle className="text-lg">프로젝트 투입 이력</CardTitle>
+          <CardDescription>
+            이 멤버가 투입된 프로젝트 목록입니다
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <UserProjectsTable userId={id as string} />
+        </CardContent>
       </Card>
     </div>
   );

@@ -124,6 +124,16 @@ export class UsersController {
     };
   }
 
+  @Get(':id/projects')
+  @Roles('SUPER_ADMIN', 'PM')
+  @ApiOperation({ summary: '사용자 프로젝트 투입 이력 조회' })
+  @ApiResponse({ status: 200, description: '조회 성공' })
+  async findUserProjects(
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.usersService.findUserProjects(BigInt(id));
+  }
+
   @Get(':id')
   @Roles('SUPER_ADMIN', 'PM')
   @ApiOperation({ summary: '사용자 상세 조회 (슈퍼관리자/PM 전용)' })
