@@ -1,0 +1,13 @@
+{
+  "active": false,
+  "mode": "ralplan",
+  "iteration": 1,
+  "max_iterations": 5,
+  "plan_path": ".omc/plans/project-unit-price.md",
+  "current_phase": "complete",
+  "started_at": "2026-02-27T10:00:00.000Z",
+  "completed_at": "2026-02-27T10:15:00.000Z",
+  "task_description": "프로젝트 상세 페이지(/projects/:id)에 '단가 관리' 탭 추가",
+  "verdict": "OKAY",
+  "critic_notes": "3 minor improvements applied: (1) use GetUnitPricesQueryDto in controller, (2) fix orderBy comment, (3) add @db.VarChar(200) to notes"
+}

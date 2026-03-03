@@ -41,9 +41,9 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  @Roles('SUPER_ADMIN')
+  @Roles('SUPER_ADMIN', 'PM')
   @ResponseCode('SUC002')
-  @ApiOperation({ summary: '사용자 생성 (슈퍼관리자 전용)' })
+  @ApiOperation({ summary: '사용자 생성 (슈퍼관리자/PM 전용)' })
   @ApiResponse({
     status: 201,
     description: '사용자가 생성되었습니다',
@@ -124,6 +124,22 @@ export class UsersController {
     };
   }
 
+  @Patch(':id/reset-password')
+  @Roles('SUPER_ADMIN', 'PM')
+  @HttpCode(HttpStatus.OK)
+  @ResponseCode('SUC001')
+  @ApiOperation({ summary: '비밀번호 초기화 (슈퍼관리자/PM 전용)' })
+  @ApiResponse({ status: 200, description: '비밀번호가 초기화되었습니다' })
+  @ApiResponse({ status: 403, description: '권한 없음' })
+  @ApiResponse({ status: 404, description: '사용자 없음' })
+  async resetPassword(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() currentUser: UserResponseDto,
+  ) {
+    await this.usersService.resetPassword(BigInt(id), BigInt(currentUser.id));
+    return null;
+  }
+
   @Get(':id/projects')
   @Roles('SUPER_ADMIN', 'PM')
   @ApiOperation({ summary: '사용자 프로젝트 투입 이력 조회' })
@@ -147,8 +163,8 @@ export class UsersController {
   }
 
   @Patch(':id')
-  @Roles('SUPER_ADMIN')
-  @ApiOperation({ summary: '멤버 정보 수정 (슈퍼관리자 전용)' })
+  @Roles('SUPER_ADMIN', 'PM')
+  @ApiOperation({ summary: '멤버 정보 수정 (슈퍼관리자/PM 전용)' })
   @ApiResponse({ status: 200, description: '수정 성공', type: UserResponseDto })
   @ApiResponse({ status: 400, description: '잘못된 요청' })
   @ApiResponse({ status: 403, description: '권한 없음' })
@@ -166,10 +182,10 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @Roles('SUPER_ADMIN')
+  @Roles('SUPER_ADMIN', 'PM')
   @HttpCode(HttpStatus.OK)
   @ResponseCode('SUC003')
-  @ApiOperation({ summary: '사용자 비활성화 (슈퍼관리자 전용)' })
+  @ApiOperation({ summary: '사용자 비활성화 (슈퍼관리자/PM 전용)' })
   @ApiResponse({ status: 200, description: '비활성화 성공' })
   @ApiResponse({ status: 400, description: '본인 계정 비활성화 불가' })
   @ApiResponse({ status: 403, description: '권한 없음' })

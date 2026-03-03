@@ -63,6 +63,7 @@ export function UserProjectsTable({ userId }: UserProjectsTableProps) {
             <TableHead>담당 분야</TableHead>
             <TableHead>기간</TableHead>
             <TableHead>투입일</TableHead>
+            <TableHead>철수일</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -105,6 +106,9 @@ export function UserProjectsTable({ userId }: UserProjectsTableProps) {
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                   {formatDate(project.createdAt)}
+                </TableCell>
+                <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
+                  {formatDate(project.leaveDate)}
                 </TableCell>
               </TableRow>
             );

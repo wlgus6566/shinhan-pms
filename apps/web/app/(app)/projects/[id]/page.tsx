@@ -8,8 +8,10 @@ import { useProjectMembers } from '@/lib/api/projectMembers';
 import { useTabNavigation } from '@/hooks/useTabNavigation';
 import { ProjectDetail } from '@/components/project/ProjectDetail';
 import { ProjectMembersTable } from '@/components/project/ProjectMembersTable';
+import { ProjectUnitPriceTable } from '@/components/project/ProjectUnitPriceTable';
 import { ProjectDetailSkeleton } from '@/components/project/skeleton/ProjectDetailSkeleton';
 import { TeamWorkLogList } from '@/components/work-log/TeamWorkLogList';
+import { ProjectWbsChart } from '@/components/project/ProjectWbsChart';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -101,7 +103,9 @@ export default function ProjectDetailPage() {
         <TabsList>
           <TabsTrigger value="info">기본 정보</TabsTrigger>
           <TabsTrigger value="members">멤버 관리</TabsTrigger>
+          <TabsTrigger value="unit-prices">단가 관리</TabsTrigger>
           <TabsTrigger value="team-logs">팀 업무일지</TabsTrigger>
+          <TabsTrigger value="wbs">WBS</TabsTrigger>
         </TabsList>
 
         <TabsContent value="info">
@@ -133,8 +137,20 @@ export default function ProjectDetailPage() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="unit-prices">
+          <Card>
+            <CardContent className="pt-6">
+              <ProjectUnitPriceTable projectId={projectId} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="team-logs">
           <TeamWorkLogList projectId={projectId} projectName={project.name} members={members || []} />
+        </TabsContent>
+
+        <TabsContent value="wbs">
+          <ProjectWbsChart projectId={projectId} />
         </TabsContent>
       </Tabs>
     </div>

@@ -35,9 +35,6 @@ import {
   Loader2,
   UserPlus,
   Trash2,
-  Info,
-  ChevronDown,
-  ChevronUp,
 } from 'lucide-react';
 import { AddMemberDialog } from './AddMemberDialog';
 import type {
@@ -64,7 +61,6 @@ export function ProjectMembersTable({
 }: ProjectMembersTableProps) {
   const { user } = useAuth();
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [showPermissions, setShowPermissions] = useState(false);
   const [memberToRemove, setMemberToRemove] = useState<ProjectMember | null>(
     null,
   );
@@ -114,23 +110,7 @@ export function ProjectMembersTable({
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <h3 className="text-lg font-semibold">멤버 목록</h3>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 px-2 text-muted-foreground hover:text-foreground"
-            onClick={() => setShowPermissions((v) => !v)}
-          >
-            <Info className="h-4 w-4 mr-1" />
-            <span className="text-xs">역할별 권한</span>
-            {showPermissions ? (
-              <ChevronUp className="h-3 w-3 ml-1" />
-            ) : (
-              <ChevronDown className="h-3 w-3 ml-1" />
-            )}
-          </Button>
-        </div>
+        <h3 className="text-lg font-semibold">멤버 목록</h3>
         {canManage && (
           <Button
             onClick={() => setAddDialogOpen(true)}
@@ -142,89 +122,6 @@ export function ProjectMembersTable({
           </Button>
         )}
       </div>
-
-      {showPermissions && (
-        <div className="rounded-lg border bg-slate-50 p-4 text-sm">
-          <h4 className="font-semibold text-slate-800 mb-3">
-            역할별 권한 안내
-          </h4>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b">
-                  <th className="pb-2 pr-4 font-medium text-slate-600">기능</th>
-                  <th className="pb-2 px-3 font-medium text-slate-600 text-center">
-                    시스템 관리자
-                  </th>
-                  <th className="pb-2 px-3 font-medium text-slate-600 text-center">
-                    PM
-                  </th>
-                  <th className="pb-2 px-3 font-medium text-slate-600 text-center">
-                    PL
-                  </th>
-                  <th className="pb-2 px-3 font-medium text-slate-600 text-center">
-                    PA
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="text-slate-700">
-                <tr className="border-b border-slate-200">
-                  <td className="py-2 pr-4">멤버 추가/수정/제거</td>
-                  <td className="py-2 px-3 text-center text-emerald-600 font-medium">
-                    O
-                  </td>
-                  <td className="py-2 px-3 text-center text-emerald-600 font-medium">
-                    O
-                  </td>
-                  <td className="py-2 px-3 text-center text-slate-400">-</td>
-                  <td className="py-2 px-3 text-center text-slate-400">-</td>
-                </tr>
-                <tr className="border-b border-slate-200">
-                  <td className="py-2 pr-4">업무 생성/수정/삭제</td>
-                  <td className="py-2 px-3 text-center text-emerald-600 font-medium">
-                    O
-                  </td>
-                  <td className="py-2 px-3 text-center text-emerald-600 font-medium">
-                    O
-                  </td>
-                  <td className="py-2 px-3 text-center text-emerald-600 font-medium">
-                    O
-                  </td>
-                  <td className="py-2 px-3 text-center text-emerald-600 font-medium">
-                    O
-                  </td>
-                </tr>
-                <tr className="border-b border-slate-200">
-                  <td className="py-2 pr-4">업무일지 작성</td>
-                  <td className="py-2 px-3 text-center text-slate-400">-</td>
-                  <td className="py-2 px-3 text-center text-slate-400">-</td>
-                  <td className="py-2 px-3 text-center text-emerald-600 font-medium">
-                    O
-                  </td>
-                  <td className="py-2 px-3 text-center text-emerald-600 font-medium">
-                    O
-                  </td>
-                </tr>
-                <tr>
-                  <td className="py-2 pr-4">프로젝트 일정 생성</td>
-                  <td className="py-2 px-3 text-center text-emerald-600 font-medium">
-                    O
-                  </td>
-                  <td className="py-2 px-3 text-center text-emerald-600 font-medium">
-                    O
-                  </td>
-                  <td className="py-2 px-3 text-center text-emerald-600 font-medium">
-                    O
-                  </td>
-                  <td className="py-2 px-3 text-center text-emerald-600 font-medium">
-                    O
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
 
       <div className="rounded-md border">
         <Table>
@@ -355,6 +252,87 @@ export function ProjectMembersTable({
             )}
           </TableBody>
         </Table>
+      </div>
+
+      <div className="rounded-lg border bg-slate-50 p-4 text-sm">
+        <h4 className="font-semibold text-slate-800 mb-3">
+          역할별 권한 안내
+        </h4>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b">
+                <th className="pb-2 pr-4 font-medium text-slate-600">기능</th>
+                <th className="pb-2 px-3 font-medium text-slate-600 text-center">
+                  시스템 관리자
+                </th>
+                <th className="pb-2 px-3 font-medium text-slate-600 text-center">
+                  PM
+                </th>
+                <th className="pb-2 px-3 font-medium text-slate-600 text-center">
+                  PL
+                </th>
+                <th className="pb-2 px-3 font-medium text-slate-600 text-center">
+                  PA
+                </th>
+              </tr>
+            </thead>
+            <tbody className="text-slate-700">
+              <tr className="border-b border-slate-200">
+                <td className="py-2 pr-4">멤버 추가/수정/제거</td>
+                <td className="py-2 px-3 text-center text-emerald-600 font-medium">
+                  O
+                </td>
+                <td className="py-2 px-3 text-center text-emerald-600 font-medium">
+                  O
+                </td>
+                <td className="py-2 px-3 text-center text-slate-400">-</td>
+                <td className="py-2 px-3 text-center text-slate-400">-</td>
+              </tr>
+              <tr className="border-b border-slate-200">
+                <td className="py-2 pr-4">업무 생성/수정/삭제</td>
+                <td className="py-2 px-3 text-center text-emerald-600 font-medium">
+                  O
+                </td>
+                <td className="py-2 px-3 text-center text-emerald-600 font-medium">
+                  O
+                </td>
+                <td className="py-2 px-3 text-center text-emerald-600 font-medium">
+                  O
+                </td>
+                <td className="py-2 px-3 text-center text-emerald-600 font-medium">
+                  O
+                </td>
+              </tr>
+              <tr className="border-b border-slate-200">
+                <td className="py-2 pr-4">업무일지 작성</td>
+                <td className="py-2 px-3 text-center text-slate-400">-</td>
+                <td className="py-2 px-3 text-center text-slate-400">-</td>
+                <td className="py-2 px-3 text-center text-emerald-600 font-medium">
+                  O
+                </td>
+                <td className="py-2 px-3 text-center text-emerald-600 font-medium">
+                  O
+                </td>
+              </tr>
+              <tr>
+                <td className="py-2 pr-4">프로젝트 일정 생성</td>
+                <td className="py-2 px-3 text-center text-emerald-600 font-medium">
+                  O
+                </td>
+                <td className="py-2 px-3 text-center text-emerald-600 font-medium">
+                  O
+                </td>
+                <td className="py-2 px-3 text-center text-emerald-600 font-medium">
+                  O
+                </td>
+                <td className="py-2 px-3 text-center text-emerald-600 font-medium">
+                  O
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <AddMemberDialog

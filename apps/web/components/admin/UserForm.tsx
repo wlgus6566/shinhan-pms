@@ -9,6 +9,7 @@ import {
   createUser,
   updateUser,
   deactivateUser,
+  resetUserPassword,
   useUser,
 } from '@/lib/api/users';
 import { useAuth } from '@/context/AuthContext';
@@ -26,7 +27,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { CheckCircle2, Loader2, Upload, User } from 'lucide-react';
+import { CheckCircle2, KeyRound, Loader2, Upload, User } from 'lucide-react';
 import {
   DEPARTMENT_OPTIONS,
   USER_ROLE_OPTIONS as ROLE_OPTIONS,
@@ -79,10 +80,11 @@ export function UserForm({ mode, userId }: UserFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
 
-  // 권한 검사: SUPER_ADMIN만 수정 가능
+  // 권한 검사: SUPER_ADMIN, PM 수정 가능
   const canEdit = useMemo(
-    () => currentUser?.role === 'SUPER_ADMIN',
+    () => currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'PM',
     [currentUser?.role],
   );
 
@@ -216,6 +218,22 @@ export function UserForm({ mode, userId }: UserFormProps) {
     }
   }
 
+  async function onResetPassword() {
+    if (!userId) return;
+
+    setIsResettingPassword(true);
+    setError(null);
+    try {
+      await resetUserPassword(userId.toString());
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err: any) {
+      setError(err.message || '비밀번호 초기화에 실패했습니다');
+    } finally {
+      setIsResettingPassword(false);
+    }
+  }
+
   // Edit 모드 로딩 중
   if (mode === 'edit' && isLoading) {
     return (
@@ -235,7 +253,7 @@ export function UserForm({ mode, userId }: UserFormProps) {
       {mode === 'edit' && !canEdit && (
         <Alert className="bg-blue-50 border-blue-200">
           <AlertDescription className="text-blue-700">
-            멤버 정보를 조회할 수 있습니다. 수정은 슈퍼 관리자만 가능합니다.
+            멤버 정보를 조회할 수 있습니다. 수정은 슈퍼 관리자 또는 PM만 가능합니다.
           </AlertDescription>
         </Alert>
       )}
@@ -409,15 +427,52 @@ export function UserForm({ mode, userId }: UserFormProps) {
                 </Button>
               </>
             ) : (
-              canEdit && (
-                <>
+              <>
+                {canEdit && (
                   <Button type="submit" disabled={isSaving}>
                     {isSaving && (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     )}
                     저장
                   </Button>
+                )}
 
+                {canEdit && (
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline">
+                        <KeyRound className="mr-2 h-4 w-4" />
+                        비밀번호 초기화
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>비밀번호 초기화</DialogTitle>
+                        <DialogDescription>
+                          이 사용자의 비밀번호를 초기화하시겠습니까? 비밀번호는{' '}
+                          <strong>password123</strong>으로 재설정되며, 다음
+                          로그인 시 비밀번호 변경이 필요합니다.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => {}}>
+                          취소
+                        </Button>
+                        <Button
+                          onClick={onResetPassword}
+                          disabled={isResettingPassword}
+                        >
+                          {isResettingPassword && (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          )}
+                          초기화
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                )}
+
+                {canEdit && (
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button variant="destructive">비활성화</Button>
@@ -447,8 +502,8 @@ export function UserForm({ mode, userId }: UserFormProps) {
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
-                </>
-              )
+                )}
+              </>
             )}
           </div>
         </form>

@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Body,
   Patch,
   Param,
@@ -33,6 +34,8 @@ import { SchedulesService } from '../schedules/schedules.service';
 import { CreateScheduleDto } from '../schedules/dto/create-schedule.dto';
 import { ResponseCode } from '../common/decorators/response.decorator';
 import { parsePaginationParams, createPaginationMeta } from '../common/helpers/pagination.helper';
+import { SaveUnitPricesDto } from './dto/save-unit-prices.dto';
+import { GetUnitPricesQueryDto } from './dto/get-unit-prices-query.dto';
 
 @ApiTags('Projects')
 @Controller('projects')
@@ -433,6 +436,64 @@ export class ProjectsController {
       dtoWithProject,
     );
     return this.transformSchedule(schedule);
+  }
+
+  // =============================================
+  // 프로젝트 단가 관리 API
+  // =============================================
+
+  @Get(':id/unit-prices')
+  @ApiOperation({ summary: '프로젝트 단가 조회 (년월 기준)' })
+  @ApiParam({ name: 'id', description: '프로젝트 ID' })
+  @ApiResponse({ status: 200, description: '등급별 단가 목록' })
+  async getUnitPrices(
+    @Param('id') id: string,
+    @Query() query: GetUnitPricesQueryDto,
+  ) {
+    const unitPrices = await this.projectsService.getUnitPrices(
+      BigInt(id),
+      query.yearMonth,
+    );
+    return unitPrices.map((up) => this.transformUnitPrice(up));
+  }
+
+  @Get(':id/unit-prices/history')
+  @ApiOperation({ summary: '프로젝트 단가 변경 이력 (최근 6개월)' })
+  @ApiParam({ name: 'id', description: '프로젝트 ID' })
+  @ApiResponse({ status: 200, description: '년월별 단가 이력' })
+  async getUnitPriceHistory(@Param('id') id: string) {
+    return this.projectsService.getUnitPriceHistory(BigInt(id));
+  }
+
+  @Put(':id/unit-prices')
+  @ApiOperation({ summary: '프로젝트 단가 일괄 저장 (upsert)' })
+  @ApiParam({ name: 'id', description: '프로젝트 ID' })
+  @ResponseCode('SUC002')
+  async saveUnitPrices(
+    @CurrentUser() user: any,
+    @Param('id') id: string,
+    @Body() saveDto: SaveUnitPricesDto,
+  ) {
+    const unitPrices = await this.projectsService.saveUnitPrices(
+      BigInt(id),
+      saveDto.yearMonth,
+      saveDto.items,
+      BigInt(user.id),
+      user.role,
+    );
+    return unitPrices.map((up) => this.transformUnitPrice(up));
+  }
+
+  private transformUnitPrice(unitPrice: any) {
+    return {
+      id: unitPrice.id.toString(),
+      projectId: unitPrice.projectId.toString(),
+      grade: unitPrice.grade,
+      yearMonth: unitPrice.yearMonth,
+      unitPrice: unitPrice.unitPrice,
+      notes: unitPrice.notes,
+      updatedAt: unitPrice.updatedAt?.toISOString() ?? null,
+    };
   }
 
   /**

@@ -897,7 +897,7 @@ export class WorkLogsService {
             department: WORK_AREA_LABELS[pm.workArea] || pm.workArea,
             role: pm.role,
             name: pm.member.name,
-            grade: GRADE_LABELS[pm.member.grade] || pm.member.grade,
+            grade: GRADE_LABELS[pm.grade] || pm.grade,
             tasks: [],
             totalMonthlyHours: 0,
           });
@@ -1110,8 +1110,9 @@ export class WorkLogsService {
         { width: 8 }, // J: 3주차
         { width: 8 }, // K: 4주차
         { width: 12 }, // L: 업무별 투입시간
-        { width: 15 }, // M: 월 공수
-        { width: 12 }, // N: 일평균
+        { width: 12 }, // M: 업무 진행 건수
+        { width: 15 }, // N: 월 공수
+        { width: 12 }, // O: 일평균
       ];
 
       // 헤더 영역
@@ -1120,7 +1121,7 @@ export class WorkLogsService {
 
       // 2행: 제목
       const titleRow = worksheet.addRow(['투입인력별 상세 업무현황']);
-      worksheet.mergeCells(2, 1, 2, 14);
+      worksheet.mergeCells(2, 1, 2, 15);
       titleRow.getCell(1).font = { name: 'Arial', size: 16, bold: true };
       titleRow.getCell(1).alignment = {
         horizontal: 'left',
@@ -1129,8 +1130,8 @@ export class WorkLogsService {
 
       // 3행: 정상근무 시간
       const normalHoursRow = worksheet.addRow([]);
-      normalHoursRow.getCell(14).value = '정상근무 160시간';
-      normalHoursRow.getCell(14).font = { name: 'Arial', size: 11, bold: true };
+      normalHoursRow.getCell(15).value = '정상근무 160시간';
+      normalHoursRow.getCell(15).font = { name: 'Arial', size: 11, bold: true };
 
       // 4행: 컬럼 헤더
       const headers = [
@@ -1146,6 +1147,7 @@ export class WorkLogsService {
         '3주차',
         '4주차',
         '업무별 투입시간',
+        '업무 진행 건수\n(실무기준)',
         `${month}월 공수\n(m/h)`,
         '일평균 근무시간',
       ];
@@ -1186,6 +1188,10 @@ export class WorkLogsService {
       for (const employee of employees) {
         const startRow = currentRow;
         const taskCount = employee.tasks.length;
+        // 업무 진행 건수: 휴가를 제외한 실무 업무 수
+        const taskProgressCount = employee.tasks.filter(
+          (t) => t.taskName !== '휴가',
+        ).length;
 
         // 담당업무별 행 범위 추적
         if (!deptRowRanges.has(employee.department)) {
@@ -1215,12 +1221,13 @@ export class WorkLogsService {
             task.weeklyHours.week3 || '',
             task.weeklyHours.week4 || '',
             { formula: `SUM(H${currentRow}:K${currentRow})` },
+            isFirstRow ? taskProgressCount : '',
             isFirstRow
               ? taskCount === 1
                 ? { formula: `L${currentRow}` }
                 : { formula: `SUM(L${startRow}:L${startRow + taskCount - 1})` }
               : '',
-            isFirstRow ? { formula: `M${currentRow}/20` } : '',
+            isFirstRow ? { formula: `N${currentRow}/20` } : '',
           ]);
 
           // 스타일 적용
@@ -1255,11 +1262,12 @@ export class WorkLogsService {
           worksheet.mergeCells(startRow, 2, startRow + taskCount - 1, 2); // 역할
           worksheet.mergeCells(startRow, 3, startRow + taskCount - 1, 3); // 이름
           worksheet.mergeCells(startRow, 4, startRow + taskCount - 1, 4); // 등급
-          worksheet.mergeCells(startRow, 13, startRow + taskCount - 1, 13); // 월 공수
-          worksheet.mergeCells(startRow, 14, startRow + taskCount - 1, 14); // 일평균
+          worksheet.mergeCells(startRow, 13, startRow + taskCount - 1, 13); // 업무 진행 건수
+          worksheet.mergeCells(startRow, 14, startRow + taskCount - 1, 14); // 월 공수
+          worksheet.mergeCells(startRow, 15, startRow + taskCount - 1, 15); // 일평균
 
           // 병합된 셀 정렬
-          [2, 3, 4, 13, 14].forEach((col) => {
+          [2, 3, 4, 13, 14, 15].forEach((col) => {
             const cell = worksheet.getCell(startRow, col);
             cell.alignment = { horizontal: 'center', vertical: 'middle' };
           });
@@ -1331,8 +1339,10 @@ export class WorkLogsService {
     });
 
     const memberWorkAreaMap = new Map<string, string>();
+    const memberGradeMap = new Map<string, string>();
     for (const pm of projectMembers) {
       memberWorkAreaMap.set(pm.memberId.toString(), pm.workArea);
+      memberGradeMap.set(pm.memberId.toString(), pm.grade);
     }
 
     // 6. 한글 변환 맵
@@ -1464,7 +1474,7 @@ export class WorkLogsService {
           userId: userKey,
           userName: log.user.name,
           workArea: WORK_AREA_LABELS[memberWorkArea] || memberWorkArea,
-          grade: GRADE_LABELS[log.user.grade] || log.user.grade,
+          grade: GRADE_LABELS[memberGradeMap.get(userKey) || ''] || memberGradeMap.get(userKey) || '',
           details: [],
           weeklyHours: { week1: 0, week2: 0, week3: 0, week4: 0 },
           totalHours: 0,

@@ -340,6 +340,139 @@ export class ProjectsService {
   }
 
   // =============================================
+  // 프로젝트 단가 관리
+  // =============================================
+
+  /**
+   * 프로젝트 단가 조회 (년월 기준)
+   */
+  async getUnitPrices(projectId: bigint, yearMonth: string) {
+    await this.findOne(projectId);
+
+    const unitPrices = await this.prisma.projectUnitPrice.findMany({
+      where: {
+        projectId,
+        yearMonth,
+        isActive: true,
+      },
+    });
+
+    return unitPrices;
+  }
+
+  /**
+   * 프로젝트 단가 일괄 저장 (soft-delete 후 새로 생성하여 이력 보존)
+   */
+  async saveUnitPrices(
+    projectId: bigint,
+    yearMonth: string,
+    items: Array<{ grade: string; unitPrice: number; notes?: string | null }>,
+    userId: bigint,
+    userRole: string,
+  ) {
+    await this.findOne(projectId);
+    await this.checkMemberManagePermission(projectId, userId, userRole);
+
+    const result = await this.prisma.$transaction(async (tx) => {
+      // 기존 활성 레코드 비활성화 (이력 보존)
+      await tx.projectUnitPrice.updateMany({
+        where: { projectId, yearMonth, isActive: true },
+        data: { isActive: false, updatedBy: userId },
+      });
+
+      // 새 레코드 생성
+      await tx.projectUnitPrice.createMany({
+        data: items.map((item) => ({
+          projectId,
+          grade: item.grade,
+          yearMonth,
+          unitPrice: item.unitPrice,
+          notes: item.notes ?? null,
+          createdBy: userId,
+          updatedBy: userId,
+        })),
+      });
+
+      // 새로 생성된 활성 레코드 반환
+      return tx.projectUnitPrice.findMany({
+        where: { projectId, yearMonth, isActive: true },
+      });
+    });
+
+    return result;
+  }
+
+  /**
+   * 프로젝트 단가 변경 이력 (모든 수정 이력 포함)
+   * - 매 저장마다 이전 레코드를 soft-delete하므로 비활성 레코드 = 과거 이력
+   * - createdAt 기준으로 그룹핑하여 저장 단위별로 표시
+   */
+  async getUnitPriceHistory(projectId: bigint) {
+    await this.findOne(projectId);
+
+    // 모든 레코드 조회 (비활성 포함 = 과거 이력)
+    const allPrices = await this.prisma.projectUnitPrice.findMany({
+      where: { projectId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (allPrices.length === 0) return [];
+
+    // 사용자 이름 조회
+    const userIds = [...new Set(allPrices.map((up) => up.createdBy).filter(Boolean))];
+    const users = userIds.length > 0
+      ? await this.prisma.user.findMany({
+          where: { id: { in: userIds as bigint[] } },
+          select: { id: true, name: true },
+        })
+      : [];
+    const userMap = new Map(users.map((u) => [u.id.toString(), u.name]));
+
+    // createdAt + yearMonth 기준 그룹핑 (동일 트랜잭션에서 생성된 레코드는 같은 createdAt)
+    type RowData = {
+      yearMonth: string;
+      EXPERT: number | null;
+      ADVANCED: number | null;
+      INTERMEDIATE: number | null;
+      BEGINNER: number | null;
+      updatedByName: string | null;
+      createdAt: string;
+    };
+
+    const batchMap = new Map<string, RowData>();
+
+    for (const up of allPrices) {
+      // 같은 트랜잭션의 레코드를 묶기 위해 createdAt을 초 단위로 키 사용
+      const batchKey = `${up.yearMonth}_${up.createdAt.toISOString()}`;
+
+      if (!batchMap.has(batchKey)) {
+        batchMap.set(batchKey, {
+          yearMonth: up.yearMonth,
+          EXPERT: null,
+          ADVANCED: null,
+          INTERMEDIATE: null,
+          BEGINNER: null,
+          updatedByName: null,
+          createdAt: up.createdAt.toISOString(),
+        });
+      }
+
+      const row = batchMap.get(batchKey)!;
+      if (up.grade === 'EXPERT' || up.grade === 'ADVANCED' || up.grade === 'INTERMEDIATE' || up.grade === 'BEGINNER') {
+        row[up.grade] = up.unitPrice;
+      }
+      if (!row.updatedByName) {
+        row.updatedByName = userMap.get(up.createdBy.toString()) ?? null;
+      }
+    }
+
+    // createdAt 내림차순 정렬, 최근 20건 제한
+    return Array.from(batchMap.values())
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .slice(0, 20);
+  }
+
+  // =============================================
   // 프로젝트 멤버 관리
   // =============================================
 

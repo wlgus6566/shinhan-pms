@@ -46,6 +46,12 @@ export async function deactivateUser(id: string | number): Promise<void> {
   });
 }
 
+export async function resetUserPassword(id: string | number): Promise<void> {
+  return fetcher<void>(`/api/users/${id}/reset-password`, {
+    method: 'PATCH',
+  });
+}
+
 // ============================================================================
 // SWR Hooks
 // ============================================================================
@@ -109,6 +115,8 @@ export interface UserProjectAssignment {
   workArea: string;
   startDate: string | null;
   endDate: string | null;
+  joinDate: string | null;
+  leaveDate: string | null;
   createdAt: string;
 }
 

@@ -52,14 +52,12 @@ export function MonthlyTaskReportExportButton({
         ) : (
           <>
             <Download className="w-3.5 h-3.5 mr-1.5" />
-            {month}월 업무별공수 다운로드
+            {month}월 업무별공수투입현황
           </>
         )}
       </Button>
       {error && (
-        <span className="text-xs text-destructive self-center">
-          {error}
-        </span>
+        <span className="text-xs text-destructive self-center">{error}</span>
       )}
     </div>
   );

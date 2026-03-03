@@ -19,7 +19,7 @@ export default function UserEditPage() {
   const router = useRouter();
   const { user } = useAuth();
 
-  const canEdit = user?.role === 'SUPER_ADMIN';
+  const canEdit = user?.role === 'SUPER_ADMIN' || user?.role === 'PM';
 
   return (
     <div className="max-w-7xl page-animate">

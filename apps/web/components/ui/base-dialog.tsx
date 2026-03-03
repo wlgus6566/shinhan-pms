@@ -11,7 +11,7 @@ import {
 export interface BaseDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   title: string;
   description?: string;
   children: React.ReactNode;
@@ -39,6 +39,7 @@ export function BaseDialog({
           size === 'sm' && 'sm:max-w-[500px]',
           size === 'md' && 'sm:max-w-[600px]',
           size === 'lg' && 'sm:max-w-2xl',
+          size === 'xl' && 'sm:max-w-4xl',
           className,
         )}
       >

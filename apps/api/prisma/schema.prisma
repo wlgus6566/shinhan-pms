@@ -25,6 +25,7 @@ model Project {
   taskTypes   ProjectTaskType[]
   schedules   Schedule[]
   tasks       Task[]
+  unitPrices  ProjectUnitPrice[]
 
   @@index([projectName], map: "idx_projects_name")
   @@index([client], map: "idx_projects_client")
@@ -152,13 +153,15 @@ model Task {
 }
 
 model TaskAssignee {
-  id        BigInt   @id @default(autoincrement())
-  taskId    BigInt   @map("task_id")
-  userId    BigInt   @map("user_id")
-  workArea  String   @map("work_area") @db.VarChar(30)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
-  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        BigInt    @id @default(autoincrement())
+  taskId    BigInt    @map("task_id")
+  userId    BigInt    @map("user_id")
+  workArea  String    @map("work_area") @db.VarChar(30)
+  startDate DateTime? @map("start_date") @db.Timestamp(6)
+  endDate   DateTime? @map("end_date") @db.Timestamp(6)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  task      Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([taskId, userId, workArea], map: "unique_task_user_workarea")
   @@index([taskId], map: "idx_task_assignees_task_id")
@@ -242,4 +245,24 @@ model ScheduleParticipant {
   @@index([scheduleId], map: "idx_schedule_participants_schedule_id")
   @@index([userId], map: "idx_schedule_participants_user_id")
   @@map("schedule_participants")
+}
+
+model ProjectUnitPrice {
+  id        BigInt    @id @default(autoincrement())
+  projectId BigInt    @map("project_id")
+  grade     String    @db.VarChar(20)
+  yearMonth String    @map("year_month") @db.VarChar(7)
+  unitPrice Int       @map("unit_price")
+  notes     String?   @db.VarChar(200)
+  isActive  Boolean   @default(true) @map("is_active")
+  createdBy BigInt    @map("created_by")
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedBy BigInt?   @map("updated_by")
+  updatedAt DateTime? @updatedAt @map("updated_at") @db.Timestamp(6)
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId], map: "idx_project_unit_prices_project_id")
+  @@index([projectId, yearMonth], map: "idx_project_unit_prices_project_year_month")
+  @@index([projectId, yearMonth, isActive], map: "idx_project_unit_prices_active")
+  @@map("project_unit_prices")
 }

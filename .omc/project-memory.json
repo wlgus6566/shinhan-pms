@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1771940532473,
+  "lastScanned": 1772495153733,
   "projectRoot": "/Users/jihyeon/cursor/shinhan-pms",
   "techStack": {
     "languages": [
@@ -62,14 +62,14 @@
       "path": "apps",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1771940532403,
+      "lastAccessed": 1772495153574,
       "keyFiles": []
     },
     "artifacts": {
       "path": "artifacts",
       "purpose": null,
       "fileCount": 3,
-      "lastAccessed": 1771940532403,
+      "lastAccessed": 1772495153575,
       "keyFiles": [
         "ai-driven-workflow.md",
         "prd.md",
@@ -80,7 +80,7 @@
       "path": "docs",
       "purpose": "Documentation",
       "fileCount": 4,
-      "lastAccessed": 1771940532403,
+      "lastAccessed": 1772495153581,
       "keyFiles": [
         "README.md",
         "outlook-calendar-integration.md",
@@ -92,14 +92,14 @@
       "path": "packages",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1771940532403,
+      "lastAccessed": 1772495153584,
       "keyFiles": []
     },
     "apps/api": {
       "path": "apps/api",
       "purpose": "API routes",
       "fileCount": 13,
-      "lastAccessed": 1771940532404,
+      "lastAccessed": 1772495153585,
       "keyFiles": [
         "Dockerfile",
         "README.md",

@@ -1,6 +1,15 @@
 import { z } from 'zod';
 import { TaskDifficultyEnum } from '../common/enums';
 
+export const TaskAssigneeInputSchema = z.object({
+  userId: z.number().int().positive(),
+  workArea: z.string(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+});
+
+export type TaskAssigneeInput = z.infer<typeof TaskAssigneeInputSchema>;
+
 export const CreateTaskSchema = z.object({
   taskName: z
     .string()
@@ -16,6 +25,7 @@ export const CreateTaskSchema = z.object({
     .max(100, '담당 RM은 최대 100자까지 입력 가능합니다')
     .optional(),
   taskTypeId: z.number().int().positive('업무 구분을 선택해주세요'),
+  assignees: z.array(TaskAssigneeInputSchema).optional(),
   planningAssigneeIds: z.array(z.number().int().positive()).optional(),
   designAssigneeIds: z.array(z.number().int().positive()).optional(),
   frontendAssigneeIds: z.array(z.number().int().positive()).optional(),

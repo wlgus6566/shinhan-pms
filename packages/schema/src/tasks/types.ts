@@ -10,6 +10,11 @@ import { UserBasicInfoSchema, UserDetailInfoSchema, AuditFieldsSchema } from '..
 // Task Response
 // ============================================
 
+export interface TaskAssigneeInfo extends UserDetailInfo {
+  startDate?: string;
+  endDate?: string;
+}
+
 export interface Task {
   id: string;
   projectId: string;
@@ -23,10 +28,11 @@ export interface Task {
     name: string;
     description?: string;
   };
-  planningAssignees?: UserDetailInfo[];
-  designAssignees?: UserDetailInfo[];
-  frontendAssignees?: UserDetailInfo[];
-  backendAssignees?: UserDetailInfo[];
+  planningAssignees?: TaskAssigneeInfo[];
+  designAssignees?: TaskAssigneeInfo[];
+  publishingAssignees?: TaskAssigneeInfo[];
+  frontendAssignees?: TaskAssigneeInfo[];
+  backendAssignees?: TaskAssigneeInfo[];
   status: string;
   startDate?: string;
   endDate?: string;
@@ -35,6 +41,11 @@ export interface Task {
   createdAt: string;
   updatedAt?: string;
 }
+
+export const TaskAssigneeInfoSchema = UserDetailInfoSchema.extend({
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+});
 
 export const TaskSchema = z
   .object({
@@ -50,10 +61,11 @@ export const TaskSchema = z
       name: z.string(),
       description: z.string().optional(),
     }).optional(),
-    planningAssignees: z.array(UserDetailInfoSchema).optional(),
-    designAssignees: z.array(UserDetailInfoSchema).optional(),
-    frontendAssignees: z.array(UserDetailInfoSchema).optional(),
-    backendAssignees: z.array(UserDetailInfoSchema).optional(),
+    planningAssignees: z.array(TaskAssigneeInfoSchema).optional(),
+    designAssignees: z.array(TaskAssigneeInfoSchema).optional(),
+    publishingAssignees: z.array(TaskAssigneeInfoSchema).optional(),
+    frontendAssignees: z.array(TaskAssigneeInfoSchema).optional(),
+    backendAssignees: z.array(TaskAssigneeInfoSchema).optional(),
     status: z.string(),
     startDate: z.string().optional(),
     endDate: z.string().optional(),

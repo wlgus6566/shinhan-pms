@@ -135,6 +135,8 @@ export class UsersService {
       workArea: pm.workArea,
       startDate: pm.project.startDate?.toISOString() || null,
       endDate: pm.project.endDate?.toISOString() || null,
+      joinDate: pm.joinDate?.toISOString() || null,
+      leaveDate: pm.leaveDate?.toISOString() || null,
       createdAt: pm.createdAt.toISOString(),
     }));
   }
@@ -178,6 +180,25 @@ export class UsersService {
       where: { id },
       data: {
         isActive: false,
+        updatedBy: currentUserId,
+        updatedAt: new Date(),
+      },
+    });
+  }
+
+  async resetPassword(id: bigint, currentUserId: bigint): Promise<void> {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다');
+    }
+
+    const passwordHash = await bcrypt.hash('password123', 12);
+
+    await this.prisma.user.update({
+      where: { id },
+      data: {
+        passwordHash,
+        requirePasswordChange: true,
         updatedBy: currentUserId,
         updatedAt: new Date(),
       },

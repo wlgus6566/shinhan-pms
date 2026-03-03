@@ -10,6 +10,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  StreamableFile,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -26,7 +27,7 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 import { TaskResponseDto } from './dto/task-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { ResponseCode } from '../common/decorators/response.decorator';
+import { ResponseCode, SkipResponseWrapper } from '../common/decorators/response.decorator';
 import { parsePaginationParams, createPaginationMeta } from '../common/helpers/pagination.helper';
 
 @ApiTags('Tasks')
@@ -105,6 +106,51 @@ export class TasksController {
     };
   }
 
+  @Get('projects/:projectId/tasks/export-wbs')
+  @SkipResponseWrapper()
+  @ApiOperation({ summary: 'WBS 공정표 엑셀 다운로드' })
+  @ApiParam({ name: 'projectId', description: '프로젝트 ID' })
+  @ApiQuery({
+    name: 'startDate',
+    description: '시작일 (YYYY-MM-DD)',
+    required: true,
+  })
+  @ApiQuery({
+    name: 'endDate',
+    description: '종료일 (YYYY-MM-DD)',
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'WBS 공정표 엑셀 파일',
+  })
+  @ApiResponse({ status: 400, description: '잘못된 요청' })
+  @ApiResponse({ status: 404, description: '프로젝트를 찾을 수 없습니다' })
+  async exportWbs(
+    @Param('projectId') projectId: string,
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+  ): Promise<StreamableFile> {
+    if (!startDate || !endDate) {
+      throw new Error('시작일과 종료일을 입력해주세요');
+    }
+
+    const { buffer, projectName } = await this.tasksService.generateWbsExcel(
+      BigInt(projectId),
+      startDate,
+      endDate,
+    );
+
+    const filename = `${projectName}_WBS_공정표_${startDate}_${endDate}.xlsx`;
+    const asciiFilename = `wbs_${startDate}_${endDate}.xlsx`;
+    const encodedFilename = encodeURIComponent(filename);
+
+    return new StreamableFile(buffer, {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      disposition: `attachment; filename="${asciiFilename}"; filename*=UTF-8''${encodedFilename}`,
+    });
+  }
+
   @Get('tasks/:id')
   @ApiOperation({ summary: '업무 상세 조회' })
   @ApiParam({ name: 'id', description: '업무 ID' })
@@ -180,6 +226,8 @@ export class TasksController {
           department: a.user.department,
           position: a.user.position,
           role: a.user.role,
+          startDate: a.startDate ? a.startDate.toISOString().split('T')[0] : null,
+          endDate: a.endDate ? a.endDate.toISOString().split('T')[0] : null,
         })) || [],
       designAssignees: assignees
         ?.filter((a: any) => a.workArea === 'DESIGN')
@@ -190,6 +238,8 @@ export class TasksController {
           department: a.user.department,
           position: a.user.position,
           role: a.user.role,
+          startDate: a.startDate ? a.startDate.toISOString().split('T')[0] : null,
+          endDate: a.endDate ? a.endDate.toISOString().split('T')[0] : null,
         })) || [],
       frontendAssignees: assignees
         ?.filter((a: any) => a.workArea === 'FRONTEND')
@@ -200,6 +250,8 @@ export class TasksController {
           department: a.user.department,
           position: a.user.position,
           role: a.user.role,
+          startDate: a.startDate ? a.startDate.toISOString().split('T')[0] : null,
+          endDate: a.endDate ? a.endDate.toISOString().split('T')[0] : null,
         })) || [],
       backendAssignees: assignees
         ?.filter((a: any) => a.workArea === 'BACKEND')
@@ -210,6 +262,8 @@ export class TasksController {
           department: a.user.department,
           position: a.user.position,
           role: a.user.role,
+          startDate: a.startDate ? a.startDate.toISOString().split('T')[0] : null,
+          endDate: a.endDate ? a.endDate.toISOString().split('T')[0] : null,
         })) || [],
     };
   }

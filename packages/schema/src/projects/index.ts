@@ -9,3 +9,4 @@ export * from './update-project-task-type.schema';
 
 // Response Types
 export * from './types';
+export * from './unit-price.schema';
