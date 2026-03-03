@@ -44,7 +44,7 @@ jobs:
             echo "=== Build & Deploy API ==="
             cd apps/api
             pnpm prisma:generate
-            npx prisma migrate deploy
+            npx prisma db push --skip-generate
             pnpm build
             pm2 restart pms-api || pm2 start dist/src/main.js --name pms-api
             cd ~/pms
