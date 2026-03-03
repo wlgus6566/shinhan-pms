@@ -45,10 +45,10 @@ export async function exportWbsExcel(
   params.append('startDate', startDate);
   params.append('endDate', endDate);
 
-  const url = `/api/projects/${projectId}/tasks/export-wbs?${params.toString()}`;
+  const url = `/proxy-api/projects/${projectId}/tasks/export-wbs?${params.toString()}`;
   const token = localStorage.getItem('accessToken');
 
-  const response = await fetch(process.env.NEXT_PUBLIC_API_URL + url, {
+  const response = await fetch(url, {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${token}`,

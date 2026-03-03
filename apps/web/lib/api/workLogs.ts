@@ -90,10 +90,10 @@ export async function exportWeeklyReport(
   params.append('month', weekInfo.month.toString());
   params.append('weekNumber', weekInfo.weekNumber.toString());
 
-  const url = `/api/projects/${projectId}/work-logs/export?${params.toString()}`;
+  const url = `/proxy-api/projects/${projectId}/work-logs/export?${params.toString()}`;
   const token = localStorage.getItem('accessToken');
 
-  const response = await fetch(process.env.NEXT_PUBLIC_API_URL + url, {
+  const response = await fetch(url, {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${token}`,
@@ -135,10 +135,10 @@ export async function exportMonthlyStaffReport(
   params.append('year', year.toString());
   params.append('month', month.toString());
 
-  const url = `/api/projects/${projectId}/work-logs/export-monthly?${params.toString()}`;
+  const url = `/proxy-api/projects/${projectId}/work-logs/export-monthly?${params.toString()}`;
   const token = localStorage.getItem('accessToken');
 
-  const response = await fetch(process.env.NEXT_PUBLIC_API_URL + url, {
+  const response = await fetch(url, {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${token}`,
@@ -178,10 +178,10 @@ export async function exportMonthlyTaskReport(
   params.append('year', year.toString());
   params.append('month', month.toString());
 
-  const url = `/api/projects/${projectId}/work-logs/export-monthly-task?${params.toString()}`;
+  const url = `/proxy-api/projects/${projectId}/work-logs/export-monthly-task?${params.toString()}`;
   const token = localStorage.getItem('accessToken');
 
-  const response = await fetch(process.env.NEXT_PUBLIC_API_URL + url, {
+  const response = await fetch(url, {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${token}`,
