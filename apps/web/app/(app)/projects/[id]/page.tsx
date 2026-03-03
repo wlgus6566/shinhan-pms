@@ -103,7 +103,7 @@ export default function ProjectDetailPage() {
         <TabsList>
           <TabsTrigger value="info">기본 정보</TabsTrigger>
           <TabsTrigger value="members">멤버 관리</TabsTrigger>
-          <TabsTrigger value="unit-prices">단가 관리</TabsTrigger>
+          {canEdit && <TabsTrigger value="unit-prices">단가 관리</TabsTrigger>}
           <TabsTrigger value="team-logs">팀 업무일지</TabsTrigger>
           <TabsTrigger value="wbs">WBS</TabsTrigger>
         </TabsList>
@@ -137,13 +137,15 @@ export default function ProjectDetailPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="unit-prices">
-          <Card>
-            <CardContent className="pt-6">
-              <ProjectUnitPriceTable projectId={projectId} />
-            </CardContent>
-          </Card>
-        </TabsContent>
+        {canEdit && (
+          <TabsContent value="unit-prices">
+            <Card>
+              <CardContent className="pt-6">
+                <ProjectUnitPriceTable projectId={projectId} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
 
         <TabsContent value="team-logs">
           <TeamWorkLogList projectId={projectId} projectName={project.name} members={members || []} />

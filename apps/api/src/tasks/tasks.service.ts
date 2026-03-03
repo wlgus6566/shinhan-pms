@@ -310,6 +310,12 @@ export class TasksService {
             },
           },
         },
+        taskType: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
   }

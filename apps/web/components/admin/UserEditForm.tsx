@@ -12,6 +12,7 @@ import { Form } from '@/components/ui/form';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -196,9 +197,9 @@ export function UserEditForm({ userId }: { userId: string }) {
                     </DialogDescription>
                   </DialogHeader>
                   <DialogFooter>
-                    <Button variant="outline" onClick={() => {}}>
-                      취소
-                    </Button>
+                    <DialogClose asChild>
+                      <Button variant="outline">취소</Button>
+                    </DialogClose>
                     <Button
                       variant="destructive"
                       onClick={onDeactivate}

@@ -207,16 +207,18 @@ export class TasksController {
   }
 
   private transformTask(task: any): any {
-    const { assignees, ...rest } = task;
+    const { assignees, taskType, ...rest } = task;
     return {
       ...rest,
       id: rest.id.toString(),
       projectId: rest.projectId.toString(),
+      taskTypeId: rest.taskTypeId?.toString() ?? null,
       createdBy: rest.createdBy?.toString(),
       updatedBy: rest.updatedBy?.toString(),
       startDate: rest.startDate ? rest.startDate.toISOString().split('T')[0] : null,
       endDate: rest.endDate ? rest.endDate.toISOString().split('T')[0] : null,
       openDate: rest.openDate ? rest.openDate.toISOString() : null,
+      taskType: taskType ? { id: taskType.id.toString(), name: taskType.name } : null,
       planningAssignees: assignees
         ?.filter((a: any) => a.workArea === 'PLANNING')
         .map((a: any) => ({

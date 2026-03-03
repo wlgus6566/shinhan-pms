@@ -20,6 +20,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -455,9 +456,9 @@ export function UserForm({ mode, userId }: UserFormProps) {
                         </DialogDescription>
                       </DialogHeader>
                       <DialogFooter>
-                        <Button variant="outline" onClick={() => {}}>
-                          취소
-                        </Button>
+                        <DialogClose asChild>
+                          <Button variant="outline">취소</Button>
+                        </DialogClose>
                         <Button
                           onClick={onResetPassword}
                           disabled={isResettingPassword}
@@ -486,9 +487,9 @@ export function UserForm({ mode, userId }: UserFormProps) {
                         </DialogDescription>
                       </DialogHeader>
                       <DialogFooter>
-                        <Button variant="outline" onClick={() => {}}>
-                          취소
-                        </Button>
+                        <DialogClose asChild>
+                          <Button variant="outline">취소</Button>
+                        </DialogClose>
                         <Button
                           variant="destructive"
                           onClick={onDeactivate}
