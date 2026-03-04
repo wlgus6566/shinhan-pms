@@ -130,19 +130,23 @@ export class TasksController {
     @Param('projectId') projectId: string,
     @Query('startDate') startDate: string,
     @Query('endDate') endDate: string,
+    @Query('flat') flat?: string,
   ): Promise<StreamableFile> {
     if (!startDate || !endDate) {
       throw new Error('시작일과 종료일을 입력해주세요');
     }
 
+    const isFlat = flat === 'true';
     const { buffer, projectName } = await this.tasksService.generateWbsExcel(
       BigInt(projectId),
       startDate,
       endDate,
+      isFlat,
     );
 
-    const filename = `${projectName}_WBS_공정표_${startDate}_${endDate}.xlsx`;
-    const asciiFilename = `wbs_${startDate}_${endDate}.xlsx`;
+    const flatSuffix = isFlat ? '_병합해제' : '';
+    const filename = `${projectName}_WBS_공정표_${startDate}_${endDate}${flatSuffix}.xlsx`;
+    const asciiFilename = `wbs_${startDate}_${endDate}${isFlat ? '_flat' : ''}.xlsx`;
     const encodedFilename = encodeURIComponent(filename);
 
     return new StreamableFile(buffer, {

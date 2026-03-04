@@ -8,13 +8,16 @@ import {
   type TaskDifficulty,
 } from '@/types/task';
 import { DifficultyIndicator } from '@/components/ui/difficulty-indicator';
+import { PenLine, Edit } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface MyTaskListProps {
   tasks: MyTask[];
+  loggedTaskIds?: Set<string>;
+  onTaskClick?: (task: MyTask) => void;
 }
 
-export function MyTaskList({ tasks }: MyTaskListProps) {
+export function MyTaskList({ tasks, loggedTaskIds, onTaskClick }: MyTaskListProps) {
   if (tasks.length === 0) {
     return (
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
@@ -37,11 +40,13 @@ export function MyTaskList({ tasks }: MyTaskListProps) {
       <div className="max-h-[412px] overflow-y-auto">
         {tasks.map((task) => {
           return (
-            <div
+            <button
+              type="button"
               key={task.id}
               className={cn(
-                'w-full px-6 pt-2 py-3 text-left border-b border-slate-100 last:border-b-0 transition-colors hover:bg-slate-50 ',
+                'group/task w-full px-6 pt-2 py-3 text-left border-b border-slate-100 last:border-b-0 transition-colors hover:bg-slate-50 cursor-pointer',
               )}
+              onClick={() => onTaskClick?.(task)}
             >
               <div className="flex items-start gap-3">
                 <div className="flex-1 min-w-0">
@@ -64,8 +69,19 @@ export function MyTaskList({ tasks }: MyTaskListProps) {
                     )}
                   </div>
                 </div>
+                {loggedTaskIds?.has(task.id) ? (
+                  <span className="flex items-center gap-1 text-xs text-slate-400 group-hover/task:text-blue-500 font-medium shrink-0 mt-0.5 transition-colors">
+                    <Edit className="h-3 w-3" />
+                    일지 수정
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1 text-xs text-slate-400 group-hover/task:text-blue-500 font-medium shrink-0 mt-0.5 transition-colors">
+                    <PenLine className="h-3 w-3" />
+                    일지 작성
+                  </span>
+                )}
               </div>
-            </div>
+            </button>
           );
         })}
       </div>

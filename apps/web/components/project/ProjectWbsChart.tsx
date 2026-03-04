@@ -296,18 +296,21 @@ export function ProjectWbsChart({ projectId }: ProjectWbsChartProps) {
   ]);
 
   // ------ Excel Download ------
-  const handleExportExcel = useCallback(async () => {
-    try {
-      setIsExporting(true);
-      const startStr = format(appliedFilters.startDate, 'yyyy-MM-dd');
-      const endStr = format(appliedFilters.endDate, 'yyyy-MM-dd');
-      await exportWbsExcel(projectId, startStr, endStr);
-    } catch {
-      toast.error('엑셀 다운로드에 실패했습니다');
-    } finally {
-      setIsExporting(false);
-    }
-  }, [projectId, appliedFilters.startDate, appliedFilters.endDate]);
+  const handleExportExcel = useCallback(
+    async (flat = false) => {
+      try {
+        setIsExporting(true);
+        const startStr = format(appliedFilters.startDate, 'yyyy-MM-dd');
+        const endStr = format(appliedFilters.endDate, 'yyyy-MM-dd');
+        await exportWbsExcel(projectId, startStr, endStr, flat);
+      } catch {
+        toast.error('엑셀 다운로드에 실패했습니다');
+      } finally {
+        setIsExporting(false);
+      }
+    },
+    [projectId, appliedFilters.startDate, appliedFilters.endDate],
+  );
 
   // ------ Date columns ------
   const dateColumns = useMemo(() => {
@@ -564,11 +567,21 @@ export function ProjectWbsChart({ projectId }: ProjectWbsChartProps) {
             size="sm"
             variant="outline"
             className="h-8"
-            onClick={handleExportExcel}
+            onClick={() => handleExportExcel(false)}
             disabled={isExporting}
           >
             <Download className="h-3.5 w-3.5 mr-1" />
             {isExporting ? '다운로드 중...' : '엑셀 다운로드'}
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8"
+            onClick={() => handleExportExcel(true)}
+            disabled={isExporting}
+          >
+            <Download className="h-3.5 w-3.5 mr-1" />
+            {isExporting ? '다운로드 중...' : '병합해제 다운로드'}
           </Button>
         </div>
       </div>
@@ -687,7 +700,7 @@ export function ProjectWbsChart({ projectId }: ProjectWbsChartProps) {
                         {/* Task Type */}
                         <div
                           className={cn(
-                            'flex items-center justify-center border-r border-slate-100 h-full px-1',
+                            'flex items-center justify-center h-full px-1',
                             !isFirstInGroup && 'border-t-0',
                           )}
                           style={{ width: TASK_TYPE_COL_WIDTH }}

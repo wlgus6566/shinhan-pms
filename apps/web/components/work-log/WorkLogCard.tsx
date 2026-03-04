@@ -38,11 +38,13 @@ export function WorkLogCard({
           <div className="flex items-center gap-1 ml-2">
             <Button
               variant="ghost"
-              size="icon"
-              className="h-6 w-6 text-slate-400 hover:text-blue-600"
+              size="sm"
+              className="h-7 px-2 gap-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50"
               onClick={onEdit}
+              title="업무일지 수정"
             >
-              <Edit className="h-4 w-4" />
+              <Edit className="h-3.5 w-3.5" />
+              <span className="text-xs font-medium">수정</span>
             </Button>
           </div>
         )}

@@ -172,10 +172,12 @@ export function WorkLogDialog({
           (task) => !existingTaskIds.has(task.id),
         );
 
-        // selectedTaskId가 있으면 해당 업무를 우선, 없으면 첫 번째 미작성 업무
-        const firstTask = selectedTaskId
-          ? unloggedTasks.find((t) => t.id === selectedTaskId) || unloggedTasks[0]
-          : unloggedTasks[0];
+        // selectedTaskId가 있으면 해당 업무를 우선 (이미 작성된 업무여도 사용자가 명시적으로 선택한 것)
+        // 없으면 첫 번째 미작성 업무
+        const selectedTask = selectedTaskId
+          ? myTasks.find((t) => t.id === selectedTaskId)
+          : undefined;
+        const firstTask = selectedTask || unloggedTasks[0];
 
         const initialEntries = firstTask
           ? [
@@ -196,7 +198,7 @@ export function WorkLogDialog({
         setSelectedTaskToAdd('');
       }
     }
-  }, [open, mode, workLogs, existingWorkLogs, myTasks, selectedDate]);
+  }, [open, mode, workLogs, existingWorkLogs, myTasks, selectedDate, selectedTaskId]);
 
   const handleDelete = async () => {
     if (!onDelete) return;
@@ -443,7 +445,7 @@ export function WorkLogDialog({
                   `업무 ${index + 1}`}
               </CardTitle>
             </div>
-            {mode === 'create' && (
+            {mode === 'create' && !selectedTaskId && (
               <Button
                 type="button"
                 variant="ghost"
@@ -719,8 +721,8 @@ export function WorkLogDialog({
               onSubmit={multiForm.handleSubmit(handleMultiFormSubmit)}
               className="space-y-6"
             >
-              {/* 생성 모드: 업무 추가 셀렉터 */}
-              {mode === 'create' && availableTasks.length > 0 && (
+              {/* 생성 모드: 업무 추가 셀렉터 (단일 업무 모드에서는 숨김) */}
+              {mode === 'create' && !selectedTaskId && availableTasks.length > 0 && (
                 <div className="flex items-end gap-2">
                   <div className="flex-1">
                     <label className="text-sm font-medium text-slate-700 mb-1.5 block">

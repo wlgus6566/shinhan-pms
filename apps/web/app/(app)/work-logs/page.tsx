@@ -133,6 +133,16 @@ export default function WorkLogsPage() {
     }
   }, [selectedTaskId, filteredTasks]);
 
+  // 선택된 날짜에 이미 일지가 작성된 업무 ID 세트
+  const loggedTaskIdsForDate = useMemo(() => {
+    const dateStr = format(selectedDate, 'yyyy-MM-dd');
+    return new Set(
+      filteredWorkLogs
+        .filter((log) => log.workDate === dateStr)
+        .map((log) => log.taskId),
+    );
+  }, [filteredWorkLogs, selectedDate]);
+
   // 날짜 선택 핸들러
   const handleDateSelect = useCallback((date: Date) => {
     setSelectedDate(date);
@@ -146,9 +156,10 @@ export default function WorkLogsPage() {
   }, []);
 
   // 일지 작성 다이얼로그 열기
-  const handleCreateClick = useCallback(() => {
+  const handleCreateClick = useCallback((taskId?: string) => {
     setDialogMode('create');
     setEditingWorkLogs([]);
+    setSelectedTaskId(taskId);
     setDialogOpen(true);
   }, []);
 
@@ -330,7 +341,21 @@ export default function WorkLogsPage() {
               onEdit={handleEditClick}
               onCreate={handleCreateClick}
             />
-            <MyTaskList tasks={filteredTasks} />
+            <MyTaskList
+              tasks={filteredTasks}
+              loggedTaskIds={loggedTaskIdsForDate}
+              onTaskClick={(task) => {
+                const dateStr = format(selectedDate, 'yyyy-MM-dd');
+                const existingLog = filteredWorkLogs.find(
+                  (log) => log.taskId === task.id && log.workDate === dateStr,
+                );
+                if (existingLog) {
+                  handleEditClick(existingLog);
+                } else {
+                  handleCreateClick(task.id);
+                }
+              }}
+            />
           </div>
 
           {/* 달력 (모바일에서 먼저 표시) */}

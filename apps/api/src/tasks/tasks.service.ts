@@ -340,6 +340,7 @@ export class TasksService {
     projectId: bigint,
     startDateStr: string,
     endDateStr: string,
+    flat = false,
   ): Promise<{ buffer: Buffer; projectName: string }> {
     // 프로젝트 조회
     const project = await this.prisma.project.findUnique({
@@ -468,7 +469,7 @@ export class TasksService {
     const totalCols = FIXED_COL + dates.length;
 
     // Row 1: 제목
-    ws.mergeCells(1, 1, 1, Math.max(totalCols, FIXED_COL));
+    if (!flat) ws.mergeCells(1, 1, 1, Math.max(totalCols, FIXED_COL));
     const titleCell = ws.getCell(1, 1);
     titleCell.value = `WBS 공정표 - ${project.projectName}`;
     titleCell.font = { size: 14, bold: true, name: '맑은 고딕' };
@@ -476,7 +477,7 @@ export class TasksService {
     ws.getRow(1).height = 30;
 
     // Row 2: 기간
-    ws.mergeCells(2, 1, 2, Math.max(totalCols, FIXED_COL));
+    if (!flat) ws.mergeCells(2, 1, 2, Math.max(totalCols, FIXED_COL));
     const periodCell = ws.getCell(2, 1);
     periodCell.value = `기간: ${startDateStr} ~ ${endDateStr}`;
     periodCell.font = {
@@ -487,8 +488,7 @@ export class TasksService {
     periodCell.alignment = { horizontal: 'left', vertical: 'middle' };
     ws.getRow(2).height = 22;
 
-    // Row 3-4: 헤더
-    // 단일 컬럼 헤더 (행 3-4 병합)
+    // Row 3: 헤더
     const singleHeaders: { col: number; label: string }[] = [
       { col: 1, label: '업무유형' },
       { col: 2, label: '업무명' },
@@ -502,7 +502,6 @@ export class TasksService {
       { col: 10, label: '종료일' },
     ];
     singleHeaders.forEach(({ col, label }) => {
-      ws.mergeCells(3, col, 4, col);
       const c = ws.getCell(3, col);
       c.value = label;
       c.fill = hdrFill;
@@ -515,32 +514,7 @@ export class TasksService {
       c.border = borders;
     });
 
-    // 월 그룹 헤더 (Row 3)
-    if (dates.length > 0) {
-      let mStart = 0;
-      for (let i = 0; i <= dates.length; i++) {
-        const atEnd = i === dates.length;
-        if (
-          atEnd ||
-          (i > 0 &&
-            (dates[i].getUTCMonth() !== dates[i - 1].getUTCMonth() ||
-              dates[i].getUTCFullYear() !== dates[i - 1].getUTCFullYear()))
-        ) {
-          const sCol = FIXED_COL + 1 + mStart;
-          const eCol = FIXED_COL + i;
-          if (sCol < eCol) ws.mergeCells(3, sCol, 3, eCol);
-          const mc = ws.getCell(3, sCol);
-          mc.value = `${dates[i - 1].getUTCFullYear()}년 ${dates[i - 1].getUTCMonth() + 1}월`;
-          mc.fill = hdrFill;
-          mc.font = hdrFont;
-          mc.alignment = { horizontal: 'center', vertical: 'middle' };
-          mc.border = borders;
-          mStart = i;
-        }
-      }
-    }
-
-    // 일 헤더 (Row 4)
+    // 일 헤더 (Row 3 - 날짜 컬럼)
     const todayNow = new Date();
     const todayStr = fmtDate(
       new Date(
@@ -558,7 +532,7 @@ export class TasksService {
       const dStr = fmtDate(d);
       const isToday = dStr === todayStr;
 
-      const c = ws.getCell(4, col);
+      const c = ws.getCell(3, col);
       c.value = `${d.getUTCMonth() + 1}/${d.getUTCDate()}\n(${DAY_KR[dow]})`;
       c.alignment = {
         horizontal: 'center',
@@ -593,8 +567,7 @@ export class TasksService {
       c.border = borders;
     });
 
-    ws.getRow(3).height = 22;
-    ws.getRow(4).height = 30;
+    ws.getRow(3).height = 30;
 
     // 컬럼 번호 → 엑셀 알파벳 변환 헬퍼
     const colLetter = (c: number): string => {
@@ -634,11 +607,11 @@ export class TasksService {
     };
 
     // 데이터 행
-    let rowNum = 5;
+    let rowNum = 4;
     // 업무유형 셀 병합을 위한 그룹 추적
     const taskTypeGroups: { startRow: number; endRow: number; name: string }[] = [];
     let currentGroupName: string | null = null;
-    let currentGroupStartRow = 5;
+    let currentGroupStartRow = 4;
 
     tasks.forEach((task, idx) => {
       const typeName = task.taskType?.name || '-';
@@ -799,7 +772,7 @@ export class TasksService {
             const c = ws.getCell(sr, ci + 1);
             if (ci === 6) {
               // 파트 column - 첫 행에만 값 설정 (나중에 병합)
-              if (nameIdx === 0) {
+              if (nameIdx === 0 || flat) {
                 c.value = group.roleLabel;
               }
               c.font = bodyFont;
@@ -823,6 +796,11 @@ export class TasksService {
               c.alignment = { horizontal: 'center', vertical: 'middle' };
             } else {
               c.font = bodyFont;
+              if (flat) {
+                c.value = vals[ci];
+                c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: ci === 1 };
+                if (ci === 5) c.numFmt = 'YYYY-MM-DD';
+              }
             }
             c.fill = subRowFill;
             c.border = borders;
@@ -876,13 +854,13 @@ export class TasksService {
         });
 
         // 같은 파트 셀 병합
-        if (group.names.length > 1) {
+        if (!flat && group.names.length > 1) {
           ws.mergeCells(groupStartRow, 7, groupStartRow + group.names.length - 1, 7);
         }
       });
 
       // 업무 단위 속성 셀 병합 (메인행 + 서브행)
-      if (rowNum - 1 > r) {
+      if (!flat && rowNum - 1 > r) {
         ws.mergeCells(r, 2, rowNum - 1, 2);   // 업무명
         ws.mergeCells(r, 3, rowNum - 1, 3);   // 난이도
         ws.mergeCells(r, 4, rowNum - 1, 4);   // 상태
@@ -897,9 +875,11 @@ export class TasksService {
     }
 
     // 업무유형 셀 병합
-    for (const group of taskTypeGroups) {
-      if (group.endRow > group.startRow) {
-        ws.mergeCells(group.startRow, 1, group.endRow, 1);
+    if (!flat) {
+      for (const group of taskTypeGroups) {
+        if (group.endRow > group.startRow) {
+          ws.mergeCells(group.startRow, 1, group.endRow, 1);
+        }
       }
     }
 
@@ -948,12 +928,12 @@ export class TasksService {
 
     // 자동 필터 (파트, 이름, 상태 등 필터링 가능)
     ws.autoFilter = {
-      from: { row: 4, column: 1 },
+      from: { row: 3, column: 1 },
       to: { row: rowNum - 1, column: FIXED_COL },
     };
 
     // Pane 고정 (헤더 + 고정 컬럼)
-    ws.views = [{ state: 'frozen', xSplit: FIXED_COL, ySplit: 4 }];
+    ws.views = [{ state: 'frozen', xSplit: FIXED_COL, ySplit: 3 }];
 
     const buf = await workbook.xlsx.writeBuffer();
     return { buffer: Buffer.from(buf), projectName: project.projectName };

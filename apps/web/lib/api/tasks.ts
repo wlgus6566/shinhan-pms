@@ -40,10 +40,12 @@ export async function exportWbsExcel(
   projectId: string,
   startDate: string,
   endDate: string,
+  flat = false,
 ): Promise<void> {
   const params = new URLSearchParams();
   params.append('startDate', startDate);
   params.append('endDate', endDate);
+  if (flat) params.append('flat', 'true');
 
   const url = `/proxy-api/projects/${projectId}/tasks/export-wbs?${params.toString()}`;
   const token = localStorage.getItem('accessToken');
@@ -63,7 +65,7 @@ export async function exportWbsExcel(
   const downloadUrl = window.URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = downloadUrl;
-  const filename = `WBS_공정표_${startDate}_${endDate}.xlsx`;
+  const filename = `WBS_공정표_${startDate}_${endDate}${flat ? '_병합해제' : ''}.xlsx`;
   link.setAttribute('download', filename);
   document.body.appendChild(link);
   link.click();
