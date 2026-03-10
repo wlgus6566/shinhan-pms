@@ -52,7 +52,7 @@ export function ScheduleForm({
 
   // Fetch project members using SWR hook
   const { members: projectMembers = [], isLoading: loadingMembers } =
-    useProjectMembers(projectId);
+    useProjectMembers(projectId, { pageSize: 0 });
 
   const form = useForm<ScheduleFormValues>({
     resolver: zodResolver(CreateScheduleSchema),
@@ -230,8 +230,10 @@ export function ScheduleForm({
     const workAreas = new Set(projectMembers.map((m) => m.workArea));
     const scopes: TeamScope[] = ['ALL']; // Always include ALL
 
+    if (workAreas.has('PROJECT_MANAGEMENT')) scopes.push('PROJECT_MANAGEMENT');
     if (workAreas.has('PLANNING')) scopes.push('PLANNING');
     if (workAreas.has('DESIGN')) scopes.push('DESIGN');
+    if (workAreas.has('PUBLISHING')) scopes.push('PUBLISHING');
     if (workAreas.has('FRONTEND')) scopes.push('FRONTEND');
     if (workAreas.has('BACKEND')) scopes.push('BACKEND');
 
@@ -244,6 +246,7 @@ export function ScheduleForm({
       PROJECT_MANAGEMENT: 'PM',
       PLANNING: '기획팀',
       DESIGN: '디자인팀',
+      PUBLISHING: '퍼블리싱팀',
       FRONTEND: '프론트엔드팀',
       BACKEND: '백엔드팀',
     };
@@ -274,8 +277,10 @@ export function ScheduleForm({
       // 팀별 필터링
       const workAreaMap: Record<TeamScope, WorkArea[]> = {
         ALL: [],
+        PROJECT_MANAGEMENT: ['PROJECT_MANAGEMENT'],
         PLANNING: ['PLANNING'],
         DESIGN: ['DESIGN'],
+        PUBLISHING: ['PUBLISHING'],
         FRONTEND: ['FRONTEND'],
         BACKEND: ['BACKEND'],
       };

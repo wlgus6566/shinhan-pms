@@ -36,7 +36,7 @@ export interface Task {
   status: string;
   startDate?: string;
   endDate?: string;
-  openDate?: string;
+  openDates?: string[];
   notes?: string;
   createdAt: string;
   updatedAt?: string;
@@ -69,7 +69,7 @@ export const TaskSchema = z
     status: z.string(),
     startDate: z.string().optional(),
     endDate: z.string().optional(),
-    openDate: z.string().optional(),
+    openDates: z.array(z.string()).optional(),
     notes: z.string().optional(),
   })
   .merge(AuditFieldsSchema);

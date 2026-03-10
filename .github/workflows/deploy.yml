@@ -41,6 +41,17 @@ jobs:
             npx tsc -b --force
             cd ~/pms
 
+            echo "=== Run pre-deploy SQL ==="
+            cd apps/api
+            for sqlfile in ~/pms/scripts/pre-deploy-sql/*.sql; do
+              if [ -f "$sqlfile" ]; then
+                echo "Executing: $sqlfile"
+                npx prisma db execute --file "$sqlfile" --schema prisma/schema.prisma
+                echo "Done: $sqlfile"
+              fi
+            done
+            cd ~/pms
+
             echo "=== Build & Deploy API ==="
             cd apps/api
             pnpm prisma:generate

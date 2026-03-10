@@ -259,7 +259,7 @@ export function TaskDetailSheet({
           )}
 
           {/* 기간 정보 */}
-          {(task.startDate || task.endDate) && (
+          {(task.startDate || task.endDate || (task.openDates && task.openDates.length > 0)) && (
             <>
               <Separator />
               <div className="space-y-2">
@@ -280,17 +280,24 @@ export function TaskDetailSheet({
                   <Calendar className="h-4 w-4" />
                   오픈일
                 </h3>
-                <div className="pl-6 flex items-center gap-2 text-base">
-                  {task.openDate && (
-                    <span>
-                      {new Date(task.openDate).toLocaleString('ko-KR', {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </span>
+                <div className="pl-6 space-y-1">
+                  {task.openDates && task.openDates.length > 0 ? (
+                    task.openDates.map((date, index) => (
+                      <div key={index} className="flex items-center gap-2 text-base">
+                        <span className="text-sm text-muted-foreground">{index + 1}차:</span>
+                        <span>
+                          {new Date(date).toLocaleString('ko-KR', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <span className="text-muted-foreground">-</span>
                   )}
                 </div>
               </div>

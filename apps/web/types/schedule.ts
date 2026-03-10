@@ -77,8 +77,10 @@ export const PARTICIPANT_STATUS_COLORS: Record<ParticipantStatus, string> = {
 // 팀 범위 라벨
 export const TEAM_SCOPE_LABELS: Record<TeamScope, string> = {
   ALL: '전사 일정',
+  PROJECT_MANAGEMENT: 'PM 일정',
   PLANNING: '기획팀 일정',
   DESIGN: '디자인팀 일정',
+  PUBLISHING: '퍼블리싱팀 일정',
   FRONTEND: '프론트엔드팀 일정',
   BACKEND: '백엔드팀 일정',
 };
@@ -86,9 +88,11 @@ export const TEAM_SCOPE_LABELS: Record<TeamScope, string> = {
 // 팀 범위 필터 색상 (체크박스용 컬러 도트)
 export const TEAM_SCOPE_FILTER_COLORS: Record<TeamScope, string> = {
   ALL: '#F2994A', // Muted Orange
+  PROJECT_MANAGEMENT: '#8b5cf6', // Violet
   PLANNING: '#e0c0ff', // Soft Purple
-  DESIGN: '#ffd96b', // Calm Blue
-  FRONTEND: '#a7cfff', // Balanced Green
+  DESIGN: '#ffd96b', // Warm Yellow
+  PUBLISHING: '#a8e6cf', // Soft Mint
+  FRONTEND: '#a7cfff', // Calm Blue
   BACKEND: '#EB5757', // Soft Red
 };
 

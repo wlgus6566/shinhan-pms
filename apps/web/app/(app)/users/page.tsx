@@ -8,8 +8,7 @@ import { Plus } from 'lucide-react';
 
 export default function UsersAdminPage() {
   const { user } = useAuth();
-  console.log(user);
-  const canCreateUser = user?.role === 'SUPER_ADMIN';
+  const canCreateUser = user?.role === 'SUPER_ADMIN' || user?.role === 'PM';
 
   return (
     <div className="page-animate">

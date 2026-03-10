@@ -33,11 +33,9 @@ import {
   DEPARTMENT_OPTIONS,
   USER_ROLE_OPTIONS as ROLE_OPTIONS,
   POSITION_OPTIONS,
-  GRADE_OPTIONS,
   type Department,
   type UserRole,
   type Position,
-  type Grade,
 } from '@repo/schema';
 
 // Create 모드 스키마
@@ -50,7 +48,6 @@ const userCreateSchema = z.object({
   department: z.custom<Department>(),
   position: z.custom<Position>(),
   role: z.custom<UserRole>(),
-  grade: z.custom<Grade>(),
 });
 
 // Edit 모드 스키마 (비밀번호 제외)
@@ -59,7 +56,6 @@ const userEditSchema = z.object({
   department: z.custom<Department>(),
   position: z.custom<Position>(),
   role: z.custom<UserRole>(),
-  grade: z.custom<Grade>(),
   isActive: z.boolean(),
 });
 
@@ -109,14 +105,12 @@ export function UserForm({ mode, userId }: UserFormProps) {
             department: undefined,
             position: 'TEAM_MEMBER',
             role: 'MEMBER',
-            grade: 'BEGINNER',
           }
         : {
             profileImage: undefined,
             department: undefined,
             position: 'TEAM_MEMBER',
             role: 'MEMBER',
-            grade: 'BEGINNER',
             isActive: true,
           },
   });
@@ -129,7 +123,6 @@ export function UserForm({ mode, userId }: UserFormProps) {
         department: userData.department as Department,
         position: userData.position as Position,
         role: userData.role as UserRole,
-        grade: userData.grade as Grade,
         isActive: userData.isActive,
       });
       // 프로필 이미지 설정
@@ -179,7 +172,6 @@ export function UserForm({ mode, userId }: UserFormProps) {
           department: createValues.department,
           position: createValues.position,
           role: createValues.role,
-          grade: createValues.grade,
           profileImage: profileImage || undefined,
         };
 
@@ -385,16 +377,6 @@ export function UserForm({ mode, userId }: UserFormProps) {
             placeholder="권한을 선택하세요"
             options={ROLE_OPTIONS}
             description="슈퍼 관리자는 전체 권한, 프로젝트 관리자는 프로젝트 관리 권한, 일반은 업무일지 작성 권한을 가집니다"
-            disabled={mode === 'edit' && !canEdit}
-          />
-
-          {/* 등급 */}
-          <FormSelect
-            control={form.control}
-            name="grade"
-            label="등급 *"
-            placeholder="등급을 선택하세요"
-            options={GRADE_OPTIONS}
             disabled={mode === 'edit' && !canEdit}
           />
 

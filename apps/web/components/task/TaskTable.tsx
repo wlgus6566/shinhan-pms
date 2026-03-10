@@ -157,7 +157,14 @@ export function TaskTable({
                   </div>
                 </TableCell>
                 <TableCell className="text-xs">
-                  {formatDate(task.openDate)}
+                  {task.openDates && task.openDates.length > 0 ? (
+                    <div>
+                      <div>{formatDate(task.openDates[0])}</div>
+                      {task.openDates.length > 1 && (
+                        <div className="text-muted-foreground">외 {task.openDates.length - 1}건</div>
+                      )}
+                    </div>
+                  ) : '-'}
                 </TableCell>
                 <TableCell className="text-xs whitespace-nowrap">
                   {formatDateRange(task.startDate, task.endDate)}

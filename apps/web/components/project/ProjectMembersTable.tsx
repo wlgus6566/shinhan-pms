@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import {
   useProjectMembers,
@@ -23,7 +23,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   Tooltip,
@@ -37,6 +36,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { AddMemberDialog } from './AddMemberDialog';
+import { TablePagination } from '@/components/common/table';
 import type {
   ProjectMember,
   ProjectRole,
@@ -50,6 +50,8 @@ import {
 } from '@/lib/constants/project';
 import { DEPARTMENT_LABELS, GRADE_LABELS, type Grade } from '@repo/schema';
 
+const PAGE_SIZE = 10;
+
 interface ProjectMembersTableProps {
   projectId: string;
   creatorId?: string;
@@ -61,13 +63,18 @@ export function ProjectMembersTable({
 }: ProjectMembersTableProps) {
   const { user } = useAuth();
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [editMember, setEditMember] = useState<ProjectMember | null>(null);
   const [memberToRemove, setMemberToRemove] = useState<ProjectMember | null>(
     null,
   );
   const [isRemoving, setIsRemoving] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // SWR hook
-  const { members, isLoading: loading, mutate } = useProjectMembers(projectId);
+  // SWR hook with pagination
+  const { members, totalPages, isLoading: loading, mutate } = useProjectMembers(
+    projectId,
+    { pageNum: currentPage, pageSize: PAGE_SIZE },
+  );
 
   const canManage =
     user?.role === 'SUPER_ADMIN' ||
@@ -107,10 +114,28 @@ export function ProjectMembersTable({
     return '멤버 제거';
   };
 
+  const handleMemberClick = (member: ProjectMember) => {
+    if (!canManage) return;
+    setEditMember(member);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">멤버 목록</h3>
+        <div className="flex items-center gap-3">
+          <h3 className="text-lg font-semibold">멤버 목록</h3>
+          <p className="text-sm text-slate-500">
+            총{' '}
+            <span className="font-semibold text-slate-900">
+              {members?.length ?? 0}
+            </span>
+            명
+          </p>
+        </div>
         {canManage && (
           <Button
             onClick={() => setAddDialogOpen(true)}
@@ -162,7 +187,17 @@ export function ProjectMembersTable({
               members.map((member) => (
                 <TableRow key={member.id}>
                   <TableCell className="font-medium whitespace-nowrap">
-                    {member.member?.name}
+                    {canManage ? (
+                      <button
+                        type="button"
+                        className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                        onClick={() => handleMemberClick(member)}
+                      >
+                        {member.member?.name}
+                      </button>
+                    ) : (
+                      member.member?.name
+                    )}
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
                     <span className="text-sm text-slate-700">
@@ -254,6 +289,12 @@ export function ProjectMembersTable({
         </Table>
       </div>
 
+      <TablePagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
+
       <div className="rounded-lg border bg-slate-50 p-4 text-sm">
         <h4 className="font-semibold text-slate-800 mb-3">
           역할별 권한 안내
@@ -335,11 +376,21 @@ export function ProjectMembersTable({
         </div>
       </div>
 
+      {/* 추가 다이얼로그 */}
       <AddMemberDialog
         projectId={projectId}
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
         onSuccess={() => mutate()}
+      />
+
+      {/* 수정 다이얼로그 */}
+      <AddMemberDialog
+        projectId={projectId}
+        open={!!editMember}
+        onOpenChange={(open) => { if (!open) setEditMember(null); }}
+        onSuccess={() => mutate()}
+        editMember={editMember}
       />
 
       <Dialog

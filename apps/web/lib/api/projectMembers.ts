@@ -72,15 +72,27 @@ export async function removeProjectMember(
 /**
  * SWR hook for fetching project members
  * @param projectId - Project ID (null to skip fetching)
+ * @param params - Optional pagination params
  */
-export function useProjectMembers(projectId: string | number | null) {
-  const { data, error, isLoading, mutate } = useSWR<PaginatedData<ProjectMember>>(
-    projectId ? `/api/projects/${projectId}/members` : null
-  );
+export function useProjectMembers(
+  projectId: string | number | null,
+  params?: { pageNum?: number; pageSize?: number },
+) {
+  let url: string | null = null;
+  if (projectId) {
+    const query = new URLSearchParams();
+    if (params?.pageNum) query.set('pageNum', params.pageNum.toString());
+    if (params?.pageSize) query.set('pageSize', params.pageSize.toString());
+    const qs = query.toString();
+    url = `/api/projects/${projectId}/members${qs ? `?${qs}` : ''}`;
+  }
+
+  const { data, error, isLoading, mutate } = useSWR<PaginatedData<ProjectMember>>(url);
 
   return {
     members: data?.list,
     totalCount: data?.totalCount,
+    totalPages: data?.pages ?? 1,
     isLoading,
     error,
     mutate,

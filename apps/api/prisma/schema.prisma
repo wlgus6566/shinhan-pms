@@ -136,13 +136,13 @@ model Task {
   createdAt   DateTime         @default(now()) @map("created_at") @db.Timestamp(6)
   updatedBy   BigInt?          @map("updated_by")
   updatedAt   DateTime?        @updatedAt @map("updated_at") @db.Timestamp(6)
-  openDate    DateTime?        @map("open_date") @db.Timestamp(6)
   taskTypeId  BigInt?          @map("task_type_id")
   assignees   TaskAssignee[]
   creator     User             @relation("TaskCreator", fields: [createdBy], references: [id])
   project     Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
   taskType    ProjectTaskType? @relation(fields: [taskTypeId], references: [id])
   workLogs    WorkLog[]
+  openDates   TaskOpenDate[]
 
   @@index([projectId], map: "idx_tasks_project_id")
   @@index([difficulty], map: "idx_tasks_difficulty")
@@ -150,6 +150,18 @@ model Task {
   @@index([isActive], map: "idx_tasks_is_active")
   @@index([taskTypeId], map: "idx_tasks_task_type_id")
   @@map("tasks")
+}
+
+model TaskOpenDate {
+  id        BigInt   @id @default(autoincrement())
+  taskId    BigInt   @map("task_id")
+  openDate  DateTime @map("open_date") @db.Timestamp(6)
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId], map: "idx_task_open_dates_task_id")
+  @@map("task_open_dates")
 }
 
 model TaskAssignee {

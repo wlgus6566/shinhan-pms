@@ -69,11 +69,10 @@ export function ProjectUnitPriceTable({
 
   const currentYearMonth = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
   const [selectedYearMonth, setSelectedYearMonth] = useState(currentYearMonth);
-  const [queryYearMonth, setQueryYearMonth] = useState(currentYearMonth);
 
   const { unitPrices, isLoading, mutate } = useProjectUnitPrices(
     projectId,
-    queryYearMonth,
+    selectedYearMonth,
   );
   const { history, isLoading: isHistoryLoading, mutate: mutateHistory } = useUnitPriceHistory(projectId);
 
@@ -96,10 +95,6 @@ export function ProjectUnitPriceTable({
     });
     setEditData(newEditData);
   }, [unitPrices]);
-
-  const handleSearch = useCallback(() => {
-    setQueryYearMonth(selectedYearMonth);
-  }, [selectedYearMonth]);
 
   const handlePriceChange = useCallback((grade: string, value: string) => {
     const numericValue = value.replace(/[^0-9]/g, '');
@@ -134,7 +129,7 @@ export function ProjectUnitPriceTable({
       if (items.length === 0) return;
 
       await saveProjectUnitPrices(projectId, {
-        yearMonth: queryYearMonth,
+        yearMonth: selectedYearMonth,
         items,
       });
       mutate();
@@ -173,9 +168,6 @@ export function ProjectUnitPriceTable({
             ))}
           </SelectContent>
         </Select>
-        <Button onClick={handleSearch} variant="default">
-          조회
-        </Button>
       </div>
 
       {/* 테이블 */}

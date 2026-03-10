@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { BaseDialog } from '@/components/ui/base-dialog';
 import { Form } from '@/components/ui/form';
 import { FormInput, FormTextarea, FormSelect } from '@/components/form';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Plus, X } from 'lucide-react';
 import type { ProjectMember } from '@/types/project';
 import { TaskAssigneeTable } from './TaskAssigneeTable';
 
@@ -32,7 +32,7 @@ const AddTaskFormSchema = z.object({
   startDate: z.string().optional(),
   endDate: z.string().optional(),
   assignees: z.array(AssigneeRowSchema).max(10, '담당자는 최대 10명까지 추가할 수 있습니다').default([]),
-  openDate: z.string().optional(),
+  openDates: z.array(z.string()).max(3).default([]),
   notes: z
     .string()
     .transform(val => val === '' ? undefined : val)
@@ -66,7 +66,7 @@ export function AddTaskDialog({ projectId, projectMembers, open, onOpenChange, o
       startDate: '',
       endDate: '',
       assignees: [],
-      openDate: '',
+      openDates: [''],
       notes: '',
     },
   });
@@ -92,7 +92,7 @@ export function AddTaskDialog({ projectId, projectMembers, open, onOpenChange, o
         })),
         startDate: data.startDate || undefined,
         endDate: data.endDate || undefined,
-        openDate: data.openDate || undefined,
+        openDates: data.openDates?.filter(d => d !== '') || undefined,
         notes: data.notes || undefined,
       };
 
@@ -204,12 +204,54 @@ export function AddTaskDialog({ projectId, projectMembers, open, onOpenChange, o
             projectMembers={projectMembers}
           />
 
-          <FormInput
-            control={form.control}
-            name="openDate"
-            label="오픈일 (상용배포일)"
-            type="datetime-local"
-          />
+          {(() => {
+            const openDates = form.watch('openDates') || [''];
+            return (
+              <div className="space-y-2">
+                <label className="text-sm font-medium">오픈일 (상용배포일) - 최대 3건</label>
+                {openDates.map((_, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground w-8">{index + 1}차</span>
+                    <input
+                      type="datetime-local"
+                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                      value={openDates[index] || ''}
+                      onChange={(e) => {
+                        const newDates = [...openDates];
+                        newDates[index] = e.target.value;
+                        form.setValue('openDates', newDates);
+                      }}
+                    />
+                    {openDates.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 shrink-0"
+                        onClick={() => {
+                          const newDates = openDates.filter((_, i) => i !== index);
+                          form.setValue('openDates', newDates);
+                        }}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+                {openDates.length < 3 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => form.setValue('openDates', [...openDates, ''])}
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    오픈일 추가
+                  </Button>
+                )}
+              </div>
+            );
+          })()}
 
           <FormTextarea
             control={form.control}

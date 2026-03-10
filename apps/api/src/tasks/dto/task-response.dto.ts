@@ -72,8 +72,8 @@ export class TaskResponseDto implements Task {
   @ApiProperty({ description: '종료일', required: false })
   endDate?: string;
 
-  @ApiProperty({ description: '오픈일(상용배포일)', required: false })
-  openDate?: string;
+  @ApiProperty({ description: '오픈일(상용배포일) 목록', type: [String], required: false })
+  openDates?: string[];
 
   @ApiProperty({ description: '비고', required: false })
   notes?: string;

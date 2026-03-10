@@ -170,21 +170,30 @@ export function TaskList({
       {/* Filters */}
 
       <div className="flex justify-between items-center">
-        <Tabs
-          value={view}
-          onValueChange={(newView) => setParam('view', newView)}
-        >
-          <TabsList>
-            <TabsTrigger value="kanban" className="flex items-center gap-2">
-              <LayoutGrid className="h-4 w-4" />
-              <span>칸반 보드</span>
-            </TabsTrigger>
-            <TabsTrigger value="table" className="flex items-center gap-2">
-              <Table2 className="h-4 w-4" />
-              <span>테이블</span>
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <div className="flex items-center gap-4">
+          <Tabs
+            value={view}
+            onValueChange={(newView) => setParam('view', newView)}
+          >
+            <TabsList>
+              <TabsTrigger value="kanban" className="flex items-center gap-2">
+                <LayoutGrid className="h-4 w-4" />
+                <span>칸반 보드</span>
+              </TabsTrigger>
+              <TabsTrigger value="table" className="flex items-center gap-2">
+                <Table2 className="h-4 w-4" />
+                <span>테이블</span>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <p className="text-sm text-slate-500">
+            총{' '}
+            <span className="font-semibold text-slate-900">
+              {pagination?.totalCount ?? allTasks?.length ?? 0}
+            </span>
+            건
+          </p>
+        </div>
 
         <Button onClick={() => setDialogOpen(true)} className="hidden sm:inline-flex">
           <Plus className="h-4 w-4 mr-2" />

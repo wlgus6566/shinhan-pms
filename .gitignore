@@ -81,3 +81,5 @@ docker-compose.override.yml
 # Backup files
 *.backup
 *.sql
+!apps/api/prisma/migrations/**/*.sql
+!scripts/pre-deploy-sql/**/*.sql

@@ -26,13 +26,9 @@ export const CreateTaskSchema = z.object({
     .optional(),
   taskTypeId: z.number().int().positive('업무 구분을 선택해주세요'),
   assignees: z.array(TaskAssigneeInputSchema).optional(),
-  planningAssigneeIds: z.array(z.number().int().positive()).optional(),
-  designAssigneeIds: z.array(z.number().int().positive()).optional(),
-  frontendAssigneeIds: z.array(z.number().int().positive()).optional(),
-  backendAssigneeIds: z.array(z.number().int().positive()).optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
-  openDate: z.string().optional(),
+  openDates: z.array(z.string()).max(3, '오픈일은 최대 3건까지 등록 가능합니다').optional(),
   notes: z
     .string()
     .transform(val => val === '' ? undefined : val)

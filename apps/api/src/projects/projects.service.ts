@@ -659,12 +659,19 @@ export class ProjectsService {
       throw new NotFoundException('프로젝트 멤버를 찾을 수 없습니다');
     }
 
-    // 역할 수정
+    // 멤버 정보 수정
     return await this.prisma.projectMember.update({
       where: { id: projectMember.id },
       data: {
         role: updateRoleDto.role,
         ...(updateRoleDto.workArea && { workArea: updateRoleDto.workArea }),
+        ...(updateRoleDto.grade && { grade: updateRoleDto.grade }),
+        ...(updateRoleDto.joinDate !== undefined && {
+          joinDate: updateRoleDto.joinDate ? new Date(updateRoleDto.joinDate) : null,
+        }),
+        ...(updateRoleDto.leaveDate !== undefined && {
+          leaveDate: updateRoleDto.leaveDate ? new Date(updateRoleDto.leaveDate) : null,
+        }),
         ...(updateRoleDto.notes !== undefined && { notes: updateRoleDto.notes }),
         updatedBy: userId,
         updatedAt: new Date(),
@@ -676,6 +683,7 @@ export class ProjectsService {
             name: true,
             email: true,
             department: true,
+            position: true,
             role: true,
           },
         },

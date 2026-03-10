@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useMemo } from 'react';
 import Link from 'next/link';
 import { useUsers } from '@/lib/api/users';
+import { useUrlQueryParams } from '@/hooks/useUrlQueryParams';
+import { useSearchButton } from '@/hooks/useSearchButton';
 import {
   Table,
   TableBody,
@@ -27,42 +29,43 @@ import {
   TableError,
   TableEmpty,
 } from '@/components/common/table';
-import { Search, MoreHorizontal, ArrowUpDown } from 'lucide-react';
+import { Search, MoreHorizontal } from 'lucide-react';
 import {
   ROLE_LABELS,
   ROLE_VARIANTS,
 } from '@/lib/constants/roles';
 import {
   DEPARTMENT_LABELS,
-  GRADE_OPTIONS,
   type Department,
 } from '@repo/schema';
-export function UserListTable() {
-  const [search, setSearch] = useState('');
-  const [role, setRole] = useState('ALL');
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
 
-  // SWR로 데이터 패칭
-  const params = useMemo(() => {
-    const p: any = {};
+export function UserListTable() {
+  const { params, setParam, setParams } = useUrlQueryParams({
+    defaults: {
+      role: 'ALL',
+      pageNum: 1,
+    },
+  });
+
+  const search = (params.search as string) || '';
+  const role = (params.role as string) || 'ALL';
+  const currentPage = (params.pageNum as number) || 1;
+
+  const { searchInput, setSearchInput, handleSearch, handleKeyDown } =
+    useSearchButton(params, setParams);
+
+  // SWR로 데이터 패칭 (서버 사이드 페이지네이션)
+  const apiParams = useMemo(() => {
+    const p: any = {
+      pageNum: currentPage,
+    };
     if (search) p.search = search;
     if (role !== 'ALL') p.role = role;
     return p;
-  }, [search, role]);
+  }, [search, role, currentPage]);
 
-  const { users, isLoading, error } = useUsers(params);
+  const { users, pagination, isLoading, error } = useUsers(apiParams);
   const userList = users || [];
-
-  // Pagination
-  const { totalPages, paginatedUsers } = useMemo(() => {
-    const total = Math.ceil(userList.length / itemsPerPage);
-    const paginated = userList.slice(
-      (currentPage - 1) * itemsPerPage,
-      currentPage * itemsPerPage,
-    );
-    return { totalPages: total, paginatedUsers: paginated };
-  }, [userList, currentPage, itemsPerPage]);
 
   return (
     <div className="space-y-6">
@@ -74,11 +77,17 @@ export function UserListTable() {
             <Input
               placeholder="이름 또는 이메일 검색..."
               className="pl-10 w-full sm:w-[280px]"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={handleKeyDown}
             />
           </div>
-          <Select value={role} onValueChange={setRole}>
+          <Select
+            value={role}
+            onValueChange={(value) => {
+              setParams({ role: value, pageNum: 1 });
+            }}
+          >
             <SelectTrigger className="w-full sm:w-[140px]">
               <SelectValue placeholder="권한 필터" />
             </SelectTrigger>
@@ -89,11 +98,20 @@ export function UserListTable() {
               <SelectItem value="MEMBER">일반</SelectItem>
             </SelectContent>
           </Select>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSearch}
+            className="sm:w-auto"
+          >
+            <Search className="h-4 w-4 mr-1" />
+            검색
+          </Button>
         </div>
         <p className="text-sm text-slate-500">
           총{' '}
           <span className="font-semibold text-slate-900">
-            {userList.length}
+            {pagination?.totalCount ?? 0}
           </span>
           명 멤버
         </p>
@@ -112,27 +130,26 @@ export function UserListTable() {
               <TableHead>이메일</TableHead>
               <TableHead>본부</TableHead>
               <TableHead>권한</TableHead>
-              <TableHead>등급</TableHead>
               <TableHead>상태</TableHead>
               <TableHead className="w-[60px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <TableLoading colSpan={7} message="멤버를 불러오는 중..." />
+              <TableLoading colSpan={6} message="멤버를 불러오는 중..." />
             ) : error ? (
               <TableError
-                colSpan={7}
+                colSpan={6}
                 message={error.message || '멤버 목록을 불러오는데 실패했습니다'}
                 onRetry={() => {
-                  setSearch('');
-                  setRole('ALL');
+                  setParams({ search: undefined, role: 'ALL', pageNum: 1 });
+                  setSearchInput('');
                 }}
               />
-            ) : paginatedUsers.length === 0 ? (
-              <TableEmpty colSpan={7} message="멤버가 없습니다" />
+            ) : userList.length === 0 ? (
+              <TableEmpty colSpan={6} message="멤버가 없습니다" />
             ) : (
-              paginatedUsers.map((user) => (
+              userList.map((user) => (
                 <TableRow key={user.id} className="group">
                   <TableCell className="whitespace-nowrap">
                     <Link
@@ -168,10 +185,6 @@ export function UserListTable() {
                     </Badge>
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
-                    {GRADE_OPTIONS.find((option) => option.value === user.grade)
-                      ?.label || user.grade}
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
                     <Badge variant={user.isActive ? 'outline' : 'destructive'}>
                       {user.isActive ? '활성' : '비활성'}
                     </Badge>
@@ -195,11 +208,11 @@ export function UserListTable() {
         </Table>
 
         {/* Pagination */}
-        {!isLoading && userList.length > 0 && (
+        {!isLoading && userList.length > 0 && pagination && (
           <TablePagination
             currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
+            totalPages={pagination.pages}
+            onPageChange={(page) => setParam('pageNum', page)}
           />
         )}
       </div>

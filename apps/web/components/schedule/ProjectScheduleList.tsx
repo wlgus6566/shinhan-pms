@@ -22,10 +22,13 @@ import { useProjectMembers } from '@/lib/api/projectMembers';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { WORK_AREA_LABELS } from '@repo/schema';
 
 interface ProjectScheduleListProps {
   projectId: string;
@@ -49,7 +52,7 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
   const [selectedMember, setSelectedMember] = useState<string>('all');
 
   // Fetch project members using SWR hook
-  const { members: projectMembers = [] } = useProjectMembers(projectId);
+  const { members: projectMembers = [] } = useProjectMembers(projectId, { pageSize: 0 });
 
   useEffect(() => {
     const fetchSchedules = async () => {
@@ -81,8 +84,10 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
     }
 
     // Map WorkArea to TeamScope
+    if (workAreas.has('PROJECT_MANAGEMENT')) scopes.push('PROJECT_MANAGEMENT');
     if (workAreas.has('PLANNING')) scopes.push('PLANNING');
     if (workAreas.has('DESIGN')) scopes.push('DESIGN');
+    if (workAreas.has('PUBLISHING')) scopes.push('PUBLISHING');
     if (workAreas.has('FRONTEND')) scopes.push('FRONTEND');
     if (workAreas.has('BACKEND')) scopes.push('BACKEND');
 
@@ -212,10 +217,24 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">전체 멤버</SelectItem>
-                      {projectMembers.map((pm) => (
-                        <SelectItem key={pm.memberId} value={pm.memberId}>
-                          {pm.member?.name ?? '알 수 없음'}
-                        </SelectItem>
+                      {Object.entries(
+                        projectMembers.reduce<Record<string, typeof projectMembers>>((groups, pm) => {
+                          const area = pm.workArea || 'UNKNOWN';
+                          if (!groups[area]) groups[area] = [];
+                          groups[area].push(pm);
+                          return groups;
+                        }, {}),
+                      ).map(([area, members]) => (
+                        <SelectGroup key={area}>
+                          <SelectLabel className="text-xs text-muted-foreground">
+                            {WORK_AREA_LABELS[area as keyof typeof WORK_AREA_LABELS] ?? area}
+                          </SelectLabel>
+                          {members.map((pm) => (
+                            <SelectItem key={pm.memberId} value={pm.memberId}>
+                              {pm.member?.name ?? '알 수 없음'}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
                       ))}
                     </SelectContent>
                   </Select>

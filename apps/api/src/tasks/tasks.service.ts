@@ -9,6 +9,7 @@ import * as ExcelJS from 'exceljs';
 export class TasksService {
   constructor(private readonly prisma: PrismaService) {}
 
+
   async create(projectId: bigint, userId: bigint, createTaskDto: CreateTaskDto) {
     // 1. 프로젝트 존재 확인
     const project = await this.prisma.project.findUnique({
@@ -35,33 +36,14 @@ export class TasksService {
     }
 
     // 5. 담당자 유효성 검증
-    await this.validateAssignees(
-      projectId,
-      createTaskDto.planningAssigneeIds,
-      createTaskDto.designAssigneeIds,
-      createTaskDto.frontendAssigneeIds,
-      createTaskDto.backendAssigneeIds,
-    );
+    const assignees = createTaskDto.assignees || [];
+    await this.validateAssigneeUsers(projectId, assignees);
 
     // 6. 업무 생성
-    const assigneesToCreate = [
-      ...(createTaskDto.planningAssigneeIds?.map(id => ({
-        userId: BigInt(id),
-        workArea: 'PLANNING',
-      })) || []),
-      ...(createTaskDto.designAssigneeIds?.map(id => ({
-        userId: BigInt(id),
-        workArea: 'DESIGN',
-      })) || []),
-      ...(createTaskDto.frontendAssigneeIds?.map(id => ({
-        userId: BigInt(id),
-        workArea: 'FRONTEND',
-      })) || []),
-      ...(createTaskDto.backendAssigneeIds?.map(id => ({
-        userId: BigInt(id),
-        workArea: 'BACKEND',
-      })) || []),
-    ];
+    const assigneesToCreate = assignees.map(a => ({
+      userId: BigInt(a.userId),
+      workArea: a.workArea,
+    }));
 
     return await this.prisma.task.create({
       data: {
@@ -73,12 +55,17 @@ export class TasksService {
         taskTypeId: BigInt(createTaskDto.taskTypeId),
         startDate: createTaskDto.startDate ? new Date(createTaskDto.startDate) : null,
         endDate: createTaskDto.endDate ? new Date(createTaskDto.endDate) : null,
-        openDate: createTaskDto.openDate ? new Date(createTaskDto.openDate) : null,
         notes: createTaskDto.notes,
         createdBy: userId,
         assignees: {
           create: assigneesToCreate,
         },
+        openDates: createTaskDto.openDates?.length ? {
+          create: createTaskDto.openDates.map((date, index) => ({
+            openDate: new Date(date),
+            sortOrder: index,
+          })),
+        } : undefined,
       },
       include: {
         assignees: {
@@ -101,6 +88,7 @@ export class TasksService {
             name: true,
           },
         },
+        openDates: { orderBy: { sortOrder: 'asc' as const } },
       },
     });
   }
@@ -166,6 +154,7 @@ export class TasksService {
               name: true,
             },
           },
+          openDates: { orderBy: { sortOrder: 'asc' as const } },
         },
         orderBy: { createdAt: 'desc' },
       }),
@@ -199,6 +188,7 @@ export class TasksService {
             name: true,
           },
         },
+        openDates: { orderBy: { sortOrder: 'asc' as const } },
       },
     });
 
@@ -235,13 +225,10 @@ export class TasksService {
     }
 
     // 담당자 유효성 검증
-    await this.validateAssignees(
-      task.projectId,
-      updateTaskDto.planningAssigneeIds,
-      updateTaskDto.designAssigneeIds,
-      updateTaskDto.frontendAssigneeIds,
-      updateTaskDto.backendAssigneeIds,
-    );
+    const assignees = updateTaskDto.assignees || [];
+    if (assignees.length > 0) {
+      await this.validateAssigneeUsers(task.projectId, assignees);
+    }
 
     // 업무 수정
     const updateData: any = {
@@ -252,18 +239,13 @@ export class TasksService {
       taskTypeId: updateTaskDto.taskTypeId ? BigInt(updateTaskDto.taskTypeId) : undefined,
       startDate: updateTaskDto.startDate ? new Date(updateTaskDto.startDate) : undefined,
       endDate: updateTaskDto.endDate ? new Date(updateTaskDto.endDate) : undefined,
-      openDate: updateTaskDto.openDate ? new Date(updateTaskDto.openDate) : undefined,
       notes: updateTaskDto.notes,
       status: updateTaskDto.status,
       updatedBy: userId,
     };
 
     // 담당자가 제공된 경우에만 업데이트
-    if (updateTaskDto.planningAssigneeIds !== undefined ||
-        updateTaskDto.designAssigneeIds !== undefined ||
-        updateTaskDto.frontendAssigneeIds !== undefined ||
-        updateTaskDto.backendAssigneeIds !== undefined) {
-
+    if (updateTaskDto.assignees !== undefined) {
       // 기존 할당 삭제
       await this.prisma.taskAssignee.deleteMany({
         where: { taskId },
@@ -271,25 +253,29 @@ export class TasksService {
 
       // 새 할당 생성
       updateData.assignees = {
-        create: [
-          ...(updateTaskDto.planningAssigneeIds?.map(id => ({
-            userId: BigInt(id),
-            workArea: 'PLANNING',
-          })) || []),
-          ...(updateTaskDto.designAssigneeIds?.map(id => ({
-            userId: BigInt(id),
-            workArea: 'DESIGN',
-          })) || []),
-          ...(updateTaskDto.frontendAssigneeIds?.map(id => ({
-            userId: BigInt(id),
-            workArea: 'FRONTEND',
-          })) || []),
-          ...(updateTaskDto.backendAssigneeIds?.map(id => ({
-            userId: BigInt(id),
-            workArea: 'BACKEND',
-          })) || []),
-        ],
+        create: assignees.map(a => ({
+          userId: BigInt(a.userId),
+          workArea: a.workArea,
+        })),
       };
+    }
+
+    // 오픈일이 제공된 경우에만 업데이트
+    if (updateTaskDto.openDates !== undefined) {
+      // 기존 오픈일 삭제
+      await this.prisma.taskOpenDate.deleteMany({
+        where: { taskId },
+      });
+
+      // 새 오픈일 생성
+      if (updateTaskDto.openDates.length > 0) {
+        updateData.openDates = {
+          create: updateTaskDto.openDates.map((date, index) => ({
+            openDate: new Date(date),
+            sortOrder: index,
+          })),
+        };
+      }
     }
 
     return await this.prisma.task.update({
@@ -316,6 +302,7 @@ export class TasksService {
             name: true,
           },
         },
+        openDates: { orderBy: { sortOrder: 'asc' as const } },
       },
     });
   }
@@ -370,6 +357,7 @@ export class TasksService {
           },
         },
         taskType: { select: { id: true, name: true } },
+        openDates: { orderBy: { sortOrder: 'asc' as const } },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -396,7 +384,7 @@ export class TasksService {
     const workbook = new ExcelJS.Workbook();
     const ws = workbook.addWorksheet('WBS 공정표');
 
-    const FIXED_COL = 10;
+    const FIXED_COL = 12;
     const DAY_KR = ['일', '월', '화', '수', '목', '금', '토'];
 
     const ROLE_ARGB: Record<string, string> = {
@@ -458,7 +446,7 @@ export class TasksService {
     };
 
     // 컬럼 너비
-    const colWidths = [12, 20, 8, 10, 10, 12, 10, 10, 12, 12];
+    const colWidths = [12, 20, 8, 10, 10, 12, 12, 12, 10, 10, 12, 12];
     colWidths.forEach((w, i) => {
       ws.getColumn(i + 1).width = w;
     });
@@ -495,11 +483,13 @@ export class TasksService {
       { col: 3, label: '난이도' },
       { col: 4, label: '상태' },
       { col: 5, label: '담당RM' },
-      { col: 6, label: '오픈일' },
-      { col: 7, label: '파트' },
-      { col: 8, label: '이름' },
-      { col: 9, label: '시작일' },
-      { col: 10, label: '종료일' },
+      { col: 6, label: '1차오픈' },
+      { col: 7, label: '2차오픈' },
+      { col: 8, label: '3차오픈' },
+      { col: 9, label: '파트' },
+      { col: 10, label: '이름' },
+      { col: 11, label: '시작일' },
+      { col: 12, label: '종료일' },
     ];
     singleHeaders.forEach(({ col, label }) => {
       const c = ws.getCell(3, col);
@@ -635,15 +625,21 @@ export class TasksService {
         DIFF_KR[task.difficulty] || task.difficulty, // col 3: 난이도
         STATUS_KR[task.status] || task.status,       // col 4: 상태
         (task as any).clientName || '',              // col 5: 담당RM
-        task.openDate                                // col 6: 오픈일
-          ? new Date(Date.UTC(task.openDate.getUTCFullYear(), task.openDate.getUTCMonth(), task.openDate.getUTCDate()))
+        task.openDates?.[0]?.openDate                // col 6: 1차오픈
+          ? new Date(Date.UTC(task.openDates[0].openDate.getUTCFullYear(), task.openDates[0].openDate.getUTCMonth(), task.openDates[0].openDate.getUTCDate()))
           : null,
-        '', // col 7: 파트 (메인행은 비움)
-        '', // col 8: 이름 (메인행은 비움)
-        task.startDate                               // col 9: 시작일
+        task.openDates?.[1]?.openDate                // col 7: 2차오픈
+          ? new Date(Date.UTC(task.openDates[1].openDate.getUTCFullYear(), task.openDates[1].openDate.getUTCMonth(), task.openDates[1].openDate.getUTCDate()))
+          : null,
+        task.openDates?.[2]?.openDate                // col 8: 3차오픈
+          ? new Date(Date.UTC(task.openDates[2].openDate.getUTCFullYear(), task.openDates[2].openDate.getUTCMonth(), task.openDates[2].openDate.getUTCDate()))
+          : null,
+        '', // col 9: 파트 (메인행은 비움)
+        '', // col 10: 이름 (메인행은 비움)
+        task.startDate                               // col 11: 시작일
           ? new Date(Date.UTC(task.startDate.getUTCFullYear(), task.startDate.getUTCMonth(), task.startDate.getUTCDate()))
           : null,
-        task.endDate                                 // col 10: 종료일
+        task.endDate                                 // col 12: 종료일
           ? new Date(Date.UTC(task.endDate.getUTCFullYear(), task.endDate.getUTCMonth(), task.endDate.getUTCDate()))
           : null,
       ];
@@ -663,7 +659,7 @@ export class TasksService {
       });
 
       // 날짜 셀에 날짜 형식 적용
-      [6, 9, 10].forEach((col) => {
+      [6, 7, 8, 11, 12].forEach((col) => {
         ws.getCell(r, col).numFmt = 'YYYY-MM-DD';
       });
 
@@ -681,7 +677,7 @@ export class TasksService {
         const cLetter = colLetter(col);
 
         // 오픈일 ◆ 마커 수식 (날짜 일치 시 표시)
-        c.value = { formula: `IF(AND($F${r}<>"",${dateFormula}=$F${r}),"◆","")` };
+        c.value = { formula: `IF(OR(AND($F${r}<>"",${dateFormula}=$F${r}),AND($G${r}<>"",${dateFormula}=$G${r}),AND($H${r}<>"",${dateFormula}=$H${r})),"◆","")` };
         c.font = bodyFont;
         c.alignment = { horizontal: 'center', vertical: 'middle' };
         c.border = {
@@ -696,7 +692,7 @@ export class TasksService {
       if (dates.length > 0) {
         const ganttRange = `${firstDateCol}${r}:${lastDateCol}${r}`;
 
-        // 조건부 서식 1: 오픈일 마커 (최고 우선순위)
+        // 조건부 서식 1: 1차 오픈일 마커 (slate)
         ws.addConditionalFormatting({
           ref: ganttRange,
           rules: [{
@@ -710,13 +706,41 @@ export class TasksService {
           }],
         });
 
+        // 조건부 서식 1-2: 2차 오픈일 마커 (teal)
+        ws.addConditionalFormatting({
+          ref: ganttRange,
+          rules: [{
+            type: 'expression',
+            priority: 1,
+            formulae: [`AND($G${r}<>"",${dateFormula}=$G${r})`],
+            style: {
+              fill: { type: 'pattern', pattern: 'solid', bgColor: { argb: 'FF0D9488' } },
+              font: { color: { argb: 'FFFFFFFF' }, bold: true, size: 7, name: '맑은 고딕' },
+            },
+          }],
+        });
+
+        // 조건부 서식 1-3: 3차 오픈일 마커 (violet)
+        ws.addConditionalFormatting({
+          ref: ganttRange,
+          rules: [{
+            type: 'expression',
+            priority: 1,
+            formulae: [`AND($H${r}<>"",${dateFormula}=$H${r})`],
+            style: {
+              fill: { type: 'pattern', pattern: 'solid', bgColor: { argb: 'FF7C3AED' } },
+              font: { color: { argb: 'FFFFFFFF' }, bold: true, size: 7, name: '맑은 고딕' },
+            },
+          }],
+        });
+
         // 조건부 서식 2: 업무 기간 바 (시작일~종료일) - 업무별 고유 색상 + 흰색 텍스트
         ws.addConditionalFormatting({
           ref: ganttRange,
           rules: [{
             type: 'expression',
             priority: 2,
-            formulae: [`AND($I${r}<>"",$J${r}<>"",${dateFormula}>=$I${r},${dateFormula}<=$J${r})`],
+            formulae: [`AND($K${r}<>"",$L${r}<>"",${dateFormula}>=$K${r},${dateFormula}<=$L${r})`],
             style: {
               fill: { type: 'pattern', pattern: 'solid', bgColor: { argb: barArgb } },
               font: { color: { argb: 'FFFFFFFF' }, size: 8, name: '맑은 고딕' },
@@ -770,25 +794,25 @@ export class TasksService {
           // 고정 컬럼 - 파트/이름/시작일/종료일 분리
           for (let ci = 0; ci < FIXED_COL; ci++) {
             const c = ws.getCell(sr, ci + 1);
-            if (ci === 6) {
+            if (ci === 8) {
               // 파트 column - 첫 행에만 값 설정 (나중에 병합)
               if (nameIdx === 0 || flat) {
                 c.value = group.roleLabel;
               }
               c.font = bodyFont;
               c.alignment = { horizontal: 'center', vertical: 'middle' };
-            } else if (ci === 7) {
+            } else if (ci === 9) {
               // 이름 column
               c.value = name;
               c.font = bodyFont;
               c.alignment = { horizontal: 'center', vertical: 'middle' };
-            } else if (ci === 8) {
+            } else if (ci === 10) {
               // 시작일 (Date 객체)
               c.value = tStartDate || null;
               c.numFmt = 'YYYY-MM-DD';
               c.font = bodyFont;
               c.alignment = { horizontal: 'center', vertical: 'middle' };
-            } else if (ci === 9) {
+            } else if (ci === 11) {
               // 종료일 (Date 객체)
               c.value = tEndDate || null;
               c.numFmt = 'YYYY-MM-DD';
@@ -799,7 +823,7 @@ export class TasksService {
               if (flat) {
                 c.value = vals[ci];
                 c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: ci === 1 };
-                if (ci === 5) c.numFmt = 'YYYY-MM-DD';
+                if (ci >= 5 && ci <= 7) c.numFmt = 'YYYY-MM-DD';
               }
             }
             c.fill = subRowFill;
@@ -829,7 +853,7 @@ export class TasksService {
               rules: [{
                 type: 'expression',
                 priority: 1,
-                formulae: [`AND($I${sr}<>"",$J${sr}<>"",${dateFormula}>=$I${sr},${dateFormula}<=$J${sr})`],
+                formulae: [`AND($K${sr}<>"",$L${sr}<>"",${dateFormula}>=$K${sr},${dateFormula}<=$L${sr})`],
                 style: {
                   fill: { type: 'pattern', pattern: 'solid', bgColor: { argb: group.color } },
                 },
@@ -855,7 +879,7 @@ export class TasksService {
 
         // 같은 파트 셀 병합
         if (!flat && group.names.length > 1) {
-          ws.mergeCells(groupStartRow, 7, groupStartRow + group.names.length - 1, 7);
+          ws.mergeCells(groupStartRow, 9, groupStartRow + group.names.length - 1, 9);
         }
       });
 
@@ -865,7 +889,9 @@ export class TasksService {
         ws.mergeCells(r, 3, rowNum - 1, 3);   // 난이도
         ws.mergeCells(r, 4, rowNum - 1, 4);   // 상태
         ws.mergeCells(r, 5, rowNum - 1, 5);   // 담당RM
-        ws.mergeCells(r, 6, rowNum - 1, 6);   // 오픈일
+        ws.mergeCells(r, 6, rowNum - 1, 6);   // 1차오픈
+        ws.mergeCells(r, 7, rowNum - 1, 7);   // 2차오픈
+        ws.mergeCells(r, 8, rowNum - 1, 8);   // 3차오픈
       }
     });
 
@@ -908,7 +934,9 @@ export class TasksService {
     const legends = [
       { name: '업무 기간', argb: TASK_BAR_ARGB, role: '' },
       ...allRoleLegends.filter((l) => activeRolesSet.has(l.role)),
-      { name: '◆ 오픈일', argb: 'FF334155', role: '' },
+      { name: '◆ 1차오픈', argb: 'FF334155', role: '' },
+      { name: '◆ 2차오픈', argb: 'FF0D9488', role: '' },
+      { name: '◆ 3차오픈', argb: 'FF7C3AED', role: '' },
     ];
 
     legends.forEach((item, i) => {
@@ -954,36 +982,22 @@ export class TasksService {
   }
 
   // 담당자 유효성 검증
-  private async validateAssignees(
+  private async validateAssigneeUsers(
     projectId: bigint,
-    planningAssigneeIds?: number[],
-    designAssigneeIds?: number[],
-    frontendAssigneeIds?: number[],
-    backendAssigneeIds?: number[],
+    assignees: { userId: number; workArea: string }[],
   ): Promise<void> {
-    const assignees = [
-      { ids: planningAssigneeIds, name: '기획' },
-      { ids: designAssigneeIds, name: '디자인' },
-      { ids: frontendAssigneeIds, name: '프론트엔드' },
-      { ids: backendAssigneeIds, name: '백엔드' },
-    ];
-
     for (const assignee of assignees) {
-      if (assignee.ids && assignee.ids.length > 0) {
-        for (const id of assignee.ids) {
-          const member = await this.prisma.projectMember.findFirst({
-            where: {
-              projectId,
-              memberId: BigInt(id),
-            },
-          });
+      const member = await this.prisma.projectMember.findFirst({
+        where: {
+          projectId,
+          memberId: BigInt(assignee.userId),
+        },
+      });
 
-          if (!member) {
-            throw new BadRequestException(
-              `${assignee.name} 담당자가 프로젝트 멤버가 아닙니다`,
-            );
-          }
-        }
+      if (!member) {
+        throw new BadRequestException(
+          `담당자(ID: ${assignee.userId})가 프로젝트 멤버가 아닙니다`,
+        );
       }
     }
   }

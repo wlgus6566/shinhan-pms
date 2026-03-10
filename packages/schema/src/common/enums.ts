@@ -120,7 +120,7 @@ export const WorkAreaEnum = z.enum(
 export type WorkArea = z.infer<typeof WorkAreaEnum>;
 
 export const WORK_AREA_LABELS: Record<WorkArea, string> = {
-  PROJECT_MANAGEMENT: '총괄',
+  PROJECT_MANAGEMENT: 'PM',
   PLANNING: '기획',
   DESIGN: '디자인',
   PUBLISHING: '퍼블리싱',
@@ -167,11 +167,11 @@ export const DEPARTMENT_LABELS: Record<Department, string> = {
   PLANNING_STRATEGY: '경영전략본부',
   PLANNING_1: '기획본부1',
   DEVELOPMENT_1: '개발본부1',
-  DIGITAL_1: '디지털본부1',
+  DIGITAL_1: '디자인본부1',
   BUSINESS_1: '사업본부1',
   PLANNING_2: '기획본부2',
   DEVELOPMENT_2: '개발본부2',
-  DIGITAL_2: '디지털본부2',
+  DIGITAL_2: '디자인본부2',
   SERVICE_OPERATION: '서비스운영본부',
   PLATFORM_OPERATION: '플랫폼운영본부',
   PLATFORM_STRATEGY: '플랫폼전략실',
@@ -179,9 +179,9 @@ export const DEPARTMENT_LABELS: Record<Department, string> = {
   XC: 'XC본부',
 };
 
-export const DEPARTMENT_OPTIONS = Object.entries(DEPARTMENT_LABELS).map(
-  ([value, label]) => ({ value, label }),
-);
+export const DEPARTMENT_OPTIONS = Object.entries(DEPARTMENT_LABELS)
+  .map(([value, label]) => ({ value, label }))
+  .sort((a, b) => a.label.localeCompare(b.label, 'ko'));
 
 export const GradeEnum = z.enum(
   ['EXPERT', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
@@ -232,11 +232,12 @@ export const PositionEnum = z.enum(
     'SENIOR_LEADER',
     'LEADER',
     'TEAM_MEMBER',
+    'FREELANCER',
   ],
   {
     errorMap: () => ({
       message:
-        '직책은 DIVISION_HEAD, GENERAL_MANAGER, PRINCIPAL_LEADER, SENIOR_LEADER, LEADER, TEAM_MEMBER 중 하나여야 합니다',
+        '직책은 DIVISION_HEAD, GENERAL_MANAGER, PRINCIPAL_LEADER, SENIOR_LEADER, LEADER, TEAM_MEMBER, FREELANCER 중 하나여야 합니다',
     }),
   },
 );
@@ -250,6 +251,7 @@ export const POSITION_LABELS: Record<Position, string> = {
   SENIOR_LEADER: '선임리더',
   LEADER: '리더',
   TEAM_MEMBER: '팀원',
+  FREELANCER: '프리랜서',
 };
 
 export const POSITION_OPTIONS = Object.entries(POSITION_LABELS).map(
@@ -270,11 +272,11 @@ export const ScheduleTypeEnum = z.enum(
 export type ScheduleType = z.infer<typeof ScheduleTypeEnum>;
 
 export const TeamScopeEnum = z.enum(
-  ['ALL', 'PLANNING', 'DESIGN', 'FRONTEND', 'BACKEND'],
+  ['ALL', 'PROJECT_MANAGEMENT', 'PLANNING', 'DESIGN', 'PUBLISHING', 'FRONTEND', 'BACKEND'],
   {
     errorMap: () => ({
       message:
-        '팀 범위는 ALL, PLANNING, DESIGN, FRONTEND, BACKEND 중 하나여야 합니다',
+        '팀 범위는 ALL, PROJECT_MANAGEMENT, PLANNING, DESIGN, PUBLISHING, FRONTEND, BACKEND 중 하나여야 합니다',
     }),
   },
 );

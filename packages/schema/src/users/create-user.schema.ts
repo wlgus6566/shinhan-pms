@@ -3,7 +3,6 @@ import {
   DepartmentEnum,
   PositionEnum,
   UserRoleEnum,
-  GradeEnum,
 } from '../common/enums';
 
 export const CreateUserSchema = z.object({
@@ -13,5 +12,4 @@ export const CreateUserSchema = z.object({
   department: DepartmentEnum,
   position: PositionEnum,
   role: UserRoleEnum,
-  grade: GradeEnum,
 });

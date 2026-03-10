@@ -35,7 +35,9 @@ import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
@@ -46,6 +48,7 @@ import {
 } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
+import { WORK_AREA_LABELS } from '@repo/schema';
 
 // ============================================================================
 // Constants
@@ -423,15 +426,15 @@ export function ProjectWbsChart({ projectId }: ProjectWbsChartProps) {
     return allRoles.filter((r) => activeRoles.has(r.value));
   }, [activeRoles]);
 
-  // ------ Assignee filter options ------
-  const assigneeOptions = useMemo(() => {
-    if (!members) return [];
-    return members
-      .map((m) => ({
-        value: m.memberId?.toString() || m.member?.id?.toString() || '',
-        label: m.member?.name || '',
-      }))
-      .filter((o) => o.value && o.label);
+  // ------ Assignee filter options (grouped by workArea) ------
+  const assigneeGrouped = useMemo(() => {
+    if (!members) return {};
+    return members.reduce<Record<string, typeof members>>((groups, pm) => {
+      const area = pm.workArea || 'UNKNOWN';
+      if (!groups[area]) groups[area] = [];
+      groups[area].push(pm);
+      return groups;
+    }, {});
   }, [members]);
 
   // ------ Bar position calculation ------
@@ -525,11 +528,21 @@ export function ProjectWbsChart({ projectId }: ProjectWbsChartProps) {
                 <SelectValue placeholder="전체" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ALL">전체</SelectItem>
-                {assigneeOptions.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
+                <SelectItem value="ALL">전체 멤버</SelectItem>
+                {Object.entries(assigneeGrouped).map(([area, areaMembers]) => (
+                  <SelectGroup key={area}>
+                    <SelectLabel className="text-xs text-muted-foreground">
+                      {WORK_AREA_LABELS[area as keyof typeof WORK_AREA_LABELS] ?? area}
+                    </SelectLabel>
+                    {areaMembers.map((pm) => (
+                      <SelectItem
+                        key={pm.memberId?.toString() || pm.member?.id?.toString() || ''}
+                        value={pm.memberId?.toString() || pm.member?.id?.toString() || ''}
+                      >
+                        {pm.member?.name ?? '알 수 없음'}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
                 ))}
               </SelectContent>
             </Select>
@@ -794,10 +807,10 @@ export function ProjectWbsChart({ projectId }: ProjectWbsChartProps) {
                         </div>
                       )}
 
-                      {/* Open date indicator (vertical bold line) */}
-                      {task.openDate &&
-                        (() => {
-                          const openDate = parseISO(task.openDate);
+                      {/* Open date indicators (vertical bold lines) */}
+                      {task.openDates && task.openDates.length > 0 &&
+                        task.openDates.map((od, odIdx) => {
+                          const openDate = parseISO(od);
                           const openDayIdx = differenceInCalendarDays(
                             openDate,
                             appliedFilters.startDate,
@@ -807,19 +820,22 @@ export function ProjectWbsChart({ projectId }: ProjectWbsChartProps) {
                             openDayIdx >= dateColumns.length
                           )
                             return null;
+                          const openDateColors = ['#334155', '#0d9488', '#7c3aed'];
                           return (
                             <div
-                              className="absolute top-1 bottom-1 w-[3px] bg-slate-700 rounded-full z-[6]"
+                              key={`open-${odIdx}`}
+                              className="absolute top-1 bottom-1 w-[3px] rounded-full z-[6]"
                               style={{
                                 left:
                                   openDayIdx * DAY_COLUMN_WIDTH +
                                   DAY_COLUMN_WIDTH / 2 -
                                   1,
+                                backgroundColor: openDateColors[odIdx] || openDateColors[0],
                               }}
-                              title={`완료 예정: ${format(openDate, 'yyyy-MM-dd')}`}
+                              title={`${odIdx + 1}차 오픈: ${format(openDate, 'yyyy-MM-dd')}`}
                             />
                           );
-                        })()}
+                        })}
                     </div>
                   </div>
 
@@ -941,10 +957,16 @@ export function ProjectWbsChart({ projectId }: ProjectWbsChartProps) {
               </div>
             ))}
           <div className="flex items-center gap-1.5">
-            <div className="w-[3px] h-3 bg-slate-700 rounded-full" />
-            <span className="text-[11px] text-slate-600">
-              오픈일 (상용배포일)
-            </span>
+            <div className="w-[3px] h-3 rounded-full" style={{ backgroundColor: '#334155' }} />
+            <span className="text-[11px] text-slate-600">1차오픈</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-[3px] h-3 rounded-full" style={{ backgroundColor: '#0d9488' }} />
+            <span className="text-[11px] text-slate-600">2차오픈</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-[3px] h-3 rounded-full" style={{ backgroundColor: '#7c3aed' }} />
+            <span className="text-[11px] text-slate-600">3차오픈</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-4 h-0 border-t-2 border-dashed border-red-400" />

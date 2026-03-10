@@ -41,7 +41,6 @@ export class UsersService {
         department: createUserDto.department,
         position: createUserDto.position,
         role: createUserDto.role,
-        grade: createUserDto.grade,
         requirePasswordChange: true,
         createdBy,
       },
