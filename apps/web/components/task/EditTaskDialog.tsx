@@ -4,7 +4,12 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { TaskDifficultyEnum, TaskStatusEnum, TASK_DIFFICULTY_OPTIONS, TASK_STATUS_OPTIONS } from '@repo/schema';
+import {
+  TaskDifficultyEnum,
+  TaskStatusEnum,
+  TASK_DIFFICULTY_OPTIONS,
+  TASK_STATUS_OPTIONS,
+} from '@repo/schema';
 import type { UpdateTaskRequest } from '@repo/schema';
 import { updateTask } from '@/lib/api/tasks';
 import { useProjectTaskTypes } from '@/lib/api/projects';
@@ -25,9 +30,15 @@ const AssigneeRowSchema = z.object({
 });
 
 const EditTaskFormSchema = z.object({
-  taskName: z.string().min(2, '작업명은 2자 이상이어야 합니다').max(100, '작업명은 100자 이하여야 합니다'),
+  taskName: z
+    .string()
+    .min(2, '작업명은 2자 이상이어야 합니다')
+    .max(100, '작업명은 100자 이하여야 합니다'),
   taskTypeId: z.string().optional(),
-  description: z.string().max(1000, '작업내용은 1000자 이하여야 합니다').optional(),
+  description: z
+    .string()
+    .max(1000, '작업내용은 1000자 이하여야 합니다')
+    .optional(),
   difficulty: TaskDifficultyEnum,
   status: TaskStatusEnum,
   clientName: z.string().max(100, '담당 RM은 100자 이하여야 합니다').optional(),
@@ -37,27 +48,59 @@ const EditTaskFormSchema = z.object({
   openDates: z.array(z.string()).max(3).default([]),
   notes: z
     .string()
-    .transform(val => val === '' ? undefined : val)
+    .transform((val) => (val === '' ? undefined : val))
     .optional(),
 });
 
 type EditTaskFormValues = z.infer<typeof EditTaskFormSchema>;
 
 // Convert task's separate assignee arrays to unified row format
-function taskToAssigneeRows(task: Task): { workArea: string; memberId: string; startDate: string; endDate: string }[] {
-  const rows: { workArea: string; memberId: string; startDate: string; endDate: string }[] = [];
+function taskToAssigneeRows(
+  task: Task,
+): {
+  workArea: string;
+  memberId: string;
+  startDate: string;
+  endDate: string;
+}[] {
+  const rows: {
+    workArea: string;
+    memberId: string;
+    startDate: string;
+    endDate: string;
+  }[] = [];
 
-  task.planningAssignees?.forEach(a => {
-    rows.push({ workArea: 'PLANNING', memberId: a.id, startDate: a.startDate || task.startDate || '', endDate: a.endDate || task.endDate || '' });
+  task.planningAssignees?.forEach((a) => {
+    rows.push({
+      workArea: 'PLANNING',
+      memberId: a.id,
+      startDate: a.startDate || task.startDate || '',
+      endDate: a.endDate || task.endDate || '',
+    });
   });
-  task.designAssignees?.forEach(a => {
-    rows.push({ workArea: 'DESIGN', memberId: a.id, startDate: a.startDate || task.startDate || '', endDate: a.endDate || task.endDate || '' });
+  task.designAssignees?.forEach((a) => {
+    rows.push({
+      workArea: 'DESIGN',
+      memberId: a.id,
+      startDate: a.startDate || task.startDate || '',
+      endDate: a.endDate || task.endDate || '',
+    });
   });
-  task.frontendAssignees?.forEach(a => {
-    rows.push({ workArea: 'FRONTEND', memberId: a.id, startDate: a.startDate || task.startDate || '', endDate: a.endDate || task.endDate || '' });
+  task.frontendAssignees?.forEach((a) => {
+    rows.push({
+      workArea: 'FRONTEND',
+      memberId: a.id,
+      startDate: a.startDate || task.startDate || '',
+      endDate: a.endDate || task.endDate || '',
+    });
   });
-  task.backendAssignees?.forEach(a => {
-    rows.push({ workArea: 'BACKEND', memberId: a.id, startDate: a.startDate || task.startDate || '', endDate: a.endDate || task.endDate || '' });
+  task.backendAssignees?.forEach((a) => {
+    rows.push({
+      workArea: 'BACKEND',
+      memberId: a.id,
+      startDate: a.startDate || task.startDate || '',
+      endDate: a.endDate || task.endDate || '',
+    });
   });
 
   return rows;
@@ -71,7 +114,13 @@ interface EditTaskDialogProps {
   onSuccess: () => void;
 }
 
-export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuccess }: EditTaskDialogProps) {
+export function EditTaskDialog({
+  task,
+  projectMembers,
+  open,
+  onOpenChange,
+  onSuccess,
+}: EditTaskDialogProps) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -89,7 +138,9 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
       startDate: task.startDate ? task.startDate.slice(0, 10) : '',
       endDate: task.endDate ? task.endDate.slice(0, 10) : '',
       assignees: taskToAssigneeRows(task),
-      openDates: task.openDates?.length ? task.openDates.map(d => d.slice(0, 16)) : [''],
+      openDates: task.openDates?.length
+        ? task.openDates.map((d) => d.slice(0, 16))
+        : [''],
       notes: task.notes || '',
     },
   });
@@ -106,7 +157,9 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
       startDate: task.startDate ? task.startDate.slice(0, 10) : '',
       endDate: task.endDate ? task.endDate.slice(0, 10) : '',
       assignees: taskToAssigneeRows(task),
-      openDates: task.openDates?.length ? task.openDates.map(d => d.slice(0, 16)) : [''],
+      openDates: task.openDates?.length
+        ? task.openDates.map((d) => d.slice(0, 16))
+        : [''],
       notes: task.notes || '',
     });
   }, [task, form]);
@@ -116,7 +169,9 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
       setSubmitting(true);
       setError(null);
 
-      const validAssignees = (data.assignees || []).filter(a => a.workArea && a.memberId);
+      const validAssignees = (data.assignees || []).filter(
+        (a) => a.workArea && a.memberId,
+      );
 
       const requestData: UpdateTaskRequest = {
         taskName: data.taskName,
@@ -125,7 +180,7 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
         difficulty: data.difficulty,
         status: data.status,
         clientName: data.clientName || undefined,
-        assignees: validAssignees.map(a => ({
+        assignees: validAssignees.map((a) => ({
           userId: Number(a.memberId),
           workArea: a.workArea,
           startDate: a.startDate || undefined,
@@ -133,7 +188,7 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
         })),
         startDate: data.startDate || undefined,
         endDate: data.endDate || undefined,
-        openDates: data.openDates?.filter(d => d !== '') || undefined,
+        openDates: data.openDates?.filter((d) => d !== '') || undefined,
         notes: data.notes || undefined,
       };
 
@@ -165,10 +220,7 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
           >
             취소
           </Button>
-          <Button
-            onClick={form.handleSubmit(onSubmit)}
-            disabled={submitting}
-          >
+          <Button onClick={form.handleSubmit(onSubmit)} disabled={submitting}>
             {submitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -195,7 +247,9 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
             name="taskTypeId"
             label="업무 구분"
             placeholder="업무 구분 선택"
-            options={taskTypes?.map(t => ({ value: t.id, label: t.name })) || []}
+            options={
+              taskTypes?.map((t) => ({ value: t.id, label: t.name })) || []
+            }
           />
 
           <FormTextarea
@@ -229,7 +283,7 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
             control={form.control}
             name="clientName"
             label="담당 RM (고객사 이름)"
-            placeholder="신한카드"
+            placeholder="김고객"
           />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -258,10 +312,14 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
             const openDates = form.watch('openDates') || [''];
             return (
               <div className="space-y-2">
-                <label className="text-sm font-medium">오픈일 (상용배포일) - 최대 3건</label>
+                <label className="text-sm font-medium">
+                  오픈일 (상용배포일) - 최대 3건
+                </label>
                 {openDates.map((_, index) => (
                   <div key={index} className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground w-8">{index + 1}차</span>
+                    <span className="text-sm text-muted-foreground w-8">
+                      {index + 1}차
+                    </span>
                     <input
                       type="datetime-local"
                       className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
@@ -279,7 +337,9 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
                         size="icon"
                         className="h-8 w-8 shrink-0"
                         onClick={() => {
-                          const newDates = openDates.filter((_, i) => i !== index);
+                          const newDates = openDates.filter(
+                            (_, i) => i !== index,
+                          );
                           form.setValue('openDates', newDates);
                         }}
                       >
@@ -293,7 +353,9 @@ export function EditTaskDialog({ task, projectMembers, open, onOpenChange, onSuc
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => form.setValue('openDates', [...openDates, ''])}
+                    onClick={() =>
+                      form.setValue('openDates', [...openDates, ''])
+                    }
                   >
                     <Plus className="h-4 w-4 mr-1" />
                     오픈일 추가

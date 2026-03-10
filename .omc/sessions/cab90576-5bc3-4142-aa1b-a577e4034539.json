@@ -1,0 +1,12 @@
+{
+  "session_id": "cab90576-5bc3-4142-aa1b-a577e4034539",
+  "started_at": "2026-02-27T10:00:00.000Z",
+  "ended_at": "2026-03-04T10:22:10.048Z",
+  "reason": "other",
+  "agents_spawned": 0,
+  "agents_completed": 0,
+  "modes_used": [
+    "ultrawork"
+  ],
+  "duration_ms": 433330048
+}
