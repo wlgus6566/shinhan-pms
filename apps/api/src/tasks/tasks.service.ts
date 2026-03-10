@@ -967,8 +967,17 @@ export class TasksService {
     return { buffer: Buffer.from(buf), projectName: project.projectName };
   }
 
-  // 권한 체크: 프로젝트 멤버인지 확인
+  // 권한 체크: 프로젝트 멤버인지 확인 (SUPER_ADMIN은 항상 허용)
   private async checkMemberPermission(projectId: bigint, userId: bigint) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+
+    if (user?.role === 'SUPER_ADMIN') {
+      return;
+    }
+
     const member = await this.prisma.projectMember.findFirst({
       where: {
         projectId,

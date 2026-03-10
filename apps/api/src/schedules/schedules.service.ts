@@ -47,16 +47,23 @@ export class SchedulesService {
         throw new NotFoundException('프로젝트를 찾을 수 없습니다');
       }
 
-      // 프로젝트 멤버인지 확인
-      const isMember = await this.prisma.projectMember.findFirst({
-        where: {
-          projectId,
-          memberId: userId,
-        },
+      // 프로젝트 멤버인지 확인 (SUPER_ADMIN은 항상 허용)
+      const currentUser = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { role: true },
       });
 
-      if (!isMember) {
-        throw new ForbiddenException('프로젝트 멤버만 일정을 생성할 수 있습니다');
+      if (currentUser?.role !== 'SUPER_ADMIN') {
+        const isMember = await this.prisma.projectMember.findFirst({
+          where: {
+            projectId,
+            memberId: userId,
+          },
+        });
+
+        if (!isMember) {
+          throw new ForbiddenException('프로젝트 멤버만 일정을 생성할 수 있습니다');
+        }
       }
     }
 

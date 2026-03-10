@@ -152,8 +152,17 @@ export class ProjectTaskTypesService {
     });
   }
 
-  // 프로젝트 멤버 권한 확인
+  // 프로젝트 멤버 권한 확인 (SUPER_ADMIN은 항상 허용)
   private async checkMemberPermission(projectId: bigint, userId: bigint) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+
+    if (user?.role === 'SUPER_ADMIN') {
+      return;
+    }
+
     const member = await this.prisma.projectMember.findFirst({
       where: {
         projectId,
