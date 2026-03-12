@@ -226,7 +226,7 @@ export function ProjectScheduleList({ projectId }: ProjectScheduleListProps) {
                         }, {}),
                       ).map(([area, members]) => (
                         <SelectGroup key={area}>
-                          <SelectLabel className="text-xs text-muted-foreground">
+                          <SelectLabel className="text-xs font-semibold text-slate-900 bg-slate-100 -mx-1 px-3 py-1.5 rounded">
                             {WORK_AREA_LABELS[area as keyof typeof WORK_AREA_LABELS] ?? area}
                           </SelectLabel>
                           {members.map((pm) => (

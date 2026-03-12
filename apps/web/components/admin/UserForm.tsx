@@ -491,6 +491,15 @@ export function UserForm({ mode, userId }: UserFormProps) {
           </div>
         </form>
       </Form>
+
+      {mode === 'edit' && userData && (
+        <div className="flex justify-end gap-4 pt-4 text-xs text-slate-400">
+          <span>등록일: {new Date(userData.createdAt).toLocaleDateString('ko-KR')}</span>
+          {userData.updatedAt && (
+            <span>수정일: {new Date(userData.updatedAt).toLocaleDateString('ko-KR')}</span>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -127,6 +127,7 @@ export function LoginForm() {
         open={showChangePassword}
         onOpenChange={setShowChangePassword}
         onSuccess={handlePasswordChangeSuccess}
+        currentPassword={form.getValues('password')}
       />
     </>
   );

@@ -179,7 +179,7 @@ export function AddTaskDialog({ projectId, projectMembers, open, onOpenChange, o
             control={form.control}
             name="clientName"
             label="담당 RM (고객사 이름)"
-            placeholder="신한카드"
+            placeholder="김고객"
           />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

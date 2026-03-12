@@ -43,12 +43,14 @@ export function UserListTable() {
   const { params, setParam, setParams } = useUrlQueryParams({
     defaults: {
       role: 'ALL',
+      isActive: 'true',
       pageNum: 1,
     },
   });
 
   const search = (params.search as string) || '';
   const role = (params.role as string) || 'ALL';
+  const isActive = (params.isActive as string) || 'true';
   const currentPage = (params.pageNum as number) || 1;
 
   const { searchInput, setSearchInput, handleSearch, handleKeyDown } =
@@ -61,8 +63,9 @@ export function UserListTable() {
     };
     if (search) p.search = search;
     if (role !== 'ALL') p.role = role;
+    if (isActive !== 'ALL') p.isActive = isActive === 'true';
     return p;
-  }, [search, role, currentPage]);
+  }, [search, role, isActive, currentPage]);
 
   const { users, pagination, isLoading, error } = useUsers(apiParams);
   const userList = users || [];
@@ -96,6 +99,21 @@ export function UserListTable() {
               <SelectItem value="SUPER_ADMIN">슈퍼 관리자</SelectItem>
               <SelectItem value="PM">프로젝트 관리자</SelectItem>
               <SelectItem value="MEMBER">일반</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select
+            value={isActive}
+            onValueChange={(value) => {
+              setParams({ isActive: value, pageNum: 1 });
+            }}
+          >
+            <SelectTrigger className="w-full sm:w-[120px]">
+              <SelectValue placeholder="상태 필터" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">전체 상태</SelectItem>
+              <SelectItem value="true">활성화</SelectItem>
+              <SelectItem value="false">비활성화</SelectItem>
             </SelectContent>
           </Select>
           <Button

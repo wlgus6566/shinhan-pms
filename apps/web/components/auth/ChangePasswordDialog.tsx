@@ -19,12 +19,14 @@ interface ChangePasswordDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
+  currentPassword?: string;
 }
 
 export function ChangePasswordDialog({
   open,
   onOpenChange,
   onSuccess,
+  currentPassword: currentPasswordProp,
 }: ChangePasswordDialogProps) {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -32,7 +34,7 @@ export function ChangePasswordDialog({
   const form = useForm<ChangePasswordValues>({
     resolver: zodResolver(ChangePasswordSchema),
     defaultValues: {
-      currentPassword: '',
+      currentPassword: currentPasswordProp || '',
       newPassword: '',
     },
   });
@@ -42,7 +44,10 @@ export function ChangePasswordDialog({
     setError(null);
 
     try {
-      await changePassword(values);
+      const payload = currentPasswordProp
+        ? { ...values, currentPassword: currentPasswordProp }
+        : values;
+      await changePassword(payload);
       onSuccess();
     } catch (err: any) {
       setError(err.message || '비밀번호 변경 중 오류가 발생했습니다');
@@ -88,13 +93,15 @@ export function ChangePasswordDialog({
             </Alert>
           )}
 
-          <FormInput
-            control={form.control}
-            name="currentPassword"
-            label="현재 비밀번호"
-            type="password"
-            placeholder="••••••••"
-          />
+          {!currentPasswordProp && (
+            <FormInput
+              control={form.control}
+              name="currentPassword"
+              label="현재 비밀번호"
+              type="password"
+              placeholder="••••••••"
+            />
+          )}
 
           <FormInput
             control={form.control}

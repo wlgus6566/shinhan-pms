@@ -17,7 +17,7 @@ import { ArrowLeft } from 'lucide-react';
 export default function UserCreatePage() {
   const router = useRouter();
   const { user } = useAuth();
-  const canCreate = user?.role === 'SUPER_ADMIN';
+  const canCreate = user?.role === 'SUPER_ADMIN' || user?.role === 'PM';
 
   // 권한 체크 및 리다이렉트
   useEffect(() => {
