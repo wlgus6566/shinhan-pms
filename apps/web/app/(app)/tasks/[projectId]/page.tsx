@@ -21,7 +21,7 @@ export default function TaskManagementPage() {
   const projectId = params.projectId as string;
 
   const { project, isLoading, error } = useProject(projectId);
-  const { members } = useProjectMembers(projectId);
+  const { members } = useProjectMembers(projectId, { pageSize: 0 });
 
   const statusConfig = {
     label:
