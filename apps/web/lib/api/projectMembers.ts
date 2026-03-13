@@ -82,7 +82,7 @@ export function useProjectMembers(
   if (projectId) {
     const query = new URLSearchParams();
     if (params?.pageNum) query.set('pageNum', params.pageNum.toString());
-    if (params?.pageSize) query.set('pageSize', params.pageSize.toString());
+    if (params?.pageSize !== undefined) query.set('pageSize', params.pageSize.toString());
     const qs = query.toString();
     url = `/api/projects/${projectId}/members${qs ? `?${qs}` : ''}`;
   }
