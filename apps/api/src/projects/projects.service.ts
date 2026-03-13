@@ -563,9 +563,10 @@ export class ProjectsService {
       return (roleOrder[a.role] ?? 999) - (roleOrder[b.role] ?? 999);
     });
 
-    // 페이지네이션 적용 (정렬 후)
-    const skip = (pageNum - 1) * pageSize;
-    const list = sortedMembers.slice(skip, skip + pageSize);
+    // 페이지네이션 적용 (정렬 후, pageSize=0이면 전체 조회)
+    const list = pageSize === 0
+      ? sortedMembers
+      : sortedMembers.slice((pageNum - 1) * pageSize, (pageNum - 1) * pageSize + pageSize);
 
     return { list, totalCount };
   }
